@@ -36,7 +36,18 @@ class _LearningView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Aprendendo Flutter')),
+      appBar: AppBar(
+        title: const Text('Aprendendo Flutter'),
+        actions: [
+          // Botão de refresh para recarregar os dados (e demonstrar o erro a cada 3 chamadas)
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            onPressed: () => context.read<LearningBloc>().add(
+              const LearningProductsRequested(),
+            ),
+          ),
+        ],
+      ),
       // BlocBuilder reconstroi o body baseado no estado atual do BLoC
       body: BlocBuilder<LearningBloc, LearningState>(
         builder: (context, state) {
