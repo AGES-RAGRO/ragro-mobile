@@ -1,4 +1,4 @@
-// 📋 DOMAIN/ENTITIES — O "cardápio" do restaurante.
+// DOMAIN/ENTITIES — O "cardápio" do restaurante.
 // Esta classe representa um Produto PURO — sem JSON, sem HTTP, sem nada externo.
 // Ela pertence ao domain/ e NUNCA importa de data/ ou presentation/.
 // Extends Equatable para comparação por valor (dois Products com mesmos campos são iguais).
