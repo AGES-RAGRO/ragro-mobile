@@ -1,4 +1,4 @@
-// 🍽️ PRESENTATION/WIDGETS — Pedaços de tela reutilizáveis.
+// PRESENTATION/WIDGETS — Pedaços de tela reutilizáveis.
 // O ProductCard é um widget que recebe um Product (Entity pura do domain/)
 // e renderiza as informações visuais. Ele não sabe de onde os dados vieram.
 

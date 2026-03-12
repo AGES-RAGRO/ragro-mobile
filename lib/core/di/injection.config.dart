@@ -19,6 +19,8 @@ import 'package:ragro_mobile/features/learning/domain/repositories/product_repos
     as _i414;
 import 'package:ragro_mobile/features/learning/domain/usecases/get_products.dart'
     as _i20;
+import 'package:ragro_mobile/features/learning/presentation/bloc/learning_bloc.dart'
+    as _i79;
 
 extension GetItInjectableX on _i174.GetIt {
   // initializes the registration of main-scope dependencies inside of GetIt
@@ -35,6 +37,9 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i20.GetProducts>(
       () => _i20.GetProducts(gh<_i414.ProductRepository>()),
+    );
+    gh.factory<_i79.LearningBloc>(
+      () => _i79.LearningBloc(gh<_i20.GetProducts>()),
     );
     return this;
   }
