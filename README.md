@@ -40,6 +40,42 @@ flutter run
 
 ---
 
+## Rodando no celular (Android)
+
+### 1. Ative o Modo Desenvolvedor no celular
+
+1. Vá em **Configurações > Sobre o telefone**
+2. Toque **7 vezes** em **Número da versão** (ou **Versão MIUI** em Xiaomi)
+3. Uma mensagem "Você agora é um desenvolvedor" vai aparecer
+
+### 2. Ative a Depuração USB
+
+1. Vá em **Configurações > Opções do desenvolvedor** (ou **Configurações adicionais > Opções do desenvolvedor** em Xiaomi)
+2. Ative **Depuração USB**
+3. Se disponível, ative também **Instalar via USB**
+
+### 3. Conecte o celular via USB
+
+1. Conecte o cabo USB no computador
+2. No celular, aceite o popup **"Permitir depuração USB?"** e marque **"Sempre permitir"**
+
+### 4. Verifique e rode
+
+```bash
+# Listar dispositivos conectados
+flutter devices
+
+# Rodar no celular (use o ID do seu dispositivo)
+flutter run -d <device-id>
+
+# Exemplo:
+flutter run -d 60867a81
+```
+
+> Se o celular não aparecer, rode `flutter doctor` para diagnosticar problemas.
+
+---
+
 ## Conventional Commits
 
 O projeto usa **Conventional Commits** para padronizar as mensagens de commit. O Lefthook valida automaticamente antes de cada commit.
