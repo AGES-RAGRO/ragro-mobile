@@ -1,0 +1,1938 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RAGRO Mobile — Documentação</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,300;0,400;0,500;0,600;1,400&family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0c10;
+    --bg2: #0f1218;
+    --bg3: #151920;
+    --border: #1e2530;
+    --border2: #252d3a;
+    --text: #c8d4e3;
+    --text-dim: #5a6880;
+    --text-muted: #3a4455;
+    --accent: #3b82f6;
+    --accent2: #60a5fa;
+    --accent3: #1d4ed8;
+    --green: #10b981;
+    --green2: #34d399;
+    --red: #ef4444;
+    --orange: #f59e0b;
+    --purple: #8b5cf6;
+    --pink: #ec4899;
+    --heading: #e8f0fe;
+    --code-bg: #0d1117;
+    --code-border: #1a2234;
+    --tag-bg: #1a2235;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    line-height: 1.7;
+    overflow-x: hidden;
+  }
+
+  /* Scanline texture */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0,0,0,0.03) 2px,
+      rgba(0,0,0,0.03) 4px
+    );
+    pointer-events: none;
+    z-index: 1000;
+  }
+
+  /* Layout */
+  .layout {
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    min-height: 100vh;
+  }
+
+  /* Sidebar */
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 260px;
+    height: 100vh;
+    background: var(--bg2);
+    border-right: 1px solid var(--border);
+    overflow-y: auto;
+    z-index: 100;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border2) transparent;
+  }
+
+  .sidebar::-webkit-scrollbar { width: 4px; }
+  .sidebar::-webkit-scrollbar-track { background: transparent; }
+  .sidebar::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+  .sidebar-logo {
+    padding: 28px 24px 20px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .logo-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 18px;
+    color: var(--heading);
+    letter-spacing: -0.3px;
+  }
+
+  .logo-icon {
+    width: 32px;
+    height: 32px;
+    background: linear-gradient(135deg, var(--accent), var(--purple));
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    flex-shrink: 0;
+  }
+
+  .logo-sub {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    color: var(--text-dim);
+    font-weight: 400;
+    display: block;
+    margin-top: 2px;
+    letter-spacing: 0.05em;
+  }
+
+  .sidebar-nav { padding: 16px 0 32px; }
+
+  .nav-section-title {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px;
+    font-weight: 500;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    padding: 12px 24px 6px;
+  }
+
+  .nav-link {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 7px 24px;
+    color: var(--text-dim);
+    text-decoration: none;
+    font-size: 13.5px;
+    font-weight: 400;
+    transition: all 0.15s;
+    border-left: 2px solid transparent;
+    margin-left: -1px;
+  }
+
+  .nav-link:hover {
+    color: var(--text);
+    background: rgba(59,130,246,0.06);
+    border-left-color: var(--accent);
+  }
+
+  .nav-link.active {
+    color: var(--accent2);
+    background: rgba(59,130,246,0.08);
+    border-left-color: var(--accent);
+  }
+
+  .nav-dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--text-muted);
+    flex-shrink: 0;
+    transition: background 0.15s;
+  }
+
+  .nav-link:hover .nav-dot,
+  .nav-link.active .nav-dot { background: var(--accent); }
+
+  /* Main content */
+  .main {
+    margin-left: 260px;
+    min-height: 100vh;
+  }
+
+  /* Hero */
+  .hero {
+    position: relative;
+    padding: 72px 80px 64px;
+    border-bottom: 1px solid var(--border);
+    overflow: hidden;
+  }
+
+  .hero-bg {
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 60% 80% at 80% 50%, rgba(59,130,246,0.06) 0%, transparent 70%),
+      radial-gradient(ellipse 40% 60% at 20% 80%, rgba(139,92,246,0.04) 0%, transparent 60%);
+  }
+
+  .hero-grid {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(var(--border) 1px, transparent 1px),
+      linear-gradient(90deg, var(--border) 1px, transparent 1px);
+    background-size: 40px 40px;
+    opacity: 0.3;
+    mask-image: radial-gradient(ellipse 80% 100% at 100% 50%, black 0%, transparent 70%);
+  }
+
+  .hero-content { position: relative; z-index: 1; max-width: 680px; }
+
+  .hero-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--tag-bg);
+    border: 1px solid var(--border2);
+    border-radius: 4px;
+    padding: 5px 12px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--accent2);
+    letter-spacing: 0.05em;
+    margin-bottom: 24px;
+  }
+
+  .hero-tag-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--green);
+    animation: pulse 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(0.8); }
+  }
+
+  h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: 52px;
+    font-weight: 800;
+    color: var(--heading);
+    line-height: 1.05;
+    letter-spacing: -1.5px;
+    margin-bottom: 20px;
+  }
+
+  h1 span {
+    background: linear-gradient(90deg, var(--accent2), var(--purple));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .hero-desc {
+    font-size: 16px;
+    color: var(--text-dim);
+    line-height: 1.65;
+    max-width: 540px;
+    margin-bottom: 36px;
+  }
+
+  .hero-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 12px;
+    border-radius: 4px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+  }
+
+  .chip-blue { background: rgba(59,130,246,0.12); color: var(--accent2); border: 1px solid rgba(59,130,246,0.2); }
+  .chip-green { background: rgba(16,185,129,0.1); color: var(--green2); border: 1px solid rgba(16,185,129,0.2); }
+  .chip-purple { background: rgba(139,92,246,0.1); color: #a78bfa; border: 1px solid rgba(139,92,246,0.2); }
+  .chip-orange { background: rgba(245,158,11,0.1); color: #fbbf24; border: 1px solid rgba(245,158,11,0.2); }
+
+  /* Content area */
+  .content {
+    padding: 0 80px 80px;
+    max-width: 960px;
+  }
+
+  /* Sections */
+  .section {
+    padding-top: 64px;
+    border-top: 1px solid var(--border);
+    margin-top: 64px;
+    animation: fadeUp 0.5s ease both;
+  }
+
+  .section:first-child { border-top: none; margin-top: 0; padding-top: 56px; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 28px;
+  }
+
+  .section-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+
+  .icon-blue { background: rgba(59,130,246,0.15); }
+  .icon-green { background: rgba(16,185,129,0.12); }
+  .icon-purple { background: rgba(139,92,246,0.12); }
+  .icon-orange { background: rgba(245,158,11,0.1); }
+  .icon-pink { background: rgba(236,72,153,0.1); }
+
+  h2 {
+    font-family: 'Syne', sans-serif;
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--heading);
+    letter-spacing: -0.5px;
+  }
+
+  h3 {
+    font-family: 'Syne', sans-serif;
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--heading);
+    letter-spacing: -0.2px;
+    margin: 36px 0 14px;
+  }
+
+  h4 {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--accent2);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin: 28px 0 12px;
+  }
+
+  p { color: var(--text); margin-bottom: 16px; line-height: 1.7; }
+
+  a { color: var(--accent2); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  code {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12.5px;
+    background: var(--tag-bg);
+    color: #93c5fd;
+    padding: 2px 6px;
+    border-radius: 3px;
+    border: 1px solid var(--border2);
+  }
+
+  /* Code blocks */
+  .code-block {
+    position: relative;
+    background: var(--code-bg);
+    border: 1px solid var(--code-border);
+    border-radius: 10px;
+    margin: 20px 0;
+    overflow: hidden;
+  }
+
+  .code-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 16px;
+    background: rgba(255,255,255,0.025);
+    border-bottom: 1px solid var(--code-border);
+  }
+
+  .code-lang {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    font-weight: 500;
+    color: var(--text-dim);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .code-dots {
+    display: flex;
+    gap: 6px;
+  }
+
+  .code-dots span {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+  }
+
+  .code-dots span:nth-child(1) { background: #ff5f57; }
+  .code-dots span:nth-child(2) { background: #febc2e; }
+  .code-dots span:nth-child(3) { background: #28c840; }
+
+  .code-block pre {
+    padding: 20px 20px 20px 20px;
+    overflow-x: auto;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12.5px;
+    line-height: 1.7;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border2) transparent;
+  }
+
+  .code-block pre::-webkit-scrollbar { height: 4px; }
+  .code-block pre::-webkit-scrollbar-track { background: transparent; }
+  .code-block pre::-webkit-scrollbar-thumb { background: var(--border2); }
+
+  /* Syntax highlighting */
+  .kw { color: #c792ea; }          /* keywords */
+  .kw2 { color: #89ddff; }         /* this, super */
+  .fn { color: #82aaff; }          /* functions */
+  .str { color: #c3e88d; }         /* strings */
+  .num { color: #f78c6c; }         /* numbers */
+  .cmt { color: #546e7a; font-style: italic; } /* comments */
+  .typ { color: #ffcb6b; }         /* types */
+  .ann { color: #f78c6c; }         /* annotations */
+  .prop { color: #b2ccd6; }        /* properties */
+  .var { color: #eeffff; }         /* variables */
+  .op { color: #89ddff; }          /* operators */
+  .punc { color: #89ddff; }        /* punctuation */
+
+  /* Restaurant analogy */
+  .restaurant-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    margin: 24px 0;
+  }
+
+  .restaurant-layer {
+    padding: 28px 32px;
+    position: relative;
+    transition: background 0.2s;
+  }
+
+  .layer-presentation { background: linear-gradient(135deg, rgba(59,130,246,0.08) 0%, rgba(59,130,246,0.02) 100%); }
+  .layer-domain { background: linear-gradient(135deg, rgba(139,92,246,0.08) 0%, rgba(139,92,246,0.02) 100%); }
+  .layer-data { background: linear-gradient(135deg, rgba(16,185,129,0.08) 0%, rgba(16,185,129,0.02) 100%); }
+
+  .layer-restaurant { background: rgba(0,0,0,0.2); }
+
+  .layer-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: 3px;
+    margin-bottom: 10px;
+  }
+
+  .tag-presentation { background: rgba(59,130,246,0.15); color: var(--accent2); }
+  .tag-domain { background: rgba(139,92,246,0.15); color: #a78bfa; }
+  .tag-data { background: rgba(16,185,129,0.12); color: var(--green2); }
+  .tag-analogy { background: rgba(245,158,11,0.1); color: #fbbf24; }
+
+  .layer-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--heading);
+    margin-bottom: 6px;
+  }
+
+  .layer-desc { color: var(--text-dim); font-size: 14px; margin: 0; }
+
+  .layer-items {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 12px;
+  }
+
+  .layer-item {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    padding: 3px 9px;
+    border-radius: 3px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--border2);
+    color: var(--text-dim);
+  }
+
+  .gold-rule {
+    background: linear-gradient(90deg, rgba(245,158,11,0.1), rgba(245,158,11,0.05));
+    border: 1px solid rgba(245,158,11,0.2);
+    border-left: 3px solid var(--orange);
+    border-radius: 0 8px 8px 0;
+    padding: 16px 20px;
+    margin: 20px 0;
+    font-size: 14px;
+    color: #fbbf24;
+    font-style: italic;
+  }
+
+  /* Flow diagram */
+  .flow-diagram {
+    background: var(--code-bg);
+    border: 1px solid var(--code-border);
+    border-radius: 10px;
+    padding: 32px;
+    margin: 24px 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+  }
+
+  .flow-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+    width: 100%;
+    max-width: 380px;
+  }
+
+  .flow-box {
+    width: 100%;
+    background: var(--bg3);
+    border: 1px solid var(--border2);
+    border-radius: 8px;
+    padding: 14px 20px;
+    text-align: center;
+    transition: border-color 0.2s, background 0.2s;
+  }
+
+  .flow-box:hover { border-color: var(--accent); background: rgba(59,130,246,0.06); }
+
+  .flow-box-label {
+    font-family: 'Syne', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--heading);
+    margin-bottom: 3px;
+  }
+
+  .flow-box-sub {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    color: var(--text-dim);
+  }
+
+  .flow-box-desc {
+    font-size: 11.5px;
+    color: var(--text-dim);
+    margin-top: 6px;
+  }
+
+  .flow-arrow {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+    padding: 4px 0;
+  }
+
+  .flow-arrow-line {
+    width: 2px;
+    height: 20px;
+    background: linear-gradient(to bottom, var(--border2), var(--accent));
+  }
+
+  .flow-arrow-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    color: var(--accent);
+    white-space: nowrap;
+    background: var(--code-bg);
+    padding: 2px 8px;
+    border: 1px solid rgba(59,130,246,0.2);
+    border-radius: 3px;
+    margin: 2px 0;
+  }
+
+  .flow-arrow-line2 {
+    width: 2px;
+    height: 20px;
+    background: linear-gradient(to bottom, var(--accent), var(--border2));
+  }
+
+  /* BLoC states */
+  .states-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin: 20px 0;
+  }
+
+  .state-card {
+    background: var(--bg3);
+    border: 1px solid var(--border2);
+    border-radius: 8px;
+    padding: 16px 18px;
+    transition: border-color 0.2s;
+  }
+
+  .state-card:hover { border-color: var(--border); }
+
+  .state-name {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    font-weight: 500;
+    margin-bottom: 6px;
+  }
+
+  .state-initial .state-name { color: var(--text-dim); }
+  .state-loading .state-name { color: var(--orange); }
+  .state-success .state-name { color: var(--green2); }
+  .state-failure .state-name { color: #f87171; }
+
+  .state-desc { font-size: 13px; color: var(--text-dim); margin: 0; }
+
+  /* DI chain */
+  .di-chain {
+    background: var(--code-bg);
+    border: 1px solid var(--code-border);
+    border-radius: 10px;
+    padding: 24px 28px;
+    margin: 20px 0;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12.5px;
+    line-height: 1.8;
+  }
+
+  .di-level { display: flex; align-items: flex-start; }
+  .di-indent { color: var(--text-muted); user-select: none; }
+  .di-arrow { color: var(--text-muted); }
+  .di-class { color: var(--accent2); }
+  .di-needs { color: var(--text-dim); font-size: 11px; }
+  .di-dep { color: #c3e88d; }
+
+  /* Tables */
+  .table-wrap {
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    margin: 20px 0;
+  }
+
+  table { width: 100%; border-collapse: collapse; }
+
+  thead {
+    background: rgba(255,255,255,0.025);
+    border-bottom: 1px solid var(--border);
+  }
+
+  th {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    padding: 12px 20px;
+    text-align: left;
+  }
+
+  td {
+    padding: 11px 20px;
+    font-size: 13.5px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+  }
+
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: rgba(255,255,255,0.015); }
+
+  td code { font-size: 12px; }
+
+  /* Step callouts */
+  .steps { margin: 24px 0; }
+
+  .step {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 32px;
+    position: relative;
+  }
+
+  .step:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    left: 17px;
+    top: 44px;
+    bottom: -12px;
+    width: 2px;
+    background: linear-gradient(to bottom, var(--border2), transparent);
+  }
+
+  .step-num {
+    flex-shrink: 0;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--bg3);
+    border: 1px solid var(--border2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--accent2);
+  }
+
+  .step-content { flex: 1; padding-top: 6px; }
+  .step-title { font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 600; color: var(--heading); margin-bottom: 10px; }
+
+  /* Alerts */
+  .alert {
+    display: flex;
+    gap: 14px;
+    padding: 16px 20px;
+    border-radius: 8px;
+    margin: 20px 0;
+    font-size: 14px;
+  }
+
+  .alert-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+
+  .alert-info { background: rgba(59,130,246,0.08); border: 1px solid rgba(59,130,246,0.2); }
+  .alert-info p { color: #93c5fd; margin: 0; }
+
+  .alert-warn { background: rgba(245,158,11,0.08); border: 1px solid rgba(245,158,11,0.2); }
+  .alert-warn p { color: #fbbf24; margin: 0; }
+
+  .alert-tip { background: rgba(16,185,129,0.08); border: 1px solid rgba(16,185,129,0.2); }
+  .alert-tip p { color: #34d399; margin: 0; }
+
+  /* Rules */
+  .rules-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin: 20px 0;
+  }
+
+  .rule-card {
+    padding: 16px 18px;
+    border-radius: 8px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12.5px;
+    line-height: 1.6;
+  }
+
+  .rule-ok { background: rgba(16,185,129,0.08); border: 1px solid rgba(16,185,129,0.2); color: var(--green2); }
+  .rule-no { background: rgba(239,68,68,0.07); border: 1px solid rgba(239,68,68,0.18); color: #f87171; }
+
+  .rule-icon { font-size: 14px; margin-bottom: 8px; display: block; }
+
+  /* Checklist */
+  .checklist { margin: 20px 0; }
+
+  .check-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 14px;
+  }
+
+  .check-item:last-child { border-bottom: none; }
+
+  .check-box {
+    width: 18px;
+    height: 18px;
+    border-radius: 4px;
+    border: 1px solid var(--border2);
+    background: var(--bg3);
+    flex-shrink: 0;
+    margin-top: 2px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    color: var(--green2);
+  }
+
+  /* TL;DR */
+  .tldr-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin: 24px 0;
+  }
+
+  .tldr-card {
+    background: var(--bg3);
+    border: 1px solid var(--border2);
+    border-radius: 10px;
+    padding: 20px;
+    transition: border-color 0.2s, transform 0.2s;
+  }
+
+  .tldr-card:hover { border-color: var(--accent); transform: translateY(-2px); }
+
+  .tldr-num {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+  }
+
+  .tldr-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--heading);
+    margin-bottom: 6px;
+  }
+
+  .tldr-desc { font-size: 13px; color: var(--text-dim); margin: 0; }
+
+  /* Commands */
+  .cmd-block {
+    background: var(--code-bg);
+    border: 1px solid var(--code-border);
+    border-radius: 8px;
+    padding: 14px 18px;
+    margin: 12px 0;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 13px;
+    color: var(--green2);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .cmd-prefix { color: var(--text-muted); user-select: none; }
+  .cmd-comment { color: var(--text-muted); font-size: 12px; }
+
+  /* Exception hierarchy */
+  .exception-tree {
+    background: var(--code-bg);
+    border: 1px solid var(--code-border);
+    border-radius: 10px;
+    padding: 20px 24px;
+    margin: 20px 0;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12.5px;
+    line-height: 1.9;
+  }
+
+  .exc-root { color: #f78c6c; }
+  .exc-child { color: var(--accent2); }
+  .exc-child::before { content: '  └─ '; color: var(--text-muted); }
+  .exc-comment { color: var(--text-muted); font-size: 11px; }
+
+  /* Folder tree */
+  .folder-tree {
+    background: var(--code-bg);
+    border: 1px solid var(--code-border);
+    border-radius: 10px;
+    padding: 20px 24px;
+    margin: 20px 0;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    line-height: 1.85;
+    overflow-x: auto;
+    white-space: pre;
+    display: block;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border2) transparent;
+  }
+
+  .folder-tree::-webkit-scrollbar { height: 4px; }
+  .folder-tree::-webkit-scrollbar-track { background: transparent; }
+  .folder-tree::-webkit-scrollbar-thumb { background: var(--border2); }
+
+  .ft-dir { color: var(--accent2); }
+  .ft-file { color: var(--text); }
+  .ft-comment { color: var(--text-muted); }
+  .ft-special { color: var(--green2); }
+  .ft-tree { color: var(--text-muted); user-select: none; }
+
+  /* Scroll top */
+  .scroll-top {
+    position: fixed;
+    bottom: 32px;
+    right: 32px;
+    width: 40px;
+    height: 40px;
+    background: var(--bg3);
+    border: 1px solid var(--border2);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 16px;
+    color: var(--text-dim);
+    transition: all 0.2s;
+    z-index: 50;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .scroll-top.visible { opacity: 1; pointer-events: all; }
+  .scroll-top:hover { background: var(--accent); color: white; border-color: var(--accent); }
+
+  /* Progress bar */
+  .progress-bar {
+    position: fixed;
+    top: 0;
+    left: 260px;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent), var(--purple));
+    transform-origin: left;
+    transform: scaleX(0);
+    z-index: 200;
+    transition: transform 0.05s;
+  }
+
+  /* Separator */
+  hr { border: none; border-top: 1px solid var(--border); margin: 32px 0; }
+
+  /* Responsive */
+  @media (max-width: 1024px) {
+    .layout { grid-template-columns: 1fr; }
+    .sidebar { transform: translateX(-100%); }
+    .main { margin-left: 0; }
+    .hero { padding: 48px 32px 48px; }
+    .content { padding: 0 32px 64px; }
+    h1 { font-size: 38px; }
+    .states-grid, .rules-grid, .tldr-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="progress-bar" id="progressBar"></div>
+
+<!-- Sidebar -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-badge">
+      <div class="logo-icon">🌾</div>
+      <div>
+        RAGRO
+        <span class="logo-sub">mobile · documentação</span>
+      </div>
+    </div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section-title">Introdução</div>
+    <a href="#intro" class="nav-link active"><span class="nav-dot"></span>Flutter & Dart</a>
+    <a href="#arquitetura" class="nav-link"><span class="nav-dot"></span>Arquitetura</a>
+    <a href="#analogia" class="nav-link"><span class="nav-dot"></span>Analogia do Restaurante</a>
+
+    <div class="nav-section-title">Estrutura</div>
+    <a href="#pastas" class="nav-link"><span class="nav-dot"></span>Estrutura de Pastas</a>
+    <a href="#camadas" class="nav-link"><span class="nav-dot"></span>Camadas na Prática</a>
+    <a href="#fluxo" class="nav-link"><span class="nav-dot"></span>Fluxo Completo</a>
+
+    <div class="nav-section-title">BLoC</div>
+    <a href="#bloc" class="nav-link"><span class="nav-dot"></span>Eventos & Estados</a>
+    <a href="#tela-bloc" class="nav-link"><span class="nav-dot"></span>Tela + BLoC</a>
+
+    <div class="nav-section-title">Infraestrutura</div>
+    <a href="#di" class="nav-link"><span class="nav-dot"></span>Injeção de Dependência</a>
+    <a href="#erros" class="nav-link"><span class="nav-dot"></span>Tratamento de Erros</a>
+    <a href="#navegacao" class="nav-link"><span class="nav-dot"></span>Navegação</a>
+
+    <div class="nav-section-title">Guias</div>
+    <a href="#nova-feature" class="nav-link"><span class="nav-dot"></span>Criar Feature Nova</a>
+    <a href="#regras" class="nav-link"><span class="nav-dot"></span>Regras do Projeto</a>
+    <a href="#stack" class="nav-link"><span class="nav-dot"></span>Stack Tecnológica</a>
+    <a href="#tldr" class="nav-link"><span class="nav-dot"></span>TL;DR</a>
+  </nav>
+</aside>
+
+<!-- Main -->
+<main class="main">
+
+  <!-- Hero -->
+  <div class="hero">
+    <div class="hero-bg"></div>
+    <div class="hero-grid"></div>
+    <div class="hero-content">
+      <div class="hero-tag">
+        <span class="hero-tag-dot"></span>
+        RAGRO Mobile · v1.0
+      </div>
+      <h1>Arquitetura do<br><span>Projeto Mobile</span></h1>
+      <p class="hero-desc">
+        Guia completo da arquitetura Flutter com Clean Architecture e BLoC. Do zero ao deploy — mesmo que você nunca tenha visto Dart, BLoC ou Clean Architecture na vida.
+      </p>
+      <div class="hero-chips">
+        <span class="chip chip-blue">⚡ Flutter</span>
+        <span class="chip chip-purple">🧱 Clean Architecture</span>
+        <span class="chip chip-green">🔄 BLoC Pattern</span>
+        <span class="chip chip-orange">💉 Injeção de Dependência</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- Intro -->
+    <section class="section" id="intro">
+      <div class="section-header">
+        <div class="section-icon icon-blue">⚡</div>
+        <h2>O que é Flutter e Dart?</h2>
+      </div>
+
+      <p><strong style="color: var(--heading)">Dart</strong> é a linguagem de programação. Pense nela como um JavaScript tipado — tem classes, <code>async/await</code>, e roda tanto no celular quanto na web.</p>
+      <p><strong style="color: var(--heading)">Flutter</strong> é o framework que usa Dart pra construir telas. Tudo no Flutter é um <code>Widget</code> — um botão é um widget, um texto é um widget, a tela inteira é um widget. Widgets se encaixam como peças de LEGO pra montar a interface.</p>
+
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-lang">dart</span>
+          <div class="code-dots"><span></span><span></span><span></span></div>
+        </div>
+        <pre><span class="cmt">// Exemplo: um texto na tela</span>
+<span class="typ">Text</span>(<span class="str">'Olá, mundo!'</span>)
+
+<span class="cmt">// Exemplo: um botão</span>
+<span class="typ">ElevatedButton</span>(
+  <span class="prop">onPressed</span>: () <span class="op">=></span> <span class="fn">print</span>(<span class="str">'clicou!'</span>),
+  <span class="prop">child</span>: <span class="typ">Text</span>(<span class="str">'Clique aqui'</span>),
+)</pre>
+      </div>
+    </section>
+
+    <!-- Arquitetura -->
+    <section class="section" id="arquitetura">
+      <div class="section-header">
+        <div class="section-icon icon-purple">🧱</div>
+        <h2>A Arquitetura: Clean + BLoC</h2>
+      </div>
+
+      <p>O projeto usa dois conceitos juntos:</p>
+
+      <div class="restaurant-grid" style="margin-top: 20px;">
+        <div class="restaurant-layer layer-presentation">
+          <span class="layer-tag tag-presentation">Clean Architecture</span>
+          <div class="layer-title">Separação de responsabilidades</div>
+          <p class="layer-desc">Como organizamos as pastas e garantimos que cada parte do código faça apenas o que é sua responsabilidade.</p>
+        </div>
+        <div class="restaurant-layer layer-domain">
+          <span class="layer-tag tag-domain">BLoC Pattern</span>
+          <div class="layer-title">Gerenciamento de estado</div>
+          <p class="layer-desc">Como gerenciamos o estado da tela — loading, erro, sucesso, dados carregados, etc.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Analogia -->
+    <section class="section" id="analogia">
+      <div class="section-header">
+        <div class="section-icon icon-orange">🍽️</div>
+        <h2>A Analogia do Restaurante</h2>
+      </div>
+
+      <p>Imagine que o app é um restaurante. Cada feature (login, cadastro, dashboard) é um prato do cardápio. Pra preparar um prato, temos 3 setores:</p>
+
+      <div class="restaurant-grid">
+        <div class="restaurant-layer layer-presentation">
+          <span class="layer-tag tag-presentation">presentation/</span>
+          <div class="layer-title">🍽️ Salão — O que o cliente vê</div>
+          <p class="layer-desc">Garçom anota o pedido e traz o prato. O BLoC é o garçom: recebe pedidos e entrega resultados.</p>
+          <div class="layer-items">
+            <span class="layer-item">Telas</span>
+            <span class="layer-item">Botões</span>
+            <span class="layer-item">Formulários</span>
+            <span class="layer-item">BLoC (garçom)</span>
+          </div>
+        </div>
+        <div class="restaurant-layer layer-domain">
+          <span class="layer-tag tag-domain">domain/</span>
+          <div class="layer-title">📋 Cardápio + Regras</div>
+          <p class="layer-desc">O que o restaurante sabe fazer. "Temos estrogonofe? Sim." Sem saber como é preparado.</p>
+          <div class="layer-items">
+            <span class="layer-item">Entities</span>
+            <span class="layer-item">UseCases</span>
+            <span class="layer-item">Repository (contrato)</span>
+          </div>
+        </div>
+        <div class="restaurant-layer layer-data">
+          <span class="layer-tag tag-data">data/</span>
+          <div class="layer-title">🍳 Cozinha — Trabalho pesado</div>
+          <p class="layer-desc">Pega ingredientes e cozinha. De onde vêm os dados e como processá-los de fato.</p>
+          <div class="layer-items">
+            <span class="layer-item">DataSources (API, cache)</span>
+            <span class="layer-item">Models (JSON)</span>
+            <span class="layer-item">Repository (impl)</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="gold-rule">
+        ✦ Regra de ouro: o salão nunca entra na cozinha. O cardápio não sabe como o prato é feito. Cada setor só conhece o setor diretamente abaixo dele.
+      </div>
+    </section>
+
+    <!-- Pastas -->
+    <section class="section" id="pastas">
+      <div class="section-header">
+        <div class="section-icon icon-green">📁</div>
+        <h2>Estrutura de Pastas</h2>
+      </div>
+
+      <p>Toda feature nova segue esse mesmo molde. É copy-paste da estrutura.</p>
+
+      <pre class="folder-tree"><span class="ft-special">lib/</span>
+<span class="ft-tree">├── </span><span class="ft-file">main.dart</span>                          <span class="ft-comment">← Liga o app</span>
+<span class="ft-tree">├── </span><span class="ft-file">app.dart</span>                           <span class="ft-comment">← Configura tema e rotas</span>
+<span class="ft-tree">│</span>
+<span class="ft-tree">├── </span><span class="ft-dir">core/</span>                              <span class="ft-comment">← Compartilhado por todas as features</span>
+<span class="ft-tree">│   ├── </span><span class="ft-dir">di/</span>                            <span class="ft-comment">← Injeção de dependência</span>
+<span class="ft-tree">│   ├── </span><span class="ft-dir">network/</span>                       <span class="ft-comment">← Cliente HTTP, URLs, exceções</span>
+<span class="ft-tree">│   ├── </span><span class="ft-dir">theme/</span>                         <span class="ft-comment">← Cores, fontes, tema visual</span>
+<span class="ft-tree">│   └── </span><span class="ft-dir">router/</span>                        <span class="ft-comment">← Navegação entre telas</span>
+<span class="ft-tree">│</span>
+<span class="ft-tree">├── </span><span class="ft-dir">features/</span>                          <span class="ft-comment">← Cada feature do app vive aqui</span>
+<span class="ft-tree">│   ├── </span><span class="ft-dir">auth/</span>                          <span class="ft-comment">← Feature: autenticação</span>
+<span class="ft-tree">│   │   ├── </span><span class="ft-dir">data/</span>                      <span class="ft-comment">← 🍳 Cozinha</span>
+<span class="ft-tree">│   │   │   ├── </span><span class="ft-dir">datasources/</span>           <span class="ft-comment">← De onde vêm os dados</span>
+<span class="ft-tree">│   │   │   │   ├── </span><span class="ft-file">auth_remote_datasource.dart</span>
+<span class="ft-tree">│   │   │   │   └── </span><span class="ft-file">auth_local_datasource.dart</span>
+<span class="ft-tree">│   │   │   ├── </span><span class="ft-dir">models/</span>                <span class="ft-comment">← Tradutores de JSON</span>
+<span class="ft-tree">│   │   │   │   └── </span><span class="ft-file">user_model.dart</span>
+<span class="ft-tree">│   │   │   └── </span><span class="ft-dir">repositories/</span>          <span class="ft-comment">← Implementação real</span>
+<span class="ft-tree">│   │   │       └── </span><span class="ft-file">auth_repository_impl.dart</span>
+<span class="ft-tree">│   │   ├── </span><span class="ft-dir">domain/</span>                    <span class="ft-comment">← 📋 Cardápio + Regras</span>
+<span class="ft-tree">│   │   │   ├── </span><span class="ft-dir">entities/</span>              <span class="ft-comment">← Objetos puros (sem JSON, sem HTTP)</span>
+<span class="ft-tree">│   │   │   │   └── </span><span class="ft-file">user.dart</span>
+<span class="ft-tree">│   │   │   ├── </span><span class="ft-dir">repositories/</span>          <span class="ft-comment">← Contrato abstrato</span>
+<span class="ft-tree">│   │   │   │   └── </span><span class="ft-file">auth_repository.dart</span>
+<span class="ft-tree">│   │   │   └── </span><span class="ft-dir">usecases/</span>              <span class="ft-comment">← Ações de negócio</span>
+<span class="ft-tree">│   │   │       └── </span><span class="ft-file">login_with_email.dart</span>
+<span class="ft-tree">│   │   └── </span><span class="ft-dir">presentation/</span>             <span class="ft-comment">← 🍽️ Salão</span>
+<span class="ft-tree">│   │       ├── </span><span class="ft-dir">bloc/</span>                  <span class="ft-comment">← Garçom (eventos + estados)</span>
+<span class="ft-tree">│   │       │   ├── </span><span class="ft-file">login_bloc.dart</span>
+<span class="ft-tree">│   │       │   ├── </span><span class="ft-file">login_event.dart</span>
+<span class="ft-tree">│   │       │   └── </span><span class="ft-file">login_state.dart</span>
+<span class="ft-tree">│   │       ├── </span><span class="ft-dir">pages/</span>                 <span class="ft-comment">← Telas</span>
+<span class="ft-tree">│   │       │   └── </span><span class="ft-file">login_page.dart</span>
+<span class="ft-tree">│   │       └── </span><span class="ft-dir">widgets/</span>              <span class="ft-comment">← Pedaços reutilizáveis</span>
+<span class="ft-tree">│   │           ├── </span><span class="ft-file">email_field.dart</span>
+<span class="ft-tree">│   │           └── </span><span class="ft-file">password_field.dart</span>
+<span class="ft-tree">│   │</span>
+<span class="ft-tree">│   ├── </span><span class="ft-dir">dashboard/</span>                     <span class="ft-comment">← Mesma estrutura, outra feature</span>
+<span class="ft-tree">│   └── </span><span class="ft-dir">profile/</span>                       <span class="ft-comment">← Mesma estrutura, outra feature</span>
+<span class="ft-tree">│</span>
+<span class="ft-tree">└── </span><span class="ft-dir">shared/</span>                            <span class="ft-comment">← Widgets usados em várias features</span>
+<span class="ft-tree">    └── </span><span class="ft-dir">widgets/</span></pre>
+    </section>
+
+    <!-- Camadas na prática -->
+    <section class="section" id="camadas">
+      <div class="section-header">
+        <div class="section-icon icon-blue">🔍</div>
+        <h2>Camadas na Prática</h2>
+      </div>
+
+      <p>Vamos acompanhar o que acontece quando o usuário faz login com email e senha, passo a passo.</p>
+
+      <div class="steps">
+
+        <div class="step">
+          <div class="step-num">1</div>
+          <div class="step-content">
+            <div class="step-title">Usuário clica "Entrar" → Tela dispara evento</div>
+            <p>A tela (<code>login_page.dart</code>) captura a ação e envia um <strong>evento</strong> pro BLoC:</p>
+            <div class="code-block">
+              <div class="code-header"><span class="code-lang">dart — login_page.dart</span><div class="code-dots"><span></span><span></span><span></span></div></div>
+              <pre><span class="cmt">// Na tela, quando o usuário clica em "Entrar":</span>
+<span class="prop">context</span>.<span class="fn">read</span>&lt;<span class="typ">LoginBloc</span>&gt;().<span class="fn">add</span>(
+  <span class="typ">LoginSubmitted</span>(
+    <span class="prop">email</span>: <span class="str">'joao@email.com'</span>,
+    <span class="prop">password</span>: <span class="str">'123456'</span>,
+  ),
+);</pre>
+            </div>
+            <div class="alert alert-info"><div class="alert-icon">💬</div><p>"Ei garçom, o cliente quer fazer login com esse email e senha."</p></div>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-num">2</div>
+          <div class="step-content">
+            <div class="step-title">BLoC recebe o evento e chama o UseCase</div>
+            <p>O BLoC é o garçom. Ele recebe o pedido, emite <code>LoginLoading</code> e chama o UseCase:</p>
+            <div class="code-block">
+              <div class="code-header"><span class="code-lang">dart — login_bloc.dart</span><div class="code-dots"><span></span><span></span><span></span></div></div>
+              <pre><span class="ann">@injectable</span>
+<span class="kw">class</span> <span class="typ">LoginBloc</span> <span class="kw">extends</span> <span class="typ">Bloc</span>&lt;<span class="typ">LoginEvent</span>, <span class="typ">LoginState</span>&gt; {
+  <span class="typ">LoginBloc</span>(<span class="kw2">this</span>._loginWithEmail)
+      : <span class="kw">super</span>(<span class="kw">const</span> <span class="typ">LoginInitial</span>()) {
+    <span class="fn">on</span>&lt;<span class="typ">LoginSubmitted</span>&gt;(_onLoginSubmitted);
+  }
+  <span class="kw">final</span> <span class="typ">LoginWithEmail</span> <span class="var">_loginWithEmail</span>;
+
+  <span class="typ">Future</span>&lt;<span class="typ">void</span>&gt; <span class="fn">_onLoginSubmitted</span>(
+    <span class="typ">LoginSubmitted</span> <span class="var">event</span>,
+    <span class="typ">Emitter</span>&lt;<span class="typ">LoginState</span>&gt; <span class="var">emit</span>,
+  ) <span class="kw">async</span> {
+    <span class="fn">emit</span>(<span class="kw">const</span> <span class="typ">LoginLoading</span>());  <span class="cmt">// mostra o loading</span>
+    <span class="kw">try</span> {
+      <span class="kw">final</span> <span class="var">user</span> <span class="op">=</span> <span class="kw">await</span> <span class="fn">_loginWithEmail</span>(
+        <span class="prop">email</span>: <span class="var">event</span>.email,
+        <span class="prop">password</span>: <span class="var">event</span>.password,
+      );
+      <span class="fn">emit</span>(<span class="typ">LoginSuccess</span>(<span class="var">user</span>));  <span class="cmt">// deu certo!</span>
+    } <span class="kw">on</span> <span class="typ">ApiException</span> <span class="kw">catch</span> (<span class="var">e</span>) {
+      <span class="fn">emit</span>(<span class="typ">LoginFailure</span>(<span class="var">e</span>.message));  <span class="cmt">// deu erro</span>
+    }
+  }
+}</pre>
+            </div>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-num">3</div>
+          <div class="step-content">
+            <div class="step-title">UseCase chama o Repository</div>
+            <p>O UseCase representa a ação de negócio. Agora é simples, mas é onde lógica complexa viria no futuro:</p>
+            <div class="code-block">
+              <div class="code-header"><span class="code-lang">dart — login_with_email.dart</span><div class="code-dots"><span></span><span></span><span></span></div></div>
+              <pre><span class="ann">@lazySingleton</span>
+<span class="kw">class</span> <span class="typ">LoginWithEmail</span> {
+  <span class="kw">const</span> <span class="typ">LoginWithEmail</span>(<span class="kw2">this</span>._repository);
+  <span class="kw">final</span> <span class="typ">AuthRepository</span> <span class="var">_repository</span>;
+
+  <span class="typ">Future</span>&lt;<span class="typ">User</span>&gt; <span class="fn">call</span>({
+    <span class="kw">required</span> <span class="typ">String</span> <span class="var">email</span>,
+    <span class="kw">required</span> <span class="typ">String</span> <span class="var">password</span>,
+  }) <span class="op">=></span> <span class="var">_repository</span>.<span class="fn">loginWithEmail</span>(<span class="prop">email</span>: <span class="var">email</span>, <span class="prop">password</span>: <span class="var">password</span>);
+}</pre>
+            </div>
+            <div class="alert alert-tip"><div class="alert-icon">💡</div><p>Mesmo sendo simples agora, num futuro o UseCase pode orquestrar: autenticar + salvar token + buscar perfil + registrar dispositivo para push — tudo sem poluir o BLoC.</p></div>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-num">4</div>
+          <div class="step-content">
+            <div class="step-title">Repository abstrato define o contrato</div>
+            <p>O contrato diz <em>o que</em> a cozinha sabe fazer, sem dizer <em>como</em>:</p>
+            <div class="code-block">
+              <div class="code-header"><span class="code-lang">dart — auth_repository.dart</span><div class="code-dots"><span></span><span></span><span></span></div></div>
+              <pre><span class="kw">abstract class</span> <span class="typ">AuthRepository</span> {
+  <span class="typ">Future</span>&lt;<span class="typ">User</span>&gt; <span class="fn">loginWithEmail</span>({
+    <span class="kw">required</span> <span class="typ">String</span> <span class="var">email</span>,
+    <span class="kw">required</span> <span class="typ">String</span> <span class="var">password</span>,
+  });
+  <span class="typ">Future</span>&lt;<span class="typ">void</span>&gt; <span class="fn">logout</span>();
+  <span class="typ">Future</span>&lt;<span class="typ">User</span>?&gt; <span class="fn">getCurrentUser</span>();
+}</pre>
+            </div>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-num">5</div>
+          <div class="step-content">
+            <div class="step-title">RepositoryImpl faz o trabalho real</div>
+            <div class="code-block">
+              <div class="code-header"><span class="code-lang">dart — auth_repository_impl.dart</span><div class="code-dots"><span></span><span></span><span></span></div></div>
+              <pre><span class="ann">@LazySingleton(as: AuthRepository)</span>
+<span class="kw">class</span> <span class="typ">AuthRepositoryImpl</span> <span class="kw">implements</span> <span class="typ">AuthRepository</span> {
+  <span class="kw">const</span> <span class="typ">AuthRepositoryImpl</span>(<span class="kw2">this</span>._remoteDataSource, <span class="kw2">this</span>._localDataSource);
+  <span class="kw">final</span> <span class="typ">AuthRemoteDataSource</span> <span class="var">_remoteDataSource</span>;
+  <span class="kw">final</span> <span class="typ">AuthLocalDataSource</span> <span class="var">_localDataSource</span>;
+
+  <span class="ann">@override</span>
+  <span class="typ">Future</span>&lt;<span class="typ">User</span>&gt; <span class="fn">loginWithEmail</span>({
+    <span class="kw">required</span> <span class="typ">String</span> <span class="var">email</span>,
+    <span class="kw">required</span> <span class="typ">String</span> <span class="var">password</span>,
+  }) <span class="kw">async</span> {
+    <span class="kw">final</span> <span class="var">result</span> <span class="op">=</span> <span class="kw">await</span> <span class="var">_remoteDataSource</span>.<span class="fn">login</span>(<span class="prop">email</span>: <span class="var">email</span>, <span class="prop">password</span>: <span class="var">password</span>);
+    <span class="kw">await</span> <span class="var">_localDataSource</span>.<span class="fn">saveToken</span>(<span class="var">result</span>.token); <span class="cmt">// mantém o usuário logado</span>
+    <span class="kw">return</span> <span class="var">result</span>.user;
+  }
+}</pre>
+            </div>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-num">6</div>
+          <div class="step-content">
+            <div class="step-title">DataSource faz a chamada HTTP</div>
+            <div class="code-block">
+              <div class="code-header"><span class="code-lang">dart — auth_remote_datasource.dart</span><div class="code-dots"><span></span><span></span><span></span></div></div>
+              <pre><span class="ann">@lazySingleton</span>
+<span class="kw">class</span> <span class="typ">AuthRemoteDataSource</span> {
+  <span class="kw">const</span> <span class="typ">AuthRemoteDataSource</span>(<span class="kw2">this</span>._apiClient);
+  <span class="kw">final</span> <span class="typ">ApiClient</span> <span class="var">_apiClient</span>;
+
+  <span class="typ">Future</span>&lt;<span class="typ">LoginResponseModel</span>&gt; <span class="fn">login</span>({
+    <span class="kw">required</span> <span class="typ">String</span> <span class="var">email</span>,
+    <span class="kw">required</span> <span class="typ">String</span> <span class="var">password</span>,
+  }) <span class="kw">async</span> {
+    <span class="kw">final</span> <span class="var">response</span> <span class="op">=</span> <span class="kw">await</span> <span class="var">_apiClient</span>.dio.<span class="fn">post</span>(
+      <span class="typ">ApiEndpoints</span>.login,
+      <span class="prop">data</span>: {<span class="str">'email'</span>: <span class="var">email</span>, <span class="str">'password'</span>: <span class="var">password</span>},
+    );
+    <span class="kw">return</span> <span class="typ">LoginResponseModel</span>.<span class="fn">fromJson</span>(<span class="var">response</span>.data);
+  }
+}</pre>
+            </div>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-num">7</div>
+          <div class="step-content">
+            <div class="step-title">Model traduz o JSON, Entity é o objeto puro</div>
+            <p>O JSON da API chega assim:</p>
+            <div class="code-block">
+              <div class="code-header"><span class="code-lang">json — resposta da API</span><div class="code-dots"><span></span><span></span><span></span></div></div>
+              <pre>{
+  <span class="str">"token"</span>: <span class="str">"eyJhbGciOiJIUzI1NiIs..."</span>,
+  <span class="str">"user"</span>: {
+    <span class="str">"id"</span>: <span class="str">"abc123"</span>,
+    <span class="str">"name"</span>: <span class="str">"João Silva"</span>,
+    <span class="str">"email"</span>: <span class="str">"joao@email.com"</span>
+  }
+}</pre>
+            </div>
+            <p>O <strong>Model</strong> sabe ler esse JSON. A <strong>Entity</strong> é o objeto puro que sobe limpo pro BLoC:</p>
+            <div class="code-block">
+              <div class="code-header"><span class="code-lang">dart — user.dart (entity) vs user_model.dart</span><div class="code-dots"><span></span><span></span><span></span></div></div>
+              <pre><span class="cmt">// domain/entities/user.dart — OBJETO PURO, sem JSON</span>
+<span class="kw">class</span> <span class="typ">User</span> <span class="kw">extends</span> <span class="typ">Equatable</span> {
+  <span class="kw">const</span> <span class="typ">User</span>({<span class="kw">required</span> <span class="kw2">this</span>.id, <span class="kw">required</span> <span class="kw2">this</span>.name, <span class="kw">required</span> <span class="kw2">this</span>.email});
+  <span class="kw">final</span> <span class="typ">String</span> <span class="var">id</span>, <span class="var">name</span>, <span class="var">email</span>;
+  <span class="ann">@override</span>
+  <span class="typ">List</span>&lt;<span class="typ">Object</span>?&gt; <span class="kw">get</span> <span class="prop">props</span> <span class="op">=></span> [<span class="var">id</span>, <span class="var">name</span>, <span class="var">email</span>];
+}
+
+<span class="cmt">// data/models/user_model.dart — EXTENDS User, sabe ler JSON</span>
+<span class="kw">class</span> <span class="typ">UserModel</span> <span class="kw">extends</span> <span class="typ">User</span> {
+  <span class="kw">const</span> <span class="typ">UserModel</span>({<span class="kw">required</span> <span class="kw">super</span>.id, <span class="kw">required</span> <span class="kw">super</span>.name, <span class="kw">required</span> <span class="kw">super</span>.email});
+
+  <span class="kw">factory</span> <span class="typ">UserModel</span>.<span class="fn">fromJson</span>(<span class="typ">Map</span>&lt;<span class="typ">String</span>, <span class="kw">dynamic</span>&gt; <span class="var">json</span>) {
+    <span class="kw">return</span> <span class="typ">UserModel</span>(
+      <span class="prop">id</span>: <span class="var">json</span>[<span class="str">'id'</span>] <span class="kw">as</span> <span class="typ">String</span>,
+      <span class="prop">name</span>: <span class="var">json</span>[<span class="str">'name'</span>] <span class="kw">as</span> <span class="typ">String</span>,
+      <span class="prop">email</span>: <span class="var">json</span>[<span class="str">'email'</span>] <span class="kw">as</span> <span class="typ">String</span>,
+    );
+  }
+}</pre>
+            </div>
+            <div class="alert alert-info"><div class="alert-icon">🤔</div><p>Por que dois arquivos? A Entity pertence ao <code>domain/</code> (não depende de nada) e o Model pertence ao <code>data/</code> (sabe ler JSON). O Model <strong>extends</strong> a Entity — ele É um User, mas com superpoderes de parsing.</p></div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Fluxo completo -->
+    <section class="section" id="fluxo">
+      <div class="section-header">
+        <div class="section-icon icon-pink">🔄</div>
+        <h2>Fluxo Completo</h2>
+      </div>
+
+      <p>Do clique do usuário até a navegação pro dashboard:</p>
+
+      <div class="flow-diagram">
+        <div style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 20px;">usuário clica "entrar"</div>
+
+        <div class="flow-step">
+          <div class="flow-box" style="border-color: rgba(59,130,246,0.3); background: rgba(59,130,246,0.05);">
+            <div class="flow-box-label">TELA (Widget)</div>
+            <div class="flow-box-sub">presentation/pages/</div>
+            <div class="flow-box-desc">Dispara o evento</div>
+          </div>
+          <div class="flow-arrow">
+            <div class="flow-arrow-line"></div>
+            <div class="flow-arrow-label">add(LoginSubmitted)</div>
+            <div class="flow-arrow-line2"></div>
+          </div>
+
+          <div class="flow-box" style="border-color: rgba(59,130,246,0.3); background: rgba(59,130,246,0.05);">
+            <div class="flow-box-label">BLOC (Garçom)</div>
+            <div class="flow-box-sub">presentation/bloc/</div>
+            <div class="flow-box-desc">Emite Loading, chama UseCase</div>
+          </div>
+          <div class="flow-arrow">
+            <div class="flow-arrow-line"></div>
+            <div class="flow-arrow-label">_loginWithEmail()</div>
+            <div class="flow-arrow-line2"></div>
+          </div>
+
+          <div class="flow-box" style="border-color: rgba(139,92,246,0.3); background: rgba(139,92,246,0.05);">
+            <div class="flow-box-label">USE CASE</div>
+            <div class="flow-box-sub">domain/usecases/</div>
+            <div class="flow-box-desc">Chama o Repository</div>
+          </div>
+          <div class="flow-arrow">
+            <div class="flow-arrow-line"></div>
+            <div class="flow-arrow-label">_repository.loginWithEmail()</div>
+            <div class="flow-arrow-line2"></div>
+          </div>
+
+          <div class="flow-box" style="border-color: rgba(139,92,246,0.3); background: rgba(139,92,246,0.05);">
+            <div class="flow-box-label">REPOSITORY</div>
+            <div class="flow-box-sub">domain/ (contrato) · data/ (impl)</div>
+            <div class="flow-box-desc">Implementação real</div>
+          </div>
+          <div class="flow-arrow">
+            <div class="flow-arrow-line"></div>
+            <div class="flow-arrow-label">_remoteDataSource.login()</div>
+            <div class="flow-arrow-line2"></div>
+          </div>
+
+          <div class="flow-box" style="border-color: rgba(16,185,129,0.3); background: rgba(16,185,129,0.05);">
+            <div class="flow-box-label">DATASOURCE (HTTP)</div>
+            <div class="flow-box-sub">data/datasources/</div>
+            <div class="flow-box-desc">Faz o POST, recebe JSON</div>
+          </div>
+          <div class="flow-arrow">
+            <div class="flow-arrow-line"></div>
+            <div class="flow-arrow-label">fromJson()</div>
+            <div class="flow-arrow-line2"></div>
+          </div>
+
+          <div class="flow-box" style="border-color: rgba(16,185,129,0.3); background: rgba(16,185,129,0.05);">
+            <div class="flow-box-label">MODEL → ENTITY</div>
+            <div class="flow-box-sub">data/models/ extends domain/entities/</div>
+            <div class="flow-box-desc">JSON vira objeto Dart limpo</div>
+          </div>
+        </div>
+
+        <div style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--green2); text-transform: uppercase; letter-spacing: 0.12em; margin-top: 20px;">
+          ↑ bloc emite LoginSuccess → tela navega pro dashboard
+        </div>
+      </div>
+    </section>
+
+    <!-- BLoC -->
+    <section class="section" id="bloc">
+      <div class="section-header">
+        <div class="section-icon icon-blue">📻</div>
+        <h2>BLoC: Eventos & Estados</h2>
+      </div>
+
+      <p>O BLoC funciona como um walkie-talkie entre a tela e os dados.</p>
+
+      <h3>Eventos — o que o usuário faz</h3>
+
+      <div class="code-block">
+        <div class="code-header"><span class="code-lang">dart — login_event.dart</span><div class="code-dots"><span></span><span></span><span></span></div></div>
+        <pre><span class="cmt">// Classe base selada — só essas subclasses existem</span>
+<span class="kw">sealed class</span> <span class="typ">LoginEvent</span> <span class="kw">extends</span> <span class="typ">Equatable</span> {
+  <span class="kw">const</span> <span class="typ">LoginEvent</span>();
+  <span class="ann">@override</span>
+  <span class="typ">List</span>&lt;<span class="typ">Object</span>?&gt; <span class="kw">get</span> <span class="prop">props</span> <span class="op">=></span> [];
+}
+
+<span class="cmt">// "Quero fazer login"</span>
+<span class="kw">class</span> <span class="typ">LoginSubmitted</span> <span class="kw">extends</span> <span class="typ">LoginEvent</span> {
+  <span class="kw">const</span> <span class="typ">LoginSubmitted</span>({<span class="kw">required</span> <span class="kw2">this</span>.email, <span class="kw">required</span> <span class="kw2">this</span>.password});
+  <span class="kw">final</span> <span class="typ">String</span> <span class="var">email</span>, <span class="var">password</span>;
+  <span class="ann">@override</span>
+  <span class="typ">List</span>&lt;<span class="typ">Object</span>?&gt; <span class="kw">get</span> <span class="prop">props</span> <span class="op">=></span> [<span class="var">email</span>, <span class="var">password</span>];
+}</pre>
+      </div>
+
+      <h3>Estados — o que a tela mostra</h3>
+
+      <div class="states-grid">
+        <div class="state-card state-initial">
+          <div class="state-name">LoginInitial</div>
+          <p class="state-desc">Tela parada, formulário vazio. Estado inicial antes de qualquer interação.</p>
+        </div>
+        <div class="state-card state-loading">
+          <div class="state-name">LoginLoading</div>
+          <p class="state-desc">Mostra spinner, desabilita o botão. Aguardando resposta da API.</p>
+        </div>
+        <div class="state-card state-success">
+          <div class="state-name">LoginSuccess(user)</div>
+          <p class="state-desc">Deu certo! Contém o objeto <code>User</code> autenticado.</p>
+        </div>
+        <div class="state-card state-failure">
+          <div class="state-name">LoginFailure(message)</div>
+          <p class="state-desc">Deu erro. Contém a mensagem de erro pra exibir na tela.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Tela + BLoC -->
+    <section class="section" id="tela-bloc">
+      <div class="section-header">
+        <div class="section-icon icon-purple">🖼️</div>
+        <h2>Como a Tela Usa o BLoC</h2>
+      </div>
+
+      <div class="code-block">
+        <div class="code-header"><span class="code-lang">dart — login_page.dart</span><div class="code-dots"><span></span><span></span><span></span></div></div>
+        <pre><span class="kw">class</span> <span class="typ">LoginPage</span> <span class="kw">extends</span> <span class="typ">StatelessWidget</span> {
+  <span class="ann">@override</span>
+  <span class="typ">Widget</span> <span class="fn">build</span>(<span class="typ">BuildContext</span> <span class="var">context</span>) {
+    <span class="kw">return</span> <span class="typ">BlocProvider</span>(
+      <span class="cmt">// Cria o BLoC via injeção de dependência</span>
+      <span class="prop">create</span>: (_) <span class="op">=></span> <span class="fn">getIt</span>&lt;<span class="typ">LoginBloc</span>&gt;(),
+      <span class="prop">child</span>: <span class="kw">const</span> <span class="typ">_LoginView</span>(),
+    );
+  }
+}
+
+<span class="cmt">// BlocListener → "side-effects" (navegação, snackbar)</span>
+<span class="typ">BlocListener</span>&lt;<span class="typ">LoginBloc</span>, <span class="typ">LoginState</span>&gt;(
+  <span class="prop">listener</span>: (<span class="var">context</span>, <span class="var">state</span>) {
+    <span class="kw">if</span> (<span class="var">state</span> <span class="kw">is</span> <span class="typ">LoginSuccess</span>) {
+      <span class="var">context</span>.<span class="fn">go</span>(<span class="str">'/dashboard'</span>);         <span class="cmt">// navega pro dashboard</span>
+    } <span class="kw">else if</span> (<span class="var">state</span> <span class="kw">is</span> <span class="typ">LoginFailure</span>) {
+      <span class="typ">ScaffoldMessenger</span>.<span class="fn">of</span>(<span class="var">context</span>)
+          .<span class="fn">showSnackBar</span>(<span class="typ">SnackBar</span>(<span class="prop">content</span>: <span class="typ">Text</span>(<span class="var">state</span>.message)));
+    }
+  },
+  <span class="prop">child</span>: ...
+)
+
+<span class="cmt">// BlocBuilder → reconstrói o botão baseado no estado</span>
+<span class="typ">BlocBuilder</span>&lt;<span class="typ">LoginBloc</span>, <span class="typ">LoginState</span>&gt;(
+  <span class="prop">builder</span>: (<span class="var">context</span>, <span class="var">state</span>) {
+    <span class="kw">return</span> <span class="typ">ElevatedButton</span>(
+      <span class="prop">onPressed</span>: <span class="var">state</span> <span class="kw">is</span> <span class="typ">LoginLoading</span> ? <span class="kw">null</span> : () {
+        <span class="var">context</span>.<span class="fn">read</span>&lt;<span class="typ">LoginBloc</span>&gt;().<span class="fn">add</span>(<span class="typ">LoginSubmitted</span>(
+          <span class="prop">email</span>: <span class="var">_emailController</span>.text,
+          <span class="prop">password</span>: <span class="var">_passwordController</span>.text,
+        ));
+      },
+      <span class="prop">child</span>: <span class="var">state</span> <span class="kw">is</span> <span class="typ">LoginLoading</span>
+          ? <span class="kw">const</span> <span class="typ">CircularProgressIndicator</span>()
+          : <span class="kw">const</span> <span class="typ">Text</span>(<span class="str">'Entrar'</span>),
+    );
+  },
+)</pre>
+      </div>
+    </section>
+
+    <!-- DI -->
+    <section class="section" id="di">
+      <div class="section-header">
+        <div class="section-icon icon-orange">💉</div>
+        <h2>Injeção de Dependência</h2>
+      </div>
+
+      <p>O BLoC recebe o UseCase, que recebe o Repository, que recebe o DataSource... mas ninguém faz <code>new</code> manualmente. Usamos <strong>get_it</strong> + <strong>injectable</strong>.</p>
+
+      <h4>Anotações disponíveis</h4>
+
+      <div class="code-block">
+        <div class="code-header"><span class="code-lang">dart — anotações injectable</span><div class="code-dots"><span></span><span></span><span></span></div></div>
+        <pre><span class="ann">@injectable</span>          <span class="cmt">// cria instância NOVA toda vez (usado em BLoCs)</span>
+<span class="ann">@lazySingleton</span>       <span class="cmt">// cria UMA vez e reutiliza (usado em UseCases, DataSources)</span>
+<span class="ann">@LazySingleton(as: AuthRepository)</span>  <span class="cmt">// registra pela interface</span></pre>
+      </div>
+
+      <h4>A cadeia automática</h4>
+
+      <div class="di-chain">
+        <div class="di-level"><span class="di-class">getIt&lt;LoginBloc&gt;()</span></div>
+        <div class="di-level"><span class="di-indent">  └─ </span><span class="di-needs">precisa de </span><span class="di-dep">LoginWithEmail</span></div>
+        <div class="di-level"><span class="di-indent">       └─ </span><span class="di-needs">precisa de </span><span class="di-dep">AuthRepository</span></div>
+        <div class="di-level"><span class="di-indent">            └─ </span><span class="di-needs">resolve para </span><span class="di-dep">AuthRepositoryImpl</span></div>
+        <div class="di-level"><span class="di-indent">                 └─ </span><span class="di-needs">precisa de </span><span class="di-dep">AuthRemoteDataSource</span> <span class="di-needs">+ </span><span class="di-dep">AuthLocalDataSource</span></div>
+        <div class="di-level"><span class="di-indent">                      └─ </span><span class="di-needs">RemoteDS precisa de </span><span class="di-dep">ApiClient (Dio)</span></div>
+        <div class="di-level"><span class="di-indent">                      └─ </span><span class="di-needs">LocalDS precisa de </span><span class="di-dep">SharedPreferences</span></div>
+      </div>
+
+      <div class="alert alert-tip"><div class="alert-icon">✨</div><p>Tudo isso é resolvido automaticamente. Na tela, basta <code>getIt&lt;LoginBloc&gt;()</code> — o framework monta toda a cadeia.</p></div>
+
+      <h4>Gerar o código de DI</h4>
+
+      <div class="cmd-block">
+        <span class="cmd-prefix">$</span>
+        <span>dart run build_runner build --delete-conflicting-outputs</span>
+      </div>
+
+      <p style="font-size: 13.5px; color: var(--text-dim);">Isso atualiza o arquivo <code>lib/core/di/injection.config.dart</code> com todas as dependências mapeadas.</p>
+    </section>
+
+    <!-- Erros -->
+    <section class="section" id="erros">
+      <div class="section-header">
+        <div class="section-icon icon-pink">⚠️</div>
+        <h2>Tratamento de Erros</h2>
+      </div>
+
+      <p>A API pode falhar de várias formas. Temos uma hierarquia de exceções em <code>core/network/api_exception.dart</code>:</p>
+
+      <div class="exception-tree">
+        <div class="exc-root">ApiException (base selada)</div>
+        <div class="exc-child"><span class="exc-class" style="color: #f87171">UnauthorizedException</span>   <span class="exc-comment">← 401 — email/senha errados</span></div>
+        <div class="exc-child"><span class="exc-class" style="color: #f87171">NotFoundException</span>        <span class="exc-comment">← 404</span></div>
+        <div class="exc-child"><span class="exc-class" style="color: var(--orange)">RateLimitedException</span>     <span class="exc-comment">← 429 — muitas tentativas</span></div>
+        <div class="exc-child"><span class="exc-class" style="color: var(--orange)">TimeoutException</span>         <span class="exc-comment">← timeout de conexão</span></div>
+        <div class="exc-child"><span class="exc-class" style="color: var(--orange)">NetworkException</span>         <span class="exc-comment">← sem internet</span></div>
+        <div class="exc-child"><span class="exc-class" style="color: #f87171">ServerException</span>          <span class="exc-comment">← 500+</span></div>
+        <div class="exc-child"><span class="exc-class" style="color: var(--text-dim)">UnknownApiException</span>      <span class="exc-comment">← qualquer outro erro</span></div>
+      </div>
+
+      <p>O <code>ApiClient</code> intercepta erros do Dio e converte pra essas exceções. O BLoC captura com <code>on ApiException catch (e)</code> e emite o estado de falha com a mensagem correta.</p>
+    </section>
+
+    <!-- Navegação -->
+    <section class="section" id="navegacao">
+      <div class="section-header">
+        <div class="section-icon icon-green">🗺️</div>
+        <h2>Navegação</h2>
+      </div>
+
+      <p>Usamos <strong>GoRouter</strong> pra gerenciar as rotas do app. A navegação é declarativa — você define as rotas num arquivo central e navega com <code>context.go('/rota')</code>.</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Rota</th><th>Tela</th></tr></thead>
+          <tbody>
+            <tr><td><code>/login</code></td><td>Tela de login</td></tr>
+            <tr><td><code>/register</code></td><td>Tela de cadastro</td></tr>
+            <tr><td><code>/dashboard</code></td><td>Tela inicial (após login)</td></tr>
+            <tr><td><code>/profile</code></td><td>Perfil do usuário</td></tr>
+            <tr><td><code>/settings</code></td><td>Configurações</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Nova Feature -->
+    <section class="section" id="nova-feature">
+      <div class="section-header">
+        <div class="section-icon icon-green">🚀</div>
+        <h2>Criando uma Feature Nova</h2>
+      </div>
+
+      <p>Quer criar a feature "Cadastro de Usuário"? Siga esse checklist:</p>
+
+      <h3>1. Crie a estrutura de pastas</h3>
+
+      <pre class="folder-tree"><span class="ft-special">lib/features/register/</span>
+<span class="ft-tree">├── </span><span class="ft-dir">data/</span>
+<span class="ft-tree">│   ├── </span><span class="ft-dir">datasources/</span>
+<span class="ft-tree">│   ├── </span><span class="ft-dir">models/</span>
+<span class="ft-tree">│   └── </span><span class="ft-dir">repositories/</span>
+<span class="ft-tree">├── </span><span class="ft-dir">domain/</span>
+<span class="ft-tree">│   ├── </span><span class="ft-dir">entities/</span>
+<span class="ft-tree">│   ├── </span><span class="ft-dir">repositories/</span>
+<span class="ft-tree">│   └── </span><span class="ft-dir">usecases/</span>
+<span class="ft-tree">└── </span><span class="ft-dir">presentation/</span>
+<span class="ft-tree">    ├── </span><span class="ft-dir">bloc/</span>
+<span class="ft-tree">    ├── </span><span class="ft-dir">pages/</span>
+<span class="ft-tree">    └── </span><span class="ft-dir">widgets/</span></pre>
+
+      <h3>2. Comece pelo domain/ (de dentro pra fora)</h3>
+
+      <div class="code-block">
+        <div class="code-header"><span class="code-lang">dart — domain/</span><div class="code-dots"><span></span><span></span><span></span></div></div>
+        <pre><span class="cmt">// domain/entities/register_result.dart</span>
+<span class="kw">class</span> <span class="typ">RegisterResult</span> <span class="kw">extends</span> <span class="typ">Equatable</span> {
+  <span class="kw">final</span> <span class="typ">String</span> <span class="var">userId</span>, <span class="var">email</span>;
+  <span class="cmt">// campos puros, sem JSON</span>
+}
+
+<span class="cmt">// domain/repositories/register_repository.dart</span>
+<span class="kw">abstract class</span> <span class="typ">RegisterRepository</span> {
+  <span class="typ">Future</span>&lt;<span class="typ">RegisterResult</span>&gt; <span class="fn">register</span>({
+    <span class="kw">required</span> <span class="typ">String</span> <span class="var">name</span>, <span class="kw">required</span> <span class="typ">String</span> <span class="var">email</span>, <span class="kw">required</span> <span class="typ">String</span> <span class="var">password</span>,
+  });
+}
+
+<span class="cmt">// domain/usecases/register_user.dart</span>
+<span class="ann">@lazySingleton</span>
+<span class="kw">class</span> <span class="typ">RegisterUser</span> {
+  <span class="kw">const</span> <span class="typ">RegisterUser</span>(<span class="kw2">this</span>._repository);
+  <span class="kw">final</span> <span class="typ">RegisterRepository</span> <span class="var">_repository</span>;
+
+  <span class="typ">Future</span>&lt;<span class="typ">RegisterResult</span>&gt; <span class="fn">call</span>({...}) <span class="op">=></span> <span class="var">_repository</span>.<span class="fn">register</span>(...);
+}</pre>
+      </div>
+
+      <h3>3. Implemente o data/</h3>
+
+      <div class="code-block">
+        <div class="code-header"><span class="code-lang">dart — data/</span><div class="code-dots"><span></span><span></span><span></span></div></div>
+        <pre><span class="cmt">// data/models/register_result_model.dart</span>
+<span class="kw">class</span> <span class="typ">RegisterResultModel</span> <span class="kw">extends</span> <span class="typ">RegisterResult</span> {
+  <span class="kw">factory</span> <span class="typ">RegisterResultModel</span>.<span class="fn">fromJson</span>(<span class="typ">Map</span>&lt;<span class="typ">String</span>, <span class="kw">dynamic</span>&gt; <span class="var">json</span>) { ... }
+}
+
+<span class="cmt">// data/datasources/register_remote_datasource.dart</span>
+<span class="ann">@lazySingleton</span>
+<span class="kw">class</span> <span class="typ">RegisterRemoteDataSource</span> {
+  <span class="cmt">// chamada HTTP real: POST /auth/register</span>
+}
+
+<span class="cmt">// data/repositories/register_repository_impl.dart</span>
+<span class="ann">@LazySingleton(as: RegisterRepository)</span>
+<span class="kw">class</span> <span class="typ">RegisterRepositoryImpl</span> <span class="kw">implements</span> <span class="typ">RegisterRepository</span> {
+  <span class="cmt">// delega pro datasource</span>
+}</pre>
+      </div>
+
+      <h3>4. Crie o BLoC e rode o build_runner</h3>
+
+      <div class="checklist">
+        <div class="check-item"><div class="check-box">✓</div><div>Criar <code>register_event.dart</code> com <code>RegisterSubmitted</code></div></div>
+        <div class="check-item"><div class="check-box">✓</div><div>Criar <code>register_state.dart</code> com Initial, Loading, Success, Failure</div></div>
+        <div class="check-item"><div class="check-box">✓</div><div>Criar <code>register_bloc.dart</code> seguindo o padrão do <code>LoginBloc</code></div></div>
+        <div class="check-item"><div class="check-box">✓</div><div>Rodar <code>dart run build_runner build --delete-conflicting-outputs</code></div></div>
+        <div class="check-item"><div class="check-box">✓</div><div>Adicionar a rota em <code>core/router/app_router.dart</code></div></div>
+      </div>
+    </section>
+
+    <!-- Regras -->
+    <section class="section" id="regras">
+      <div class="section-header">
+        <div class="section-icon icon-orange">📏</div>
+        <h2>Regras do Projeto</h2>
+      </div>
+
+      <h3>Dependências entre camadas</h3>
+
+      <div class="rules-grid">
+        <div class="rule-card rule-ok">
+          <span class="rule-icon">✅</span>
+          <code>presentation/</code> importa de <code>domain/</code><br>(entities, usecases)
+        </div>
+        <div class="rule-card rule-ok">
+          <span class="rule-icon">✅</span>
+          <code>data/</code> importa de <code>domain/</code><br>(entities, repositories)
+        </div>
+        <div class="rule-card rule-no">
+          <span class="rule-icon">❌</span>
+          <code>domain/</code> NUNCA importa de <code>data/</code> ou <code>presentation/</code>
+        </div>
+        <div class="rule-card rule-no">
+          <span class="rule-icon">❌</span>
+          <code>presentation/</code> NUNCA importa de <code>data/</code> (exceto via DI)
+        </div>
+      </div>
+
+      <h3>Convenções de nomenclatura</h3>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Tipo</th><th>Padrão</th><th>Exemplo</th></tr></thead>
+          <tbody>
+            <tr><td>Entity</td><td><code>nome.dart</code></td><td><code>user.dart</code></td></tr>
+            <tr><td>Model</td><td><code>nome_model.dart</code></td><td><code>user_model.dart</code></td></tr>
+            <tr><td>Repository (contrato)</td><td><code>nome_repository.dart</code></td><td><code>auth_repository.dart</code></td></tr>
+            <tr><td>Repository (impl)</td><td><code>nome_repository_impl.dart</code></td><td><code>auth_repository_impl.dart</code></td></tr>
+            <tr><td>DataSource (remoto)</td><td><code>nome_remote_datasource.dart</code></td><td><code>auth_remote_datasource.dart</code></td></tr>
+            <tr><td>DataSource (local)</td><td><code>nome_local_datasource.dart</code></td><td><code>auth_local_datasource.dart</code></td></tr>
+            <tr><td>UseCase</td><td><code>verbo_substantivo.dart</code></td><td><code>login_with_email.dart</code></td></tr>
+            <tr><td>BLoC</td><td><code>nome_bloc.dart</code></td><td><code>login_bloc.dart</code></td></tr>
+            <tr><td>Event</td><td><code>nome_event.dart</code></td><td><code>login_event.dart</code></td></tr>
+            <tr><td>State</td><td><code>nome_state.dart</code></td><td><code>login_state.dart</code></td></tr>
+            <tr><td>Page</td><td><code>nome_page.dart</code></td><td><code>login_page.dart</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Stack -->
+    <section class="section" id="stack">
+      <div class="section-header">
+        <div class="section-icon icon-purple">📦</div>
+        <h2>Stack Tecnológica</h2>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Pacote</th><th>Pra que serve</th></tr></thead>
+          <tbody>
+            <tr><td><code>flutter_bloc</code></td><td>Gerenciamento de estado (BLoC pattern)</td></tr>
+            <tr><td><code>get_it</code> + <code>injectable</code></td><td>Injeção de dependência automática</td></tr>
+            <tr><td><code>dio</code></td><td>Cliente HTTP para chamadas de API</td></tr>
+            <tr><td><code>go_router</code></td><td>Navegação declarativa entre telas</td></tr>
+            <tr><td><code>equatable</code></td><td>Comparação de objetos por valor</td></tr>
+            <tr><td><code>shared_preferences</code></td><td>Armazenamento local simples (token, configs)</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h4>Dev / Test</h4>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Pacote</th><th>Pra que serve</th></tr></thead>
+          <tbody>
+            <tr><td><code>bloc_test</code></td><td>Testes de BLoC</td></tr>
+            <tr><td><code>mocktail</code></td><td>Mocks para testes</td></tr>
+            <tr><td><code>build_runner</code></td><td>Geração de código (DI)</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Rodando o projeto</h3>
+
+      <div class="cmd-block"><span class="cmd-prefix">$</span> <span>flutter pub get</span> <span class="cmd-comment">  # instalar dependências</span></div>
+      <div class="cmd-block"><span class="cmd-prefix">$</span> <span>dart run build_runner build --delete-conflicting-outputs</span> <span class="cmd-comment">  # gerar DI</span></div>
+      <div class="cmd-block"><span class="cmd-prefix">$</span> <span>flutter run</span> <span class="cmd-comment">  # rodar o app</span></div>
+      <div class="cmd-block"><span class="cmd-prefix">$</span> <span>flutter test</span> <span class="cmd-comment">  # rodar testes</span></div>
+    </section>
+
+    <!-- TL;DR -->
+    <section class="section" id="tldr">
+      <div class="section-header">
+        <div class="section-icon icon-blue">⚡</div>
+        <h2>TL;DR — Resumão</h2>
+      </div>
+
+      <div class="tldr-grid">
+        <div class="tldr-card">
+          <div class="tldr-num">01</div>
+          <div class="tldr-title">Três pastas por feature</div>
+          <p class="tldr-desc"><code>data/</code> (cozinha), <code>domain/</code> (cardápio), <code>presentation/</code> (salão)</p>
+        </div>
+        <div class="tldr-card">
+          <div class="tldr-num">02</div>
+          <div class="tldr-title">BLoC no presentation/</div>
+          <p class="tldr-desc">Recebe eventos da tela, chama UseCases, emite estados de volta</p>
+        </div>
+        <div class="tldr-card">
+          <div class="tldr-num">03</div>
+          <div class="tldr-title">UseCase no domain/</div>
+          <p class="tldr-desc">Representa uma ação de negócio. Onde lógica complexa fica centralizada</p>
+        </div>
+        <div class="tldr-card">
+          <div class="tldr-num">04</div>
+          <div class="tldr-title">Repository: contrato + impl</div>
+          <p class="tldr-desc">Contrato no <code>domain/</code> (o quê), implementação no <code>data/</code> (como)</p>
+        </div>
+        <div class="tldr-card">
+          <div class="tldr-num">05</div>
+          <div class="tldr-title">DataSource no data/</div>
+          <p class="tldr-desc">Faz a chamada HTTP real ou acessa armazenamento local</p>
+        </div>
+        <div class="tldr-card">
+          <div class="tldr-num">06</div>
+          <div class="tldr-title">Model vs Entity</div>
+          <p class="tldr-desc">Model traduz JSON, Entity é o objeto puro. Model extends Entity</p>
+        </div>
+        <div class="tldr-card">
+          <div class="tldr-num">07</div>
+          <div class="tldr-title">Injeção automática</div>
+          <p class="tldr-desc">get_it + injectable montam toda a cadeia de dependências automaticamente</p>
+        </div>
+        <div class="tldr-card">
+          <div class="tldr-num">08</div>
+          <div class="tldr-title">Feature nova = copy-paste</div>
+          <p class="tldr-desc">Copie a estrutura de uma feature existente e siga o padrão estabelecido</p>
+        </div>
+      </div>
+    </section>
+
+  </div>
+</main>
+
+<!-- Scroll to top -->
+<button class="scroll-top" id="scrollTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
+
+<script>
+  // Progress bar
+  const progressBar = document.getElementById('progressBar');
+  const scrollTop = document.getElementById('scrollTop');
+
+  window.addEventListener('scroll', () => {
+    const scrolled = window.scrollY;
+    const total = document.documentElement.scrollHeight - window.innerHeight;
+    const progress = scrolled / total;
+    progressBar.style.transform = `scaleX(${progress})`;
+
+    scrollTop.classList.toggle('visible', scrolled > 300);
+  });
+
+  // Active nav links
+  const sections = document.querySelectorAll('section[id]');
+  const navLinks = document.querySelectorAll('.nav-link');
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const id = entry.target.id;
+        navLinks.forEach(link => {
+          link.classList.toggle('active', link.getAttribute('href') === `#${id}`);
+        });
+      }
+    });
+  }, { threshold: 0.3, rootMargin: '-10% 0px -60% 0px' });
+
+  sections.forEach(section => observer.observe(section));
+
+  // Smooth click
+  navLinks.forEach(link => {
+    link.addEventListener('click', (e) => {
+      e.preventDefault();
+      const target = document.querySelector(link.getAttribute('href'));
+      if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  });
+</script>
+</body>
+</html>
