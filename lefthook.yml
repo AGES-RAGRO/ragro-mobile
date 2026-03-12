@@ -1,0 +1,13 @@
+pre-commit:
+  commands:
+    format:
+      glob: "*.dart"
+      run: dart format --set-exit-if-changed {staged_files}
+    analyze:
+      glob: "*.dart"
+      run: dart analyze --fatal-infos
+
+commit-msg:
+  commands:
+    conventional-commit:
+      run: sh scripts/check-commit-msg.sh {1}
