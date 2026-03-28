@@ -13,7 +13,24 @@ import 'package:dio/dio.dart' as _i361;
 import 'package:get_it/get_it.dart' as _i174;
 import 'package:injectable/injectable.dart' as _i526;
 import 'package:ragro_mobile/core/di/network_module.dart' as _i1002;
+import 'package:ragro_mobile/core/di/shared_preferences_module.dart' as _i55;
 import 'package:ragro_mobile/core/network/api_client.dart' as _i873;
+import 'package:ragro_mobile/features/auth/data/datasources/auth_local_datasource.dart'
+    as _i209;
+import 'package:ragro_mobile/features/auth/data/datasources/auth_remote_datasource.dart'
+    as _i201;
+import 'package:ragro_mobile/features/auth/data/repositories/auth_repository_impl.dart'
+    as _i579;
+import 'package:ragro_mobile/features/auth/domain/repositories/auth_repository.dart'
+    as _i43;
+import 'package:ragro_mobile/features/auth/domain/usecases/get_current_user.dart'
+    as _i846;
+import 'package:ragro_mobile/features/auth/domain/usecases/login_user.dart'
+    as _i1047;
+import 'package:ragro_mobile/features/auth/domain/usecases/logout.dart'
+    as _i418;
+import 'package:ragro_mobile/features/auth/domain/usecases/register_consumer.dart'
+    as _i852;
 import 'package:ragro_mobile/features/learning/data/datasources/product_mock_datasource.dart'
     as _i368;
 import 'package:ragro_mobile/features/learning/data/repositories/product_repository_impl.dart'
@@ -24,15 +41,21 @@ import 'package:ragro_mobile/features/learning/domain/usecases/get_products.dart
     as _i20;
 import 'package:ragro_mobile/features/learning/presentation/bloc/learning_bloc.dart'
     as _i79;
+import 'package:shared_preferences/shared_preferences.dart' as _i460;
 
 extension GetItInjectableX on _i174.GetIt {
   // initializes the registration of main-scope dependencies inside of GetIt
-  _i174.GetIt init({
+  Future<_i174.GetIt> init({
     String? environment,
     _i526.EnvironmentFilter? environmentFilter,
-  }) {
+  }) async {
     final gh = _i526.GetItHelper(this, environment, environmentFilter);
+    final sharedPreferencesModule = _$SharedPreferencesModule();
     final networkModule = _$NetworkModule();
+    await gh.factoryAsync<_i460.SharedPreferences>(
+      () => sharedPreferencesModule.prefs,
+      preResolve: true,
+    );
     gh.lazySingleton<_i361.Dio>(() => networkModule.dio);
     gh.lazySingleton<_i368.ProductMockDataSource>(
       () => _i368.ProductMockDataSource(),
@@ -47,8 +70,35 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i79.LearningBloc>(
       () => _i79.LearningBloc(gh<_i20.GetProducts>()),
     );
+    gh.lazySingleton<_i209.AuthLocalDataSource>(
+      () => _i209.AuthLocalDataSource(gh<_i460.SharedPreferences>()),
+    );
+    gh.lazySingleton<_i201.AuthRemoteDataSource>(
+      () => _i201.AuthRemoteDataSource(gh<_i873.ApiClient>()),
+    );
+    gh.lazySingleton<_i43.AuthRepository>(
+      () => _i579.AuthRepositoryImpl(
+        gh<_i201.AuthRemoteDataSource>(),
+        gh<_i209.AuthLocalDataSource>(),
+        gh<_i873.ApiClient>(),
+      ),
+    );
+    gh.lazySingleton<_i846.GetCurrentUser>(
+      () => _i846.GetCurrentUser(gh<_i43.AuthRepository>()),
+    );
+    gh.lazySingleton<_i1047.LoginUser>(
+      () => _i1047.LoginUser(gh<_i43.AuthRepository>()),
+    );
+    gh.lazySingleton<_i418.Logout>(
+      () => _i418.Logout(gh<_i43.AuthRepository>()),
+    );
+    gh.lazySingleton<_i852.RegisterConsumer>(
+      () => _i852.RegisterConsumer(gh<_i43.AuthRepository>()),
+    );
     return this;
   }
 }
+
+class _$SharedPreferencesModule extends _i55.SharedPreferencesModule {}
 
 class _$NetworkModule extends _i1002.NetworkModule {}
