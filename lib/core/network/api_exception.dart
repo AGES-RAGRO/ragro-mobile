@@ -20,8 +20,8 @@ class RateLimitedException extends ApiException {
   const RateLimitedException([super.message = 'Muitas tentativas. Aguarde.']);
 }
 
-class TimeoutException extends ApiException {
-  const TimeoutException([super.message = 'Tempo limite excedido']);
+class ApiTimeoutException extends ApiException {
+  const ApiTimeoutException([super.message = 'Tempo limite excedido']);
 }
 
 class NetworkException extends ApiException {
