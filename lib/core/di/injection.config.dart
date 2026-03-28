@@ -105,7 +105,7 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i192.RegisterBloc>(
       () => _i192.RegisterBloc(gh<_i852.RegisterConsumer>()),
     );
-    gh.factory<_i475.AuthBloc>(
+    gh.lazySingleton<_i475.AuthBloc>(
       () => _i475.AuthBloc(gh<_i846.GetCurrentUser>(), gh<_i418.Logout>()),
     );
     gh.factory<_i713.LoginBloc>(() => _i713.LoginBloc(gh<_i1047.LoginUser>()));

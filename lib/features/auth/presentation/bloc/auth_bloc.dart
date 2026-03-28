@@ -5,7 +5,7 @@ import 'package:ragro_mobile/features/auth/domain/usecases/logout.dart';
 import 'package:ragro_mobile/features/auth/presentation/bloc/auth_event.dart';
 import 'package:ragro_mobile/features/auth/presentation/bloc/auth_state.dart';
 
-@injectable
+@lazySingleton
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
   AuthBloc(this._getCurrentUser, this._logout) : super(const AuthInitial()) {
     on<AuthStarted>(_onStarted);
