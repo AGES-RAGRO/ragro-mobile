@@ -31,6 +31,12 @@ import 'package:ragro_mobile/features/auth/domain/usecases/logout.dart'
     as _i418;
 import 'package:ragro_mobile/features/auth/domain/usecases/register_consumer.dart'
     as _i852;
+import 'package:ragro_mobile/features/auth/presentation/bloc/auth_bloc.dart'
+    as _i475;
+import 'package:ragro_mobile/features/auth/presentation/bloc/login_bloc.dart'
+    as _i713;
+import 'package:ragro_mobile/features/auth/presentation/bloc/register_bloc.dart'
+    as _i192;
 import 'package:ragro_mobile/features/learning/data/datasources/product_mock_datasource.dart'
     as _i368;
 import 'package:ragro_mobile/features/learning/data/repositories/product_repository_impl.dart'
@@ -95,6 +101,13 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i852.RegisterConsumer>(
       () => _i852.RegisterConsumer(gh<_i43.AuthRepository>()),
     );
+    gh.factory<_i192.RegisterBloc>(
+      () => _i192.RegisterBloc(gh<_i852.RegisterConsumer>()),
+    );
+    gh.factory<_i475.AuthBloc>(
+      () => _i475.AuthBloc(gh<_i846.GetCurrentUser>(), gh<_i418.Logout>()),
+    );
+    gh.factory<_i713.LoginBloc>(() => _i713.LoginBloc(gh<_i1047.LoginUser>()));
     return this;
   }
 }
