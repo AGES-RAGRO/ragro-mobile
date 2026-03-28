@@ -32,7 +32,12 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     AuthLogoutRequested event,
     Emitter<AuthState> emit,
   ) async {
-    await _logout();
+    try {
+      await _logout();
+    } on Exception catch (_) {
+      // Logout failure (e.g. local storage error) — still clear local session
+      // and unauthenticate the user in-memory.
+    }
     emit(const AuthUnauthenticated());
   }
 }
