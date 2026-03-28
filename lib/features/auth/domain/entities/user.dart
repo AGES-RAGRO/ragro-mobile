@@ -19,5 +19,5 @@ class User extends Equatable {
   final bool active;
 
   @override
-  List<Object?> get props => [id, email, type];
+  List<Object?> get props => [id, name, email, type, active, phone];
 }

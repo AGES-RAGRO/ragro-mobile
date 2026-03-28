@@ -28,5 +28,8 @@ class Address extends Equatable {
   final double? longitude;
 
   @override
-  List<Object?> get props => [id, street, number, city, state, zipCode];
+  List<Object?> get props => [
+    id, street, number, city, state, zipCode,
+    isPrimary, complement, neighborhood, latitude, longitude,
+  ];
 }

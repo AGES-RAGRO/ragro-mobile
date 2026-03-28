@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:ragro_mobile/core/network/api_exception.dart';
 import 'package:ragro_mobile/features/auth/domain/entities/user.dart';
 import 'package:ragro_mobile/features/auth/domain/entities/user_type.dart';
 import 'package:ragro_mobile/features/auth/domain/repositories/auth_repository.dart';
@@ -12,7 +13,7 @@ void main() {
   late MockAuthRepository mockRepo;
 
   setUpAll(() {
-    registerFallbackValue(UserType.customer);
+    registerFallbackValue(UserType.consumer);
   });
 
   setUp(() {
@@ -24,7 +25,7 @@ void main() {
     id: 'user-1',
     name: 'João',
     email: 'joao@test.com',
-    type: UserType.customer,
+    type: UserType.consumer,
     active: true,
   );
 
@@ -38,7 +39,7 @@ void main() {
     final result = await loginUser(
       email: 'joao@test.com',
       password: '123456',
-      userType: UserType.customer,
+      userType: UserType.consumer,
     );
 
     expect(result.user, tUser);
@@ -46,7 +47,26 @@ void main() {
     verify(() => mockRepo.loginUser(
           email: 'joao@test.com',
           password: '123456',
-          userType: UserType.customer,
+          userType: UserType.consumer,
         )).called(1);
+  });
+
+  test('propagates UnauthorizedException from repository', () async {
+    when(() => mockRepo.loginUser(
+          email: any(named: 'email'),
+          password: any(named: 'password'),
+          userType: any(named: 'userType'),
+        )).thenThrow(
+      const UnauthorizedException(),
+    );
+
+    expect(
+      () => loginUser(
+        email: 'j@t.com',
+        password: 'wrong',
+        userType: UserType.consumer,
+      ),
+      throwsA(isA<UnauthorizedException>()),
+    );
   });
 }
