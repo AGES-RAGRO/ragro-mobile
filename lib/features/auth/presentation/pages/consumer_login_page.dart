@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:ragro_mobile/core/di/injection.dart';
+import 'package:ragro_mobile/core/theme/app_colors.dart';
 import 'package:ragro_mobile/features/auth/domain/entities/user_type.dart';
 import 'package:ragro_mobile/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:ragro_mobile/features/auth/presentation/bloc/auth_event.dart';
@@ -26,6 +27,13 @@ class ConsumerLoginPage extends StatelessWidget {
         listener: (context, state) {
           if (state is LoginSuccess) {
             context.read<AuthBloc>().add(const AuthStarted());
+          } else if (state is LoginFailure) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(state.message),
+                backgroundColor: AppColors.red,
+              ),
+            );
           }
         },
         child: Scaffold(

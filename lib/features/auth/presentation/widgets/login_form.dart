@@ -20,11 +20,13 @@ class LoginForm extends StatefulWidget {
     super.key,
     this.onRegisterTap,
     this.onForgotPasswordTap,
+    this.onLoginFailure,
   });
 
   final UserType userType;
   final VoidCallback? onRegisterTap;
   final VoidCallback? onForgotPasswordTap;
+  final ValueChanged<String>? onLoginFailure;
 
   @override
   State<LoginForm> createState() => _LoginFormState();
@@ -34,11 +36,16 @@ class _LoginFormState extends State<LoginForm> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  late final TapGestureRecognizer? _registerTapRecognizer =
+      widget.onRegisterTap != null
+          ? (TapGestureRecognizer()..onTap = widget.onRegisterTap)
+          : null;
 
   @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
+    _registerTapRecognizer?.dispose();
     super.dispose();
   }
 
@@ -56,102 +63,86 @@ class _LoginFormState extends State<LoginForm> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<LoginBloc, LoginState>(
-      listener: (context, state) {
-        if (state is LoginFailure) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(state.message),
-              backgroundColor: AppColors.red,
-            ),
-          );
-        }
-      },
-      child: Form(
-        key: _formKey,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            AuthTextField(
-              label: 'E-mail',
-              icon: Icons.email_outlined,
-              controller: _emailController,
-              keyboardType: TextInputType.emailAddress,
-              validator: (value) {
-                if (value == null || value.trim().isEmpty) {
-                  return 'Informe seu e-mail';
-                }
-                if (!value.contains('@')) {
-                  return 'E-mail inválido';
-                }
-                return null;
-              },
-            ),
-            const SizedBox(height: 16),
-            AuthTextField(
-              label: 'Senha',
-              icon: Icons.lock_outline,
-              controller: _passwordController,
-              isPassword: true,
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Informe sua senha';
-                }
-                return null;
-              },
-            ),
-            if (widget.onForgotPasswordTap != null) ...[
-              const SizedBox(height: 12),
-              Align(
-                alignment: Alignment.centerRight,
-                child: GestureDetector(
-                  onTap: widget.onForgotPasswordTap,
-                  child: Text(
-                    'Esqueceu sua senha?',
-                    style: AppTextStyles.caption.copyWith(
-                      color: AppColors.darkGreen,
-                    ),
+    return Form(
+      key: _formKey,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          AuthTextField(
+            label: 'E-mail',
+            icon: Icons.email_outlined,
+            controller: _emailController,
+            keyboardType: TextInputType.emailAddress,
+            validator: (v) {
+              if (v == null || v.isEmpty) return 'E-mail obrigatório';
+              final emailRegex = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$');
+              if (!emailRegex.hasMatch(v)) return 'E-mail inválido';
+              return null;
+            },
+          ),
+          const SizedBox(height: 16),
+          AuthTextField(
+            label: 'Senha',
+            icon: Icons.lock_outline,
+            controller: _passwordController,
+            isPassword: true,
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'Informe sua senha';
+              }
+              return null;
+            },
+          ),
+          if (widget.onForgotPasswordTap != null) ...[
+            const SizedBox(height: 12),
+            Align(
+              alignment: Alignment.centerRight,
+              child: GestureDetector(
+                onTap: widget.onForgotPasswordTap,
+                child: Text(
+                  'Esqueceu sua senha?',
+                  style: AppTextStyles.caption.copyWith(
+                    color: AppColors.darkGreen,
                   ),
                 ),
               ),
-            ],
-            const SizedBox(height: 24),
-            BlocBuilder<LoginBloc, LoginState>(
-              builder: (context, state) {
-                return AuthSubmitButton(
-                  label: 'Entrar',
-                  isLoading: state is LoginLoading,
-                  onPressed: _submit,
-                );
-              },
             ),
-            if (widget.onRegisterTap != null) ...[
-              const SizedBox(height: 20),
-              Center(
-                child: RichText(
-                  text: TextSpan(
-                    style: AppTextStyles.caption.copyWith(
-                      color: AppColors.black,
-                    ),
-                    children: [
-                      const TextSpan(text: 'Não tem conta? '),
-                      TextSpan(
-                        text: 'Criar uma conta',
-                        style: AppTextStyles.caption.copyWith(
-                          color: AppColors.darkGreen,
-                          fontWeight: FontWeight.w700,
-                        ),
-                        recognizer: TapGestureRecognizer()
-                          ..onTap = widget.onRegisterTap,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
           ],
-        ),
+          const SizedBox(height: 24),
+          BlocBuilder<LoginBloc, LoginState>(
+            builder: (context, state) {
+              return AuthSubmitButton(
+                label: 'Entrar',
+                isLoading: state is LoginLoading,
+                onPressed: _submit,
+              );
+            },
+          ),
+          if (widget.onRegisterTap != null) ...[
+            const SizedBox(height: 20),
+            Center(
+              child: RichText(
+                text: TextSpan(
+                  style: AppTextStyles.caption.copyWith(
+                    color: AppColors.black,
+                  ),
+                  children: [
+                    const TextSpan(text: 'Não tem conta? '),
+                    TextSpan(
+                      text: 'Criar uma conta',
+                      style: AppTextStyles.caption.copyWith(
+                        color: AppColors.darkGreen,
+                        fontWeight: FontWeight.w700,
+                      ),
+                      recognizer: _registerTapRecognizer,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ],
       ),
     );
   }

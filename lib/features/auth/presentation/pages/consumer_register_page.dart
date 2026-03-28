@@ -149,13 +149,10 @@ class _ConsumerRegisterViewState extends State<_ConsumerRegisterView> {
                   icon: Icons.email_outlined,
                   controller: _emailController,
                   keyboardType: TextInputType.emailAddress,
-                  validator: (value) {
-                    if (value == null || value.trim().isEmpty) {
-                      return 'Informe seu e-mail';
-                    }
-                    if (!value.contains('@')) {
-                      return 'E-mail inválido';
-                    }
+                  validator: (v) {
+                    if (v == null || v.isEmpty) return 'E-mail obrigatório';
+                    final emailRegex = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$');
+                    if (!emailRegex.hasMatch(v)) return 'E-mail inválido';
                     return null;
                   },
                 ),
@@ -291,7 +288,7 @@ class _ConsumerRegisterViewState extends State<_ConsumerRegisterView> {
   }
 }
 
-class _TermsCheckbox extends StatelessWidget {
+class _TermsCheckbox extends StatefulWidget {
   const _TermsCheckbox({
     required this.value,
     required this.onChanged,
@@ -301,13 +298,29 @@ class _TermsCheckbox extends StatelessWidget {
   final ValueChanged<bool?> onChanged;
 
   @override
+  State<_TermsCheckbox> createState() => _TermsCheckboxState();
+}
+
+class _TermsCheckboxState extends State<_TermsCheckbox> {
+  late final TapGestureRecognizer _termsTapRecognizer = TapGestureRecognizer()
+    ..onTap = () {
+      // TODO(ragro): open terms of service page
+    };
+
+  @override
+  void dispose() {
+    _termsTapRecognizer.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Checkbox(
-          value: value,
-          onChanged: onChanged,
+          value: widget.value,
+          onChanged: widget.onChanged,
           activeColor: AppColors.darkGreen,
           materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
         ),
@@ -326,10 +339,7 @@ class _TermsCheckbox extends StatelessWidget {
                       color: AppColors.darkGreen,
                       fontWeight: FontWeight.w700,
                     ),
-                    recognizer: TapGestureRecognizer()
-                      ..onTap = () {
-                        // TODO(ragro): open terms of service page
-                      },
+                    recognizer: _termsTapRecognizer,
                   ),
                 ],
               ),
