@@ -15,6 +15,7 @@ import 'package:injectable/injectable.dart' as _i526;
 import 'package:ragro_mobile/core/di/network_module.dart' as _i1002;
 import 'package:ragro_mobile/core/di/shared_preferences_module.dart' as _i55;
 import 'package:ragro_mobile/core/network/api_client.dart' as _i873;
+import 'package:ragro_mobile/core/router/app_router.dart' as _i419;
 import 'package:ragro_mobile/features/auth/data/datasources/auth_local_datasource.dart'
     as _i209;
 import 'package:ragro_mobile/features/auth/data/datasources/auth_remote_datasource.dart'
@@ -108,6 +109,9 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i475.AuthBloc(gh<_i846.GetCurrentUser>(), gh<_i418.Logout>()),
     );
     gh.factory<_i713.LoginBloc>(() => _i713.LoginBloc(gh<_i1047.LoginUser>()));
+    gh.lazySingleton<_i419.AppRouter>(
+      () => _i419.AppRouter(gh<_i475.AuthBloc>()),
+    );
     return this;
   }
 }
