@@ -26,14 +26,21 @@ class AuthRepositoryImpl implements AuthRepository {
       password: password,
       userType: userType,
     );
-    await _local.saveSession(
-      token: response.token,
-      userType: response.user.type.name,
-      userId: response.user.id,
-      userName: response.user.name,
-      userEmail: response.user.email,
-    );
-    _apiClient.setAuthToken(response.token);
+    try {
+      await _local.saveSession(
+        token: response.token,
+        userType: response.user.type.name,
+        userId: response.user.id,
+        userName: response.user.name,
+        userEmail: response.user.email,
+        active: response.user.active,
+      );
+      _apiClient.setAuthToken(response.token);
+    } on Exception catch (_) {
+      // Network auth succeeded but local persistence failed.
+      // Session will not survive app restart, but current session still works.
+      _apiClient.setAuthToken(response.token);
+    }
     return (user: response.user, token: response.token);
   }
 
@@ -71,20 +78,21 @@ class AuthRepositoryImpl implements AuthRepository {
 
   @override
   Future<User?> getCurrentUser() async {
-    final token = _local.getToken();
+    final token  = _local.getToken();
     if (token == null) return null;
-    final id    = _local.getUserId();
-    final name  = _local.getUserName();
-    final email = _local.getUserEmail();
-    final type  = _local.getUserType();
+    final id     = _local.getUserId();
+    final name   = _local.getUserName();
+    final email  = _local.getUserEmail();
+    final type   = _local.getUserType();
+    final active = _local.getUserActive();
     if (id == null || name == null || email == null || type == null) return null;
     _apiClient.setAuthToken(token);
     return UserModel(
       id: id,
       name: name,
       email: email,
-      type: UserType.fromApiValue(type),
-      active: true,
+      type: UserType.values.byName(type),
+      active: active ?? true,
     );
   }
 }

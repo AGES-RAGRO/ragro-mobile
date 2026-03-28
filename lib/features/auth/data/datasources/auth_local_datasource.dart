@@ -6,11 +6,12 @@ class AuthLocalDataSource {
   const AuthLocalDataSource(this._prefs);
   final SharedPreferences _prefs;
 
-  static const _tokenKey     = 'auth_token';
-  static const _userTypeKey  = 'auth_user_type';
-  static const _userIdKey    = 'auth_user_id';
-  static const _userNameKey  = 'auth_user_name';
-  static const _userEmailKey = 'auth_user_email';
+  static const _tokenKey      = 'auth_token';
+  static const _userTypeKey   = 'auth_user_type';
+  static const _userIdKey     = 'auth_user_id';
+  static const _userNameKey   = 'auth_user_name';
+  static const _userEmailKey  = 'auth_user_email';
+  static const _userActiveKey = 'auth_user_active';
 
   Future<void> saveSession({
     required String token,
@@ -18,6 +19,7 @@ class AuthLocalDataSource {
     required String userId,
     required String userName,
     required String userEmail,
+    required bool active,
   }) async {
     await Future.wait([
       _prefs.setString(_tokenKey, token),
@@ -25,14 +27,16 @@ class AuthLocalDataSource {
       _prefs.setString(_userIdKey, userId),
       _prefs.setString(_userNameKey, userName),
       _prefs.setString(_userEmailKey, userEmail),
+      _prefs.setBool(_userActiveKey, active),
     ]);
   }
 
-  String? getToken()     => _prefs.getString(_tokenKey);
-  String? getUserType()  => _prefs.getString(_userTypeKey);
-  String? getUserId()    => _prefs.getString(_userIdKey);
-  String? getUserName()  => _prefs.getString(_userNameKey);
-  String? getUserEmail() => _prefs.getString(_userEmailKey);
+  String? getToken()      => _prefs.getString(_tokenKey);
+  String? getUserType()   => _prefs.getString(_userTypeKey);
+  String? getUserId()     => _prefs.getString(_userIdKey);
+  String? getUserName()   => _prefs.getString(_userNameKey);
+  String? getUserEmail()  => _prefs.getString(_userEmailKey);
+  bool?   getUserActive() => _prefs.getBool(_userActiveKey);
 
   Future<void> clearSession() async {
     await Future.wait([
@@ -41,6 +45,7 @@ class AuthLocalDataSource {
       _prefs.remove(_userIdKey),
       _prefs.remove(_userNameKey),
       _prefs.remove(_userEmailKey),
+      _prefs.remove(_userActiveKey),
     ]);
   }
 }
