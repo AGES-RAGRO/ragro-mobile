@@ -11,6 +11,7 @@ class AuthLocalDataSource {
   static const _userIdKey     = 'auth_user_id';
   static const _userNameKey   = 'auth_user_name';
   static const _userEmailKey  = 'auth_user_email';
+  static const _userPhoneKey  = 'auth_user_phone';
   static const _userActiveKey = 'auth_user_active';
 
   Future<void> saveSession({
@@ -20,15 +21,22 @@ class AuthLocalDataSource {
     required String userName,
     required String userEmail,
     required bool active,
+    String? phone,
   }) async {
-    await Future.wait([
+    final futures = <Future<bool>>[
       _prefs.setString(_tokenKey, token),
       _prefs.setString(_userTypeKey, userType),
       _prefs.setString(_userIdKey, userId),
       _prefs.setString(_userNameKey, userName),
       _prefs.setString(_userEmailKey, userEmail),
       _prefs.setBool(_userActiveKey, active),
-    ]);
+    ];
+    if (phone != null) {
+      futures.add(_prefs.setString(_userPhoneKey, phone));
+    } else {
+      futures.add(_prefs.remove(_userPhoneKey).then((_) => true));
+    }
+    await Future.wait(futures);
   }
 
   String? getToken()      => _prefs.getString(_tokenKey);
@@ -36,6 +44,7 @@ class AuthLocalDataSource {
   String? getUserId()     => _prefs.getString(_userIdKey);
   String? getUserName()   => _prefs.getString(_userNameKey);
   String? getUserEmail()  => _prefs.getString(_userEmailKey);
+  String? getUserPhone()  => _prefs.getString(_userPhoneKey);
   bool?   getUserActive() => _prefs.getBool(_userActiveKey);
 
   Future<void> clearSession() async {
@@ -45,6 +54,7 @@ class AuthLocalDataSource {
       _prefs.remove(_userIdKey),
       _prefs.remove(_userNameKey),
       _prefs.remove(_userEmailKey),
+      _prefs.remove(_userPhoneKey),
       _prefs.remove(_userActiveKey),
     ]);
   }

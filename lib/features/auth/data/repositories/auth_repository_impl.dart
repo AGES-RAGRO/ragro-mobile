@@ -34,13 +34,13 @@ class AuthRepositoryImpl implements AuthRepository {
         userName: response.user.name,
         userEmail: response.user.email,
         active: response.user.active,
+        phone: response.user.phone,
       );
-      _apiClient.setAuthToken(response.token);
     } on Exception catch (_) {
       // Network auth succeeded but local persistence failed.
       // Session will not survive app restart, but current session still works.
-      _apiClient.setAuthToken(response.token);
     }
+    _apiClient.setAuthToken(response.token);
     return (user: response.user, token: response.token);
   }
 
@@ -86,12 +86,14 @@ class AuthRepositoryImpl implements AuthRepository {
     final type   = _local.getUserType();
     final active = _local.getUserActive();
     if (id == null || name == null || email == null || type == null) return null;
+    final phone = _local.getUserPhone();
     _apiClient.setAuthToken(token);
     return UserModel(
       id: id,
       name: name,
       email: email,
-      type: UserType.values.byName(type),
+      phone: phone,
+      type: UserType.fromApiValue(type),
       active: active ?? true,
     );
   }

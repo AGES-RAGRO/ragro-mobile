@@ -9,6 +9,7 @@ import 'package:ragro_mobile/features/auth/presentation/bloc/auth_state.dart';
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
   AuthBloc(this._getCurrentUser, this._logout) : super(const AuthInitial()) {
     on<AuthStarted>(_onStarted);
+    on<AuthLoggedIn>((event, emit) => emit(AuthAuthenticated(event.user)));
     on<AuthLogoutRequested>(_onLogout);
   }
 

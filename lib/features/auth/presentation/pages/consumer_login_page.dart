@@ -26,7 +26,7 @@ class ConsumerLoginPage extends StatelessWidget {
       child: BlocListener<LoginBloc, LoginState>(
         listener: (context, state) {
           if (state is LoginSuccess) {
-            context.read<AuthBloc>().add(const AuthStarted());
+            context.read<AuthBloc>().add(AuthLoggedIn(state.user));
           } else if (state is LoginFailure) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
