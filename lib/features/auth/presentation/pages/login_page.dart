@@ -11,6 +11,7 @@ import 'package:ragro_mobile/core/theme/app_colors.dart';
 import 'package:ragro_mobile/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:ragro_mobile/features/auth/presentation/bloc/auth_event.dart';
 import 'package:ragro_mobile/features/auth/presentation/bloc/login_bloc.dart';
+
 import 'package:ragro_mobile/features/auth/presentation/bloc/login_state.dart';
 import 'package:ragro_mobile/features/auth/presentation/widgets/login_form.dart';
 import 'package:ragro_mobile/features/auth/presentation/widgets/ragro_logo.dart';
@@ -25,7 +26,7 @@ class LoginPage extends StatelessWidget {
       child: BlocListener<LoginBloc, LoginState>(
         listener: (context, state) {
           if (state is LoginSuccess) {
-            context.read<AuthBloc>().add(AuthLoggedIn(state.user));
+            getIt<AuthBloc>().add(AuthLoggedIn(state.user));
           } else if (state is LoginFailure) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
@@ -36,6 +37,7 @@ class LoginPage extends StatelessWidget {
           }
         },
         child: Scaffold(
+          backgroundColor: AppColors.white,
           body: SafeArea(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24),
