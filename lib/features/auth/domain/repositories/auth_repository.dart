@@ -1,11 +1,9 @@
 import 'package:ragro_mobile/features/auth/domain/entities/user.dart';
-import 'package:ragro_mobile/features/auth/domain/entities/user_type.dart';
 
 abstract class AuthRepository {
   Future<({User user, String token})> loginUser({
     required String email,
     required String password,
-    required UserType userType,
   });
 
   Future<User> registerConsumer({

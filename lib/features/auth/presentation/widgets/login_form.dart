@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ragro_mobile/core/theme/app_colors.dart';
 import 'package:ragro_mobile/core/theme/app_text_styles.dart';
-import 'package:ragro_mobile/features/auth/domain/entities/user_type.dart';
 import 'package:ragro_mobile/features/auth/presentation/bloc/login_bloc.dart';
 import 'package:ragro_mobile/features/auth/presentation/bloc/login_event.dart';
 import 'package:ragro_mobile/features/auth/presentation/bloc/login_state.dart';
@@ -16,14 +15,12 @@ import 'package:ragro_mobile/features/auth/presentation/widgets/auth_text_field.
 /// Requires [LoginBloc] to be available above this widget in the tree.
 class LoginForm extends StatefulWidget {
   const LoginForm({
-    required this.userType,
     super.key,
     this.onRegisterTap,
     this.onForgotPasswordTap,
     this.onLoginFailure,
   });
 
-  final UserType userType;
   final VoidCallback? onRegisterTap;
   final VoidCallback? onForgotPasswordTap;
   final ValueChanged<String>? onLoginFailure;
@@ -55,7 +52,6 @@ class _LoginFormState extends State<LoginForm> {
             LoginSubmitted(
               email: _emailController.text.trim(),
               password: _passwordController.text,
-              userType: widget.userType,
             ),
           );
     }

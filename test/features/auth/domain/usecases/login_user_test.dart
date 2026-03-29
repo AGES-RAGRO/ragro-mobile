@@ -12,10 +12,6 @@ void main() {
   late LoginUser loginUser;
   late MockAuthRepository mockRepo;
 
-  setUpAll(() {
-    registerFallbackValue(UserType.consumer);
-  });
-
   setUp(() {
     mockRepo = MockAuthRepository();
     loginUser = LoginUser(mockRepo);
@@ -33,13 +29,11 @@ void main() {
     when(() => mockRepo.loginUser(
           email: any(named: 'email'),
           password: any(named: 'password'),
-          userType: any(named: 'userType'),
         )).thenAnswer((_) async => (user: tUser, token: 'tok'));
 
     final result = await loginUser(
       email: 'joao@test.com',
       password: '123456',
-      userType: UserType.consumer,
     );
 
     expect(result.user, tUser);
@@ -47,7 +41,6 @@ void main() {
     verify(() => mockRepo.loginUser(
           email: 'joao@test.com',
           password: '123456',
-          userType: UserType.consumer,
         )).called(1);
   });
 
@@ -55,7 +48,6 @@ void main() {
     when(() => mockRepo.loginUser(
           email: any(named: 'email'),
           password: any(named: 'password'),
-          userType: any(named: 'userType'),
         )).thenThrow(
       const UnauthorizedException(),
     );
@@ -64,7 +56,6 @@ void main() {
       () => loginUser(
         email: 'j@t.com',
         password: 'wrong',
-        userType: UserType.consumer,
       ),
       throwsA(isA<UnauthorizedException>()),
     );

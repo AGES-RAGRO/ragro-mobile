@@ -19,12 +19,10 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<({User user, String token})> loginUser({
     required String email,
     required String password,
-    required UserType userType,
   }) async {
     final response = await _remote.loginUser(
       email: email,
       password: password,
-      userType: userType,
     );
     try {
       await _local.saveSession(
@@ -78,6 +76,26 @@ class AuthRepositoryImpl implements AuthRepository {
 
   @override
   Future<User?> getCurrentUser() async {
+    // DEMO_MODE: bypass auth — used for Playwright visual testing only.
+    // Run with: flutter run -d chrome --dart-define=DEMO_MODE=true
+    const demoMode = bool.fromEnvironment('DEMO_MODE');
+    const demoRole = String.fromEnvironment('DEMO_ROLE', defaultValue: 'producer');
+    if (demoMode) {
+      final (id, name, email) = switch (demoRole) {
+        'consumer' => ('demo_consumer_001', 'Ricardo Aguiar (Demo)', 'consumer@ragro.com.br'),
+        'admin'    => ('demo_admin_001',    'Admin RAGRO (Demo)',    'admin@ragro.com.br'),
+        _          => ('demo_producer_001', 'João Silva (Demo)',     'produtor@ragro.com.br'),
+      };
+      return UserModel(
+        id: id,
+        name: name,
+        email: email,
+        phone: '(51) 99999-0000',
+        type: UserType.fromApiValue(demoRole),
+        active: true,
+      );
+    }
+
     final token  = _local.getToken();
     if (token == null) return null;
     final id     = _local.getUserId();

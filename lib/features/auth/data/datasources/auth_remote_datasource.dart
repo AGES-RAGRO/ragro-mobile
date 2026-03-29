@@ -12,25 +12,75 @@ class AuthRemoteDataSource {
   const AuthRemoteDataSource(this._apiClient);
   final ApiClient _apiClient;
 
+  /// Authenticates a user by email and password.
+  ///
+  /// === REAL IMPLEMENTATION (uncomment when backend is ready) ===
+  ///
+  /// Future<LoginResponseModel> loginUser({
+  ///   required String email,
+  ///   required String password,
+  /// }) async {
+  ///   try {
+  ///     final response = await _apiClient.dio.post<Map<String, dynamic>>(
+  ///       ApiEndpoints.login,
+  ///       data: {'email': email, 'password': password},
+  ///     );
+  ///     return LoginResponseModel.fromJson(response.data!);
+  ///   } on DioException catch (e) {
+  ///     if (e.response?.statusCode == 401) {
+  ///       throw const InvalidCredentialsApiException();
+  ///     }
+  ///     throw e.error as ApiException? ?? const UnknownApiException();
+  ///   }
+  /// }
+  ///
+  /// === END REAL IMPLEMENTATION ===
+  ///
+  /// MOCK TEMPORÁRIO — remover quando backend estiver conectado:
   Future<LoginResponseModel> loginUser({
     required String email,
     required String password,
-    required UserType userType,
   }) async {
-    final endpoint = switch (userType) {
-      UserType.consumer => ApiEndpoints.loginConsumer,
-      UserType.producer => ApiEndpoints.loginProducer,
-      UserType.admin    => ApiEndpoints.loginAdmin,
+    await Future.delayed(const Duration(milliseconds: 600));
+
+    const validPassword = '123456';
+
+    final mockUsers = <String, UserModel>{
+      'consumer@ragro.com.br': UserModel(
+        id: 'user_c001',
+        name: 'Ricardo Aguiar',
+        email: 'consumer@ragro.com.br',
+        phone: '(51) 99999-0001',
+        type: UserType.consumer,
+        active: true,
+      ),
+      'produtor@ragro.com.br': UserModel(
+        id: 'user_p001',
+        name: 'João Silva',
+        email: 'produtor@ragro.com.br',
+        phone: '(51) 99999-0002',
+        type: UserType.producer,
+        active: true,
+      ),
+      'admin@ragro.com.br': UserModel(
+        id: 'user_a001',
+        name: 'Admin RAGRO',
+        email: 'admin@ragro.com.br',
+        phone: '(51) 99999-0000',
+        type: UserType.admin,
+        active: true,
+      ),
     };
-    try {
-      final response = await _apiClient.dio.post<Map<String, dynamic>>(
-        endpoint,
-        data: {'email': email, 'password': password},
-      );
-      return LoginResponseModel.fromJson(response.data!);
-    } on DioException catch (e) {
-      throw e.error as ApiException? ?? const UnknownApiException();
+
+    final user = mockUsers[email.toLowerCase()];
+    if (user == null || password != validPassword) {
+      throw const InvalidCredentialsApiException();
     }
+
+    return LoginResponseModel(
+      token: 'mock_token_${user.type.name}_${DateTime.now().millisecondsSinceEpoch}',
+      user: user,
+    );
   }
 
   Future<UserModel> registerConsumer({

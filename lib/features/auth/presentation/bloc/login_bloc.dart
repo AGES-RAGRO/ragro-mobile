@@ -22,7 +22,6 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
       final result = await _loginUser(
         email: event.email,
         password: event.password,
-        userType: event.userType,
       );
       emit(LoginSuccess(result.user));
     } on ApiException catch (e) {

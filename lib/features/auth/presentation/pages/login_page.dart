@@ -1,13 +1,13 @@
-// Screen: Admin Login
-// User Story: US-09 — Admin access
+// Screen: Login
+// User Story: US-01 — Consumer Login / US-08 — Producer Login
 // Epic: EPIC 1 — Authentication
 // Routes: POST /auth/login
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:ragro_mobile/core/di/injection.dart';
 import 'package:ragro_mobile/core/theme/app_colors.dart';
-import 'package:ragro_mobile/features/auth/domain/entities/user_type.dart';
 import 'package:ragro_mobile/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:ragro_mobile/features/auth/presentation/bloc/auth_event.dart';
 import 'package:ragro_mobile/features/auth/presentation/bloc/login_bloc.dart';
@@ -15,8 +15,8 @@ import 'package:ragro_mobile/features/auth/presentation/bloc/login_state.dart';
 import 'package:ragro_mobile/features/auth/presentation/widgets/login_form.dart';
 import 'package:ragro_mobile/features/auth/presentation/widgets/ragro_logo.dart';
 
-class AdminLoginPage extends StatelessWidget {
-  const AdminLoginPage({super.key});
+class LoginPage extends StatelessWidget {
+  const LoginPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -35,17 +35,19 @@ class AdminLoginPage extends StatelessWidget {
             );
           }
         },
-        child: const Scaffold(
+        child: Scaffold(
           body: SafeArea(
             child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: 24),
+              padding: const EdgeInsets.symmetric(horizontal: 24),
               child: Column(
                 children: [
-                  Spacer(flex: 2),
-                  RagroLogo(),
-                  Spacer(flex: 2),
-                  LoginForm(userType: UserType.admin),
-                  Spacer(),
+                  const Spacer(flex: 2),
+                  const RagroLogo(),
+                  const Spacer(flex: 2),
+                  LoginForm(
+                    onRegisterTap: () => context.push('/register'),
+                  ),
+                  const Spacer(),
                 ],
               ),
             ),

@@ -35,3 +35,7 @@ class ServerException extends ApiException {
 class UnknownApiException extends ApiException {
   const UnknownApiException([super.message = 'Erro desconhecido']);
 }
+
+class InvalidCredentialsApiException extends ApiException {
+  const InvalidCredentialsApiException([super.message = 'E-mail ou senha inválidos']);
+}

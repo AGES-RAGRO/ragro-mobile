@@ -15,8 +15,6 @@ void main() {
   late LoginBloc bloc;
   late MockLoginUser mockLoginUser;
 
-  setUpAll(() => registerFallbackValue(UserType.consumer));
-
   setUp(() {
     mockLoginUser = MockLoginUser();
     bloc = LoginBloc(mockLoginUser);
@@ -38,14 +36,12 @@ void main() {
       when(() => mockLoginUser(
             email: any(named: 'email'),
             password: any(named: 'password'),
-            userType: any(named: 'userType'),
           )).thenAnswer((_) async => (user: tUser, token: 'tok'));
       return bloc;
     },
     act: (b) => b.add(const LoginSubmitted(
       email: 'j@t.com',
       password: '123',
-      userType: UserType.consumer,
     )),
     expect: () => [const LoginLoading(), const LoginSuccess(tUser)],
   );
@@ -56,14 +52,12 @@ void main() {
       when(() => mockLoginUser(
             email: any(named: 'email'),
             password: any(named: 'password'),
-            userType: any(named: 'userType'),
           )).thenThrow(const UnauthorizedException());
       return bloc;
     },
     act: (b) => b.add(const LoginSubmitted(
       email: 'j@t.com',
       password: 'wrong',
-      userType: UserType.consumer,
     )),
     expect: () => [
       const LoginLoading(),
