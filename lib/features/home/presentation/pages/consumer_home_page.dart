@@ -33,7 +33,7 @@ class _ConsumerHomeView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.cream,
+      backgroundColor: AppColors.white,
       body: SafeArea(
         child: BlocBuilder<HomeBloc, HomeState>(
           builder: (context, state) {
@@ -70,6 +70,7 @@ class _ConsumerHomeView extends StatelessWidget {
                       SliverToBoxAdapter(
                         child: ProductsGrid(
                           products: products,
+                          onProductTap: (p) => context.push('/consumer/home/product/${p.id}'),
                           onAddToCart: (_) {
                             // TODO: navigate to cart / add to cart
                           },

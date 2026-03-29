@@ -209,6 +209,7 @@ class _ProducerPublicProfileView extends StatelessWidget {
                                   itemCount: producer.products.length,
                                   itemBuilder: (_, i) => HomeProductCard(
                                     product: producer.products[i],
+                                    onTap: () => context.push('/consumer/home/product/${producer.products[i].id}'),
                                     onAddToCart: () {},
                                   ),
                                 ),

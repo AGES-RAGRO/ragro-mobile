@@ -109,7 +109,9 @@ class _ConsumerRegisterViewState extends State<_ConsumerRegisterView> {
         }
       },
       child: Scaffold(
+        backgroundColor: AppColors.white,
         appBar: AppBar(
+          backgroundColor: AppColors.white,
           title: const Text('Criar conta'),
           leading: const BackButton(),
         ),

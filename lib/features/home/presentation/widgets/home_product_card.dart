@@ -6,15 +6,19 @@ class HomeProductCard extends StatelessWidget {
   const HomeProductCard({
     super.key,
     required this.product,
+    required this.onTap,
     required this.onAddToCart,
   });
 
   final HomeProduct product;
+  final VoidCallback onTap;
   final VoidCallback onAddToCart;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
       decoration: BoxDecoration(
         color: AppColors.inputBackground,
         borderRadius: BorderRadius.circular(16),
@@ -118,6 +122,7 @@ class HomeProductCard extends StatelessWidget {
             ),
           ),
         ],
+      ),
       ),
     );
   }
