@@ -97,6 +97,8 @@ class HomeProductCard extends StatelessWidget {
                           fontSize: 16,
                           color: AppColors.black,
                         ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
                     GestureDetector(

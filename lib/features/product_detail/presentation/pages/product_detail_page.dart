@@ -303,22 +303,25 @@ class _ProductDetailView extends StatelessWidget {
                               color: AppColors.darkGreen,
                               borderRadius: BorderRadius.circular(24),
                             ),
-                            child: const Row(
+                            child: Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Icon(
+                                const Icon(
                                   Icons.shopping_basket_outlined,
                                   color: AppColors.white,
                                   size: 20,
                                 ),
-                                SizedBox(width: 8),
-                                Text(
-                                  'Adicionar ao Carrinho',
-                                  style: TextStyle(
-                                    fontFamily: 'Figtree',
-                                    fontWeight: FontWeight.w700,
-                                    fontSize: 16,
-                                    color: AppColors.white,
+                                const SizedBox(width: 8),
+                                Flexible(
+                                  child: const Text(
+                                    'Adicionar ao Carrinho',
+                                    style: TextStyle(
+                                      fontFamily: 'Figtree',
+                                      fontWeight: FontWeight.w700,
+                                      fontSize: 16,
+                                      color: AppColors.white,
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
                                   ),
                                 ),
                               ],
