@@ -45,3 +45,20 @@ app.*.map.json
 /android/app/release
 
 *superpowers
+
+# VS Code workspace settings
+.vscode/
+
+# Playwright MCP
+CLAUDE.md
+.playwright-mcp/
+playwright/
+
+# Playwright generated artifacts
+playwright/node_modules/
+playwright/test-results/
+playwright/screenshots/
+
+# Visual regression / ad-hoc test screenshots
+playwright-live-*.png
+test-*.png
