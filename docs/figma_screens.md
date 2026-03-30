@@ -1,7 +1,6 @@
 # RAGRO — Figma Screens Map
 
 Figma File: [RAGRO](https://www.figma.com/design/8mGABAdTXf6ORLyiHx7rub/RAGRO)
-File Key: `8mGABAdTXf6ORLyiHx7rub`
 
 Last updated: 2026-03-26
 
