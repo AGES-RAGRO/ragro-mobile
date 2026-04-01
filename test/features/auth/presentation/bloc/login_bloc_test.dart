@@ -1,0 +1,67 @@
+import 'package:bloc_test/bloc_test.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:mocktail/mocktail.dart';
+import 'package:ragro_mobile/core/network/api_exception.dart';
+import 'package:ragro_mobile/features/auth/domain/entities/user.dart';
+import 'package:ragro_mobile/features/auth/domain/entities/user_type.dart';
+import 'package:ragro_mobile/features/auth/domain/usecases/login_user.dart';
+import 'package:ragro_mobile/features/auth/presentation/bloc/login_bloc.dart';
+import 'package:ragro_mobile/features/auth/presentation/bloc/login_event.dart';
+import 'package:ragro_mobile/features/auth/presentation/bloc/login_state.dart';
+
+class MockLoginUser extends Mock implements LoginUser {}
+
+void main() {
+  late LoginBloc bloc;
+  late MockLoginUser mockLoginUser;
+
+  setUp(() {
+    mockLoginUser = MockLoginUser();
+    bloc = LoginBloc(mockLoginUser);
+  });
+
+  tearDown(() => bloc.close());
+
+  const tUser = User(
+    id: '1',
+    name: 'João',
+    email: 'j@t.com',
+    type: UserType.consumer,
+    active: true,
+  );
+
+  blocTest<LoginBloc, LoginState>(
+    'emits [Loading, Success] on successful login',
+    build: () {
+      when(() => mockLoginUser(
+            email: any(named: 'email'),
+            password: any(named: 'password'),
+          )).thenAnswer((_) async => (user: tUser, token: 'tok'));
+      return bloc;
+    },
+    act: (b) => b.add(const LoginSubmitted(
+      email: 'j@t.com',
+      password: '123',
+    )),
+    expect: () => [const LoginLoading(), const LoginSuccess(tUser)],
+  );
+
+  blocTest<LoginBloc, LoginState>(
+    'emits [Loading, Failure] on UnauthorizedException',
+    build: () {
+      when(() => mockLoginUser(
+            email: any(named: 'email'),
+            password: any(named: 'password'),
+          )).thenThrow(const UnauthorizedException());
+      return bloc;
+    },
+    act: (b) => b.add(const LoginSubmitted(
+      email: 'j@t.com',
+      password: 'wrong',
+    )),
+    expect: () => [
+      const LoginLoading(),
+      const LoginFailure('Credenciais inválidas'),
+    ],
+  );
+}

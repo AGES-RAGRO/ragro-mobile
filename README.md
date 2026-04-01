@@ -1,223 +1,145 @@
-# RAGRO - Mobile
+# RAGRO — Mobile
 
-App mobile do RAGRO, construído com Flutter usando Clean Architecture + BLoC.
+Flutter app for RAGRO, a platform connecting small family farmers with urban consumers.
 
-Para entender a arquitetura do projeto em detalhes, leia o [Guia de Arquitetura](docs/ARCHITECTURE.md).
-
----
-
-## Pré-requisitos
-
-Antes de começar, instale as seguintes ferramentas:
-
-| Ferramenta | Versão mínima | Instalação |
-|------------|---------------|------------|
-| Flutter | 3.41+ | [flutter.dev/docs/get-started/install](https://flutter.dev/docs/get-started/install) |
-| Dart | 3.11+ | Incluso no Flutter |
-| Lefthook | 2.1+ | `scoop install lefthook` (Windows) / `brew install lefthook` (macOS) / `snap install lefthook` (Linux) |
+Built with **Clean Architecture + BLoC**.
 
 ---
 
-## Setup do projeto
+## Tech Stack
+
+| Package | Purpose |
+|---------|---------|
+| `flutter_bloc` | State management (BLoC pattern) |
+| `get_it` + `injectable` | Automatic dependency injection |
+| `dio` | HTTP client |
+| `go_router` | Navigation and routing |
+| `equatable` | Value-based object comparison |
+| `shared_preferences` | Local storage (token, settings) |
+| `bloc_test` + `mocktail` | BLoC unit tests and mocks |
+
+---
+
+## Documentation
+
+| Document | Description |
+|----------|-------------|
+| [`docs/architecture/01-overview.md`](docs/architecture/01-overview.md) | Clean Architecture + BLoC concept and request flow |
+| [`docs/architecture/02-folder-structure.md`](docs/architecture/02-folder-structure.md) | Annotated folder tree for all features |
+| [`docs/architecture/03-layers.md`](docs/architecture/03-layers.md) | Presentation / Domain / Data layers with code examples |
+| [`docs/architecture/04-state-management.md`](docs/architecture/04-state-management.md) | BLoC: events, states, BlocProvider/Builder/Listener |
+| [`docs/architecture/05-dependency-injection.md`](docs/architecture/05-dependency-injection.md) | get_it + injectable annotations and how to regenerate |
+| [`docs/architecture/06-navigation.md`](docs/architecture/06-navigation.md) | GoRouter: auth guard, shell routes, route table |
+| [`docs/architecture/07-new-feature.md`](docs/architecture/07-new-feature.md) | Step-by-step guide for adding a new feature |
+| [`docs/api/overview.md`](docs/api/overview.md) | Base URL, authentication, demo credentials |
+| [`docs/api/endpoints.md`](docs/api/endpoints.md) | All endpoints by domain |
+| [`docs/conventions.md`](docs/conventions.md) | Naming conventions and layer boundary rules |
+| [`docs/backlog_ragro.md`](docs/backlog_ragro.md) | User stories and acceptance criteria |
+| [`docs/database.md`](docs/database.md) | PostgreSQL schema and ER diagram |
+| [`docs/figma_screens.md`](docs/figma_screens.md) | Figma node IDs and screen-to-story mapping |
+
+---
+
+## Running the Project
+
+### Prerequisites
+
+| Tool | Min version |
+|------|-------------|
+| Flutter | 3.41+ |
+| Dart | 3.11+ (bundled with Flutter) |
+
+### Setup
 
 ```bash
-# 1. Clone o repositório
-git clone <url-do-repo>
-cd ragro-mobile
-
-# 2. Instale as dependências do Flutter
+# Install Flutter dependencies
 flutter pub get
 
-# 3. Instale os git hooks (lefthook)
-lefthook install
-
-# 4. Gere o código de injeção de dependência
+# Generate dependency injection code
 dart run build_runner build --delete-conflicting-outputs
 
-# 5. Rode o app
-flutter run
+# Run the app (Chrome)
+flutter run -d chrome
 ```
 
----
-
-## Rodando no celular (Android)
-
-### 1. Ative o Modo Desenvolvedor no celular
-
-1. Vá em **Configurações > Sobre o telefone**
-2. Toque **7 vezes** em **Número da versão** (ou **Versão MIUI** em Xiaomi)
-3. Uma mensagem "Você agora é um desenvolvedor" vai aparecer
-
-### 2. Ative a Depuração USB
-
-1. Vá em **Configurações > Opções do desenvolvedor** (ou **Configurações adicionais > Opções do desenvolvedor** em Xiaomi)
-2. Ative **Depuração USB**
-3. Se disponível, ative também **Instalar via USB**
-
-### 3. Conecte o celular via USB
-
-1. Conecte o cabo USB no computador
-2. No celular, aceite o popup **"Permitir depuração USB?"** e marque **"Sempre permitir"**
-
-### 4. Verifique e rode
+### Demo mode (skip login)
 
 ```bash
-# Listar dispositivos conectados
+# As consumer
+flutter run -d chrome --dart-define=DEMO_MODE=true --dart-define=DEMO_ROLE=consumer
+
+# As producer
+flutter run -d chrome --dart-define=DEMO_MODE=true --dart-define=DEMO_ROLE=producer
+
+# As admin
+flutter run -d chrome --dart-define=DEMO_MODE=true --dart-define=DEMO_ROLE=admin
+```
+
+### Login credentials (mock)
+
+| Role | Email | Password |
+|------|-------|----------|
+| Consumer | `consumer@ragro.com.br` | `123456` |
+| Producer | `produtor@ragro.com.br` | `123456` |
+| Admin | `admin@ragro.com.br` | `123456` |
+
+### Run on Android
+
+```bash
+# List connected devices
 flutter devices
 
-# Rodar no celular (use o ID do seu dispositivo)
+# Run on device
 flutter run -d <device-id>
-
-# Exemplo:
-flutter run -d 60867a81
 ```
-
-> Se o celular não aparecer, rode `flutter doctor` para diagnosticar problemas.
 
 ---
 
-## Conventional Commits
+## Tests
 
-O projeto usa **Conventional Commits** para padronizar as mensagens de commit. O Lefthook valida automaticamente antes de cada commit.
-
-### Formato
-
-```
-<tipo>(<escopo>): <descrição>
-```
-
-### Tipos permitidos
-
-| Tipo | Quando usar |
-|------|-------------|
-| `feat` | Nova funcionalidade |
-| `fix` | Correção de bug |
-| `docs` | Alteração em documentação |
-| `style` | Formatação, ponto e vírgula, etc. (sem mudança de lógica) |
-| `refactor` | Refatoração de código (sem feat nem fix) |
-| `test` | Adição ou correção de testes |
-| `chore` | Tarefas de manutenção (configs, dependências, etc.) |
-| `ci` | Mudanças em CI/CD |
-| `build` | Mudanças no sistema de build |
-| `perf` | Melhoria de performance |
-
-### Exemplos
+### Unit tests
 
 ```bash
-feat(auth): adiciona tela de login
-fix(dashboard): corrige loading infinito ao buscar dados
-docs: atualiza README com instruções de setup
-chore: atualiza dependências do Flutter
-refactor(profile)!: altera estrutura de dados do usuário  # breaking change
+flutter test
+```
+
+### Visual regression tests (Playwright)
+
+Requires the Flutter app running on `http://localhost:8080`.
+
+```bash
+# 1. Start the app
+flutter run -d chrome --dart-define=DEMO_MODE=true --dart-define=DEMO_ROLE=consumer
+
+# 2. Install dependencies (first time only)
+cd playwright && npm install
+
+# 3. Run all tests
+npm test
+
+# Run by role
+npm run test:consumer
+npm run test:producer
+npm run test:admin
+
+# View HTML report
+npm run report
 ```
 
 ---
 
-## Git Hooks (Lefthook)
-
-O Lefthook roda automaticamente em cada commit:
-
-| Hook | Comando | O que faz |
-|------|---------|-----------|
-| `pre-commit` | `dart format` | Bloqueia se o código não estiver formatado |
-| `pre-commit` | `dart analyze` | Bloqueia se houver warnings ou erros de lint |
-| `commit-msg` | Regex check | Bloqueia se a mensagem não seguir Conventional Commits |
-
-Se o commit for bloqueado, corrija o problema e tente novamente.
-
----
-
-## Linting
-
-Usamos o pacote **very_good_analysis** com regras rigorosas de lint. A configuração está em `analysis_options.yaml`.
+## Useful Commands
 
 ```bash
-# Rodar análise manualmente
+# Analyze code
 dart analyze
 
-# Formatar código
+# Format code
 dart format .
-```
 
----
-
-## EditorConfig
-
-O projeto inclui um `.editorconfig` que padroniza:
-
-- **Indentação:** 2 espaços (padrão Dart/Flutter)
-- **Encoding:** UTF-8
-- **Line endings:** LF (mesmo no Windows)
-- **Trailing whitespace:** removido automaticamente
-
-> No VS Code, instale a extensão [EditorConfig for VS Code](https://marketplace.visualstudio.com/items?itemName=EditorConfig.EditorConfig). No Android Studio/IntelliJ já funciona nativamente.
-
----
-
-## Comandos úteis
-
-```bash
-# Instalar dependências
-flutter pub get
-
-# Gerar código de DI
+# Regenerate DI code
 dart run build_runner build --delete-conflicting-outputs
 
-# Rodar o app
-flutter run
-
-# Rodar testes
-flutter test
-
-# Formatar código
-dart format .
-
-# Analisar código
-dart analyze
+# Build for web
+flutter build web --no-tree-shake-icons
 ```
-
----
-
-## Stack tecnológica
-
-| Pacote | Função |
-|--------|--------|
-| `flutter_bloc` | Gerenciamento de estado (BLoC) |
-| `get_it` + `injectable` | Injeção de dependência automática |
-| `dio` | Cliente HTTP |
-| `go_router` | Navegação entre telas |
-| `equatable` | Comparação de objetos por valor |
-| `shared_preferences` | Armazenamento local (token, configs) |
-
-### Dev/Test
-
-| Pacote | Função |
-|--------|--------|
-| `very_good_analysis` | Regras de lint rigorosas |
-| `injectable_generator` + `build_runner` | Geração de código (DI) |
-| `bloc_test` | Testes de BLoC |
-| `mocktail` | Mocks para testes |
-
----
-
-## Estrutura de pastas
-
-```
-lib/
-├── main.dart
-├── app.dart
-├── core/
-│   ├── di/              ← Injeção de dependência
-│   ├── network/         ← Cliente HTTP, exceções
-│   ├── theme/           ← Cores, fontes, tema visual
-│   └── router/          ← Navegação entre telas
-├── features/            ← Cada feature do app
-│   └── <feature>/
-│       ├── data/        ← DataSources, Models, Repository impl
-│       ├── domain/      ← Entities, UseCases, Repository contrato
-│       └── presentation/← BLoC, Pages, Widgets
-└── shared/
-    └── widgets/         ← Widgets reutilizáveis
-```
-
-Para detalhes completos sobre a arquitetura, camadas e exemplos de código, leia o [Guia de Arquitetura](docs/ARCHITECTURE.md).

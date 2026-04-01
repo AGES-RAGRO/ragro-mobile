@@ -1,0 +1,23 @@
+import 'package:injectable/injectable.dart' hide Order;
+import 'package:ragro_mobile/features/orders/data/datasources/orders_remote_datasource.dart';
+import 'package:ragro_mobile/features/orders/domain/entities/order.dart';
+import 'package:ragro_mobile/features/orders/domain/entities/order_status.dart';
+import 'package:ragro_mobile/features/orders/domain/repositories/orders_repository.dart';
+
+@LazySingleton(as: OrdersRepository)
+class OrdersRepositoryImpl implements OrdersRepository {
+  const OrdersRepositoryImpl(this._datasource);
+  final OrdersRemoteDatasource _datasource;
+
+  @override
+  Future<List<Order>> getOrders({OrderStatus? status}) => _datasource.getOrders(status: status);
+
+  @override
+  Future<Order> getOrderById(String id) => _datasource.getOrderById(id);
+
+  @override
+  Future<Order> confirmOrder(String cartId) => _datasource.confirmOrder(cartId);
+
+  @override
+  Future<void> rateProducer(String orderId, int rating) => _datasource.rateProducer(orderId, rating);
+}
