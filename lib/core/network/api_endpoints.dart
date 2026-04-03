@@ -1,13 +1,14 @@
 // lib/core/network/api_endpoints.dart
 abstract final class ApiEndpoints {
-  static const String _base = 'https://api.ragro.com.br';
+  static const String _base = String.fromEnvironment(
+    'API_BASE_URL',
+    defaultValue: 'http://localhost:8080',
+  );
 
   // Auth
-  static const String login         = '$_base/auth/login';
-  // static const String loginConsumer = '$_base/auth/login/consumer';  // legacy — replaced by unified login
-  // static const String loginProducer = '$_base/auth/login/producer';  // legacy — replaced by unified login
-  // static const String loginAdmin    = '$_base/auth/login/admin';     // legacy — replaced by unified login
-  static const String registerConsumer = '$_base/auth/register/consumer';
+  static const String authConfig       = '$_base/auth/config';
+  static const String authSession      = '$_base/auth/session';
+  static const String registerCustomer = '$_base/auth/register/customer';
 
   // Consumers
   static const String consumers        = '$_base/consumers';

@@ -12,23 +12,51 @@ All requests are made over HTTPS. There is no API version in the URL — version
 
 ## Authentication
 
-The API uses **Bearer Token** (JWT) authentication.
+The API uses **Keycloak** as its identity provider. The backend does not have a login endpoint — the app authenticates directly with Keycloak and uses the resulting JWT for all backend calls.
 
-After a successful login (`POST /auth/login`), the server returns a `token`. This token must be included in the `Authorization` header of all subsequent requests:
+### Login Flow
+
+1. **Get configuration** — `GET /auth/config` (public, no token required)
+   Returns the Keycloak token URL, client ID, and realm.
+
+2. **Authenticate with Keycloak** — `POST {tokenUrl}` (direct to Keycloak)
+   Sends email and password as `application/x-www-form-urlencoded`. Returns `access_token` and `refresh_token`.
+
+3. **Get user session** — `GET /auth/session` (requires Bearer token)
+   Returns the authenticated user's data from the database: `id`, `name`, `email`, `type`, `active`.
+
+After login, the `access_token` must be included in the `Authorization` header of all subsequent requests:
 
 ```
-Authorization: Bearer <token>
+Authorization: Bearer <access_token>
 ```
 
-The project's `ApiClient` manages this automatically via `setAuthToken()` and adds the header through a Dio interceptor. Once the token is saved locally (SharedPreferences), it is restored and configured in the `ApiClient` when the app starts.
+The project's `ApiClient` manages this automatically via `setAuthToken()`.
 
-**Token duration**: expiration is managed by the backend. When the token expires, the API will return `401 Unauthorized` and the app will redirect the user to login.
+### Token Refresh
+
+The `access_token` has a short lifespan (default: 5 minutes). When it expires, the app should attempt to refresh it using the `refresh_token` before redirecting to login:
+
+```
+POST {tokenUrl}
+Content-Type: application/x-www-form-urlencoded
+
+grant_type=refresh_token
+client_id={clientId}
+refresh_token={savedRefreshToken}
+```
+
+If the refresh succeeds, update both tokens locally. If it fails (refresh token expired), clear the session and redirect to login.
+
+### Logout
+
+Clear the tokens from local storage and remove the `Authorization` header from `ApiClient`. Optionally, call Keycloak's logout endpoint to invalidate the session server-side.
 
 ---
 
 ## Error Format
 
-When a request fails, the API returns a JSON object with the `error` key:
+When a request fails, the API returns a JSON object:
 
 ```json
 {
@@ -41,11 +69,11 @@ Common HTTP errors:
 | Code | Meaning | App Handling |
 |------|---------|--------------|
 | `400` | Bad Request — invalid data in the body | `UnknownApiException` |
-| `401` | Unauthorized — token missing or expired | `InvalidCredentialsApiException` |
+| `401` | Unauthorized — token missing or expired | `UnauthorizedException` |
 | `403` | Forbidden — no permission for the resource | Redirect to login |
-| `404` | Not Found — resource does not exist | `UnknownApiException` |
-| `422` | Unprocessable Entity — validation failed | Message shown to user |
-| `500` | Internal Server Error — backend error | `UnknownApiException` |
+| `404` | Not Found — resource does not exist | `NotFoundException` |
+| `409` | Conflict — duplicate resource | `ConflictException` |
+| `500` | Internal Server Error — backend error | `ServerException` |
 
 ---
 
@@ -68,20 +96,6 @@ When `DEMO_MODE=true`, `getCurrentUser()` returns a mocked user without checking
 
 ---
 
-## Demo Credentials
-
-For normal login (via form) during development, the following mocked credentials are available in `AuthRemoteDataSource`:
-
-| Role | Email | Password |
-|------|-------|----------|
-| Consumer | consumer@ragro.com.br | 123456 |
-| Producer | produtor@ragro.com.br | 123456 |
-| Admin | admin@ragro.com.br | 123456 |
-
-> These credentials only work with the current mock in `AuthRemoteDataSource.loginUser()`. When the real backend is connected, replace the mock with the real implementation (the code is commented in the file).
-
----
-
 ## Pagination
 
 List endpoints support pagination parameters via query string:
@@ -101,8 +115,8 @@ GET /producers?page=1&limit=20
 
 `ApiClient` is the Dio wrapper used in all remote datasources. It:
 
-1. Configures timeouts (connection: 15s, receive: 30s)
-2. Automatically adds the `Authorization: Bearer <token>` header via interceptor
+1. Configures timeouts (10s for connection, receive, and send)
+2. Automatically adds the `Authorization: Bearer <token>` header
 3. Throws typed `ApiException` instances on HTTP errors
 
 ```dart

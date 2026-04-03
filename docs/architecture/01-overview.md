@@ -60,7 +60,7 @@ The waiter (BLoC) moves between the dining room and the kitchen, but the custome
 │      │  await _remote.loginUser(...)                            │
 │      ▼                                                          │
 │   RemoteDataSource (AuthRemoteDataSource)                       │
-│      │  HTTP POST /auth/login → JSON response                   │
+│      │  GET /auth/config → POST Keycloak → GET /auth/session    │
 │      ▼                                                          │
 │   Model (UserModel.fromJson(json))                              │
 │      │  parsing JSON → typed object                             │

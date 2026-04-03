@@ -29,9 +29,11 @@ lib/
 │   │   ├── data/
 │   │   │   ├── datasources/
 │   │   │   │   ├── auth_local_datasource.dart   # Reads/saves session in SharedPreferences
-│   │   │   │   └── auth_remote_datasource.dart  # Calls POST /auth/login and /auth/register/consumer
+│   │   │   │   └── auth_remote_datasource.dart  # Keycloak login flow (config → token → session) and registration
 │   │   │   ├── models/
-│   │   │   │   ├── login_response_model.dart    # Login response model (token + user)
+│   │   │   │   ├── auth_config_model.dart       # GET /auth/config response
+│   │   │   │   ├── keycloak_token_model.dart    # Keycloak token response
+│   │   │   │   ├── login_response_model.dart    # Assembled login result (tokens + user)
 │   │   │   │   └── user_model.dart              # Extends User, adds fromJson
 │   │   │   └── repositories/
 │   │   │       └── auth_repository_impl.dart    # Implements AuthRepository

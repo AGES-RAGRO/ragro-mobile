@@ -87,7 +87,7 @@ Every Page must begin with a traceability comment that links it back to the back
 // Screen: Login
 // User Story: US-01 — Log in to the platform
 // Epic: EPIC 1 — Authentication
-// Routes: POST /auth/login
+// Routes: GET /auth/config → POST Keycloak → GET /auth/session
 ```
 
 ```dart

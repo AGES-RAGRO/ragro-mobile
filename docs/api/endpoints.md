@@ -8,43 +8,75 @@ All authenticated endpoints require the header: `Authorization: Bearer <token>`
 
 ## Auth
 
-### POST /auth/login
+### GET /auth/config
 
-Authenticates a user (consumer, producer, or admin).
+Returns the Keycloak authentication configuration. No authentication required.
 
-**Request Body:**
+**Response (200 OK):**
 ```json
 {
-  "email": "consumer@ragro.com.br",
-  "password": "123456"
+  "tokenUrl": "https://keycloak.ragro.com.br/realms/ragro/protocol/openid-connect/token",
+  "clientId": "ragro-app",
+  "realm": "ragro"
 }
+```
+
+---
+
+### POST {tokenUrl} (Keycloak)
+
+Authenticates a user directly with Keycloak. The `tokenUrl` is obtained from `GET /auth/config`.
+
+**Content-Type:** `application/x-www-form-urlencoded`
+
+**Request Body:**
+```
+grant_type=password
+client_id=ragro-app
+username=consumer@ragro.com.br
+password=123456
 ```
 
 **Response (200 OK):**
 ```json
 {
-  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-  "user": {
-    "id": "user_c001",
-    "name": "Ricardo Aguiar",
-    "email": "consumer@ragro.com.br",
-    "phone": "(51) 99999-0001",
-    "type": "consumer",
-    "active": true
-  }
+  "access_token": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "refresh_token": "eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9...",
+  "expires_in": 300,
+  "token_type": "Bearer"
 }
 ```
 
-The `type` field can be: `"consumer"`, `"producer"`, or `"admin"`. Used for post-login routing.
-
 **Errors:**
-- `401 Unauthorized` → invalid credentials
+- `401 Unauthorized` → invalid email or password
 
 ---
 
-### POST /auth/register/consumer
+### GET /auth/session
 
-Registers a new consumer.
+Returns the authenticated user's session data from the database. Requires valid JWT.
+
+**Response (200 OK):**
+```json
+{
+  "id": "550e8400-e29b-41d4-a716-446655440000",
+  "name": "Ricardo Aguiar",
+  "email": "consumer@ragro.com.br",
+  "type": "customer",
+  "active": true
+}
+```
+
+The `type` field can be: `"customer"`, `"farmer"`, or `"admin"`. The app maps these to `consumer`, `producer`, `admin` respectively for routing.
+
+**Errors:**
+- `401 Unauthorized` → token missing or user not found in database
+
+---
+
+### POST /auth/register/customer
+
+Registers a new customer.
 
 **Request Body:**
 ```json
