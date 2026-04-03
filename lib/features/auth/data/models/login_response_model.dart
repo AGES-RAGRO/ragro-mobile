@@ -1,15 +1,17 @@
 import 'package:ragro_mobile/features/auth/data/models/user_model.dart';
 
 class LoginResponseModel {
-  const LoginResponseModel({required this.token, required this.user});
+  const LoginResponseModel({
+    required this.accessToken,
+    required this.refreshToken,
+    required this.tokenUrl,
+    required this.clientId,
+    required this.user,
+  });
 
-  factory LoginResponseModel.fromJson(Map<String, dynamic> json) {
-    return LoginResponseModel(
-      token: json['token'] as String,
-      user: UserModel.fromJson(json['user'] as Map<String, dynamic>),
-    );
-  }
-
-  final String token;
+  final String accessToken;
+  final String refreshToken;
+  final String tokenUrl;
+  final String clientId;
   final UserModel user;
 }

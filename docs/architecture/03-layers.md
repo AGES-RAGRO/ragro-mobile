@@ -20,7 +20,7 @@ The page is the entry point of a route. It is responsible for:
 // Screen: Login
 // User Story: US-01 — Log in to the platform
 // Epic: EPIC 1 — Authentication
-// Routes: POST /auth/login
+// Routes: GET /auth/config → POST Keycloak → GET /auth/session
 
 class LoginPage extends StatelessWidget {
   const LoginPage({super.key});
@@ -354,14 +354,16 @@ The pattern adopted in RAGRO is **extends**: `UserModel extends User`. This mean
 4. AuthRepositoryImpl.loginUser() coordinates datasources
    └─ await _remote.loginUser(email: e, password: p)
 
-5. AuthRemoteDataSource.loginUser() makes the HTTP call
-   └─ POST https://api.ragro.com.br/auth/login
-   └─ Receives JSON: { "token": "...", "user": { "id": "...", "type": "consumer", ... } }
+5. AuthRemoteDataSource.loginUser() executes the three-step Keycloak flow
+   └─ GET /auth/config → { tokenUrl, clientId, realm }
+   └─ POST {tokenUrl} (form-urlencoded) → { access_token, refresh_token }
+   └─ GET /auth/session → { id, name, email, type, active }
 
-6. LoginResponseModel.fromJson(json) converts the JSON into a typed object
-   └─ UserModel.fromJson(json['user']) creates the UserModel
+6. Models parse each response separately
+   └─ AuthConfigModel.fromJson, KeycloakTokenModel.fromJson, UserModel.fromJson
+   └─ Assembled into LoginResponseModel(accessToken, refreshToken, tokenUrl, clientId, user)
 
-7. Data travels back up: UserModel → LoginResponseModel → AuthRepositoryImpl
+7. Data travels back up: LoginResponseModel → AuthRepositoryImpl
    └─ AuthRepositoryImpl saves token in SharedPreferences
    └─ AuthRepositoryImpl sets the token on Dio (AuthHeader)
    └─ Returns (user: userModel, token: "...")
