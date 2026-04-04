@@ -77,6 +77,20 @@ Common HTTP errors:
 
 ---
 
+## Test Users
+
+Three users are pre-configured in both Keycloak and the database when the backend starts with Docker:
+
+| Role | Email | Password |
+|------|-------|----------|
+| Customer | `customer@ragro.com.br` | `Test@123` |
+| Farmer | `farmer@ragro.com.br` | `Test@123` |
+| Admin | `admin@ragro.com.br` | `Admin@123` |
+
+These credentials authenticate against the real Keycloak instance running at `http://localhost:8180`. The backend must be running (`docker compose up -d` from `ragro-backend/`).
+
+---
+
 ## Demo Mode (DEMO_MODE)
 
 For visual development, Playwright testing, and demonstrations without a real backend, the app supports a demo mode:

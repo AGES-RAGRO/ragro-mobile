@@ -33,8 +33,8 @@ Authenticates a user directly with Keycloak. The `tokenUrl` is obtained from `GE
 ```
 grant_type=password
 client_id=ragro-app
-username=consumer@ragro.com.br
-password=123456
+username=customer@ragro.com.br
+password=Test@123
 ```
 
 **Response (200 OK):**
