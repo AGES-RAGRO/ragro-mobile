@@ -1,3 +1,4 @@
+import 'package:ragro_mobile/features/auth/data/models/address_model.dart';
 import 'package:ragro_mobile/features/consumer_profile/domain/entities/consumer_profile.dart';
 
 class ConsumerProfileModel extends ConsumerProfile {
@@ -14,14 +15,16 @@ class ConsumerProfileModel extends ConsumerProfile {
   factory ConsumerProfileModel.fromJson(Map<String, dynamic> json) {
     final user = json['user'] as Map<String, dynamic>? ?? json;
     final addressData = json['address'] as Map<String, dynamic>?;
+
+    // Deserializar endereço com AddressModel
     String addressStr = '';
     if (addressData != null) {
-      final parts = [
-        addressData['street'],
-        if (addressData['number'] != null) addressData['number'],
-        if (addressData['city'] != null) addressData['city'],
-      ].whereType<String>().toList();
-      addressStr = parts.join(', ');
+      final addressModel = AddressModel.fromJson(addressData);
+      addressStr = [
+        addressModel.street,
+        if (addressModel.number.isNotEmpty) addressModel.number,
+        if (addressModel.city.isNotEmpty) addressModel.city,
+      ].join(', ');
     }
 
     return ConsumerProfileModel(
