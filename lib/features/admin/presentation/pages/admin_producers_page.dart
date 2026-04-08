@@ -12,6 +12,7 @@ import 'package:ragro_mobile/features/admin/domain/entities/admin_producer.dart'
 import 'package:ragro_mobile/features/admin/presentation/bloc/admin_producers_bloc.dart';
 import 'package:ragro_mobile/features/admin/presentation/bloc/admin_producers_event.dart';
 import 'package:ragro_mobile/features/admin/presentation/bloc/admin_producers_state.dart';
+import 'package:ragro_mobile/shared/widgets/confirm_dialog.dart';
 
 class AdminProducersPage extends StatelessWidget {
   const AdminProducersPage({super.key});
@@ -20,7 +21,7 @@ class AdminProducersPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (_) =>
-          getIt<AdminProducersBloc>()..add(const AdminProducersStarted()),
+      getIt<AdminProducersBloc>()..add(const AdminProducersStarted()),
       child: const _AdminProducersView(),
     );
   }
@@ -85,16 +86,14 @@ class _AdminProducersView extends StatelessWidget {
                       final producer = state.producers[index];
                       return _ProducerCard(
                         producer: producer,
-                        onDelete: () => _confirmDeactivate(
-                          context,
-                          producer.id,
-                          producer.name,
-                        ),
+                        onToggleActive: () => producer.active
+                            ? _confirmDeactivate(context, producer)
+                            : _confirmActivate(context, producer),
                         onEdit: () {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
                               content:
-                                  Text('Editar ${producer.name} — em breve'),
+                              Text('Editar ${producer.name} — em breve'),
                             ),
                           );
                         },
@@ -139,41 +138,99 @@ class _AdminProducersView extends StatelessWidget {
     );
   }
 
-  void _confirmDeactivate(
-      BuildContext context, String producerId, String producerName) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Desativar "$producerName"?'),
-        action: SnackBarAction(
-          label: 'Confirmar',
-          textColor: AppColors.white,
-          onPressed: () {
-            context
-                .read<AdminProducersBloc>()
-                .add(AdminProducerDeactivated(producerId));
-          },
+  Future<void> _confirmDeactivate(
+      BuildContext context, AdminProducer producer) async {
+    final confirmed = await ConfirmDialog.show(
+      context: context,
+      title: RichText(
+        textAlign: TextAlign.center,
+        text: TextSpan(
+          style: const TextStyle(
+            fontFamily: 'Figtree',
+            fontWeight: FontWeight.w600,
+            fontSize: 17,
+            color: AppColors.black,
+            height: 1.4,
+          ),
+          children: [
+            const TextSpan(text: 'Tem certeza que deseja\ndesativar '),
+            TextSpan(
+              text: producer.name,
+              style: const TextStyle(color: AppColors.red),
+            ),
+            const TextSpan(text: '?'),
+          ],
         ),
-        backgroundColor: AppColors.red,
       ),
+      confirmLabel: 'Desativar',
+      confirmColor: AppColors.red,
     );
+
+    if (confirmed == true && context.mounted) {
+      context
+          .read<AdminProducersBloc>()
+          .add(AdminProducerDeactivated(producer.id));
+    }
+  }
+
+  Future<void> _confirmActivate(
+      BuildContext context, AdminProducer producer) async {
+    final confirmed = await ConfirmDialog.show(
+      context: context,
+      title: RichText(
+        textAlign: TextAlign.center,
+        text: TextSpan(
+          style: const TextStyle(
+            fontFamily: 'Figtree',
+            fontWeight: FontWeight.w600,
+            fontSize: 17,
+            color: AppColors.black,
+            height: 1.4,
+          ),
+          children: [
+            const TextSpan(text: 'Tem certeza que deseja\nativar '),
+            TextSpan(
+              text: producer.name,
+              style: const TextStyle(color: AppColors.darkGreen),
+            ),
+            const TextSpan(text: '?'),
+          ],
+        ),
+      ),
+      confirmLabel: 'Ativar',
+      confirmColor: AppColors.darkGreen,
+    );
+
+    if (confirmed == true && context.mounted) {
+      context
+          .read<AdminProducersBloc>()
+          .add(AdminProducerActivated(producer.id));
+    }
   }
 }
 
 class _ProducerCard extends StatelessWidget {
   const _ProducerCard({
     required this.producer,
-    required this.onDelete,
+    required this.onToggleActive,
     required this.onEdit,
   });
 
   final AdminProducer producer;
-  final VoidCallback onDelete;
+  final VoidCallback onToggleActive;
   final VoidCallback onEdit;
 
   @override
   Widget build(BuildContext context) {
     String fmtDate(DateTime d) =>
         '${d.day.toString().padLeft(2, '0')}/${d.month.toString().padLeft(2, '0')}/${d.year}';
+
+    final toggleColor =
+    producer.active ? AppColors.red : AppColors.darkGreen;
+    final toggleIcon = producer.active
+        ? Icons.delete_outline
+        : Icons.restore;
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -191,7 +248,6 @@ class _ProducerCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Name + action buttons row
           Row(
             children: [
               Expanded(
@@ -219,17 +275,15 @@ class _ProducerCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 8),
-              // Delete
               GestureDetector(
-                onTap: onDelete,
+                onTap: onToggleActive,
                 child: Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: AppColors.red.withOpacity(0.1),
+                    color: toggleColor.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: const Icon(Icons.delete_outline,
-                      size: 16, color: AppColors.red),
+                  child: Icon(toggleIcon, size: 16, color: toggleColor),
                 ),
               ),
             ],
@@ -283,7 +337,6 @@ class _ProducerCard extends StatelessWidget {
           const Divider(color: Color(0xFFE2E8F0), height: 1),
           const SizedBox(height: 8),
 
-          // Dates
           Row(
             children: [
               _DateBadge(
@@ -298,7 +351,7 @@ class _ProducerCard extends StatelessWidget {
               const Spacer(),
               Container(
                 padding:
-                    const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                 decoration: BoxDecoration(
                   color: producer.active
                       ? AppColors.lightGreen.withOpacity(0.1)

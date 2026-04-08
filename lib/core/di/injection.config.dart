@@ -22,6 +22,8 @@ import 'package:ragro_mobile/features/admin/data/repositories/admin_repository_i
     as _i780;
 import 'package:ragro_mobile/features/admin/domain/repositories/admin_repository.dart'
     as _i759;
+import 'package:ragro_mobile/features/admin/domain/usecases/activate_admin_producer.dart'
+    as _i671;
 import 'package:ragro_mobile/features/admin/domain/usecases/create_admin_producer.dart'
     as _i321;
 import 'package:ragro_mobile/features/admin/domain/usecases/deactivate_admin_producer.dart'
@@ -335,6 +337,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i456.UpdateCartItemQuantity>(
       () => _i456.UpdateCartItemQuantity(gh<_i830.CartRepository>()),
     );
+    gh.lazySingleton<_i671.ActivateAdminProducer>(
+      () => _i671.ActivateAdminProducer(gh<_i759.AdminRepository>()),
+    );
     gh.lazySingleton<_i321.CreateAdminProducer>(
       () => _i321.CreateAdminProducer(gh<_i759.AdminRepository>()),
     );
@@ -400,6 +405,13 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i127.ProductDetailRemoteDataSource>(),
       ),
     );
+    gh.factory<_i1056.AdminProducersBloc>(
+      () => _i1056.AdminProducersBloc(
+        gh<_i1054.GetAdminProducers>(),
+        gh<_i514.DeactivateAdminProducer>(),
+        gh<_i671.ActivateAdminProducer>(),
+      ),
+    );
     gh.lazySingleton<_i43.AuthRepository>(
       () => _i579.AuthRepositoryImpl(
         gh<_i201.AuthRemoteDataSource>(),
@@ -456,12 +468,6 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i894.SearchProducersAndProducts>(
       () => _i894.SearchProducersAndProducts(gh<_i38.SearchRepository>()),
-    );
-    gh.factory<_i1056.AdminProducersBloc>(
-      () => _i1056.AdminProducersBloc(
-        gh<_i1054.GetAdminProducers>(),
-        gh<_i514.DeactivateAdminProducer>(),
-      ),
     );
     gh.lazySingleton<_i47.GetConsumerProfile>(
       () => _i47.GetConsumerProfile(gh<_i810.ConsumerProfileRepository>()),
