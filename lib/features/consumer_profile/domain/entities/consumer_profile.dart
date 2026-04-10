@@ -2,8 +2,8 @@
 // US-04 — Update Consumer Profile
 import 'package:equatable/equatable.dart';
 
-class ConsumerProfile extends Equatable {
-  const ConsumerProfile({
+class CustomerProfile extends Equatable {
+  const CustomerProfile({
     required this.id,
     required this.userId,
     required this.name,
@@ -21,13 +21,13 @@ class ConsumerProfile extends Equatable {
   final String address;
   final String? fiscalNumber;
 
-  ConsumerProfile copyWith({
+  CustomerProfile copyWith({
     String? name,
     String? phone,
     String? address,
     String? fiscalNumber,
   }) {
-    return ConsumerProfile(
+    return CustomerProfile(
       id: id,
       userId: userId,
       name: name ?? this.name,

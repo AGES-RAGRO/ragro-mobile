@@ -3,12 +3,12 @@ import 'package:ragro_mobile/features/consumer_profile/domain/entities/consumer_
 import 'package:ragro_mobile/features/consumer_profile/domain/repositories/consumer_profile_repository.dart';
 
 @lazySingleton
-class UpdateConsumerProfile {
-  const UpdateConsumerProfile(this._repository);
+class UpdateCustomerProfile {
+  const UpdateCustomerProfile(this._repository);
 
-  final ConsumerProfileRepository _repository;
+  final CustomerProfileRepository _repository;
 
-  Future<ConsumerProfile> call({
+  Future<CustomerProfile> call({
     required String userId,
     required String name,
     required String phone,

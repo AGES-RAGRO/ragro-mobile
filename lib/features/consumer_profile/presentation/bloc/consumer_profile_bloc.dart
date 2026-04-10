@@ -15,8 +15,8 @@ class ConsumerProfileBloc
     on<ConsumerProfileUpdateSubmitted>(_onUpdateSubmitted);
   }
 
-  final GetConsumerProfile _getProfile;
-  final UpdateConsumerProfile _updateProfile;
+  final GetCustomerProfile _getProfile;
+  final UpdateCustomerProfile _updateProfile;
 
   Future<void> _onStarted(
     ConsumerProfileStarted event,

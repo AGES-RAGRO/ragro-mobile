@@ -18,7 +18,7 @@ class ConsumerProfileLoading extends ConsumerProfileState {
 
 class ConsumerProfileLoaded extends ConsumerProfileState {
   const ConsumerProfileLoaded(this.profile);
-  final ConsumerProfile profile;
+  final CustomerProfile profile;
 
   @override
   List<Object?> get props => [profile];
@@ -26,7 +26,7 @@ class ConsumerProfileLoaded extends ConsumerProfileState {
 
 class ConsumerProfileUpdating extends ConsumerProfileState {
   const ConsumerProfileUpdating(this.profile);
-  final ConsumerProfile profile;
+  final CustomerProfile profile;
 
   @override
   List<Object?> get props => [profile];
@@ -34,7 +34,7 @@ class ConsumerProfileUpdating extends ConsumerProfileState {
 
 class ConsumerProfileUpdateSuccess extends ConsumerProfileState {
   const ConsumerProfileUpdateSuccess(this.profile);
-  final ConsumerProfile profile;
+  final CustomerProfile profile;
 
   @override
   List<Object?> get props => [profile];

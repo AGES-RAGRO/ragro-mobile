@@ -1,8 +1,8 @@
 import 'package:ragro_mobile/features/consumer_profile/domain/entities/consumer_profile.dart';
 
-abstract class ConsumerProfileRepository {
-  Future<ConsumerProfile> getProfile(String userId);
-  Future<ConsumerProfile> updateProfile({
+abstract class CustomerProfileRepository {
+  Future<CustomerProfile> getProfile(String userId);
+  Future<CustomerProfile> updateProfile({
     required String userId,
     required String name,
     required String phone,

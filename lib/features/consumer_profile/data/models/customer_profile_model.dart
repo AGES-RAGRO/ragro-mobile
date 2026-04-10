@@ -1,7 +1,7 @@
 import 'package:ragro_mobile/features/consumer_profile/domain/entities/consumer_profile.dart';
 
-class ConsumerProfileModel extends ConsumerProfile {
-  const ConsumerProfileModel({
+class CustomerProfileModel extends CustomerProfile {
+  const CustomerProfileModel({
     required super.id,
     required super.userId,
     required super.name,
@@ -11,7 +11,7 @@ class ConsumerProfileModel extends ConsumerProfile {
     super.fiscalNumber,
   });
 
-  factory ConsumerProfileModel.fromJson(Map<String, dynamic> json) {
+  factory CustomerProfileModel.fromJson(Map<String, dynamic> json) {
     final user = json['user'] as Map<String, dynamic>? ?? json;
     final addressData = json['address'] as Map<String, dynamic>?;
     String addressStr = '';
@@ -24,7 +24,7 @@ class ConsumerProfileModel extends ConsumerProfile {
       addressStr = parts.join(', ');
     }
 
-    return ConsumerProfileModel(
+    return CustomerProfileModel(
       id: json['id'] as String? ?? user['id'] as String,
       userId: user['id'] as String? ?? json['id'] as String,
       name: user['name'] as String,
@@ -35,15 +35,5 @@ class ConsumerProfileModel extends ConsumerProfile {
     );
   }
 
-  static ConsumerProfileModel mock() {
-    return const ConsumerProfileModel(
-      id: 'consumer_1',
-      userId: 'user_1',
-      name: 'Ricardo Aguiar',
-      email: 'ricardo.aguiar@ragro.com.br',
-      phone: '+55 (11) 98765-4321',
-      address: 'Rua Cândido Vieira',
-      fiscalNumber: '000.000.000-00',
-    );
-  }
+  // Removed mock data — API-backed implementation should be used.
 }
