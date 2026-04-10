@@ -5,7 +5,7 @@ class AdminProducer extends Equatable {
     required this.id,
     required this.name,
     required this.email,
-    required this.location,
+    required this.phone,
     required this.address,
     required this.createdAt,
     required this.updatedAt,
@@ -15,7 +15,7 @@ class AdminProducer extends Equatable {
   final String id;
   final String name;
   final String email;
-  final String location;
+  final String phone;
   final String address;
   final DateTime createdAt;
   final DateTime updatedAt;
@@ -26,7 +26,7 @@ class AdminProducer extends Equatable {
       id: id,
       name: name,
       email: email,
-      location: location,
+      phone: phone,
       address: address,
       createdAt: createdAt,
       updatedAt: updatedAt,
@@ -36,5 +36,5 @@ class AdminProducer extends Equatable {
 
   @override
   List<Object?> get props =>
-      [id, name, email, location, address, createdAt, updatedAt, active];
+      [id, name, email, phone, address, createdAt, updatedAt, active];
 }

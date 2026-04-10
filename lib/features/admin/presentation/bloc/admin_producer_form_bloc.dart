@@ -25,7 +25,7 @@ class AdminProducerFormBloc
         id: DateTime.now().millisecondsSinceEpoch.toString(),
         name: event.name,
         email: event.email,
-        location: '${event.city}, ${event.state}',
+        phone: event.phone,
         address: '${event.address}, ${event.city}, ${event.state}',
         createdAt: DateTime.now(),
         updatedAt: DateTime.now(),
