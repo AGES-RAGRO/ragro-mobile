@@ -10,6 +10,9 @@ class AdminProducerModel extends AdminProducer {
     required super.createdAt,
     required super.updatedAt,
     required super.active,
+    required super.fiscalNumber,
+    required super.fiscalNumberType,
+    required super.farmName,
   });
 
   factory AdminProducerModel.fromJson(Map<String, dynamic> json) {
@@ -22,6 +25,9 @@ class AdminProducerModel extends AdminProducer {
       createdAt: DateTime.parse(json['createdAt'] as String ?? DateTime.now().toIso8601String()),
       updatedAt: DateTime.parse(json['updatedAt'] as String ?? DateTime.now().toIso8601String()),
       active: json['active'] as bool,
+      fiscalNumber: json['fiscalNumber'] as String? ?? '',
+      fiscalNumberType: json['fiscalNumberType'] as String? ?? '',
+      farmName: json['farmName'] as String? ?? '',
     );
   }
 
@@ -35,6 +41,9 @@ class AdminProducerModel extends AdminProducer {
       'createdAt': createdAt.toIso8601String(),
       'updatedAt': updatedAt.toIso8601String(),
       'active': active,
+      'fiscalNumber': fiscalNumber,
+      'fiscalNumberType': fiscalNumberType,
+      'farmName': farmName,
     };
   }
 
@@ -48,6 +57,9 @@ class AdminProducerModel extends AdminProducer {
       createdAt: entity.createdAt,
       updatedAt: entity.updatedAt,
       active: entity.active,
+      fiscalNumber: entity.fiscalNumber,
+      fiscalNumberType: entity.fiscalNumberType,
+      farmName: entity.farmName,
     );
   }
 }

@@ -1,4 +1,7 @@
 import 'package:equatable/equatable.dart';
+import 'package:ragro_mobile/features/admin/domain/entities/admin_bank_account.dart';
+import 'package:ragro_mobile/features/admin/domain/entities/admin_availability.dart';
+import 'package:ragro_mobile/features/admin/domain/entities/admin_address.dart';
 
 class AdminProducer extends Equatable {
   const AdminProducer({
@@ -10,6 +13,12 @@ class AdminProducer extends Equatable {
     required this.createdAt,
     required this.updatedAt,
     required this.active,
+    required this.fiscalNumber,
+    required this.fiscalNumberType,
+    required this.farmName,
+    this.producerAddress,
+    this.bankAccount,
+    this.availability,
   });
 
   final String id;
@@ -20,6 +29,12 @@ class AdminProducer extends Equatable {
   final DateTime createdAt;
   final DateTime updatedAt;
   final bool active;
+  final String fiscalNumber;
+  final String fiscalNumberType;
+  final String farmName;
+  final AdminAddress? producerAddress;
+  final AdminBankAccount? bankAccount;
+  final List<AdminAvailability>? availability;
 
   AdminProducer copyWith({bool? active}) {
     return AdminProducer(
@@ -31,10 +46,17 @@ class AdminProducer extends Equatable {
       createdAt: createdAt,
       updatedAt: updatedAt,
       active: active ?? this.active,
+      fiscalNumber: fiscalNumber ?? this.fiscalNumber,
+      fiscalNumberType: fiscalNumberType,
+      farmName: farmName ?? this.farmName,
+      producerAddress: producerAddress,
+      bankAccount: bankAccount,
+      availability: availability,
     );
   }
 
   @override
   List<Object?> get props =>
-      [id, name, email, phone, address, createdAt, updatedAt, active];
+      [id, name, email, phone, address, createdAt, updatedAt,
+        active, fiscalNumber, fiscalNumberType, farmName,];
 }

@@ -37,6 +37,7 @@ class _ErrorInterceptor extends Interceptor {
         404 => const NotFoundException(),
         409 => const ConflictException(),
         429 => const RateLimitedException(),
+        403 => const ForbiddenException(),
         >= 500 => const ServerException(),
         _ => const UnknownApiException(),
       };

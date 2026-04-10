@@ -39,3 +39,7 @@ class UnknownApiException extends ApiException {
 class InvalidCredentialsApiException extends ApiException {
   const InvalidCredentialsApiException([super.message = 'E-mail ou senha inválidos']);
 }
+
+class ForbiddenException extends ApiException {
+  const ForbiddenException([super.message = 'Sua conta está desativada. Entre em contato com o suporte.']);
+}

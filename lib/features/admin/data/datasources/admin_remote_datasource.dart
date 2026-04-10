@@ -5,6 +5,7 @@ import 'package:ragro_mobile/core/network/api_endpoints.dart';
 import 'package:ragro_mobile/core/network/api_exception.dart';
 import 'package:ragro_mobile/features/admin/domain/entities/admin_producer.dart';
 import 'package:ragro_mobile/features/admin/data/models/admin_producer_model.dart';
+import 'package:ragro_mobile/features/admin/domain/entities/admin_availability.dart';
 
 @lazySingleton
 class AdminRemoteDataSource {
@@ -26,12 +27,22 @@ class AdminRemoteDataSource {
 
   Future<void> createProducer(AdminProducer producer, String password) async {
     try {
-      final model = AdminProducerModel.fromEntity(producer);
-      await _apiClient.dio.post<void>(
+      await _apiClient.dio.post(
         ApiEndpoints.adminProducers,
         data: {
-          ...model.toJson(),
+          'name': producer.name,
+          'email': producer.email,
+          'phone': producer.phone,
           'password': password,
+          'fiscalNumber': producer.fiscalNumber,
+          'fiscalNumberType': producer.fiscalNumberType,
+          'farmName': producer.farmName,
+          'address': producer.producerAddress!.toJson(),
+          if (producer.bankAccount != null)
+            'bankAccount': producer.bankAccount!.toJson(),
+          if (producer.availability != null && producer.availability!.isNotEmpty)
+            'availability': producer.availability!
+                .map((a) => (a as AdminAvailability).toJson()).toList(),
         },
       );
     } on DioException catch (e) {

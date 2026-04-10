@@ -113,7 +113,12 @@ class _AdminProducersView extends StatelessWidget {
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: ElevatedButton.icon(
-              onPressed: () => context.push('/admin/producers/new'),
+                onPressed: () async {
+                  await context.push('/admin/producers/new');
+                  if (context.mounted) {
+                    context.read<AdminProducersBloc>().add(const AdminProducersStarted());
+                  }
+                },
               icon: const Icon(Icons.add, size: 18),
               label: const Text(
                 'Novo produtor',
