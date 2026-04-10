@@ -1,7 +1,7 @@
 // Screen: Consumer Registration
 // User Story: US-01 — Consumer Registration
 // Epic: EPIC 1 — Authentication
-// Routes: POST /auth/register
+// Routes: POST /auth/register/customer
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -41,11 +41,14 @@ class _ConsumerRegisterViewState extends State<_ConsumerRegisterView> {
   final _nameController = TextEditingController();
   final _phoneController = TextEditingController();
   final _emailController = TextEditingController();
+  final _cpfController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
   final _zipCodeController = TextEditingController();
   final _streetController = TextEditingController();
   final _numberController = TextEditingController();
+  final _complementController = TextEditingController();
+  final _neighborhoodController = TextEditingController();
   final _cityController = TextEditingController();
   final _stateController = TextEditingController();
 
@@ -56,11 +59,14 @@ class _ConsumerRegisterViewState extends State<_ConsumerRegisterView> {
     _nameController.dispose();
     _phoneController.dispose();
     _emailController.dispose();
+    _cpfController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
     _zipCodeController.dispose();
     _streetController.dispose();
     _numberController.dispose();
+    _complementController.dispose();
+    _neighborhoodController.dispose();
     _cityController.dispose();
     _stateController.dispose();
     super.dispose();
@@ -83,12 +89,19 @@ class _ConsumerRegisterViewState extends State<_ConsumerRegisterView> {
             name: _nameController.text.trim(),
             phone: _phoneController.text.trim(),
             email: _emailController.text.trim(),
+            fiscalNumber: _cpfController.text.trim(),
             password: _passwordController.text,
             zipCode: _zipCodeController.text.trim(),
             street: _streetController.text.trim(),
             number: _numberController.text.trim(),
             city: _cityController.text.trim(),
             state: _stateController.text.trim(),
+            complement: _complementController.text.trim().isEmpty
+                ? null
+                : _complementController.text.trim(),
+            neighborhood: _neighborhoodController.text.trim().isEmpty
+                ? null
+                : _neighborhoodController.text.trim(),
           ),
         );
   }
@@ -139,8 +152,10 @@ class _ConsumerRegisterViewState extends State<_ConsumerRegisterView> {
                   controller: _phoneController,
                   keyboardType: TextInputType.phone,
                   validator: (value) {
-                    if (value == null || value.trim().isEmpty) {
-                      return 'Informe seu telefone';
+                    final digits =
+                        value?.replaceAll(RegExp(r'\D'), '') ?? '';
+                    if (digits.length != 11) {
+                      return 'DDD + número com 11 dígitos';
                     }
                     return null;
                   },
@@ -160,6 +175,21 @@ class _ConsumerRegisterViewState extends State<_ConsumerRegisterView> {
                 ),
                 const SizedBox(height: 16),
                 AuthTextField(
+                  label: 'CPF',
+                  icon: Icons.badge_outlined,
+                  controller: _cpfController,
+                  keyboardType: TextInputType.number,
+                  validator: (value) {
+                    final digits =
+                        value?.replaceAll(RegExp(r'\D'), '') ?? '';
+                    if (digits.length != 11) {
+                      return 'CPF deve ter 11 dígitos';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 16),
+                AuthTextField(
                   label: 'Senha',
                   icon: Icons.lock_outline,
                   controller: _passwordController,
@@ -168,8 +198,12 @@ class _ConsumerRegisterViewState extends State<_ConsumerRegisterView> {
                     if (value == null || value.isEmpty) {
                       return 'Informe uma senha';
                     }
-                    if (value.length < 8) {
-                      return 'A senha deve ter pelo menos 8 caracteres';
+                    if (value.length < 8 || value.length > 50) {
+                      return 'Entre 8 e 50 caracteres';
+                    }
+                    if (!RegExp(r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$')
+                        .hasMatch(value)) {
+                      return 'Inclua maiúscula, minúscula e um número';
                     }
                     return null;
                   },
@@ -228,6 +262,18 @@ class _ConsumerRegisterViewState extends State<_ConsumerRegisterView> {
                   },
                 ),
                 const SizedBox(height: 16),
+                AuthTextField(
+                  label: 'Complemento (opcional)',
+                  icon: Icons.apartment_outlined,
+                  controller: _complementController,
+                ),
+                const SizedBox(height: 16),
+                AuthTextField(
+                  label: 'Bairro (opcional)',
+                  icon: Icons.signpost_outlined,
+                  controller: _neighborhoodController,
+                ),
+                const SizedBox(height: 16),
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -252,8 +298,10 @@ class _ConsumerRegisterViewState extends State<_ConsumerRegisterView> {
                         icon: Icons.map_outlined,
                         controller: _stateController,
                         validator: (value) {
-                          if (value == null || value.trim().isEmpty) {
-                            return 'UF';
+                          final v = value?.trim().toUpperCase() ?? '';
+                          if (v.length != 2 ||
+                              !RegExp(r'^[A-Z]{2}$').hasMatch(v)) {
+                            return 'UF com 2 letras (ex: RS)';
                           }
                           return null;
                         },

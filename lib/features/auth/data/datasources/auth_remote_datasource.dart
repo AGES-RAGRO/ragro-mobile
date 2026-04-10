@@ -4,6 +4,7 @@ import 'package:ragro_mobile/core/network/api_client.dart';
 import 'package:ragro_mobile/core/network/api_endpoints.dart';
 import 'package:ragro_mobile/core/network/api_exception.dart';
 import 'package:ragro_mobile/features/auth/data/models/auth_config_model.dart';
+import 'package:ragro_mobile/features/auth/data/models/customer_registration_request.dart';
 import 'package:ragro_mobile/features/auth/data/models/keycloak_token_model.dart';
 import 'package:ragro_mobile/features/auth/data/models/login_response_model.dart';
 import 'package:ragro_mobile/features/auth/data/models/user_model.dart';
@@ -99,35 +100,14 @@ class AuthRemoteDataSource {
     }
   }
 
-  Future<UserModel> registerConsumer({
-    required String name,
-    required String phone,
-    required String email,
-    required String password,
-    required String zipCode,
-    required String street,
-    required String number,
-    required String city,
-    required String state,
-    String? complement,
-  }) async {
+  /// Cadastro de consumidor — POST /auth/register/customer (201 + corpo do cliente).
+  Future<UserModel> registerCustomer(
+    CustomerRegistrationRequest request,
+  ) async {
     try {
       final response = await _apiClient.dio.post<Map<String, dynamic>>(
         ApiEndpoints.registerCustomer,
-        data: {
-          'name': name,
-          'phone': phone,
-          'email': email,
-          'password': password,
-          'address': {
-            'zip_code': zipCode,
-            'street': street,
-            'number': number,
-            'city': city,
-            'state': state,
-            if (complement != null) 'complement': complement,
-          },
-        },
+        data: request.toJson(),
       );
       return UserModel.fromJson(response.data!);
     } on DioException catch (e) {

@@ -2,6 +2,8 @@ import 'package:injectable/injectable.dart';
 import 'package:ragro_mobile/core/network/api_client.dart';
 import 'package:ragro_mobile/features/auth/data/datasources/auth_local_datasource.dart';
 import 'package:ragro_mobile/features/auth/data/datasources/auth_remote_datasource.dart';
+import 'package:ragro_mobile/features/auth/data/models/address_request.dart';
+import 'package:ragro_mobile/features/auth/data/models/customer_registration_request.dart';
 import 'package:ragro_mobile/features/auth/data/models/user_model.dart';
 import 'package:ragro_mobile/features/auth/domain/entities/user.dart';
 import 'package:ragro_mobile/features/auth/domain/entities/user_type.dart';
@@ -50,6 +52,7 @@ class AuthRepositoryImpl implements AuthRepository {
     required String name,
     required String phone,
     required String email,
+    required String fiscalNumber,
     required String password,
     required String zipCode,
     required String street,
@@ -57,19 +60,27 @@ class AuthRepositoryImpl implements AuthRepository {
     required String city,
     required String state,
     String? complement,
-  }) =>
-      _remote.registerConsumer(
-        name: name,
-        phone: phone,
-        email: email,
-        password: password,
-        zipCode: zipCode,
-        street: street,
-        number: number,
-        city: city,
-        state: state,
-        complement: complement,
-      );
+    String? neighborhood,
+  }) {
+    String digits(String s) => s.replaceAll(RegExp(r'\D'), '');
+    final request = CustomerRegistrationRequest(
+      name: name.trim(),
+      email: email.trim(),
+      phone: digits(phone),
+      fiscalNumber: digits(fiscalNumber),
+      password: password,
+      address: AddressRequest(
+        street: street.trim(),
+        number: number.trim(),
+        city: city.trim(),
+        state: state.trim().toUpperCase(),
+        zipCode: digits(zipCode),
+        complement: complement?.trim(),
+        neighborhood: neighborhood?.trim(),
+      ),
+    );
+    return _remote.registerCustomer(request);
+  }
 
   @override
   Future<void> logout() async {

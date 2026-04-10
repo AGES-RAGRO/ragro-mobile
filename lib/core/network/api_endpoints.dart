@@ -1,5 +1,6 @@
 // lib/core/network/api_endpoints.dart
 abstract final class ApiEndpoints {
+  /// `http://10.0.2.2:8080`, device físico `http://<IP_LAN>:8080`).
   static const String _base = String.fromEnvironment(
     'API_BASE_URL',
     defaultValue: 'http://localhost:8080',
