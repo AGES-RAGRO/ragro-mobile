@@ -23,6 +23,7 @@ class RegisterBloc extends Bloc<RegisterEvent, RegisterState> {
         name: event.name,
         phone: event.phone,
         email: event.email,
+        fiscalNumber: event.fiscalNumber,
         password: event.password,
         zipCode: event.zipCode,
         street: event.street,
@@ -30,6 +31,7 @@ class RegisterBloc extends Bloc<RegisterEvent, RegisterState> {
         city: event.city,
         state: event.state,
         complement: event.complement,
+        neighborhood: event.neighborhood,
       );
       emit(RegisterSuccess(user));
     } on ApiException catch (e) {

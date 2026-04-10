@@ -34,6 +34,7 @@ void main() {
     name: 'Ana',
     phone: '11900000000',
     email: 'ana@t.com',
+    fiscalNumber: '12345678901',
     password: 'password123',
     zipCode: '01310100',
     street: 'Av. Paulista',
@@ -49,6 +50,7 @@ void main() {
             name: any(named: 'name'),
             phone: any(named: 'phone'),
             email: any(named: 'email'),
+            fiscalNumber: any(named: 'fiscalNumber'),
             password: any(named: 'password'),
             zipCode: any(named: 'zipCode'),
             street: any(named: 'street'),
@@ -56,6 +58,7 @@ void main() {
             city: any(named: 'city'),
             state: any(named: 'state'),
             complement: any(named: 'complement'),
+            neighborhood: any(named: 'neighborhood'),
           )).thenAnswer((_) async => tUser);
       return bloc;
     },
@@ -70,6 +73,7 @@ void main() {
             name: any(named: 'name'),
             phone: any(named: 'phone'),
             email: any(named: 'email'),
+            fiscalNumber: any(named: 'fiscalNumber'),
             password: any(named: 'password'),
             zipCode: any(named: 'zipCode'),
             street: any(named: 'street'),
@@ -77,6 +81,7 @@ void main() {
             city: any(named: 'city'),
             state: any(named: 'state'),
             complement: any(named: 'complement'),
+            neighborhood: any(named: 'neighborhood'),
           )).thenThrow(const ConflictException());
       return bloc;
     },

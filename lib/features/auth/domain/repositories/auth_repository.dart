@@ -10,6 +10,7 @@ abstract class AuthRepository {
     required String name,
     required String phone,
     required String email,
+    required String fiscalNumber,
     required String password,
     required String zipCode,
     required String street,
@@ -17,6 +18,7 @@ abstract class AuthRepository {
     required String city,
     required String state,
     String? complement,
+    String? neighborhood,
   });
 
   Future<void> logout();
