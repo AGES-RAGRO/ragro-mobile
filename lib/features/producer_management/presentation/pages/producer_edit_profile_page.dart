@@ -6,6 +6,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:ragro_mobile/core/theme/app_colors.dart';
+import 'package:ragro_mobile/core/di/injection.dart';
+import 'package:ragro_mobile/features/producer_profile/data/datasources/producer_profile_remote_datasource.dart';
 
 class ProducerEditProfilePage extends StatefulWidget {
   const ProducerEditProfilePage({super.key});
@@ -36,17 +38,42 @@ class _ProducerEditProfilePageState extends State<ProducerEditProfilePage> {
 
   Future<void> _save() async {
     setState(() => _saving = true);
-    // TODO: replace with real API call — PUT /producers/me
-    await Future.delayed(const Duration(milliseconds: 600));
-    if (!mounted) return;
-    setState(() => _saving = false);
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Perfil atualizado com sucesso!'),
-        backgroundColor: AppColors.darkGreen,
-      ),
-    );
-    context.pop();
+
+    try {
+      // 1. Montamos o "pacotinho" de dados com o que o produtor digitou na tela
+      final updateData = {
+        'name': _nameController.text,
+        'story': _bioController.text,
+        'phone': _phoneController.text,
+        'location': _locationController.text,
+      };
+
+      // 2. Chamamos a API de verdade! 
+      // Passamos 'me' como ID porque o produtor está editando o próprio perfil
+      await getIt<ProducerProfileRemoteDataSource>().updateProducer('me', updateData);
+
+      if (!mounted) return;
+      setState(() => _saving = false);
+      
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Perfil atualizado com sucesso!'),
+          backgroundColor: AppColors.darkGreen,
+        ),
+      );
+      context.pop(); // Fecha a tela e volta
+      
+    } catch (e) {
+      // 3. Se der ruim na internet, a gente avisa o usuário em vez de travar
+      if (!mounted) return;
+      setState(() => _saving = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Erro ao atualizar o perfil. Tente novamente!'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 
   @override
