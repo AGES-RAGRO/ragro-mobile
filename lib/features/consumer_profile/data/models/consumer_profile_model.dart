@@ -13,9 +13,12 @@ class ConsumerProfileModel extends ConsumerProfile {
 
   factory ConsumerProfileModel.fromJson(Map<String, dynamic> json) {
     final user = json['user'] as Map<String, dynamic>? ?? json;
-    final addressData = json['address'] as Map<String, dynamic>?;
+    
+    // Parse addresses array — take first address or fallback to empty string
     String addressStr = '';
-    if (addressData != null) {
+    final addressesList = json['addresses'] as List?;
+    if (addressesList != null && addressesList.isNotEmpty) {
+      final addressData = addressesList[0] as Map<String, dynamic>;
       final parts = [
         addressData['street'],
         if (addressData['number'] != null) addressData['number'],

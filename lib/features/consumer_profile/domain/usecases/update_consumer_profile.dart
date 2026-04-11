@@ -9,14 +9,12 @@ class UpdateConsumerProfile {
   final ConsumerProfileRepository _repository;
 
   Future<ConsumerProfile> call({
-    required String userId,
     required String name,
     required String phone,
     required String address,
     String? fiscalNumber,
   }) =>
       _repository.updateProfile(
-        userId: userId,
         name: name,
         phone: phone,
         address: address,

@@ -8,5 +8,5 @@ class GetConsumerProfile {
 
   final ConsumerProfileRepository _repository;
 
-  Future<ConsumerProfile> call(String userId) => _repository.getProfile(userId);
+  Future<ConsumerProfile> call() => _repository.getProfile();
 }

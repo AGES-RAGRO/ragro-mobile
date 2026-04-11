@@ -7,8 +7,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:ragro_mobile/core/theme/app_colors.dart';
-import 'package:ragro_mobile/features/auth/presentation/bloc/auth_bloc.dart';
-import 'package:ragro_mobile/features/auth/presentation/bloc/auth_state.dart';
 import 'package:ragro_mobile/features/consumer_profile/presentation/bloc/consumer_profile_bloc.dart';
 import 'package:ragro_mobile/features/consumer_profile/presentation/bloc/consumer_profile_event.dart';
 import 'package:ragro_mobile/features/consumer_profile/presentation/bloc/consumer_profile_state.dart';
@@ -283,11 +281,8 @@ class _ConsumerEditProfilePageState extends State<ConsumerEditProfilePage> {
   }
 
   void _onSave() {
-    final authState = context.read<AuthBloc>().state;
-    final userId = authState is AuthAuthenticated ? authState.user.id : '';
     context.read<ConsumerProfileBloc>().add(
       ConsumerProfileUpdateSubmitted(
-        userId: userId,
         name: _nameController.text.trim(),
         phone: _phoneController.text.trim(),
         address: _addressController.text.trim(),

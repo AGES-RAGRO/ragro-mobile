@@ -10,8 +10,8 @@ abstract final class ApiEndpoints {
   static const String registerConsumer = '$_base/auth/register/consumer';
 
   // Consumers
-  static const String consumers        = '$_base/consumers';
-  static String consumer(String id)   => '$_base/consumers/$id';
+  static const String consumers        = '$_base/consumers/me';
+  //static String consumer(String id)   => '$_base/consumers/$id';
 
   // Producers / Farmers
   static const String producers       = '$_base/producers';

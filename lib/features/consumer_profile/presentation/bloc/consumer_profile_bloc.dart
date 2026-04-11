@@ -24,7 +24,7 @@ class ConsumerProfileBloc
   ) async {
     emit(const ConsumerProfileLoading());
     try {
-      final profile = await _getProfile(event.userId);
+      final profile = await _getProfile();
       emit(ConsumerProfileLoaded(profile));
     } on ApiException catch (e) {
       emit(ConsumerProfileFailure(e.message));
@@ -46,7 +46,6 @@ class ConsumerProfileBloc
     }
     try {
       final updated = await _updateProfile(
-        userId: event.userId,
         name: event.name,
         phone: event.phone,
         address: event.address,

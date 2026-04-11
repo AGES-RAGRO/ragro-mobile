@@ -10,19 +10,17 @@ class ConsumerProfileRepositoryImpl implements ConsumerProfileRepository {
   final ConsumerProfileRemoteDataSource _dataSource;
 
   @override
-  Future<ConsumerProfile> getProfile(String userId) =>
-      _dataSource.getProfile(userId);
+  Future<ConsumerProfile> getProfile() =>
+      _dataSource.getProfile();
 
   @override
   Future<ConsumerProfile> updateProfile({
-    required String userId,
     required String name,
     required String phone,
     required String address,
     String? fiscalNumber,
   }) =>
       _dataSource.updateProfile(
-        userId: userId,
         name: name,
         phone: phone,
         address: address,

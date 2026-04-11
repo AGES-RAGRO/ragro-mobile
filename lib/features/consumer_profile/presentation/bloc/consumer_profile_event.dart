@@ -17,19 +17,17 @@ class ConsumerProfileStarted extends ConsumerProfileEvent {
 
 class ConsumerProfileUpdateSubmitted extends ConsumerProfileEvent {
   const ConsumerProfileUpdateSubmitted({
-    required this.userId,
     required this.name,
     required this.phone,
     required this.address,
     this.fiscalNumber,
   });
 
-  final String userId;
   final String name;
   final String phone;
   final String address;
   final String? fiscalNumber;
 
   @override
-  List<Object?> get props => [userId, name, phone, address, fiscalNumber];
+  List<Object?> get props => [name, phone, address, fiscalNumber];
 }
