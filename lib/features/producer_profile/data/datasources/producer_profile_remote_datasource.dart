@@ -3,6 +3,7 @@ import 'package:injectable/injectable.dart';
 import 'package:ragro_mobile/core/network/api_client.dart';
 import 'package:ragro_mobile/core/network/api_endpoints.dart';
 import 'package:ragro_mobile/core/network/api_exception.dart';
+import 'package:ragro_mobile/features/producer_profile/data/models/producer_update_request.dart';
 import 'package:ragro_mobile/features/producer_profile/data/models/public_producer_model.dart';
 
 @lazySingleton
@@ -22,11 +23,14 @@ class ProducerProfileRemoteDataSource {
     }
   }
 
-  Future<void> updateProducer(String producerId, Map<String, dynamic> data) async {
+  Future<void> updateProducer(
+    String producerId,
+    ProducerUpdateRequest request,
+  ) async {
     try {
-      await _apiClient.dio.put(
+      await _apiClient.dio.put<void>(
         ApiEndpoints.producer(producerId),
-        data: data,
+        data: request.toJson(),
       );
     } on DioException catch (e) {
       throw e.error as ApiException? ?? const UnknownApiException();

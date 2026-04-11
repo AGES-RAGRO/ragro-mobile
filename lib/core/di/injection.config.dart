@@ -182,6 +182,8 @@ import 'package:ragro_mobile/features/producer_profile/domain/repositories/produ
     as _i420;
 import 'package:ragro_mobile/features/producer_profile/domain/usecases/get_producer_profile.dart'
     as _i1031;
+import 'package:ragro_mobile/features/producer_profile/domain/usecases/update_producer.dart'
+    as _i240;
 import 'package:ragro_mobile/features/producer_profile/presentation/bloc/producer_profile_bloc.dart'
     as _i756;
 import 'package:ragro_mobile/features/product_detail/data/datasources/product_detail_remote_datasource.dart'
@@ -497,11 +499,17 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i1031.GetProducerProfile>(
       () => _i1031.GetProducerProfile(gh<_i420.ProducerProfileRepository>()),
     );
+    gh.lazySingleton<_i240.UpdateProducer>(
+      () => _i240.UpdateProducer(gh<_i420.ProducerProfileRepository>()),
+    );
     gh.lazySingleton<_i419.AppRouter>(
       () => _i419.AppRouter(gh<_i475.AuthBloc>()),
     );
     gh.factory<_i756.ProducerProfileBloc>(
-      () => _i756.ProducerProfileBloc(gh<_i1031.GetProducerProfile>()),
+      () => _i756.ProducerProfileBloc(
+        gh<_i1031.GetProducerProfile>(),
+        gh<_i240.UpdateProducer>(),
+      ),
     );
     return this;
   }
