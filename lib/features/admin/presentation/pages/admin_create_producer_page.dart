@@ -92,13 +92,43 @@ class _AdminCreateProducerViewState extends State<_AdminCreateProducerView> {
     }
 
     final cleanFiscal = _cpfCnpjController.text.replaceAll(RegExp(r'[^0-9]'), '');
-    final type = cleanFiscal.length <= 11 ? 'CPF' : 'CNPJ';
+    final String? type;
+    if (cleanFiscal.length == 11) {
+      type = 'CPF';
+    } else if (cleanFiscal.length == 14) {
+      type = 'CNPJ';
+    } else {
+      type = null;
+    }
 
     if (_nameController.text.trim().isEmpty ||
         _emailController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Preencha os campos obrigatórios.'),
+          backgroundColor: AppColors.red,
+        ),
+      );
+      return;
+    }
+
+    if (type == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('CPF deve ter 11 dígitos ou CNPJ deve ter 14 dígitos.'),
+          backgroundColor: AppColors.red,
+        ),
+      );
+      return;
+    }
+
+    if (_cepController.text.trim().isEmpty ||
+        _addressController.text.trim().isEmpty ||
+        _cityController.text.trim().isEmpty ||
+        _stateController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Preencha o endereço completo.'),
           backgroundColor: AppColors.red,
         ),
       );
@@ -140,7 +170,7 @@ class _AdminCreateProducerViewState extends State<_AdminCreateProducerView> {
               backgroundColor: AppColors.darkGreen,
             ),
           );
-          context.pop();
+          context.pop(true);
         }
         if (state is AdminProducerFormFailure) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -458,7 +488,7 @@ class _AdminCreateProducerViewState extends State<_AdminCreateProducerView> {
                       backgroundColor: AppColors.darkGreen,
                       foregroundColor: AppColors.white,
                       disabledBackgroundColor:
-                          AppColors.darkGreen.withOpacity(0.5),
+                          AppColors.darkGreen.withValues(alpha: 0.5),
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(24)),
                       padding: const EdgeInsets.symmetric(vertical: 16),

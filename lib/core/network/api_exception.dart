@@ -8,6 +8,17 @@ class UnauthorizedException extends ApiException {
   const UnauthorizedException([super.message = 'Credenciais inválidas']);
 }
 
+/// Lançada quando o backend retorna 401 com body indicando que a
+/// conta do produtor está marcada como inativa (ex:
+/// `{"error": "Produtor inativo"}`). Diferenciada de
+/// [UnauthorizedException] para permitir mensagem de UI específica.
+class DeactivatedAccountException extends ApiException {
+  const DeactivatedAccountException([
+    super.message =
+        'Sua conta está desativada. Entre em contato com o administrador.',
+  ]);
+}
+
 class NotFoundException extends ApiException {
   const NotFoundException([super.message = 'Recurso não encontrado']);
 }
@@ -37,9 +48,7 @@ class UnknownApiException extends ApiException {
 }
 
 class InvalidCredentialsApiException extends ApiException {
-  const InvalidCredentialsApiException([super.message = 'E-mail ou senha inválidos']);
-}
-
-class ForbiddenException extends ApiException {
-  const ForbiddenException([super.message = 'Sua conta está desativada. Entre em contato com o suporte.']);
+  const InvalidCredentialsApiException([
+    super.message = 'E-mail ou senha inválidos',
+  ]);
 }

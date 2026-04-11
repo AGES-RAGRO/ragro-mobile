@@ -1,7 +1,7 @@
 import 'package:equatable/equatable.dart';
-import 'package:ragro_mobile/features/admin/domain/entities/admin_bank_account.dart';
-import 'package:ragro_mobile/features/admin/domain/entities/admin_availability.dart';
 import 'package:ragro_mobile/features/admin/domain/entities/admin_address.dart';
+import 'package:ragro_mobile/features/admin/domain/entities/admin_availability.dart';
+import 'package:ragro_mobile/features/admin/domain/entities/admin_bank_account.dart';
 
 class AdminProducer extends Equatable {
   const AdminProducer({
@@ -46,9 +46,9 @@ class AdminProducer extends Equatable {
       createdAt: createdAt,
       updatedAt: updatedAt,
       active: active ?? this.active,
-      fiscalNumber: fiscalNumber ?? this.fiscalNumber,
+      fiscalNumber: fiscalNumber,
       fiscalNumberType: fiscalNumberType,
-      farmName: farmName ?? this.farmName,
+      farmName: farmName,
       producerAddress: producerAddress,
       bankAccount: bankAccount,
       availability: availability,
@@ -56,7 +56,17 @@ class AdminProducer extends Equatable {
   }
 
   @override
-  List<Object?> get props =>
-      [id, name, email, phone, address, createdAt, updatedAt,
-        active, fiscalNumber, fiscalNumberType, farmName,];
+  List<Object?> get props => [
+    id,
+    name,
+    email,
+    phone,
+    address,
+    createdAt,
+    updatedAt,
+    active,
+    fiscalNumber,
+    fiscalNumberType,
+    farmName,
+  ];
 }
