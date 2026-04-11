@@ -117,7 +117,7 @@ class _AdminProducersView extends StatelessWidget {
               onPressed: () => context.push('/admin/producers/new'),
               icon: const Icon(Icons.add, size: 18),
               label: const Text(
-                '+ Novo produtor',
+                'Novo produtor',
                 style: TextStyle(
                   fontFamily: 'Manrope',
                   fontWeight: FontWeight.w700,
