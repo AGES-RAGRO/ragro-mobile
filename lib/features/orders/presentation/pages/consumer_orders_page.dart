@@ -19,7 +19,8 @@ class ConsumerOrdersPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => getIt<OrdersBloc>()..add(const OrdersStarted(OrderStatus.pending)),
+      create: (_) =>
+          getIt<OrdersBloc>()..add(const OrdersStarted(OrderStatus.pending)),
       child: const _OrdersView(),
     );
   }
@@ -62,8 +63,8 @@ class _OrdersView extends StatelessWidget {
                 final activeTab = state is OrdersLoading
                     ? state.activeTab
                     : state is OrdersLoaded
-                        ? state.activeTab
-                        : OrderStatus.pending;
+                    ? state.activeTab
+                    : OrderStatus.pending;
                 return SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
                   padding: const EdgeInsets.only(left: 16),
@@ -71,13 +72,18 @@ class _OrdersView extends StatelessWidget {
                     children: _tabs.map((tab) {
                       final isActive = activeTab == tab.$1;
                       return GestureDetector(
-                        onTap: () => context.read<OrdersBloc>().add(OrdersTabChanged(tab.$1)),
+                        onTap: () => context.read<OrdersBloc>().add(
+                          OrdersTabChanged(tab.$1),
+                        ),
                         child: Container(
                           padding: const EdgeInsets.fromLTRB(24, 17, 24, 18),
                           decoration: BoxDecoration(
                             border: isActive
                                 ? const Border(
-                                    bottom: BorderSide(color: AppColors.darkGreen, width: 3),
+                                    bottom: BorderSide(
+                                      color: AppColors.darkGreen,
+                                      width: 3,
+                                    ),
                                   )
                                 : null,
                           ),
@@ -85,9 +91,13 @@ class _OrdersView extends StatelessWidget {
                             tab.$2,
                             style: TextStyle(
                               fontFamily: 'Manrope',
-                              fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
+                              fontWeight: isActive
+                                  ? FontWeight.w700
+                                  : FontWeight.w500,
                               fontSize: 14,
-                              color: isActive ? AppColors.darkGreen : AppColors.placeholder,
+                              color: isActive
+                                  ? AppColors.darkGreen
+                                  : AppColors.placeholder,
                             ),
                           ),
                         ),
@@ -103,7 +113,9 @@ class _OrdersView extends StatelessWidget {
                 builder: (context, state) {
                   if (state is OrdersLoading) {
                     return const Center(
-                      child: CircularProgressIndicator(color: AppColors.darkGreen),
+                      child: CircularProgressIndicator(
+                        color: AppColors.darkGreen,
+                      ),
                     );
                   }
                   if (state is OrdersFailure) {
@@ -115,7 +127,11 @@ class _OrdersView extends StatelessWidget {
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Icon(Icons.shopping_bag_outlined, size: 64, color: AppColors.placeholder),
+                          const Icon(
+                            Icons.shopping_bag_outlined,
+                            size: 64,
+                            color: AppColors.placeholder,
+                          ),
                           const SizedBox(height: 16),
                           Text(
                             'Nenhum pedido ${state.activeTab.label.toLowerCase()}',
@@ -133,7 +149,8 @@ class _OrdersView extends StatelessWidget {
                     padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
                     itemCount: state.orders.length,
                     separatorBuilder: (_, __) => const SizedBox(height: 13),
-                    itemBuilder: (context, index) => OrderCard(order: state.orders[index]),
+                    itemBuilder: (context, index) =>
+                        OrderCard(order: state.orders[index]),
                   );
                 },
               ),

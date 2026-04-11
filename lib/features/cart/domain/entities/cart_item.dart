@@ -26,17 +26,27 @@ class CartItem extends Equatable {
   double get totalPrice => unitPrice * quantity;
 
   CartItem copyWith({int? quantity}) => CartItem(
-        productId: productId,
-        productName: productName,
-        imageUrl: imageUrl,
-        unitPrice: unitPrice,
-        unityType: unityType,
-        quantity: quantity ?? this.quantity,
-        farmName: farmName,
-        farmLocation: farmLocation,
-        producerId: producerId,
-      );
+    productId: productId,
+    productName: productName,
+    imageUrl: imageUrl,
+    unitPrice: unitPrice,
+    unityType: unityType,
+    quantity: quantity ?? this.quantity,
+    farmName: farmName,
+    farmLocation: farmLocation,
+    producerId: producerId,
+  );
 
   @override
-  List<Object?> get props => [productId, productName, imageUrl, unitPrice, unityType, quantity, farmName, farmLocation, producerId];
+  List<Object?> get props => [
+    productId,
+    productName,
+    imageUrl,
+    unitPrice,
+    unityType,
+    quantity,
+    farmName,
+    farmLocation,
+    producerId,
+  ];
 }

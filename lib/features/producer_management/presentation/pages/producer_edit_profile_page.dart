@@ -21,8 +21,7 @@ class _ProducerEditProfilePageState extends State<ProducerEditProfilePage> {
     text: 'Produtor orgânico certificado com mais de 10 anos de experiência.',
   );
   final _phoneController = TextEditingController(text: '(51) 99999-0001');
-  final _locationController =
-      TextEditingController(text: 'Porto Alegre, RS');
+  final _locationController = TextEditingController(text: 'Porto Alegre, RS');
   bool _saving = false;
 
   @override
@@ -99,7 +98,8 @@ class _ProducerEditProfilePageState extends State<ProducerEditProfilePage> {
                       onTap: () {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
-                              content: Text('Seleção de foto em breve...')),
+                            content: Text('Seleção de foto em breve...'),
+                          ),
                         );
                       },
                       child: Container(
@@ -108,8 +108,11 @@ class _ProducerEditProfilePageState extends State<ProducerEditProfilePage> {
                           color: AppColors.darkGreen,
                           shape: BoxShape.circle,
                         ),
-                        child: const Icon(Icons.camera_alt,
-                            size: 16, color: AppColors.white),
+                        child: const Icon(
+                          Icons.camera_alt,
+                          size: 16,
+                          color: AppColors.white,
+                        ),
                       ),
                     ),
                   ),
@@ -147,10 +150,7 @@ class _ProducerEditProfilePageState extends State<ProducerEditProfilePage> {
 
             _FieldLabel('Localização'),
             const SizedBox(height: 8),
-            _TextField(
-              controller: _locationController,
-              hint: 'Cidade, Estado',
-            ),
+            _TextField(controller: _locationController, hint: 'Cidade, Estado'),
 
             const SizedBox(height: 32),
 
@@ -161,10 +161,10 @@ class _ProducerEditProfilePageState extends State<ProducerEditProfilePage> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.darkGreen,
                   foregroundColor: AppColors.white,
-                  disabledBackgroundColor:
-                      AppColors.darkGreen.withOpacity(0.5),
+                  disabledBackgroundColor: AppColors.darkGreen.withOpacity(0.5),
                   shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(24)),
+                    borderRadius: BorderRadius.circular(24),
+                  ),
                   padding: const EdgeInsets.symmetric(vertical: 16),
                 ),
                 child: _saving
@@ -239,8 +239,10 @@ class _TextField extends StatelessWidget {
         ),
         filled: true,
         fillColor: AppColors.inputBackground,
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 14,
+        ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: AppColors.inputBorder),

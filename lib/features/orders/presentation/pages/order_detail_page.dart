@@ -30,7 +30,9 @@ class OrderDetailPage extends StatelessWidget {
         builder: (context, state) {
           if (state is OrderDetailLoading || state is OrderDetailInitial) {
             return const Scaffold(
-              body: Center(child: CircularProgressIndicator(color: AppColors.darkGreen)),
+              body: Center(
+                child: CircularProgressIndicator(color: AppColors.darkGreen),
+              ),
             );
           }
           if (state is OrderDetailFailure) {
@@ -99,7 +101,9 @@ class OrderDetailPage extends StatelessWidget {
                           decoration: BoxDecoration(
                             color: AppColors.white,
                             borderRadius: BorderRadius.circular(24),
-                            border: Border.all(color: AppColors.lightGreen.withOpacity(0.05)),
+                            border: Border.all(
+                              color: AppColors.lightGreen.withOpacity(0.05),
+                            ),
                             boxShadow: const [
                               BoxShadow(
                                 color: Color(0x0D000000),
@@ -111,16 +115,21 @@ class OrderDetailPage extends StatelessWidget {
                           child: Column(
                             children: [
                               ...order.items.asMap().entries.map((entry) {
-                                final isLast = entry.key == order.items.length - 1;
+                                final isLast =
+                                    entry.key == order.items.length - 1;
                                 return Column(
                                   children: [
                                     Padding(
-                                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 16,
+                                      ),
                                       child: OrderItemRow(item: entry.value),
                                     ),
                                     if (!isLast)
                                       Divider(
-                                        color: AppColors.lightGreen.withOpacity(0.05),
+                                        color: AppColors.lightGreen.withOpacity(
+                                          0.05,
+                                        ),
                                         height: 1,
                                       ),
                                   ],
@@ -135,13 +144,21 @@ class OrderDetailPage extends StatelessWidget {
                                   ),
                                   border: Border(
                                     top: BorderSide(
-                                      color: AppColors.lightGreen.withOpacity(0.1),
+                                      color: AppColors.lightGreen.withOpacity(
+                                        0.1,
+                                      ),
                                     ),
                                   ),
                                 ),
-                                padding: const EdgeInsets.fromLTRB(16, 17, 16, 16),
+                                padding: const EdgeInsets.fromLTRB(
+                                  16,
+                                  17,
+                                  16,
+                                  16,
+                                ),
                                 child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
                                   children: [
                                     const Text(
                                       'Total',
@@ -190,7 +207,9 @@ class OrderDetailPage extends StatelessWidget {
                           decoration: BoxDecoration(
                             color: AppColors.white,
                             borderRadius: BorderRadius.circular(24),
-                            border: Border.all(color: AppColors.lightGreen.withOpacity(0.05)),
+                            border: Border.all(
+                              color: AppColors.lightGreen.withOpacity(0.05),
+                            ),
                             boxShadow: const [
                               BoxShadow(
                                 color: Color(0x0D000000),
@@ -202,7 +221,11 @@ class OrderDetailPage extends StatelessWidget {
                           child: Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Icon(Icons.location_on_outlined, size: 20, color: AppColors.darkGreen),
+                              const Icon(
+                                Icons.location_on_outlined,
+                                size: 20,
+                                color: AppColors.darkGreen,
+                              ),
                               const SizedBox(width: 12),
                               Expanded(
                                 child: Column(

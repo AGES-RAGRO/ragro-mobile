@@ -14,12 +14,11 @@ class UpdateConsumerProfile {
     required String phone,
     required String address,
     String? fiscalNumber,
-  }) =>
-      _repository.updateProfile(
-        userId: userId,
-        name: name,
-        phone: phone,
-        address: address,
-        fiscalNumber: fiscalNumber,
-      );
+  }) => _repository.updateProfile(
+    userId: userId,
+    name: name,
+    phone: phone,
+    address: address,
+    fiscalNumber: fiscalNumber,
+  );
 }

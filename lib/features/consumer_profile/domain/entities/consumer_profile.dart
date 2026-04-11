@@ -39,5 +39,13 @@ class ConsumerProfile extends Equatable {
   }
 
   @override
-  List<Object?> get props => [id, userId, name, email, phone, address, fiscalNumber];
+  List<Object?> get props => [
+    id,
+    userId,
+    name,
+    email,
+    phone,
+    address,
+    fiscalNumber,
+  ];
 }

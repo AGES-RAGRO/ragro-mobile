@@ -85,25 +85,25 @@ class _ConsumerRegisterViewState extends State<_ConsumerRegisterView> {
     }
 
     context.read<RegisterBloc>().add(
-          RegisterSubmitted(
-            name: _nameController.text.trim(),
-            phone: _phoneController.text.trim(),
-            email: _emailController.text.trim(),
-            fiscalNumber: _cpfController.text.trim(),
-            password: _passwordController.text,
-            zipCode: _zipCodeController.text.trim(),
-            street: _streetController.text.trim(),
-            number: _numberController.text.trim(),
-            city: _cityController.text.trim(),
-            state: _stateController.text.trim(),
-            complement: _complementController.text.trim().isEmpty
-                ? null
-                : _complementController.text.trim(),
-            neighborhood: _neighborhoodController.text.trim().isEmpty
-                ? null
-                : _neighborhoodController.text.trim(),
-          ),
-        );
+      RegisterSubmitted(
+        name: _nameController.text.trim(),
+        phone: _phoneController.text.trim(),
+        email: _emailController.text.trim(),
+        fiscalNumber: _cpfController.text.trim(),
+        password: _passwordController.text,
+        zipCode: _zipCodeController.text.trim(),
+        street: _streetController.text.trim(),
+        number: _numberController.text.trim(),
+        city: _cityController.text.trim(),
+        state: _stateController.text.trim(),
+        complement: _complementController.text.trim().isEmpty
+            ? null
+            : _complementController.text.trim(),
+        neighborhood: _neighborhoodController.text.trim().isEmpty
+            ? null
+            : _neighborhoodController.text.trim(),
+      ),
+    );
   }
 
   @override
@@ -152,8 +152,7 @@ class _ConsumerRegisterViewState extends State<_ConsumerRegisterView> {
                   controller: _phoneController,
                   keyboardType: TextInputType.phone,
                   validator: (value) {
-                    final digits =
-                        value?.replaceAll(RegExp(r'\D'), '') ?? '';
+                    final digits = value?.replaceAll(RegExp(r'\D'), '') ?? '';
                     if (digits.length != 11) {
                       return 'DDD + número com 11 dígitos';
                     }
@@ -180,8 +179,7 @@ class _ConsumerRegisterViewState extends State<_ConsumerRegisterView> {
                   controller: _cpfController,
                   keyboardType: TextInputType.number,
                   validator: (value) {
-                    final digits =
-                        value?.replaceAll(RegExp(r'\D'), '') ?? '';
+                    final digits = value?.replaceAll(RegExp(r'\D'), '') ?? '';
                     if (digits.length != 11) {
                       return 'CPF deve ter 11 dígitos';
                     }
@@ -201,8 +199,9 @@ class _ConsumerRegisterViewState extends State<_ConsumerRegisterView> {
                     if (value.length < 8 || value.length > 50) {
                       return 'Entre 8 e 50 caracteres';
                     }
-                    if (!RegExp(r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$')
-                        .hasMatch(value)) {
+                    if (!RegExp(
+                      r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$',
+                    ).hasMatch(value)) {
                       return 'Inclua maiúscula, minúscula e um número';
                     }
                     return null;
@@ -228,8 +227,7 @@ class _ConsumerRegisterViewState extends State<_ConsumerRegisterView> {
                   controller: _zipCodeController,
                   keyboardType: TextInputType.number,
                   validator: (value) {
-                    final digits =
-                        value?.replaceAll(RegExp(r'\D'), '') ?? '';
+                    final digits = value?.replaceAll(RegExp(r'\D'), '') ?? '';
                     if (digits.length != 8) {
                       return 'CEP deve ter 8 dígitos';
                     }
@@ -339,10 +337,7 @@ class _ConsumerRegisterViewState extends State<_ConsumerRegisterView> {
 }
 
 class _TermsCheckbox extends StatefulWidget {
-  const _TermsCheckbox({
-    required this.value,
-    required this.onChanged,
-  });
+  const _TermsCheckbox({required this.value, required this.onChanged});
 
   final bool value;
   final ValueChanged<bool?> onChanged;

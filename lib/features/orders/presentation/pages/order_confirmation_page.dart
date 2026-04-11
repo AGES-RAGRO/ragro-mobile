@@ -36,13 +36,16 @@ class OrderConfirmationPage extends StatelessWidget {
           builder: (context, state) {
             if (state is CheckoutLoading || state is CheckoutInitial) {
               return const Scaffold(
-                body: Center(child: CircularProgressIndicator(color: AppColors.darkGreen)),
+                body: Center(
+                  child: CircularProgressIndicator(color: AppColors.darkGreen),
+                ),
               );
             }
             if (state is CheckoutFailure) {
               return Scaffold(body: Center(child: Text(state.message)));
             }
-            if (state is! CheckoutReady && state is! CheckoutSuccess) return const Scaffold();
+            if (state is! CheckoutReady && state is! CheckoutSuccess)
+              return const Scaffold();
 
             final order = state is CheckoutReady
                 ? state.order
@@ -141,7 +144,9 @@ class _CheckoutView extends StatelessWidget {
                           decoration: BoxDecoration(
                             color: AppColors.lightGreen.withOpacity(0.05),
                             borderRadius: BorderRadius.circular(24),
-                            border: Border.all(color: AppColors.lightGreen.withOpacity(0.1)),
+                            border: Border.all(
+                              color: AppColors.lightGreen.withOpacity(0.1),
+                            ),
                           ),
                           child: Row(
                             children: [
@@ -151,7 +156,11 @@ class _CheckoutView extends StatelessWidget {
                                   color: AppColors.darkGreen,
                                   borderRadius: BorderRadius.circular(16),
                                 ),
-                                child: const Icon(Icons.location_on, color: AppColors.white, size: 20),
+                                child: const Icon(
+                                  Icons.location_on,
+                                  color: AppColors.white,
+                                  size: 20,
+                                ),
                               ),
                               const SizedBox(width: 16),
                               Expanded(
@@ -194,7 +203,11 @@ class _CheckoutView extends StatelessWidget {
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                Icon(Icons.map_outlined, color: AppColors.darkGreen, size: 24),
+                                Icon(
+                                  Icons.map_outlined,
+                                  color: AppColors.darkGreen,
+                                  size: 24,
+                                ),
                                 SizedBox(width: 8),
                                 Text(
                                   'Mapa de Entrega',
@@ -234,7 +247,10 @@ class _CheckoutView extends StatelessWidget {
                               ),
                             ),
                             Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 4,
+                              ),
                               decoration: BoxDecoration(
                                 color: AppColors.lightGreen.withOpacity(0.1),
                                 borderRadius: BorderRadius.circular(9999),
@@ -290,14 +306,35 @@ class _CheckoutView extends StatelessWidget {
                               // Bank
                               Row(
                                 children: [
-                                  const Icon(Icons.account_balance_outlined, size: 20, color: AppColors.darkGreen),
+                                  const Icon(
+                                    Icons.account_balance_outlined,
+                                    size: 20,
+                                    color: AppColors.darkGreen,
+                                  ),
                                   const SizedBox(width: 16),
                                   Expanded(
                                     child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
-                                        const Text('Banco', style: TextStyle(fontFamily: 'Manrope', fontWeight: FontWeight.w700, fontSize: 14, color: AppColors.placeholder)),
-                                        Text(order.bankInfo.bank, style: const TextStyle(fontFamily: 'Manrope', fontWeight: FontWeight.w700, fontSize: 14, color: AppColors.black)),
+                                        const Text(
+                                          'Banco',
+                                          style: TextStyle(
+                                            fontFamily: 'Manrope',
+                                            fontWeight: FontWeight.w700,
+                                            fontSize: 14,
+                                            color: AppColors.placeholder,
+                                          ),
+                                        ),
+                                        Text(
+                                          order.bankInfo.bank,
+                                          style: const TextStyle(
+                                            fontFamily: 'Manrope',
+                                            fontWeight: FontWeight.w700,
+                                            fontSize: 14,
+                                            color: AppColors.black,
+                                          ),
+                                        ),
                                       ],
                                     ),
                                   ),
@@ -309,36 +346,94 @@ class _CheckoutView extends StatelessWidget {
                                 children: [
                                   Expanded(
                                     child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
-                                        const Text('Agência', style: TextStyle(fontFamily: 'Manrope', fontWeight: FontWeight.w700, fontSize: 12, color: AppColors.placeholder)),
-                                        Text(order.bankInfo.agency, style: const TextStyle(fontFamily: 'Manrope', fontWeight: FontWeight.w700, fontSize: 14, color: AppColors.black)),
+                                        const Text(
+                                          'Agência',
+                                          style: TextStyle(
+                                            fontFamily: 'Manrope',
+                                            fontWeight: FontWeight.w700,
+                                            fontSize: 12,
+                                            color: AppColors.placeholder,
+                                          ),
+                                        ),
+                                        Text(
+                                          order.bankInfo.agency,
+                                          style: const TextStyle(
+                                            fontFamily: 'Manrope',
+                                            fontWeight: FontWeight.w700,
+                                            fontSize: 14,
+                                            color: AppColors.black,
+                                          ),
+                                        ),
                                       ],
                                     ),
                                   ),
                                   Expanded(
                                     child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
-                                        const Text('Conta Corrente', style: TextStyle(fontFamily: 'Manrope', fontWeight: FontWeight.w700, fontSize: 12, color: AppColors.placeholder)),
-                                        Text(order.bankInfo.account, style: const TextStyle(fontFamily: 'Manrope', fontWeight: FontWeight.w700, fontSize: 14, color: AppColors.black)),
+                                        const Text(
+                                          'Conta Corrente',
+                                          style: TextStyle(
+                                            fontFamily: 'Manrope',
+                                            fontWeight: FontWeight.w700,
+                                            fontSize: 12,
+                                            color: AppColors.placeholder,
+                                          ),
+                                        ),
+                                        Text(
+                                          order.bankInfo.account,
+                                          style: const TextStyle(
+                                            fontFamily: 'Manrope',
+                                            fontWeight: FontWeight.w700,
+                                            fontSize: 14,
+                                            color: AppColors.black,
+                                          ),
+                                        ),
                                       ],
                                     ),
                                   ),
                                 ],
                               ),
-                              const Divider(color: Color(0xFFF1F5F9), height: 24),
+                              const Divider(
+                                color: Color(0xFFF1F5F9),
+                                height: 24,
+                              ),
                               // PIX
                               Row(
                                 children: [
-                                  const Icon(Icons.pix, size: 22, color: AppColors.lightGreen),
+                                  const Icon(
+                                    Icons.pix,
+                                    size: 22,
+                                    color: AppColors.lightGreen,
+                                  ),
                                   const SizedBox(width: 16),
                                   Expanded(
                                     child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
-                                        const Text('Chave PIX', style: TextStyle(fontFamily: 'Manrope', fontWeight: FontWeight.w700, fontSize: 12, color: AppColors.placeholder)),
-                                        Text(order.bankInfo.pixKey, style: const TextStyle(fontFamily: 'Manrope', fontWeight: FontWeight.w700, fontSize: 14, color: AppColors.black)),
+                                        const Text(
+                                          'Chave PIX',
+                                          style: TextStyle(
+                                            fontFamily: 'Manrope',
+                                            fontWeight: FontWeight.w700,
+                                            fontSize: 12,
+                                            color: AppColors.placeholder,
+                                          ),
+                                        ),
+                                        Text(
+                                          order.bankInfo.pixKey,
+                                          style: const TextStyle(
+                                            fontFamily: 'Manrope',
+                                            fontWeight: FontWeight.w700,
+                                            fontSize: 14,
+                                            color: AppColors.black,
+                                          ),
+                                        ),
                                       ],
                                     ),
                                   ),
@@ -374,12 +469,35 @@ class _CheckoutView extends StatelessWidget {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Text('Frete RAGRO Logística', style: TextStyle(fontFamily: 'Manrope', fontWeight: FontWeight.w700, fontSize: 14, color: AppColors.black)),
-                                    Text('Previsão: 3 a 5 dias úteis', style: TextStyle(fontFamily: 'Manrope', fontSize: 12, color: AppColors.placeholder)),
+                                    Text(
+                                      'Frete RAGRO Logística',
+                                      style: TextStyle(
+                                        fontFamily: 'Manrope',
+                                        fontWeight: FontWeight.w700,
+                                        fontSize: 14,
+                                        color: AppColors.black,
+                                      ),
+                                    ),
+                                    Text(
+                                      'Previsão: 3 a 5 dias úteis',
+                                      style: TextStyle(
+                                        fontFamily: 'Manrope',
+                                        fontSize: 12,
+                                        color: AppColors.placeholder,
+                                      ),
+                                    ),
                                   ],
                                 ),
                               ),
-                              Text('Grátis', style: TextStyle(fontFamily: 'Manrope', fontWeight: FontWeight.w700, fontSize: 14, color: AppColors.darkGreen)),
+                              Text(
+                                'Grátis',
+                                style: TextStyle(
+                                  fontFamily: 'Manrope',
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 14,
+                                  color: AppColors.darkGreen,
+                                ),
+                              ),
                             ],
                           ),
                         ),
@@ -396,7 +514,9 @@ class _CheckoutView extends StatelessWidget {
               padding: const EdgeInsets.fromLTRB(24, 25, 24, 24),
               decoration: BoxDecoration(
                 color: AppColors.white,
-                border: const Border(top: BorderSide(color: AppColors.placeholder)),
+                border: const Border(
+                  top: BorderSide(color: AppColors.placeholder),
+                ),
                 boxShadow: const [
                   BoxShadow(
                     color: Color(0x0D000000),
@@ -411,8 +531,22 @@ class _CheckoutView extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text('Subtotal', style: TextStyle(fontFamily: 'Manrope', fontSize: 14, color: AppColors.black)),
-                      Text(_formatPrice(order.totalAmount), style: const TextStyle(fontFamily: 'Manrope', fontSize: 14, color: AppColors.black)),
+                      const Text(
+                        'Subtotal',
+                        style: TextStyle(
+                          fontFamily: 'Manrope',
+                          fontSize: 14,
+                          color: AppColors.black,
+                        ),
+                      ),
+                      Text(
+                        _formatPrice(order.totalAmount),
+                        style: const TextStyle(
+                          fontFamily: 'Manrope',
+                          fontSize: 14,
+                          color: AppColors.black,
+                        ),
+                      ),
                     ],
                   ),
                   const SizedBox(height: 8),
@@ -420,8 +554,23 @@ class _CheckoutView extends StatelessWidget {
                   const Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text('Frete', style: TextStyle(fontFamily: 'Manrope', fontSize: 14, color: AppColors.black)),
-                      Text('Grátis', style: TextStyle(fontFamily: 'Manrope', fontWeight: FontWeight.w700, fontSize: 14, color: AppColors.darkGreen)),
+                      Text(
+                        'Frete',
+                        style: TextStyle(
+                          fontFamily: 'Manrope',
+                          fontSize: 14,
+                          color: AppColors.black,
+                        ),
+                      ),
+                      Text(
+                        'Grátis',
+                        style: TextStyle(
+                          fontFamily: 'Manrope',
+                          fontWeight: FontWeight.w700,
+                          fontSize: 14,
+                          color: AppColors.darkGreen,
+                        ),
+                      ),
                     ],
                   ),
                   const SizedBox(height: 8),
@@ -429,8 +578,24 @@ class _CheckoutView extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text('Total do Pedido', style: TextStyle(fontFamily: 'Manrope', fontWeight: FontWeight.w700, fontSize: 16, color: AppColors.black)),
-                      Text(_formatPrice(order.totalAmount), style: const TextStyle(fontFamily: 'Manrope', fontWeight: FontWeight.w700, fontSize: 16, color: AppColors.black)),
+                      const Text(
+                        'Total do Pedido',
+                        style: TextStyle(
+                          fontFamily: 'Manrope',
+                          fontWeight: FontWeight.w700,
+                          fontSize: 16,
+                          color: AppColors.black,
+                        ),
+                      ),
+                      Text(
+                        _formatPrice(order.totalAmount),
+                        style: const TextStyle(
+                          fontFamily: 'Manrope',
+                          fontWeight: FontWeight.w700,
+                          fontSize: 16,
+                          color: AppColors.black,
+                        ),
+                      ),
                     ],
                   ),
                   const SizedBox(height: 16),
@@ -441,7 +606,9 @@ class _CheckoutView extends StatelessWidget {
                       return GestureDetector(
                         onTap: isLoading
                             ? null
-                            : () => context.read<CheckoutBloc>().add(const CheckoutConfirmed('cart')),
+                            : () => context.read<CheckoutBloc>().add(
+                                const CheckoutConfirmed('cart'),
+                              ),
                         child: Container(
                           height: 56,
                           decoration: BoxDecoration(
@@ -450,7 +617,9 @@ class _CheckoutView extends StatelessWidget {
                           ),
                           child: Center(
                             child: isLoading
-                                ? const CircularProgressIndicator(color: AppColors.white)
+                                ? const CircularProgressIndicator(
+                                    color: AppColors.white,
+                                  )
                                 : const Row(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
@@ -464,7 +633,11 @@ class _CheckoutView extends StatelessWidget {
                                         ),
                                       ),
                                       SizedBox(width: 8),
-                                      Icon(Icons.check_circle_outline, color: AppColors.white, size: 20),
+                                      Icon(
+                                        Icons.check_circle_outline,
+                                        color: AppColors.white,
+                                        size: 20,
+                                      ),
                                     ],
                                   ),
                           ),

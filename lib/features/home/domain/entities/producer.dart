@@ -18,5 +18,12 @@ class Producer extends Equatable {
   final String ownerName;
 
   @override
-  List<Object?> get props => [id, name, description, avatarUrl, averageRating, ownerName];
+  List<Object?> get props => [
+    id,
+    name,
+    description,
+    avatarUrl,
+    averageRating,
+    ownerName,
+  ];
 }

@@ -33,9 +33,7 @@ class ProfileMenuItem extends StatelessWidget {
         decoration: BoxDecoration(
           color: backgroundColor ?? AppColors.white,
           borderRadius: BorderRadius.circular(24),
-          border: Border.all(
-            color: borderColor ?? const Color(0x0D2E5729),
-          ),
+          border: Border.all(color: borderColor ?? const Color(0x0D2E5729)),
           boxShadow: const [
             BoxShadow(
               color: Color(0x0D000000),

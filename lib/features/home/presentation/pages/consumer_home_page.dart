@@ -40,62 +40,67 @@ class _ConsumerHomeView extends StatelessWidget {
             return switch (state) {
               HomeLoading() || HomeInitial() => const _HomeLoadingView(),
               HomeLoaded(:final producers, :final products) => RefreshIndicator(
-                  onRefresh: () async {
-                    context.read<HomeBloc>().add(const HomeRefreshed());
-                  },
-                  child: CustomScrollView(
-                    slivers: [
-                      SliverToBoxAdapter(
-                        child: Padding(
-                          padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-                          child: const Text(
-                            'Início',
-                            style: TextStyle(
-                              fontFamily: 'Figtree',
-                              fontWeight: FontWeight.w700,
-                              fontSize: 34,
-                              color: AppColors.darkGreen,
-                            ),
+                onRefresh: () async {
+                  context.read<HomeBloc>().add(const HomeRefreshed());
+                },
+                child: CustomScrollView(
+                  slivers: [
+                    SliverToBoxAdapter(
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                        child: const Text(
+                          'Início',
+                          style: TextStyle(
+                            fontFamily: 'Figtree',
+                            fontWeight: FontWeight.w700,
+                            fontSize: 34,
+                            color: AppColors.darkGreen,
                           ),
                         ),
                       ),
-                      const SliverToBoxAdapter(child: SizedBox(height: 24)),
-                      SliverToBoxAdapter(
-                        child: ProducersSection(
-                          producers: producers,
-                          onProducerTap: (p) => _onProducerTap(context, p),
-                        ),
+                    ),
+                    const SliverToBoxAdapter(child: SizedBox(height: 24)),
+                    SliverToBoxAdapter(
+                      child: ProducersSection(
+                        producers: producers,
+                        onProducerTap: (p) => _onProducerTap(context, p),
                       ),
-                      const SliverToBoxAdapter(child: SizedBox(height: 32)),
-                      SliverToBoxAdapter(
-                        child: ProductsGrid(
-                          products: products,
-                          onProductTap: (p) => context.push('/consumer/home/product/${p.id}'),
-                          onAddToCart: (_) {
-                            // TODO: navigate to cart / add to cart
-                          },
-                        ),
+                    ),
+                    const SliverToBoxAdapter(child: SizedBox(height: 32)),
+                    SliverToBoxAdapter(
+                      child: ProductsGrid(
+                        products: products,
+                        onProductTap: (p) =>
+                            context.push('/consumer/home/product/${p.id}'),
+                        onAddToCart: (_) {
+                          // TODO: navigate to cart / add to cart
+                        },
                       ),
-                      const SliverToBoxAdapter(child: SizedBox(height: 32)),
-                    ],
-                  ),
+                    ),
+                    const SliverToBoxAdapter(child: SizedBox(height: 32)),
+                  ],
                 ),
+              ),
               HomeFailure(:final message) => Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(Icons.error_outline, color: AppColors.red, size: 48),
-                      const SizedBox(height: 16),
-                      Text(message, textAlign: TextAlign.center),
-                      const SizedBox(height: 16),
-                      ElevatedButton(
-                        onPressed: () =>
-                            context.read<HomeBloc>().add(const HomeRefreshed()),
-                        child: const Text('Tentar novamente'),
-                      ),
-                    ],
-                  ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(
+                      Icons.error_outline,
+                      color: AppColors.red,
+                      size: 48,
+                    ),
+                    const SizedBox(height: 16),
+                    Text(message, textAlign: TextAlign.center),
+                    const SizedBox(height: 16),
+                    ElevatedButton(
+                      onPressed: () =>
+                          context.read<HomeBloc>().add(const HomeRefreshed()),
+                      child: const Text('Tentar novamente'),
+                    ),
+                  ],
                 ),
+              ),
             };
           },
         ),

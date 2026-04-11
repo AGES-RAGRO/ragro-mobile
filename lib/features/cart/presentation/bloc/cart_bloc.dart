@@ -38,7 +38,10 @@ class CartBloc extends Bloc<CartEvent, CartState> {
     emit(CartLoaded(_addToCart(event.item)));
   }
 
-  void _onQuantityUpdated(CartItemQuantityUpdated event, Emitter<CartState> emit) {
+  void _onQuantityUpdated(
+    CartItemQuantityUpdated event,
+    Emitter<CartState> emit,
+  ) {
     emit(CartLoaded(_updateQuantity(event.productId, event.quantity)));
   }
 

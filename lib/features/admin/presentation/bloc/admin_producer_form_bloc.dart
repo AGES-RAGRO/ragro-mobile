@@ -9,7 +9,7 @@ import 'package:ragro_mobile/features/admin/presentation/bloc/admin_producer_for
 class AdminProducerFormBloc
     extends Bloc<AdminProducerFormEvent, AdminProducerFormState> {
   AdminProducerFormBloc(this._createProducer)
-      : super(const AdminProducerFormInitial()) {
+    : super(const AdminProducerFormInitial()) {
     on<AdminProducerFormSubmitted>(_onSubmitted);
   }
 

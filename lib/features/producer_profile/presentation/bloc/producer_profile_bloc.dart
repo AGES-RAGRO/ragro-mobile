@@ -8,7 +8,8 @@ import 'package:ragro_mobile/features/producer_profile/presentation/bloc/produce
 @injectable
 class ProducerProfileBloc
     extends Bloc<ProducerProfileEvent, ProducerProfileState> {
-  ProducerProfileBloc(this._getProducer) : super(const ProducerProfileInitial()) {
+  ProducerProfileBloc(this._getProducer)
+    : super(const ProducerProfileInitial()) {
     on<ProducerProfileStarted>(_onStarted);
   }
 
@@ -25,7 +26,9 @@ class ProducerProfileBloc
     } on ApiException catch (e) {
       emit(ProducerProfileFailure(e.message));
     } catch (_) {
-      emit(const ProducerProfileFailure('Erro ao carregar perfil do produtor.'));
+      emit(
+        const ProducerProfileFailure('Erro ao carregar perfil do produtor.'),
+      );
     }
   }
 }

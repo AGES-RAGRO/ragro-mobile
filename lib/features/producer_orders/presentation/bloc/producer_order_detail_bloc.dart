@@ -84,7 +84,9 @@ class ProducerOrderDetailBloc
     try {
       await _updateStatus(event.orderId, event.status);
       final updated = await _getDetail(event.orderId);
-      emit(ProducerOrderDetailSuccess(order: updated, action: 'status_updated'));
+      emit(
+        ProducerOrderDetailSuccess(order: updated, action: 'status_updated'),
+      );
       emit(ProducerOrderDetailLoaded(updated));
     } catch (e) {
       emit(ProducerOrderDetailFailure(e.toString()));

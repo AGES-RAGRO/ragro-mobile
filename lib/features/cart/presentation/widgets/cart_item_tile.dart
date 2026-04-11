@@ -93,7 +93,10 @@ class CartItemTile extends StatelessWidget {
                   children: [
                     // Quantity selector
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 4,
+                      ),
                       decoration: BoxDecoration(
                         color: const Color(0xFFF1F5F9),
                         borderRadius: BorderRadius.circular(9999),
@@ -102,8 +105,11 @@ class CartItemTile extends StatelessWidget {
                         children: [
                           GestureDetector(
                             onTap: () => context.read<CartBloc>().add(
-                                  CartItemQuantityUpdated(item.productId, item.quantity - 1),
-                                ),
+                              CartItemQuantityUpdated(
+                                item.productId,
+                                item.quantity - 1,
+                              ),
+                            ),
                             child: const Icon(Icons.remove, size: 14),
                           ),
                           const SizedBox(width: 12),
@@ -118,8 +124,11 @@ class CartItemTile extends StatelessWidget {
                           const SizedBox(width: 12),
                           GestureDetector(
                             onTap: () => context.read<CartBloc>().add(
-                                  CartItemQuantityUpdated(item.productId, item.quantity + 1),
-                                ),
+                              CartItemQuantityUpdated(
+                                item.productId,
+                                item.quantity + 1,
+                              ),
+                            ),
                             child: const Icon(Icons.add, size: 14),
                           ),
                         ],
@@ -129,9 +138,13 @@ class CartItemTile extends StatelessWidget {
                     // Delete
                     GestureDetector(
                       onTap: () => context.read<CartBloc>().add(
-                            CartItemRemoved(item.productId),
-                          ),
-                      child: const Icon(Icons.delete_outline, color: AppColors.red, size: 20),
+                        CartItemRemoved(item.productId),
+                      ),
+                      child: const Icon(
+                        Icons.delete_outline,
+                        color: AppColors.red,
+                        size: 20,
+                      ),
                     ),
                   ],
                 ),

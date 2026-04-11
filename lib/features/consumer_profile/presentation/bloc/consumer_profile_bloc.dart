@@ -10,7 +10,7 @@ import 'package:ragro_mobile/features/consumer_profile/presentation/bloc/consume
 class ConsumerProfileBloc
     extends Bloc<ConsumerProfileEvent, ConsumerProfileState> {
   ConsumerProfileBloc(this._getProfile, this._updateProfile)
-      : super(const ConsumerProfileInitial()) {
+    : super(const ConsumerProfileInitial()) {
     on<ConsumerProfileStarted>(_onStarted);
     on<ConsumerProfileUpdateSubmitted>(_onUpdateSubmitted);
   }

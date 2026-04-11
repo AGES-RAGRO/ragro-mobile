@@ -9,7 +9,7 @@ import 'package:ragro_mobile/features/admin/presentation/bloc/admin_producers_st
 class AdminProducersBloc
     extends Bloc<AdminProducersEvent, AdminProducersState> {
   AdminProducersBloc(this._getProducers, this._deactivate)
-      : super(const AdminProducersInitial()) {
+    : super(const AdminProducersInitial()) {
     on<AdminProducersStarted>(_onStarted);
     on<AdminProducerDeactivated>(_onDeactivated);
     on<AdminProducersRefreshed>(_onRefreshed);

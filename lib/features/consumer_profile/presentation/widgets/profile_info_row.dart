@@ -1,11 +1,7 @@
 import 'package:flutter/material.dart';
 
 class ProfileInfoRow extends StatelessWidget {
-  const ProfileInfoRow({
-    super.key,
-    required this.icon,
-    required this.text,
-  });
+  const ProfileInfoRow({super.key, required this.icon, required this.text});
 
   final IconData icon;
   final String text;

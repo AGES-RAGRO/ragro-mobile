@@ -26,37 +26,32 @@ void main() {
   );
 
   test('calls repository with correct params', () async {
-    when(() => mockRepo.loginUser(
-          email: any(named: 'email'),
-          password: any(named: 'password'),
-        )).thenAnswer((_) async => (user: tUser, token: 'tok'));
+    when(
+      () => mockRepo.loginUser(
+        email: any(named: 'email'),
+        password: any(named: 'password'),
+      ),
+    ).thenAnswer((_) async => (user: tUser, token: 'tok'));
 
-    final result = await loginUser(
-      email: 'joao@test.com',
-      password: '123456',
-    );
+    final result = await loginUser(email: 'joao@test.com', password: '123456');
 
     expect(result.user, tUser);
     expect(result.token, 'tok');
-    verify(() => mockRepo.loginUser(
-          email: 'joao@test.com',
-          password: '123456',
-        )).called(1);
+    verify(
+      () => mockRepo.loginUser(email: 'joao@test.com', password: '123456'),
+    ).called(1);
   });
 
   test('propagates UnauthorizedException from repository', () async {
-    when(() => mockRepo.loginUser(
-          email: any(named: 'email'),
-          password: any(named: 'password'),
-        )).thenThrow(
-      const UnauthorizedException(),
-    );
+    when(
+      () => mockRepo.loginUser(
+        email: any(named: 'email'),
+        password: any(named: 'password'),
+      ),
+    ).thenThrow(const UnauthorizedException());
 
     expect(
-      () => loginUser(
-        email: 'j@t.com',
-        password: 'wrong',
-      ),
+      () => loginUser(email: 'j@t.com', password: 'wrong'),
       throwsA(isA<UnauthorizedException>()),
     );
   });

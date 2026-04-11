@@ -13,10 +13,38 @@ class OrdersRemoteDatasource {
       farmAvatarUrl: '',
       ownerName: 'Manoel Silva',
       items: const [
-        OrderItem(productId: 'prod1', name: 'Tomate', imageUrl: '', quantity: 1, unityType: 'un', totalPrice: 12.90),
-        OrderItem(productId: 'prod2', name: 'Bananas', imageUrl: '', quantity: 3, unityType: 'kg', totalPrice: 18.00),
-        OrderItem(productId: 'prod3', name: 'Maçã', imageUrl: '', quantity: 1, unityType: 'kg', totalPrice: 9.00),
-        OrderItem(productId: 'prod4', name: 'Alface Crespa', imageUrl: '', quantity: 1, unityType: 'un', totalPrice: 4.50),
+        OrderItem(
+          productId: 'prod1',
+          name: 'Tomate',
+          imageUrl: '',
+          quantity: 1,
+          unityType: 'un',
+          totalPrice: 12.90,
+        ),
+        OrderItem(
+          productId: 'prod2',
+          name: 'Bananas',
+          imageUrl: '',
+          quantity: 3,
+          unityType: 'kg',
+          totalPrice: 18.00,
+        ),
+        OrderItem(
+          productId: 'prod3',
+          name: 'Maçã',
+          imageUrl: '',
+          quantity: 1,
+          unityType: 'kg',
+          totalPrice: 9.00,
+        ),
+        OrderItem(
+          productId: 'prod4',
+          name: 'Alface Crespa',
+          imageUrl: '',
+          quantity: 1,
+          unityType: 'un',
+          totalPrice: 4.50,
+        ),
       ],
       totalAmount: 145.90,
       status: OrderStatus.pending,
@@ -42,9 +70,30 @@ class OrdersRemoteDatasource {
       farmAvatarUrl: '',
       ownerName: 'Manoel Silva',
       items: const [
-        OrderItem(productId: 'prod1', name: 'Tomate', imageUrl: '', quantity: 1, unityType: 'un', totalPrice: 12.90),
-        OrderItem(productId: 'prod2', name: 'Bananas', imageUrl: '', quantity: 3, unityType: 'kg', totalPrice: 18.00),
-        OrderItem(productId: 'prod3', name: 'Maçã', imageUrl: '', quantity: 1, unityType: 'kg', totalPrice: 9.00),
+        OrderItem(
+          productId: 'prod1',
+          name: 'Tomate',
+          imageUrl: '',
+          quantity: 1,
+          unityType: 'un',
+          totalPrice: 12.90,
+        ),
+        OrderItem(
+          productId: 'prod2',
+          name: 'Bananas',
+          imageUrl: '',
+          quantity: 3,
+          unityType: 'kg',
+          totalPrice: 18.00,
+        ),
+        OrderItem(
+          productId: 'prod3',
+          name: 'Maçã',
+          imageUrl: '',
+          quantity: 1,
+          unityType: 'kg',
+          totalPrice: 9.00,
+        ),
       ],
       totalAmount: 145.90,
       status: OrderStatus.accepted,
@@ -70,8 +119,22 @@ class OrdersRemoteDatasource {
       farmAvatarUrl: '',
       ownerName: 'Manoel Silva',
       items: const [
-        OrderItem(productId: 'prod1', name: 'Tomate', imageUrl: '', quantity: 1, unityType: 'un', totalPrice: 12.90),
-        OrderItem(productId: 'prod5', name: 'Maçã', imageUrl: '', quantity: 1, unityType: 'kg', totalPrice: 9.00),
+        OrderItem(
+          productId: 'prod1',
+          name: 'Tomate',
+          imageUrl: '',
+          quantity: 1,
+          unityType: 'un',
+          totalPrice: 12.90,
+        ),
+        OrderItem(
+          productId: 'prod5',
+          name: 'Maçã',
+          imageUrl: '',
+          quantity: 1,
+          unityType: 'kg',
+          totalPrice: 9.00,
+        ),
       ],
       totalAmount: 145.90,
       status: OrderStatus.delivered,
@@ -97,7 +160,14 @@ class OrdersRemoteDatasource {
       farmAvatarUrl: '',
       ownerName: 'Manoel Silva',
       items: const [
-        OrderItem(productId: 'prod2', name: 'Bananas', imageUrl: '', quantity: 3, unityType: 'kg', totalPrice: 18.00),
+        OrderItem(
+          productId: 'prod2',
+          name: 'Bananas',
+          imageUrl: '',
+          quantity: 3,
+          unityType: 'kg',
+          totalPrice: 18.00,
+        ),
       ],
       totalAmount: 145.90,
       status: OrderStatus.cancelled,
@@ -167,7 +237,10 @@ class OrdersRemoteDatasource {
   /// MOCK TEMPORÁRIO — remover quando backend estiver conectado:
   Future<Order> getOrderById(String id) async {
     await Future<void>.delayed(const Duration(milliseconds: 400));
-    return _mockOrders.firstWhere((o) => o.id == id, orElse: () => _mockOrders.first);
+    return _mockOrders.firstWhere(
+      (o) => o.id == id,
+      orElse: () => _mockOrders.first,
+    );
   }
 
   /// Confirms an order from cart (POST /orders).

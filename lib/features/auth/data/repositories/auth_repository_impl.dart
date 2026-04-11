@@ -22,10 +22,7 @@ class AuthRepositoryImpl implements AuthRepository {
     required String email,
     required String password,
   }) async {
-    final response = await _remote.loginUser(
-      email: email,
-      password: password,
-    );
+    final response = await _remote.loginUser(email: email, password: password);
     try {
       await _local.saveSession(
         token: response.accessToken,
@@ -93,25 +90,27 @@ class AuthRepositoryImpl implements AuthRepository {
     // DEMO_MODE: bypass auth — used for Playwright visual testing only.
     // Run with: flutter run -d chrome --dart-define=DEMO_MODE=true
     const demoMode = bool.fromEnvironment('DEMO_MODE');
-    const demoRole =
-        String.fromEnvironment('DEMO_ROLE', defaultValue: 'producer');
+    const demoRole = String.fromEnvironment(
+      'DEMO_ROLE',
+      defaultValue: 'producer',
+    );
     if (demoMode) {
       final (id, name, email) = switch (demoRole) {
         'consumer' => (
-            'demo_consumer_001',
-            'Ricardo Aguiar (Demo)',
-            'consumer@ragro.com.br'
-          ),
+          'demo_consumer_001',
+          'Ricardo Aguiar (Demo)',
+          'consumer@ragro.com.br',
+        ),
         'admin' => (
-            'demo_admin_001',
-            'Admin RAGRO (Demo)',
-            'admin@ragro.com.br'
-          ),
+          'demo_admin_001',
+          'Admin RAGRO (Demo)',
+          'admin@ragro.com.br',
+        ),
         _ => (
-            'demo_producer_001',
-            'João Silva (Demo)',
-            'produtor@ragro.com.br'
-          ),
+          'demo_producer_001',
+          'João Silva (Demo)',
+          'produtor@ragro.com.br',
+        ),
       };
       return UserModel(
         id: id,
@@ -167,7 +166,8 @@ class AuthRepositoryImpl implements AuthRepository {
     final email = _local.getUserEmail();
     final type = _local.getUserType();
     final active = _local.getUserActive();
-    if (id == null || name == null || email == null || type == null) return null;
+    if (id == null || name == null || email == null || type == null)
+      return null;
     final phone = _local.getUserPhone();
     return UserModel(
       id: id,

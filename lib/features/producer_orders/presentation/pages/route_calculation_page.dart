@@ -215,18 +215,14 @@ class RouteCalculationPage extends StatelessWidget {
               padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
               decoration: BoxDecoration(
                 color: Colors.white.withOpacity(0.97),
-                border: const Border(
-                  top: BorderSide(color: Color(0x1A2E5729)),
-                ),
+                border: const Border(top: BorderSide(color: Color(0x1A2E5729))),
               ),
               child: GestureDetector(
                 onTap: () {
                   // TODO: Open Google Maps or in-app navigation when Maps SDK is integrated
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
-                      content: Text(
-                        'Navegação por mapa disponível em breve',
-                      ),
+                      content: Text('Navegação por mapa disponível em breve'),
                     ),
                   );
                 },
@@ -285,10 +281,7 @@ class _RouteStatCard extends StatelessWidget {
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [
-            AppColors.darkGreen,
-            AppColors.darkGreen.withOpacity(0.8),
-          ],
+          colors: [AppColors.darkGreen, AppColors.darkGreen.withOpacity(0.8)],
         ),
         borderRadius: BorderRadius.circular(16),
       ),

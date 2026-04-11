@@ -111,7 +111,19 @@ class AuthRemoteDataSource {
       );
       return UserModel.fromJson(response.data!);
     } on DioException catch (e) {
-      throw e.error as ApiException? ?? const UnknownApiException();
+      final wrapped = e.error;
+      if (wrapped is ApiException) {
+        throw wrapped;
+      }
+      if (e.type == DioExceptionType.connectionError) {
+        throw const NetworkException();
+      }
+      if (e.type == DioExceptionType.connectionTimeout ||
+          e.type == DioExceptionType.receiveTimeout ||
+          e.type == DioExceptionType.sendTimeout) {
+        throw const ApiTimeoutException();
+      }
+      throw const UnknownApiException();
     }
   }
 }

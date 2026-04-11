@@ -26,20 +26,50 @@ class ApiClient {
   }
 }
 
+String? _errorFieldFromResponse(Response<dynamic>? response) {
+  final data = response?.data;
+  if (data is Map<String, dynamic>) {
+    final err = data['error'];
+    if (err is String) return err;
+  }
+  return null;
+}
+
+ConflictException _conflictExceptionFromBody(String? errorField) {
+  final lower = (errorField ?? '').toLowerCase();
+  if (lower.contains('email')) {
+    return const ConflictException('Este e-mail já está em uso.');
+  }
+  if (lower.contains('cpf') || lower.contains('fiscal')) {
+    return const ConflictException('Este CPF já está cadastrado.');
+  }
+  return const ConflictException('E-mail ou CPF já cadastrado.');
+}
+
 class _ErrorInterceptor extends Interceptor {
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) {
     final statusCode = err.response?.statusCode;
     final ApiException exception;
     if (statusCode != null) {
-      exception = switch (statusCode) {
-        401 => const UnauthorizedException(),
-        404 => const NotFoundException(),
-        409 => const ConflictException(),
-        429 => const RateLimitedException(),
-        >= 500 => const ServerException(),
-        _ => const UnknownApiException(),
-      };
+      if (statusCode == 400) {
+        final raw = _errorFieldFromResponse(err.response);
+        exception = UnknownApiException(
+          raw ?? 'Dados inválidos. Revise o formulário.',
+        );
+      } else if (statusCode == 409) {
+        exception = _conflictExceptionFromBody(
+          _errorFieldFromResponse(err.response),
+        );
+      } else {
+        exception = switch (statusCode) {
+          401 => const UnauthorizedException(),
+          404 => const NotFoundException(),
+          429 => const RateLimitedException(),
+          >= 500 => const ServerException(),
+          _ => const UnknownApiException(),
+        };
+      }
     } else if (err.type == DioExceptionType.connectionTimeout ||
         err.type == DioExceptionType.receiveTimeout ||
         err.type == DioExceptionType.sendTimeout) {
@@ -52,6 +82,8 @@ class _ErrorInterceptor extends Interceptor {
     handler.reject(
       DioException(
         requestOptions: err.requestOptions,
+        response: err.response,
+        type: err.type,
         error: exception,
         message: exception.message,
       ),

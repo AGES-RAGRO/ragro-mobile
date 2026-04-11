@@ -78,7 +78,11 @@ class OrderCard extends StatelessWidget {
                       ? NetworkImage(order.farmAvatarUrl)
                       : null,
                   child: order.farmAvatarUrl.isEmpty
-                      ? const Icon(Icons.storefront, size: 16, color: AppColors.lightGreen)
+                      ? const Icon(
+                          Icons.storefront,
+                          size: 16,
+                          color: AppColors.lightGreen,
+                        )
                       : null,
                 ),
                 const SizedBox(width: 8),

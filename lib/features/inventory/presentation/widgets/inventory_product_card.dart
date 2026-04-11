@@ -77,7 +77,9 @@ class InventoryProductCard extends StatelessWidget {
                     const SizedBox(width: 8),
                     Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 3),
+                        horizontal: 8,
+                        vertical: 3,
+                      ),
                       decoration: BoxDecoration(
                         color: isAvailable
                             ? AppColors.lightGreen.withOpacity(0.12)
@@ -136,15 +138,20 @@ class InventoryProductCard extends StatelessWidget {
                       onTap: onEditTap,
                       child: Container(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 12, vertical: 6),
+                          horizontal: 12,
+                          vertical: 6,
+                        ),
                         decoration: BoxDecoration(
                           color: AppColors.lightGreen.withOpacity(0.1),
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: const Row(
                           children: [
-                            Icon(Icons.edit_outlined,
-                                size: 14, color: AppColors.lightGreen),
+                            Icon(
+                              Icons.edit_outlined,
+                              size: 14,
+                              color: AppColors.lightGreen,
+                            ),
                             SizedBox(width: 4),
                             Text(
                               'Editar',
@@ -165,15 +172,20 @@ class InventoryProductCard extends StatelessWidget {
                       onTap: onDeleteTap,
                       child: Container(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 12, vertical: 6),
+                          horizontal: 12,
+                          vertical: 6,
+                        ),
                         decoration: BoxDecoration(
                           color: AppColors.red.withOpacity(0.1),
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: const Row(
                           children: [
-                            Icon(Icons.delete_outline,
-                                size: 14, color: AppColors.red),
+                            Icon(
+                              Icons.delete_outline,
+                              size: 14,
+                              color: AppColors.red,
+                            ),
                             SizedBox(width: 4),
                             Text(
                               'Excluir',

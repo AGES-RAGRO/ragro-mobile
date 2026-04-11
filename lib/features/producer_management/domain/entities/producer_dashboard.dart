@@ -29,16 +29,16 @@ class ProducerDashboard extends Equatable {
 
   @override
   List<Object?> get props => [
-        producerName,
-        producerTitle,
-        avatarUrl,
-        totalSales,
-        salesGrowthPercent,
-        totalOrders,
-        ordersGrowthPercent,
-        stockPercentage,
-        stockChangePercent,
-        weeklyChartData,
-        currentMonth,
-      ];
+    producerName,
+    producerTitle,
+    avatarUrl,
+    totalSales,
+    salesGrowthPercent,
+    totalOrders,
+    ordersGrowthPercent,
+    stockPercentage,
+    stockChangePercent,
+    weeklyChartData,
+    currentMonth,
+  ];
 }

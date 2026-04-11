@@ -37,5 +37,7 @@ class UnknownApiException extends ApiException {
 }
 
 class InvalidCredentialsApiException extends ApiException {
-  const InvalidCredentialsApiException([super.message = 'E-mail ou senha inválidos']);
+  const InvalidCredentialsApiException([
+    super.message = 'E-mail ou senha inválidos',
+  ]);
 }

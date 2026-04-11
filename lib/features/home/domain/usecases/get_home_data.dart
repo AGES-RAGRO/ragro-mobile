@@ -9,7 +9,8 @@ class GetHomeData {
 
   final HomeRepository _repository;
 
-  Future<({List<Producer> producers, List<HomeProduct> products})> call() async {
+  Future<({List<Producer> producers, List<HomeProduct> products})>
+  call() async {
     final results = await Future.wait([
       _repository.getProducers(),
       _repository.getRecommendedProducts(),

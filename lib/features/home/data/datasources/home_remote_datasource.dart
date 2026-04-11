@@ -30,7 +30,10 @@ class HomeRemoteDataSource {
   /// === END REAL IMPLEMENTATION ===
   ///
   /// MOCK TEMPORÁRIO — remover quando backend estiver conectado:
-  Future<List<ProducerModel>> getProducers({int page = 1, int limit = 10}) async {
+  Future<List<ProducerModel>> getProducers({
+    int page = 1,
+    int limit = 10,
+  }) async {
     await Future.delayed(const Duration(milliseconds: 800));
     return List.generate(4, ProducerModel.mock);
   }

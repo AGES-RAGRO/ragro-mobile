@@ -7,8 +7,8 @@ enum UserType {
   static UserType fromApiValue(String value) {
     return switch (value) {
       'customer' || 'consumer' => UserType.consumer,
-      'farmer'   || 'producer' => UserType.producer,
-      'admin'                  => UserType.admin,
+      'farmer' || 'producer' => UserType.producer,
+      'admin' => UserType.admin,
       _ => throw ArgumentError('Unknown user type: $value'),
     };
   }

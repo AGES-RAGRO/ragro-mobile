@@ -21,11 +21,11 @@ class CustomerRegistrationRequest {
   final AddressRequest address;
 
   Map<String, dynamic> toJson() => {
-        'name': name,
-        'email': email,
-        'phone': phone,
-        'fiscalNumber': fiscalNumber,
-        'password': password,
-        'address': address.toJson(),
-      };
+    'name': name,
+    'email': email,
+    'phone': phone,
+    'fiscalNumber': fiscalNumber,
+    'password': password,
+    'address': address.toJson(),
+  };
 }

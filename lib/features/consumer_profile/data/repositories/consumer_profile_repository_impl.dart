@@ -20,12 +20,11 @@ class ConsumerProfileRepositoryImpl implements ConsumerProfileRepository {
     required String phone,
     required String address,
     String? fiscalNumber,
-  }) =>
-      _dataSource.updateProfile(
-        userId: userId,
-        name: name,
-        phone: phone,
-        address: address,
-        fiscalNumber: fiscalNumber,
-      );
+  }) => _dataSource.updateProfile(
+    userId: userId,
+    name: name,
+    phone: phone,
+    address: address,
+    fiscalNumber: fiscalNumber,
+  );
 }

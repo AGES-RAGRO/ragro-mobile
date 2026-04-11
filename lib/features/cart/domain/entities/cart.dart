@@ -10,10 +10,10 @@ class Cart extends Equatable {
   });
 
   const Cart.empty()
-      : producerId = '',
-        farmName = '',
-        farmLocation = '',
-        items = const [];
+    : producerId = '',
+      farmName = '',
+      farmLocation = '',
+      items = const [];
 
   final String producerId;
   final String farmName;
@@ -25,11 +25,11 @@ class Cart extends Equatable {
   double get totalAmount => items.fold(0, (sum, item) => sum + item.totalPrice);
 
   Cart copyWith({List<CartItem>? items}) => Cart(
-        producerId: producerId,
-        farmName: farmName,
-        farmLocation: farmLocation,
-        items: items ?? this.items,
-      );
+    producerId: producerId,
+    farmName: farmName,
+    farmLocation: farmLocation,
+    items: items ?? this.items,
+  );
 
   @override
   List<Object?> get props => [producerId, farmName, farmLocation, items];

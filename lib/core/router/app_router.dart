@@ -63,153 +63,181 @@ class AppRouter {
       routes: [
         // Auth routes
         GoRoute(path: '/login', builder: (_, __) => const LoginPage()),
-        GoRoute(path: '/register', builder: (_, __) => const ConsumerRegisterPage()),
+        GoRoute(
+          path: '/register',
+          builder: (_, __) => const ConsumerRegisterPage(),
+        ),
 
         // Consumer shell with bottom nav
         StatefulShellRoute.indexedStack(
           builder: (_, __, shell) => ConsumerShell(navigationShell: shell),
           branches: [
-            StatefulShellBranch(routes: [
-              GoRoute(
-                path: '/consumer/home',
-                builder: (_, __) => const ConsumerHomePage(),
-                routes: [
-                  GoRoute(
-                    path: 'producer/:producerId',
-                    builder: (context, state) => ProducerPublicProfilePage(
-                      producerId: state.pathParameters['producerId']!,
-                    ),
-                  ),
-                  GoRoute(
-                    path: 'product/:productId',
-                    builder: (context, state) => ProductDetailPage(
-                      productId: state.pathParameters['productId']!,
-                    ),
-                  ),
-                ],
-              ),
-            ]),
-            StatefulShellBranch(routes: [
-              GoRoute(
-                path: '/consumer/orders',
-                builder: (_, __) => const ConsumerOrdersPage(),
-                routes: [
-                  GoRoute(
-                    path: ':orderId',
-                    builder: (context, state) => OrderDetailPage(
-                      orderId: state.pathParameters['orderId']!,
-                    ),
-                    routes: [
-                      GoRoute(
-                        path: 'rate',
-                        builder: (context, state) => RateProducerPage(
-                          orderId: state.pathParameters['orderId']!,
-                          farmName: state.uri.queryParameters['farmName'] ?? '',
-                          ownerName: state.uri.queryParameters['ownerName'] ?? '',
-                        ),
+            StatefulShellBranch(
+              routes: [
+                GoRoute(
+                  path: '/consumer/home',
+                  builder: (_, __) => const ConsumerHomePage(),
+                  routes: [
+                    GoRoute(
+                      path: 'producer/:producerId',
+                      builder: (context, state) => ProducerPublicProfilePage(
+                        producerId: state.pathParameters['producerId']!,
                       ),
-                    ],
-                  ),
-                ],
-              ),
-            ]),
-            StatefulShellBranch(routes: [
-              GoRoute(
-                path: '/consumer/profile',
-                builder: (context, __) {
-                  final authState = context.read<AuthBloc>().state;
-                  final userId = authState is AuthAuthenticated ? authState.user.id : '';
-                  return BlocProvider(
-                    create: (_) => getIt<ConsumerProfileBloc>()
-                      ..add(ConsumerProfileStarted(userId)),
-                    child: const ConsumerProfilePage(),
-                  );
-                },
-                routes: [
-                  GoRoute(
-                    path: 'edit',
-                    builder: (context, __) {
-                      final authState = context.read<AuthBloc>().state;
-                      final userId = authState is AuthAuthenticated ? authState.user.id : '';
-                      return BlocProvider(
-                        create: (_) => getIt<ConsumerProfileBloc>()
-                          ..add(ConsumerProfileStarted(userId)),
-                        child: const ConsumerEditProfilePage(),
-                      );
-                    },
-                  ),
-                ],
-              ),
-            ]),
-            StatefulShellBranch(routes: [
-              GoRoute(
-                path: '/consumer/search',
-                builder: (_, __) => const SearchPage(),
-              ),
-            ]),
+                    ),
+                    GoRoute(
+                      path: 'product/:productId',
+                      builder: (context, state) => ProductDetailPage(
+                        productId: state.pathParameters['productId']!,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            StatefulShellBranch(
+              routes: [
+                GoRoute(
+                  path: '/consumer/orders',
+                  builder: (_, __) => const ConsumerOrdersPage(),
+                  routes: [
+                    GoRoute(
+                      path: ':orderId',
+                      builder: (context, state) => OrderDetailPage(
+                        orderId: state.pathParameters['orderId']!,
+                      ),
+                      routes: [
+                        GoRoute(
+                          path: 'rate',
+                          builder: (context, state) => RateProducerPage(
+                            orderId: state.pathParameters['orderId']!,
+                            farmName:
+                                state.uri.queryParameters['farmName'] ?? '',
+                            ownerName:
+                                state.uri.queryParameters['ownerName'] ?? '',
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            StatefulShellBranch(
+              routes: [
+                GoRoute(
+                  path: '/consumer/profile',
+                  builder: (context, __) {
+                    final authState = context.read<AuthBloc>().state;
+                    final userId = authState is AuthAuthenticated
+                        ? authState.user.id
+                        : '';
+                    return BlocProvider(
+                      create: (_) =>
+                          getIt<ConsumerProfileBloc>()
+                            ..add(ConsumerProfileStarted(userId)),
+                      child: const ConsumerProfilePage(),
+                    );
+                  },
+                  routes: [
+                    GoRoute(
+                      path: 'edit',
+                      builder: (context, __) {
+                        final authState = context.read<AuthBloc>().state;
+                        final userId = authState is AuthAuthenticated
+                            ? authState.user.id
+                            : '';
+                        return BlocProvider(
+                          create: (_) =>
+                              getIt<ConsumerProfileBloc>()
+                                ..add(ConsumerProfileStarted(userId)),
+                          child: const ConsumerEditProfilePage(),
+                        );
+                      },
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            StatefulShellBranch(
+              routes: [
+                GoRoute(
+                  path: '/consumer/search',
+                  builder: (_, __) => const SearchPage(),
+                ),
+              ],
+            ),
           ],
         ),
 
         // Cart & Checkout routes
         GoRoute(path: '/consumer/cart', builder: (_, __) => const CartPage()),
-        GoRoute(path: '/consumer/checkout', builder: (_, __) => const OrderConfirmationPage()),
+        GoRoute(
+          path: '/consumer/checkout',
+          builder: (_, __) => const OrderConfirmationPage(),
+        ),
 
         // Producer shell with 3 tabs
         StatefulShellRoute.indexedStack(
           builder: (_, __, shell) => ProducerShell(navigationShell: shell),
           branches: [
-            StatefulShellBranch(routes: [
-              GoRoute(
-                path: '/producer/home',
-                builder: (_, __) => const ProducerOrdersPage(),
-                routes: [
-                  GoRoute(
-                    path: 'orders/:orderId',
-                    builder: (context, state) => ProducerOrderDetailPage(
-                      orderId: state.pathParameters['orderId']!,
+            StatefulShellBranch(
+              routes: [
+                GoRoute(
+                  path: '/producer/home',
+                  builder: (_, __) => const ProducerOrdersPage(),
+                  routes: [
+                    GoRoute(
+                      path: 'orders/:orderId',
+                      builder: (context, state) => ProducerOrderDetailPage(
+                        orderId: state.pathParameters['orderId']!,
+                      ),
                     ),
-                  ),
-                  GoRoute(
-                    path: 'route',
-                    builder: (_, __) => const RouteCalculationPage(),
-                  ),
-                ],
-              ),
-            ]),
-            StatefulShellBranch(routes: [
-              GoRoute(
-                path: '/producer/stock',
-                builder: (_, __) => const InventoryPage(),
-                routes: [
-                  GoRoute(
-                    path: 'new',
-                    builder: (_, __) => const ProductFormPage(),
-                  ),
-                  GoRoute(
-                    path: ':productId/edit',
-                    builder: (context, state) => ProductFormPage(
-                      productId: state.pathParameters['productId'],
+                    GoRoute(
+                      path: 'route',
+                      builder: (_, __) => const RouteCalculationPage(),
                     ),
-                  ),
-                ],
-              ),
-            ]),
-            StatefulShellBranch(routes: [
-              GoRoute(
-                path: '/producer/profile',
-                builder: (_, __) => const ProducerProfilePage(),
-                routes: [
-                  GoRoute(
-                    path: 'edit',
-                    builder: (_, __) => const ProducerEditProfilePage(),
-                  ),
-                  GoRoute(
-                    path: 'settings',
-                    builder: (_, __) => const ProducerSettingsPage(),
-                  ),
-                ],
-              ),
-            ]),
+                  ],
+                ),
+              ],
+            ),
+            StatefulShellBranch(
+              routes: [
+                GoRoute(
+                  path: '/producer/stock',
+                  builder: (_, __) => const InventoryPage(),
+                  routes: [
+                    GoRoute(
+                      path: 'new',
+                      builder: (_, __) => const ProductFormPage(),
+                    ),
+                    GoRoute(
+                      path: ':productId/edit',
+                      builder: (context, state) => ProductFormPage(
+                        productId: state.pathParameters['productId'],
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            StatefulShellBranch(
+              routes: [
+                GoRoute(
+                  path: '/producer/profile',
+                  builder: (_, __) => const ProducerProfilePage(),
+                  routes: [
+                    GoRoute(
+                      path: 'edit',
+                      builder: (_, __) => const ProducerEditProfilePage(),
+                    ),
+                    GoRoute(
+                      path: 'settings',
+                      builder: (_, __) => const ProducerSettingsPage(),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ],
         ),
 

@@ -56,7 +56,8 @@ class _AdminProducersView extends StatelessWidget {
                       state is AdminProducersInitial) {
                     return const Center(
                       child: CircularProgressIndicator(
-                          color: AppColors.darkGreen),
+                        color: AppColors.darkGreen,
+                      ),
                     );
                   }
                   if (state is AdminProducersFailure) {
@@ -93,8 +94,9 @@ class _AdminProducersView extends StatelessWidget {
                         onEdit: () {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
-                              content:
-                                  Text('Editar ${producer.name} — em breve'),
+                              content: Text(
+                                'Editar ${producer.name} — em breve',
+                              ),
                             ),
                           );
                         },
@@ -128,7 +130,8 @@ class _AdminProducersView extends StatelessWidget {
                 backgroundColor: AppColors.darkGreen,
                 foregroundColor: AppColors.white,
                 shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(24)),
+                  borderRadius: BorderRadius.circular(24),
+                ),
                 padding: const EdgeInsets.symmetric(vertical: 16),
               ),
             ),
@@ -140,7 +143,10 @@ class _AdminProducersView extends StatelessWidget {
   }
 
   void _confirmDeactivate(
-      BuildContext context, String producerId, String producerName) {
+    BuildContext context,
+    String producerId,
+    String producerName,
+  ) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text('Desativar "$producerName"?'),
@@ -148,9 +154,9 @@ class _AdminProducersView extends StatelessWidget {
           label: 'Confirmar',
           textColor: AppColors.white,
           onPressed: () {
-            context
-                .read<AdminProducersBloc>()
-                .add(AdminProducerDeactivated(producerId));
+            context.read<AdminProducersBloc>().add(
+              AdminProducerDeactivated(producerId),
+            );
           },
         ),
         backgroundColor: AppColors.red,
@@ -214,8 +220,11 @@ class _ProducerCard extends StatelessWidget {
                     color: AppColors.lightGreen.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: const Icon(Icons.edit_outlined,
-                      size: 16, color: AppColors.lightGreen),
+                  child: const Icon(
+                    Icons.edit_outlined,
+                    size: 16,
+                    color: AppColors.lightGreen,
+                  ),
                 ),
               ),
               const SizedBox(width: 8),
@@ -228,8 +237,11 @@ class _ProducerCard extends StatelessWidget {
                     color: AppColors.red.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: const Icon(Icons.delete_outline,
-                      size: 16, color: AppColors.red),
+                  child: const Icon(
+                    Icons.delete_outline,
+                    size: 16,
+                    color: AppColors.red,
+                  ),
                 ),
               ),
             ],
@@ -240,8 +252,11 @@ class _ProducerCard extends StatelessWidget {
           // Email
           Row(
             children: [
-              const Icon(Icons.email_outlined,
-                  size: 14, color: AppColors.placeholder),
+              const Icon(
+                Icons.email_outlined,
+                size: 14,
+                color: AppColors.placeholder,
+              ),
               const SizedBox(width: 6),
               Expanded(
                 child: Text(
@@ -263,8 +278,11 @@ class _ProducerCard extends StatelessWidget {
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Icon(Icons.location_on_outlined,
-                  size: 14, color: AppColors.placeholder),
+              const Icon(
+                Icons.location_on_outlined,
+                size: 14,
+                color: AppColors.placeholder,
+              ),
               const SizedBox(width: 6),
               Expanded(
                 child: Text(
@@ -286,10 +304,7 @@ class _ProducerCard extends StatelessWidget {
           // Dates
           Row(
             children: [
-              _DateBadge(
-                label: 'CADASTRO',
-                date: fmtDate(producer.createdAt),
-              ),
+              _DateBadge(label: 'CADASTRO', date: fmtDate(producer.createdAt)),
               const SizedBox(width: 12),
               _DateBadge(
                 label: 'MODIFICADO',
@@ -297,8 +312,7 @@ class _ProducerCard extends StatelessWidget {
               ),
               const Spacer(),
               Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                 decoration: BoxDecoration(
                   color: producer.active
                       ? AppColors.lightGreen.withOpacity(0.1)

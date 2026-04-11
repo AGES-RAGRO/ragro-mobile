@@ -44,15 +44,22 @@ class _ConsumerProfileView extends StatelessWidget {
         body: SafeArea(
           child: BlocBuilder<ConsumerProfileBloc, ConsumerProfileState>(
             builder: (context, state) {
-              if (state is ConsumerProfileLoading || state is ConsumerProfileInitial) {
-                return const Center(child: CircularProgressIndicator(color: AppColors.darkGreen));
+              if (state is ConsumerProfileLoading ||
+                  state is ConsumerProfileInitial) {
+                return const Center(
+                  child: CircularProgressIndicator(color: AppColors.darkGreen),
+                );
               }
               if (state is ConsumerProfileFailure) {
                 return Center(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Icon(Icons.error_outline, color: AppColors.red, size: 48),
+                      const Icon(
+                        Icons.error_outline,
+                        color: AppColors.red,
+                        size: 48,
+                      ),
                       const SizedBox(height: 16),
                       Text(state.message),
                     ],
@@ -98,11 +105,20 @@ class _ConsumerProfileView extends StatelessWidget {
                     ),
                     const SizedBox(height: 8),
                     // User info rows
-                    ProfileInfoRow(icon: Icons.email_outlined, text: profile.email),
+                    ProfileInfoRow(
+                      icon: Icons.email_outlined,
+                      text: profile.email,
+                    ),
                     const SizedBox(height: 7),
-                    ProfileInfoRow(icon: Icons.phone_outlined, text: profile.phone),
+                    ProfileInfoRow(
+                      icon: Icons.phone_outlined,
+                      text: profile.phone,
+                    ),
                     const SizedBox(height: 7),
-                    ProfileInfoRow(icon: Icons.location_on_outlined, text: profile.address),
+                    ProfileInfoRow(
+                      icon: Icons.location_on_outlined,
+                      text: profile.address,
+                    ),
                     const SizedBox(height: 32),
                     // Management section
                     const Padding(

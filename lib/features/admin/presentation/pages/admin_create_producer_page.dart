@@ -53,7 +53,13 @@ class _AdminCreateProducerViewState extends State<_AdminCreateProducerView> {
   bool _termsAccepted = false;
 
   static const _weekdayLabels = [
-    'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'
+    'Seg',
+    'Ter',
+    'Qua',
+    'Qui',
+    'Sex',
+    'Sáb',
+    'Dom',
   ];
 
   @override
@@ -97,25 +103,25 @@ class _AdminCreateProducerViewState extends State<_AdminCreateProducerView> {
       return;
     }
     context.read<AdminProducerFormBloc>().add(
-          AdminProducerFormSubmitted(
-            name: _nameController.text.trim(),
-            email: _emailController.text.trim(),
-            phone: _phoneController.text.trim(),
-            cep: _cepController.text.trim(),
-            address: _addressController.text.trim(),
-            city: _cityController.text.trim(),
-            state: _stateController.text.trim(),
-            bank: _bankController.text.trim(),
-            agency: _agencyController.text.trim(),
-            account: _accountController.text.trim(),
-            accountHolder: _holderController.text.trim(),
-            cpfCnpj: _cpfCnpjController.text.trim(),
-            password: _passwordController.text.trim(),
-            scheduleWeekdays: List.from(_weekdays),
-            scheduleStart: _scheduleStartController.text.trim(),
-            scheduleEnd: _scheduleEndController.text.trim(),
-          ),
-        );
+      AdminProducerFormSubmitted(
+        name: _nameController.text.trim(),
+        email: _emailController.text.trim(),
+        phone: _phoneController.text.trim(),
+        cep: _cepController.text.trim(),
+        address: _addressController.text.trim(),
+        city: _cityController.text.trim(),
+        state: _stateController.text.trim(),
+        bank: _bankController.text.trim(),
+        agency: _agencyController.text.trim(),
+        account: _accountController.text.trim(),
+        accountHolder: _holderController.text.trim(),
+        cpfCnpj: _cpfCnpjController.text.trim(),
+        password: _passwordController.text.trim(),
+        scheduleWeekdays: List.from(_weekdays),
+        scheduleStart: _scheduleStartController.text.trim(),
+        scheduleEnd: _scheduleEndController.text.trim(),
+      ),
+    );
   }
 
   @override
@@ -171,33 +177,37 @@ class _AdminCreateProducerViewState extends State<_AdminCreateProducerView> {
                 _FieldLabel('Nome Completo'),
                 const SizedBox(height: 8),
                 _TextField(
-                    controller: _nameController,
-                    hint: 'Nome do produtor',
-                    enabled: !isLoading),
+                  controller: _nameController,
+                  hint: 'Nome do produtor',
+                  enabled: !isLoading,
+                ),
                 const SizedBox(height: 12),
                 _FieldLabel('Telefone'),
                 const SizedBox(height: 8),
                 _TextField(
-                    controller: _phoneController,
-                    hint: '(XX) XXXXX-XXXX',
-                    keyboardType: TextInputType.phone,
-                    enabled: !isLoading),
+                  controller: _phoneController,
+                  hint: '(XX) XXXXX-XXXX',
+                  keyboardType: TextInputType.phone,
+                  enabled: !isLoading,
+                ),
                 const SizedBox(height: 12),
                 _FieldLabel('Email'),
                 const SizedBox(height: 8),
                 _TextField(
-                    controller: _emailController,
-                    hint: 'email@exemplo.com',
-                    keyboardType: TextInputType.emailAddress,
-                    enabled: !isLoading),
+                  controller: _emailController,
+                  hint: 'email@exemplo.com',
+                  keyboardType: TextInputType.emailAddress,
+                  enabled: !isLoading,
+                ),
                 const SizedBox(height: 12),
                 _FieldLabel('Senha'),
                 const SizedBox(height: 8),
                 _TextField(
-                    controller: _passwordController,
-                    hint: 'Senha de acesso',
-                    obscure: true,
-                    enabled: !isLoading),
+                  controller: _passwordController,
+                  hint: 'Senha de acesso',
+                  obscure: true,
+                  enabled: !isLoading,
+                ),
 
                 const SizedBox(height: 20),
                 _sectionTitle('Endereço'),
@@ -205,17 +215,19 @@ class _AdminCreateProducerViewState extends State<_AdminCreateProducerView> {
                 _FieldLabel('CEP'),
                 const SizedBox(height: 8),
                 _TextField(
-                    controller: _cepController,
-                    hint: '00000-000',
-                    keyboardType: TextInputType.number,
-                    enabled: !isLoading),
+                  controller: _cepController,
+                  hint: '00000-000',
+                  keyboardType: TextInputType.number,
+                  enabled: !isLoading,
+                ),
                 const SizedBox(height: 12),
                 _FieldLabel('Endereço'),
                 const SizedBox(height: 8),
                 _TextField(
-                    controller: _addressController,
-                    hint: 'Rua, número, bairro',
-                    enabled: !isLoading),
+                  controller: _addressController,
+                  hint: 'Rua, número, bairro',
+                  enabled: !isLoading,
+                ),
                 const SizedBox(height: 12),
                 Row(
                   children: [
@@ -227,9 +239,10 @@ class _AdminCreateProducerViewState extends State<_AdminCreateProducerView> {
                           _FieldLabel('Cidade'),
                           const SizedBox(height: 8),
                           _TextField(
-                              controller: _cityController,
-                              hint: 'Cidade',
-                              enabled: !isLoading),
+                            controller: _cityController,
+                            hint: 'Cidade',
+                            enabled: !isLoading,
+                          ),
                         ],
                       ),
                     ),
@@ -241,9 +254,10 @@ class _AdminCreateProducerViewState extends State<_AdminCreateProducerView> {
                           _FieldLabel('Estado'),
                           const SizedBox(height: 8),
                           _TextField(
-                              controller: _stateController,
-                              hint: 'UF',
-                              enabled: !isLoading),
+                            controller: _stateController,
+                            hint: 'UF',
+                            enabled: !isLoading,
+                          ),
                         ],
                       ),
                     ),
@@ -256,9 +270,10 @@ class _AdminCreateProducerViewState extends State<_AdminCreateProducerView> {
                 _FieldLabel('Banco'),
                 const SizedBox(height: 8),
                 _TextField(
-                    controller: _bankController,
-                    hint: 'Nome do banco',
-                    enabled: !isLoading),
+                  controller: _bankController,
+                  hint: 'Nome do banco',
+                  enabled: !isLoading,
+                ),
                 const SizedBox(height: 12),
                 Row(
                   children: [
@@ -269,10 +284,11 @@ class _AdminCreateProducerViewState extends State<_AdminCreateProducerView> {
                           _FieldLabel('Agência'),
                           const SizedBox(height: 8),
                           _TextField(
-                              controller: _agencyController,
-                              hint: '0000',
-                              keyboardType: TextInputType.number,
-                              enabled: !isLoading),
+                            controller: _agencyController,
+                            hint: '0000',
+                            keyboardType: TextInputType.number,
+                            enabled: !isLoading,
+                          ),
                         ],
                       ),
                     ),
@@ -284,10 +300,11 @@ class _AdminCreateProducerViewState extends State<_AdminCreateProducerView> {
                           _FieldLabel('Conta'),
                           const SizedBox(height: 8),
                           _TextField(
-                              controller: _accountController,
-                              hint: '000000-0',
-                              keyboardType: TextInputType.number,
-                              enabled: !isLoading),
+                            controller: _accountController,
+                            hint: '000000-0',
+                            keyboardType: TextInputType.number,
+                            enabled: !isLoading,
+                          ),
                         ],
                       ),
                     ),
@@ -297,17 +314,19 @@ class _AdminCreateProducerViewState extends State<_AdminCreateProducerView> {
                 _FieldLabel('Nome do Titular'),
                 const SizedBox(height: 8),
                 _TextField(
-                    controller: _holderController,
-                    hint: 'Nome completo do titular',
-                    enabled: !isLoading),
+                  controller: _holderController,
+                  hint: 'Nome completo do titular',
+                  enabled: !isLoading,
+                ),
                 const SizedBox(height: 12),
                 _FieldLabel('CPF / CNPJ'),
                 const SizedBox(height: 8),
                 _TextField(
-                    controller: _cpfCnpjController,
-                    hint: '000.000.000-00',
-                    keyboardType: TextInputType.number,
-                    enabled: !isLoading),
+                  controller: _cpfCnpjController,
+                  hint: '000.000.000-00',
+                  keyboardType: TextInputType.number,
+                  enabled: !isLoading,
+                ),
 
                 const SizedBox(height: 20),
                 _sectionTitle('Horário de atendimento'),
@@ -318,11 +337,12 @@ class _AdminCreateProducerViewState extends State<_AdminCreateProducerView> {
                   children: List.generate(7, (i) {
                     final isSelected = _weekdays[i];
                     return GestureDetector(
-                      onTap: () =>
-                          setState(() => _weekdays[i] = !_weekdays[i]),
+                      onTap: () => setState(() => _weekdays[i] = !_weekdays[i]),
                       child: Container(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 12, vertical: 8),
+                          horizontal: 12,
+                          vertical: 8,
+                        ),
                         decoration: BoxDecoration(
                           color: isSelected
                               ? AppColors.darkGreen
@@ -354,17 +374,21 @@ class _AdminCreateProducerViewState extends State<_AdminCreateProducerView> {
                           _FieldLabel('Início'),
                           const SizedBox(height: 8),
                           _TextField(
-                              controller: _scheduleStartController,
-                              hint: '08:00',
-                              keyboardType: TextInputType.datetime,
-                              enabled: !isLoading),
+                            controller: _scheduleStartController,
+                            hint: '08:00',
+                            keyboardType: TextInputType.datetime,
+                            enabled: !isLoading,
+                          ),
                         ],
                       ),
                     ),
                     const Padding(
                       padding: EdgeInsets.only(top: 28, left: 12, right: 12),
-                      child: Icon(Icons.arrow_forward,
-                          color: AppColors.placeholder, size: 18),
+                      child: Icon(
+                        Icons.arrow_forward,
+                        color: AppColors.placeholder,
+                        size: 18,
+                      ),
                     ),
                     Expanded(
                       child: Column(
@@ -373,10 +397,11 @@ class _AdminCreateProducerViewState extends State<_AdminCreateProducerView> {
                           _FieldLabel('Fim'),
                           const SizedBox(height: 8),
                           _TextField(
-                              controller: _scheduleEndController,
-                              hint: '18:00',
-                              keyboardType: TextInputType.datetime,
-                              enabled: !isLoading),
+                            controller: _scheduleEndController,
+                            hint: '18:00',
+                            keyboardType: TextInputType.datetime,
+                            enabled: !isLoading,
+                          ),
                         ],
                       ),
                     ),
@@ -387,8 +412,7 @@ class _AdminCreateProducerViewState extends State<_AdminCreateProducerView> {
 
                 // Terms checkbox
                 GestureDetector(
-                  onTap: () =>
-                      setState(() => _termsAccepted = !_termsAccepted),
+                  onTap: () => setState(() => _termsAccepted = !_termsAccepted),
                   child: Row(
                     children: [
                       Checkbox(
@@ -397,7 +421,8 @@ class _AdminCreateProducerViewState extends State<_AdminCreateProducerView> {
                             setState(() => _termsAccepted = v ?? false),
                         activeColor: AppColors.darkGreen,
                         shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(4)),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
                       ),
                       const Expanded(
                         child: Text(
@@ -422,10 +447,12 @@ class _AdminCreateProducerViewState extends State<_AdminCreateProducerView> {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.darkGreen,
                       foregroundColor: AppColors.white,
-                      disabledBackgroundColor:
-                          AppColors.darkGreen.withOpacity(0.5),
+                      disabledBackgroundColor: AppColors.darkGreen.withOpacity(
+                        0.5,
+                      ),
                       shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(24)),
+                        borderRadius: BorderRadius.circular(24),
+                      ),
                       padding: const EdgeInsets.symmetric(vertical: 16),
                     ),
                     child: isLoading
@@ -522,8 +549,10 @@ class _TextField extends StatelessWidget {
         ),
         filled: true,
         fillColor: AppColors.inputBackground,
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 14,
+        ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: AppColors.inputBorder),

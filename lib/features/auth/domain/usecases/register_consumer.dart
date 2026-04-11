@@ -20,19 +20,18 @@ class RegisterConsumer {
     required String state,
     String? complement,
     String? neighborhood,
-  }) =>
-      _repository.registerConsumer(
-        name: name,
-        phone: phone,
-        email: email,
-        fiscalNumber: fiscalNumber,
-        password: password,
-        zipCode: zipCode,
-        street: street,
-        number: number,
-        city: city,
-        state: state,
-        complement: complement,
-        neighborhood: neighborhood,
-      );
+  }) => _repository.registerConsumer(
+    name: name,
+    phone: phone,
+    email: email,
+    fiscalNumber: fiscalNumber,
+    password: password,
+    zipCode: zipCode,
+    street: street,
+    number: number,
+    city: city,
+    state: state,
+    complement: complement,
+    neighborhood: neighborhood,
+  );
 }

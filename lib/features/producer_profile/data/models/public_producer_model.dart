@@ -35,20 +35,22 @@ class PublicProducerModel extends PublicProducer {
       totalReviews: json['total_reviews'] as int? ?? 0,
       totalOrders: json['total_orders'] as int? ?? 0,
       phone: user['phone'] as String? ?? '',
-      products: ((json['products'] as List?)?.map(
-                (p) => HomeProductModel.fromJson(p as Map<String, dynamic>),
-              ) ??
-              [])
-          .toList(),
-      availability: ((json['availability'] as List?)?.map(
-                (a) => AvailabilitySlot(
-                  weekday: a['weekday'] as int,
-                  opensAt: a['opens_at'] as String,
-                  closesAt: a['closes_at'] as String,
-                ),
-              ) ??
-              [])
-          .toList(),
+      products:
+          ((json['products'] as List?)?.map(
+                    (p) => HomeProductModel.fromJson(p as Map<String, dynamic>),
+                  ) ??
+                  [])
+              .toList(),
+      availability:
+          ((json['availability'] as List?)?.map(
+                    (a) => AvailabilitySlot(
+                      weekday: a['weekday'] as int,
+                      opensAt: a['opens_at'] as String,
+                      closesAt: a['closes_at'] as String,
+                    ),
+                  ) ??
+                  [])
+              .toList(),
       memberSince: json['created_at'] != null
           ? DateTime.parse(json['created_at'] as String)
           : DateTime(2016),

@@ -46,9 +46,7 @@ class LoginPage extends StatelessWidget {
                   const Spacer(flex: 2),
                   const RagroLogo(),
                   const Spacer(flex: 2),
-                  LoginForm(
-                    onRegisterTap: () => context.push('/register'),
-                  ),
+                  LoginForm(onRegisterTap: () => context.push('/register')),
                   const Spacer(),
                 ],
               ),

@@ -7,22 +7,22 @@ abstract final class ApiEndpoints {
   );
 
   // Auth
-  static const String authConfig       = '$_base/auth/config';
-  static const String authSession      = '$_base/auth/session';
+  static const String authConfig = '$_base/auth/config';
+  static const String authSession = '$_base/auth/session';
   static const String registerCustomer = '$_base/auth/register/customer';
 
   // Consumers
-  static const String consumers        = '$_base/consumers';
-  static String consumer(String id)   => '$_base/consumers/$id';
+  static const String consumers = '$_base/consumers';
+  static String consumer(String id) => '$_base/consumers/$id';
 
   // Producers / Farmers
-  static const String producers       = '$_base/producers';
+  static const String producers = '$_base/producers';
   static const String recommendations = '$_base/recommendations';
-  static String producer(String id)   => '$_base/producers/$id';
+  static String producer(String id) => '$_base/producers/$id';
 
   // Orders
-  static const String orders          = '$_base/orders';
-  static String order(String id)      => '$_base/orders/$id';
+  static const String orders = '$_base/orders';
+  static String order(String id) => '$_base/orders/$id';
   static String orderRating(String id) => '$_base/orders/$id/rating';
 
   // Cart (local, no API endpoints needed yet)
@@ -42,6 +42,6 @@ abstract final class ApiEndpoints {
   static String producerOrderCancel(String id) => '$_base/orders/$id/cancel';
 
   // Admin
-  static const String adminProducers  = '$_base/admin/producers';
+  static const String adminProducers = '$_base/admin/producers';
   static String adminProducer(String id) => '$_base/admin/producers/$id';
 }

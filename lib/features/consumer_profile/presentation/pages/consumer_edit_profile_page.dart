@@ -17,7 +17,8 @@ class ConsumerEditProfilePage extends StatefulWidget {
   const ConsumerEditProfilePage({super.key});
 
   @override
-  State<ConsumerEditProfilePage> createState() => _ConsumerEditProfilePageState();
+  State<ConsumerEditProfilePage> createState() =>
+      _ConsumerEditProfilePageState();
 }
 
 class _ConsumerEditProfilePageState extends State<ConsumerEditProfilePage> {
@@ -156,7 +157,10 @@ class _ConsumerEditProfilePageState extends State<ConsumerEditProfilePage> {
                               GestureDetector(
                                 onTap: isLoading ? null : _onSave,
                                 child: Container(
-                                  padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 16,
+                                    horizontal: 24,
+                                  ),
                                   decoration: BoxDecoration(
                                     color: AppColors.darkGreen,
                                     borderRadius: BorderRadius.circular(16),
@@ -181,7 +185,11 @@ class _ConsumerEditProfilePageState extends State<ConsumerEditProfilePage> {
                                           ),
                                         )
                                       else ...[
-                                        const Icon(Icons.save_outlined, color: AppColors.white, size: 18),
+                                        const Icon(
+                                          Icons.save_outlined,
+                                          color: AppColors.white,
+                                          size: 18,
+                                        ),
                                         const SizedBox(width: 8),
                                       ],
                                       const SizedBox(width: 8),
