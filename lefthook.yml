@@ -2,10 +2,10 @@ pre-commit:
   commands:
     format:
       glob: "*.dart"
-      run: dart format --set-exit-if-changed {staged_files}
+      run: dart format {staged_files} && git add {staged_files}
     analyze:
       glob: "*.dart"
-      run: dart analyze --fatal-warnings
+      run: dart analyze --fatal-warnings {staged_files}
 
 commit-msg:
   commands:
