@@ -46,8 +46,8 @@ import 'package:ragro_mobile/features/auth/domain/usecases/login_user.dart'
     as _i1047;
 import 'package:ragro_mobile/features/auth/domain/usecases/logout.dart'
     as _i418;
-import 'package:ragro_mobile/features/auth/domain/usecases/register_consumer.dart'
-    as _i852;
+import 'package:ragro_mobile/features/auth/domain/usecases/register_customer.dart'
+    as _i948;
 import 'package:ragro_mobile/features/auth/presentation/bloc/auth_bloc.dart'
     as _i475;
 import 'package:ragro_mobile/features/auth/presentation/bloc/login_bloc.dart'
@@ -72,18 +72,18 @@ import 'package:ragro_mobile/features/cart/domain/usecases/update_cart_item_quan
     as _i456;
 import 'package:ragro_mobile/features/cart/presentation/bloc/cart_bloc.dart'
     as _i841;
-import 'package:ragro_mobile/features/consumer_profile/data/datasources/consumer_profile_remote_datasource.dart'
-    as _i36;
-import 'package:ragro_mobile/features/consumer_profile/data/repositories/consumer_profile_repository_impl.dart'
-    as _i489;
-import 'package:ragro_mobile/features/consumer_profile/domain/repositories/consumer_profile_repository.dart'
-    as _i810;
-import 'package:ragro_mobile/features/consumer_profile/domain/usecases/get_consumer_profile.dart'
-    as _i47;
-import 'package:ragro_mobile/features/consumer_profile/domain/usecases/update_consumer_profile.dart'
-    as _i513;
-import 'package:ragro_mobile/features/consumer_profile/presentation/bloc/consumer_profile_bloc.dart'
-    as _i654;
+import 'package:ragro_mobile/features/customer_profile/data/datasources/customer_profile_remote_datasource.dart'
+    as _i666;
+import 'package:ragro_mobile/features/customer_profile/data/repositories/customer_profile_repository_impl.dart'
+    as _i866;
+import 'package:ragro_mobile/features/customer_profile/domain/repositories/customer_profile_repository.dart'
+    as _i788;
+import 'package:ragro_mobile/features/customer_profile/domain/usecases/get_customer_profile.dart'
+    as _i626;
+import 'package:ragro_mobile/features/customer_profile/domain/usecases/update_customer_profile.dart'
+    as _i436;
+import 'package:ragro_mobile/features/customer_profile/presentation/bloc/customer_profile_bloc.dart'
+    as _i526;
 import 'package:ragro_mobile/features/home/data/datasources/home_remote_datasource.dart'
     as _i904;
 import 'package:ragro_mobile/features/home/data/repositories/home_repository_impl.dart'
@@ -369,8 +369,8 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i201.AuthRemoteDataSource>(
       () => _i201.AuthRemoteDataSource(gh<_i873.ApiClient>()),
     );
-    gh.lazySingleton<_i36.ConsumerProfileRemoteDataSource>(
-      () => _i36.ConsumerProfileRemoteDataSource(gh<_i873.ApiClient>()),
+    gh.lazySingleton<_i666.CustomerProfileRemoteDataSource>(
+      () => _i666.CustomerProfileRemoteDataSource(gh<_i873.ApiClient>()),
     );
     gh.lazySingleton<_i904.HomeRemoteDataSource>(
       () => _i904.HomeRemoteDataSource(gh<_i873.ApiClient>()),
@@ -422,8 +422,8 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i418.Logout>(
       () => _i418.Logout(gh<_i43.AuthRepository>()),
     );
-    gh.lazySingleton<_i852.RegisterConsumer>(
-      () => _i852.RegisterConsumer(gh<_i43.AuthRepository>()),
+    gh.lazySingleton<_i948.RegisterCustomer>(
+      () => _i948.RegisterCustomer(gh<_i43.AuthRepository>()),
     );
     gh.factory<_i205.InventoryBloc>(
       () => _i205.InventoryBloc(
@@ -431,16 +431,8 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i481.DeleteInventoryProduct>(),
       ),
     );
-    gh.lazySingleton<_i810.ConsumerProfileRepository>(
-      () => _i489.ConsumerProfileRepositoryImpl(
-        gh<_i36.ConsumerProfileRemoteDataSource>(),
-      ),
-    );
     gh.factory<_i740.ProductDetailBloc>(
       () => _i740.ProductDetailBloc(gh<_i680.GetProductDetail>()),
-    );
-    gh.factory<_i192.RegisterBloc>(
-      () => _i192.RegisterBloc(gh<_i852.RegisterConsumer>()),
     );
     gh.factory<_i846.AdminProducerFormBloc>(
       () => _i846.AdminProducerFormBloc(gh<_i321.CreateAdminProducer>()),
@@ -454,6 +446,9 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i992.ClearCart>(),
       ),
     );
+    gh.factory<_i192.RegisterBloc>(
+      () => _i192.RegisterBloc(gh<_i948.RegisterCustomer>()),
+    );
     gh.lazySingleton<_i894.SearchProducersAndProducts>(
       () => _i894.SearchProducersAndProducts(gh<_i38.SearchRepository>()),
     );
@@ -462,12 +457,6 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i1054.GetAdminProducers>(),
         gh<_i514.DeactivateAdminProducer>(),
       ),
-    );
-    gh.lazySingleton<_i47.GetConsumerProfile>(
-      () => _i47.GetConsumerProfile(gh<_i810.ConsumerProfileRepository>()),
-    );
-    gh.lazySingleton<_i513.UpdateConsumerProfile>(
-      () => _i513.UpdateConsumerProfile(gh<_i810.ConsumerProfileRepository>()),
     );
     gh.lazySingleton<_i420.ProducerProfileRepository>(
       () => _i86.ProducerProfileRepositoryImpl(
@@ -480,14 +469,19 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i285.HomeRepository>(
       () => _i1055.HomeRepositoryImpl(gh<_i904.HomeRemoteDataSource>()),
     );
-    gh.factory<_i654.ConsumerProfileBloc>(
-      () => _i654.ConsumerProfileBloc(
-        gh<_i47.GetConsumerProfile>(),
-        gh<_i513.UpdateConsumerProfile>(),
+    gh.lazySingleton<_i788.CustomerProfileRepository>(
+      () => _i866.CustomerProfileRepositoryImpl(
+        gh<_i666.CustomerProfileRemoteDataSource>(),
       ),
     );
     gh.lazySingleton<_i159.GetHomeData>(
       () => _i159.GetHomeData(gh<_i285.HomeRepository>()),
+    );
+    gh.lazySingleton<_i626.GetCustomerProfile>(
+      () => _i626.GetCustomerProfile(gh<_i788.CustomerProfileRepository>()),
+    );
+    gh.lazySingleton<_i436.UpdateCustomerProfile>(
+      () => _i436.UpdateCustomerProfile(gh<_i788.CustomerProfileRepository>()),
     );
     gh.factory<_i713.LoginBloc>(() => _i713.LoginBloc(gh<_i1047.LoginUser>()));
     gh.factory<_i856.SearchBloc>(
@@ -499,6 +493,12 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i419.AppRouter>(
       () => _i419.AppRouter(gh<_i475.AuthBloc>()),
+    );
+    gh.factory<_i526.CustomerProfileBloc>(
+      () => _i526.CustomerProfileBloc(
+        gh<_i626.GetCustomerProfile>(),
+        gh<_i436.UpdateCustomerProfile>(),
+      ),
     );
     gh.factory<_i756.ProducerProfileBloc>(
       () => _i756.ProducerProfileBloc(gh<_i1031.GetProducerProfile>()),

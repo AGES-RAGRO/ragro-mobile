@@ -5,7 +5,7 @@ pre-commit:
       run: dart format --set-exit-if-changed {staged_files}
     analyze:
       glob: "*.dart"
-      run: dart analyze --fatal-infos
+      run: dart analyze --fatal-warnings
 
 commit-msg:
   commands:

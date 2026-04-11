@@ -39,7 +39,9 @@ class CartPage extends StatelessWidget {
                     padding: const EdgeInsets.fromLTRB(16, 16, 20, 17),
                     decoration: const BoxDecoration(
                       color: AppColors.white,
-                      border: Border(bottom: BorderSide(color: Color(0xFFF1F5F9))),
+                      border: Border(
+                        bottom: BorderSide(color: Color(0xFFF1F5F9)),
+                      ),
                     ),
                     child: Row(
                       children: [
@@ -64,14 +66,18 @@ class CartPage extends StatelessWidget {
                         GestureDetector(
                           onTap: isEmpty
                               ? null
-                              : () => context.read<CartBloc>().add(const CartCleared()),
+                              : () => context.read<CartBloc>().add(
+                                  const CartCleared(),
+                                ),
                           child: Text(
                             'Limpar',
                             style: TextStyle(
                               fontFamily: 'Manrope',
                               fontWeight: FontWeight.w700,
                               fontSize: 14,
-                              color: isEmpty ? Colors.transparent : AppColors.red,
+                              color: isEmpty
+                                  ? Colors.transparent
+                                  : AppColors.red,
                             ),
                           ),
                         ),
@@ -85,7 +91,11 @@ class CartPage extends StatelessWidget {
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Icon(Icons.shopping_cart_outlined, size: 64, color: AppColors.placeholder),
+                            Icon(
+                              Icons.shopping_cart_outlined,
+                              size: 64,
+                              color: AppColors.placeholder,
+                            ),
                             SizedBox(height: 16),
                             Text(
                               'Seu carrinho está vazio',
@@ -109,18 +119,27 @@ class CartPage extends StatelessWidget {
                             margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
                             padding: const EdgeInsets.all(17),
                             decoration: BoxDecoration(
-                              color: const Color(0xFF487ACB).withOpacity(0.15),
+                              color: const Color(
+                                0xFF487ACB,
+                              ).withValues(alpha: 0.15),
                               borderRadius: BorderRadius.circular(16),
-                              border: Border.all(color: const Color(0xFF487ACB)),
+                              border: Border.all(
+                                color: const Color(0xFF487ACB),
+                              ),
                             ),
                             child: const Row(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Icon(Icons.info_outline, color: Color(0xFF487ACB), size: 20),
+                                Icon(
+                                  Icons.info_outline,
+                                  color: Color(0xFF487ACB),
+                                  size: 20,
+                                ),
                                 SizedBox(width: 12),
                                 Expanded(
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Text(
                                         'Aviso de Produtor Único',
@@ -172,7 +191,9 @@ class CartPage extends StatelessWidget {
                       padding: const EdgeInsets.fromLTRB(24, 9, 24, 24),
                       decoration: const BoxDecoration(
                         color: AppColors.white,
-                        border: Border(top: BorderSide(color: Color(0xFFF1F5F9))),
+                        border: Border(
+                          top: BorderSide(color: Color(0xFFF1F5F9)),
+                        ),
                       ),
                       child: Column(
                         children: [
@@ -201,7 +222,7 @@ class CartPage extends StatelessWidget {
                           ),
                           const SizedBox(height: 16),
                           GestureDetector(
-                            onTap: () => context.push('/consumer/checkout'),
+                            onTap: () => context.push('/customer/checkout'),
                             child: Container(
                               height: 56,
                               decoration: BoxDecoration(

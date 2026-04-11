@@ -16,14 +16,15 @@ import 'package:ragro_mobile/features/product_detail/presentation/bloc/product_d
 import 'package:ragro_mobile/features/product_detail/presentation/bloc/product_detail_state.dart';
 
 class ProductDetailPage extends StatelessWidget {
-  const ProductDetailPage({super.key, required this.productId});
+  const ProductDetailPage({required this.productId, super.key});
 
   final String productId;
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => getIt<ProductDetailBloc>()..add(ProductDetailStarted(productId)),
+      create: (_) =>
+          getIt<ProductDetailBloc>()..add(ProductDetailStarted(productId)),
       child: const _ProductDetailView(),
     );
   }
@@ -57,10 +58,13 @@ class _ProductDetailView extends StatelessWidget {
                 slivers: [
                   // Header
                   SliverAppBar(
-                    backgroundColor: Colors.white.withOpacity(0.9),
+                    backgroundColor: Colors.white.withValues(alpha: 0.9),
                     leading: GestureDetector(
                       onTap: () => context.pop(),
-                      child: const Icon(Icons.arrow_back, color: AppColors.black),
+                      child: const Icon(
+                        Icons.arrow_back,
+                        color: AppColors.black,
+                      ),
                     ),
                     title: const Text(
                       'Detalhe do Produto',
@@ -97,8 +101,10 @@ class _ProductDetailView extends StatelessWidget {
                                       product.imageUrl,
                                       fit: BoxFit.cover,
                                     )
-                                  : Container(
-                                      color: AppColors.mintGreen.withOpacity(0.3),
+                                  : ColoredBox(
+                                      color: AppColors.mintGreen.withValues(
+                                        alpha: 0.3,
+                                      ),
                                       child: const Center(
                                         child: Icon(
                                           Icons.eco,
@@ -234,7 +240,7 @@ class _ProductDetailView extends StatelessWidget {
                 child: Container(
                   padding: const EdgeInsets.fromLTRB(16, 17, 16, 16),
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.95),
+                    color: Colors.white.withValues(alpha: 0.95),
                     border: const Border(
                       top: BorderSide(color: Color(0x1A2E5729)),
                     ),
@@ -253,7 +259,8 @@ class _ProductDetailView extends StatelessWidget {
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: [
                             GestureDetector(
-                              onTap: () => context.read<ProductDetailBloc>().add(
+                              onTap: () =>
+                                  context.read<ProductDetailBloc>().add(
                                     const ProductDetailQuantityDecremented(),
                                   ),
                               child: const Icon(Icons.remove, size: 16),
@@ -267,7 +274,8 @@ class _ProductDetailView extends StatelessWidget {
                               ),
                             ),
                             GestureDetector(
-                              onTap: () => context.read<ProductDetailBloc>().add(
+                              onTap: () =>
+                                  context.read<ProductDetailBloc>().add(
                                     const ProductDetailQuantityIncremented(),
                                   ),
                               child: const Icon(Icons.add, size: 14),
@@ -295,7 +303,7 @@ class _ProductDetailView extends StatelessWidget {
                                 ),
                               ),
                             );
-                            context.push('/consumer/cart');
+                            context.push('/customer/cart');
                           },
                           child: Container(
                             height: 53,
@@ -303,17 +311,17 @@ class _ProductDetailView extends StatelessWidget {
                               color: AppColors.darkGreen,
                               borderRadius: BorderRadius.circular(24),
                             ),
-                            child: Row(
+                            child: const Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                const Icon(
+                                Icon(
                                   Icons.shopping_basket_outlined,
                                   color: AppColors.white,
                                   size: 20,
                                 ),
-                                const SizedBox(width: 8),
+                                SizedBox(width: 8),
                                 Flexible(
-                                  child: const Text(
+                                  child: Text(
                                     'Adicionar ao Carrinho',
                                     style: TextStyle(
                                       fontFamily: 'Figtree',
