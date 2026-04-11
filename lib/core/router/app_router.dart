@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:injectable/injectable.dart';
 import 'package:ragro_mobile/features/admin/presentation/pages/admin_create_producer_page.dart';
+import 'package:ragro_mobile/features/admin/presentation/pages/admin_edit_producer_page.dart';
 import 'package:ragro_mobile/features/admin/presentation/pages/admin_producers_page.dart';
 import 'package:ragro_mobile/features/auth/domain/entities/user_type.dart';
 import 'package:ragro_mobile/features/auth/presentation/bloc/auth_bloc.dart';
@@ -221,6 +222,12 @@ class AppRouter {
         GoRoute(
           path: '/admin/producers/new',
           builder: (_, __) => const AdminCreateProducerPage(),
+        ),
+        GoRoute(
+          path: '/admin/producers/:id/edit',
+          builder: (_, state) => AdminEditProducerPage(
+            producerId: state.pathParameters['id']!,
+          ),
         ),
       ],
     );
