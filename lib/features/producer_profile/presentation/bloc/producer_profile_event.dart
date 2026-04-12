@@ -21,15 +21,17 @@ class ProducerProfileUpdateSubmitted extends ProducerProfileEvent {
     required this.name,
     required this.story,
     required this.phone,
-    required this.location,
+
+
+    required this.farmName,
   });
 
   final String producerId;
   final String name;
   final String story;
   final String phone;
-  final String location;
+  final String farmName;
 
   @override
-  List<Object?> get props => [producerId, name, story, phone, location];
+  List<Object?> get props => [producerId, name, story, phone, farmName];
 }

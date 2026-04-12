@@ -1,7 +1,7 @@
 // Screen: Producer Edit Profile (Editar Perfil do Produtor)
 // User Story: US-25 — Edit Producer Profile
 // Epic: EPIC 4 — Producer Features
-// Routes: PUT /producers/me
+// Routes: PUT /producers/:id
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -12,9 +12,7 @@ import 'package:ragro_mobile/features/producer_profile/presentation/bloc/produce
 import 'package:ragro_mobile/features/producer_profile/presentation/bloc/producer_profile_event.dart';
 import 'package:ragro_mobile/features/producer_profile/presentation/bloc/producer_profile_state.dart';
 
-/// ID do produtor autenticado. O backend resolve o UUID a partir do JWT
-/// quando recebemos `me` como path param (padrão já utilizado em
-/// `GET /producers/me/dashboard`).
+/// ID do produtor autenticado. O backend resolve via JWT.
 const String _authenticatedProducerId = 'me';
 
 class ProducerEditProfilePage extends StatelessWidget {
@@ -44,7 +42,7 @@ class _ProducerEditProfileViewState extends State<_ProducerEditProfileView> {
   final _nameController = TextEditingController();
   final _bioController = TextEditingController();
   final _phoneController = TextEditingController();
-  final _locationController = TextEditingController();
+  final _farmNameController = TextEditingController();
 
   bool _hydrated = false;
 
@@ -53,7 +51,7 @@ class _ProducerEditProfileViewState extends State<_ProducerEditProfileView> {
     _nameController.dispose();
     _bioController.dispose();
     _phoneController.dispose();
-    _locationController.dispose();
+    _farmNameController.dispose();
     super.dispose();
   }
 
@@ -62,7 +60,7 @@ class _ProducerEditProfileViewState extends State<_ProducerEditProfileView> {
     _nameController.text = state.producer.name;
     _bioController.text = state.producer.story;
     _phoneController.text = state.producer.phone;
-    _locationController.text = state.producer.location;
+    _farmNameController.text = state.producer.farmName;
     _hydrated = true;
   }
 
@@ -74,7 +72,7 @@ class _ProducerEditProfileViewState extends State<_ProducerEditProfileView> {
         name: _nameController.text,
         story: _bioController.text,
         phone: _phoneController.text,
-        location: _locationController.text,
+        farmName: _farmNameController.text,
       ),
     );
   }
@@ -239,14 +237,14 @@ class _ProducerEditProfileViewState extends State<_ProducerEditProfileView> {
                     },
                   ),
                   const SizedBox(height: 16),
-                  const _FieldLabel('Localização'),
+                  const _FieldLabel('Nome da Fazenda'),
                   const SizedBox(height: 8),
                   _FormField(
-                    controller: _locationController,
-                    hint: 'Cidade, Estado',
+                    controller: _farmNameController,
+                    hint: 'Nome da sua propriedade rural',
                     validator: (value) {
                       if (value?.trim().isEmpty ?? true) {
-                        return 'Informe sua localização';
+                        return 'Informe o nome da fazenda';
                       }
                       return null;
                     },

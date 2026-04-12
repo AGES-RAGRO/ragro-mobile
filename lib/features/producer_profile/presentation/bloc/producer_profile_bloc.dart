@@ -28,7 +28,7 @@ class ProducerProfileBloc
       emit(ProducerProfileLoaded(producer));
     } on ApiException catch (e) {
       emit(ProducerProfileFailure(e.message));
-    } catch (_) {
+    } on Object catch (_) {
       emit(
         const ProducerProfileFailure('Erro ao carregar perfil do produtor.'),
       );
@@ -46,11 +46,13 @@ class ProducerProfileBloc
         name: event.name,
         story: event.story,
         phone: event.phone,
-        location: event.location,
+        farmName: event.farmName,
       );
       emit(const ProducerProfileUpdateSuccess());
     } on ApiException catch (e) {
       emit(ProducerProfileFailure(e.message));
+    } on Object catch (_) {
+      emit(const ProducerProfileFailure('Erro ao atualizar perfil.'));
     }
   }
 }

@@ -12,12 +12,12 @@ class UpdateProducer {
     required String name,
     required String story,
     required String phone,
-    required String location,
+    required String farmName,
   }) => _repository.updateProducer(
     producerId: producerId,
     name: name,
     story: story,
     phone: phone,
-    location: location,
+    farmName: farmName,
   );
 }

@@ -30,7 +30,7 @@ void main() {
     name: 'João Silva',
     story: 'Produtor orgânico há 10 anos.',
     phone: '(51) 99999-0001',
-    location: 'Porto Alegre, RS',
+    farmName: 'Fazenda Sol Nascente',
   );
 
   group('ProducerProfileUpdateSubmitted', () {
@@ -43,7 +43,7 @@ void main() {
             name: any(named: 'name'),
             story: any(named: 'story'),
             phone: any(named: 'phone'),
-            location: any(named: 'location'),
+            farmName: any(named: 'farmName'),
           ),
         ).thenAnswer((_) async {});
         return bloc;
@@ -60,7 +60,7 @@ void main() {
             name: 'João Silva',
             story: 'Produtor orgânico há 10 anos.',
             phone: '(51) 99999-0001',
-            location: 'Porto Alegre, RS',
+            farmName: 'Fazenda Sol Nascente',
           ),
         ).called(1);
       },
@@ -75,7 +75,7 @@ void main() {
             name: any(named: 'name'),
             story: any(named: 'story'),
             phone: any(named: 'phone'),
-            location: any(named: 'location'),
+            farmName: any(named: 'farmName'),
           ),
         ).thenThrow(const UnauthorizedException('Sessão expirada'));
         return bloc;

@@ -1,21 +1,24 @@
-/// Payload de atualização de perfil de produtor para `PUT /producers/:id`.
+// Payload de PUT /producers/:id — patch parcial alinhado ao ProducerUpdateRequest.java.
 class ProducerUpdateRequest {
   const ProducerUpdateRequest({
-    required this.name,
-    required this.story,
-    required this.phone,
-    required this.location,
+    this.name,
+    this.story,
+    this.phone,
+    this.farmName,
+    this.description,
   });
 
-  final String name;
-  final String story;
-  final String phone;
-  final String location;
+  final String? name;
+  final String? story;
+  final String? phone;
+  final String? farmName;
+  final String? description;
 
   Map<String, dynamic> toJson() => {
-    'name': name,
-    'story': story,
-    'phone': phone,
-    'location': location,
+    if (name != null) 'name': name,
+    if (story != null) 'story': story,
+    if (phone != null) 'phone': phone,
+    if (farmName != null) 'farmName': farmName,
+    if (description != null) 'description': description,
   };
 }

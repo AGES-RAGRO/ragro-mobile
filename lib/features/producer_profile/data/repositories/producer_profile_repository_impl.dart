@@ -20,13 +20,14 @@ class ProducerProfileRepositoryImpl implements ProducerProfileRepository {
     required String name,
     required String story,
     required String phone,
-    required String location,
+
+    required String farmName,
   }) {
     final request = ProducerUpdateRequest(
       name: name.trim(),
       story: story.trim(),
       phone: phone.trim(),
-      location: location.trim(),
+      farmName: farmName.trim(),
     );
     return _dataSource.updateProducer(producerId, request);
   }

@@ -8,6 +8,6 @@ abstract class ProducerProfileRepository {
     required String name,
     required String story,
     required String phone,
-    required String location,
+    required String farmName,
   });
 }
