@@ -1,7 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 import 'package:ragro_mobile/core/network/api_exception.dart';
-import 'package:ragro_mobile/features/auth/domain/usecases/register_consumer.dart';
+import 'package:ragro_mobile/features/auth/domain/usecases/register_customer.dart';
 import 'package:ragro_mobile/features/auth/presentation/bloc/register_event.dart';
 import 'package:ragro_mobile/features/auth/presentation/bloc/register_state.dart';
 
@@ -11,7 +11,7 @@ class RegisterBloc extends Bloc<RegisterEvent, RegisterState> {
     on<RegisterSubmitted>(_onSubmitted);
   }
 
-  final RegisterConsumer _register;
+  final RegisterCustomer _register;
 
   Future<void> _onSubmitted(
     RegisterSubmitted event,

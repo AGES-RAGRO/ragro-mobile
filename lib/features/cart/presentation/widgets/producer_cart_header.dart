@@ -4,10 +4,10 @@ import 'package:ragro_mobile/core/theme/app_colors.dart';
 
 class ProducerCartHeader extends StatelessWidget {
   const ProducerCartHeader({
-    super.key,
     required this.farmName,
     required this.farmLocation,
     required this.producerId,
+    super.key,
   });
 
   final String farmName;
@@ -47,7 +47,7 @@ class ProducerCartHeader extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           GestureDetector(
-            onTap: () => context.push('/consumer/home/producer/$producerId'),
+            onTap: () => context.push('/customer/home/producer/$producerId'),
             child: const Row(
               children: [
                 Text(

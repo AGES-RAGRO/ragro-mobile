@@ -6,7 +6,7 @@ abstract class AuthRepository {
     required String password,
   });
 
-  Future<User> registerConsumer({
+  Future<User> registerCustomer({
     required String name,
     required String phone,
     required String email,

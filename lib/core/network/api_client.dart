@@ -30,14 +30,23 @@ class _ErrorInterceptor extends Interceptor {
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) {
     final statusCode = err.response?.statusCode;
+    final responseData = err.response?.data;
+    final responseMessage = responseData is Map<String, dynamic>
+        ? responseData['error'] as String?
+        : null;
     final ApiException exception;
     if (statusCode != null) {
       exception = switch (statusCode) {
-        401 => const UnauthorizedException(),
-        404 => const NotFoundException(),
-        409 => const ConflictException(),
+        400 => UnknownApiException(responseMessage ?? 'Dados invalidos'),
+        401 => UnauthorizedException(
+          responseMessage ?? 'Credenciais invalidas',
+        ),
+        404 => NotFoundException(responseMessage ?? 'Recurso nao encontrado'),
+        409 => ConflictException(responseMessage ?? 'Recurso ja existe'),
         429 => const RateLimitedException(),
-        >= 500 => const ServerException(),
+        >= 500 => ServerException(
+          responseMessage ?? 'Erro interno do servidor',
+        ),
         _ => const UnknownApiException(),
       };
     } else if (err.type == DioExceptionType.connectionTimeout ||

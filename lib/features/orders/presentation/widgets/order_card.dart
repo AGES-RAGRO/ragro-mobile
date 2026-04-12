@@ -5,7 +5,7 @@ import 'package:ragro_mobile/features/orders/domain/entities/order.dart';
 import 'package:ragro_mobile/features/orders/presentation/widgets/order_status_badge.dart';
 
 class OrderCard extends StatelessWidget {
-  const OrderCard({super.key, required this.order});
+  const OrderCard({required this.order, super.key});
 
   final Order order;
 
@@ -73,12 +73,16 @@ class OrderCard extends StatelessWidget {
               children: [
                 CircleAvatar(
                   radius: 17,
-                  backgroundColor: AppColors.lightGreen.withOpacity(0.2),
+                  backgroundColor: AppColors.lightGreen.withValues(alpha: 0.2),
                   backgroundImage: order.farmAvatarUrl.isNotEmpty
                       ? NetworkImage(order.farmAvatarUrl)
                       : null,
                   child: order.farmAvatarUrl.isEmpty
-                      ? const Icon(Icons.storefront, size: 16, color: AppColors.lightGreen)
+                      ? const Icon(
+                          Icons.storefront,
+                          size: 16,
+                          color: AppColors.lightGreen,
+                        )
                       : null,
                 ),
                 const SizedBox(width: 8),
@@ -153,7 +157,7 @@ class OrderCard extends StatelessWidget {
                   ],
                 ),
                 GestureDetector(
-                  onTap: () => context.push('/consumer/orders/${order.id}'),
+                  onTap: () => context.push('/customer/orders/${order.id}'),
                   child: Container(
                     height: 30,
                     padding: const EdgeInsets.symmetric(horizontal: 10),
