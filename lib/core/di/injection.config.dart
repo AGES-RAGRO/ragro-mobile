@@ -26,8 +26,14 @@ import 'package:ragro_mobile/features/admin/domain/usecases/create_admin_produce
     as _i321;
 import 'package:ragro_mobile/features/admin/domain/usecases/deactivate_admin_producer.dart'
     as _i514;
+import 'package:ragro_mobile/features/admin/domain/usecases/get_admin_producer_by_id.dart'
+    as _i852;
 import 'package:ragro_mobile/features/admin/domain/usecases/get_admin_producers.dart'
     as _i1054;
+import 'package:ragro_mobile/features/admin/domain/usecases/update_admin_producer.dart'
+    as _i711;
+import 'package:ragro_mobile/features/admin/presentation/bloc/admin_edit_producer_bloc.dart'
+    as _i914;
 import 'package:ragro_mobile/features/admin/presentation/bloc/admin_producer_form_bloc.dart'
     as _i846;
 import 'package:ragro_mobile/features/admin/presentation/bloc/admin_producers_bloc.dart'
@@ -341,8 +347,14 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i514.DeactivateAdminProducer>(
       () => _i514.DeactivateAdminProducer(gh<_i759.AdminRepository>()),
     );
+    gh.lazySingleton<_i852.GetAdminProducerById>(
+      () => _i852.GetAdminProducerById(gh<_i759.AdminRepository>()),
+    );
     gh.lazySingleton<_i1054.GetAdminProducers>(
       () => _i1054.GetAdminProducers(gh<_i759.AdminRepository>()),
+    );
+    gh.lazySingleton<_i711.UpdateAdminProducer>(
+      () => _i711.UpdateAdminProducer(gh<_i759.AdminRepository>()),
     );
     gh.factory<_i432.RateProducerBloc>(
       () => _i432.RateProducerBloc(gh<_i907.RateProducer>()),
@@ -398,6 +410,12 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i818.ProductDetailRepository>(
       () => _i43.ProductDetailRepositoryImpl(
         gh<_i127.ProductDetailRemoteDataSource>(),
+      ),
+    );
+    gh.factory<_i914.AdminEditProducerBloc>(
+      () => _i914.AdminEditProducerBloc(
+        gh<_i852.GetAdminProducerById>(),
+        gh<_i711.UpdateAdminProducer>(),
       ),
     );
     gh.lazySingleton<_i43.AuthRepository>(

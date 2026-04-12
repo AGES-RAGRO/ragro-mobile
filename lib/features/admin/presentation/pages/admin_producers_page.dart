@@ -8,7 +8,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:ragro_mobile/core/di/injection.dart';
 import 'package:ragro_mobile/core/theme/app_colors.dart';
-import 'package:ragro_mobile/features/admin/domain/entities/admin_producer.dart';
+import 'package:ragro_mobile/features/admin/domain/entities/admin_producer_summary.dart';
 import 'package:ragro_mobile/features/admin/presentation/bloc/admin_producers_bloc.dart';
 import 'package:ragro_mobile/features/admin/presentation/bloc/admin_producers_event.dart';
 import 'package:ragro_mobile/features/admin/presentation/bloc/admin_producers_state.dart';
@@ -90,14 +90,15 @@ class _AdminProducersView extends StatelessWidget {
                           producer.id,
                           producer.name,
                         ),
-                        onEdit: () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content:
-                                  Text('Editar ${producer.name} — em breve'),
-                            ),
-                          );
-                        },
+                        onEdit: () =>
+                            context.push('/admin/producers/${producer.id}/edit')
+                                .then((_) {
+                              if (context.mounted) {
+                                context
+                                    .read<AdminProducersBloc>()
+                                    .add(const AdminProducersRefreshed());
+                              }
+                            }),
                       );
                     },
                   );
@@ -166,7 +167,8 @@ class _ProducerCard extends StatelessWidget {
     required this.onEdit,
   });
 
-  final AdminProducer producer;
+
+  final AdminProducerSummary producer;
   final VoidCallback onDelete;
   final VoidCallback onEdit;
 
