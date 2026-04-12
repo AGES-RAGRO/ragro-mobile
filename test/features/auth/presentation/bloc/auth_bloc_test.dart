@@ -30,7 +30,7 @@ void main() {
     id: '1',
     name: 'Maria',
     email: 'm@t.com',
-    type: UserType.consumer,
+    type: UserType.customer,
     active: true,
   );
 
