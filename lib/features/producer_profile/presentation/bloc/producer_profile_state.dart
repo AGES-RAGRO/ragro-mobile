@@ -31,3 +31,11 @@ class ProducerProfileFailure extends ProducerProfileState {
   @override
   List<Object?> get props => [message];
 }
+
+class ProducerProfileUpdating extends ProducerProfileState {
+  const ProducerProfileUpdating();
+}
+
+class ProducerProfileUpdateSuccess extends ProducerProfileState {
+  const ProducerProfileUpdateSuccess();
+}

@@ -1,52 +1,80 @@
 // Screen: Producer Edit Profile (Editar Perfil do Produtor)
 // User Story: US-25 — Edit Producer Profile
 // Epic: EPIC 4 — Producer Features
-// Routes: PUT /producers/me
+// Routes: PUT /producers/:id
 
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:ragro_mobile/core/di/injection.dart';
 import 'package:ragro_mobile/core/theme/app_colors.dart';
+import 'package:ragro_mobile/features/producer_profile/presentation/bloc/producer_profile_bloc.dart';
+import 'package:ragro_mobile/features/producer_profile/presentation/bloc/producer_profile_event.dart';
+import 'package:ragro_mobile/features/producer_profile/presentation/bloc/producer_profile_state.dart';
 
-class ProducerEditProfilePage extends StatefulWidget {
+/// ID do produtor autenticado. O backend resolve via JWT.
+const String _authenticatedProducerId = 'me';
+
+class ProducerEditProfilePage extends StatelessWidget {
   const ProducerEditProfilePage({super.key});
 
   @override
-  State<ProducerEditProfilePage> createState() =>
-      _ProducerEditProfilePageState();
+  Widget build(BuildContext context) {
+    return BlocProvider<ProducerProfileBloc>(
+      create: (_) =>
+          getIt<ProducerProfileBloc>()
+            ..add(const ProducerProfileStarted(_authenticatedProducerId)),
+      child: const _ProducerEditProfileView(),
+    );
+  }
 }
 
-class _ProducerEditProfilePageState extends State<ProducerEditProfilePage> {
-  final _nameController = TextEditingController(text: 'João Silva');
-  final _bioController = TextEditingController(
-    text: 'Produtor orgânico certificado com mais de 10 anos de experiência.',
-  );
-  final _phoneController = TextEditingController(text: '(51) 99999-0001');
-  final _locationController =
-      TextEditingController(text: 'Porto Alegre, RS');
-  bool _saving = false;
+class _ProducerEditProfileView extends StatefulWidget {
+  const _ProducerEditProfileView();
+
+  @override
+  State<_ProducerEditProfileView> createState() =>
+      _ProducerEditProfileViewState();
+}
+
+class _ProducerEditProfileViewState extends State<_ProducerEditProfileView> {
+  final _formKey = GlobalKey<FormState>();
+  final _nameController = TextEditingController();
+  final _bioController = TextEditingController();
+  final _phoneController = TextEditingController();
+  final _farmNameController = TextEditingController();
+
+  bool _hydrated = false;
 
   @override
   void dispose() {
     _nameController.dispose();
     _bioController.dispose();
     _phoneController.dispose();
-    _locationController.dispose();
+    _farmNameController.dispose();
     super.dispose();
   }
 
-  Future<void> _save() async {
-    setState(() => _saving = true);
-    // TODO: replace with real API call — PUT /producers/me
-    await Future.delayed(const Duration(milliseconds: 600));
-    if (!mounted) return;
-    setState(() => _saving = false);
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Perfil atualizado com sucesso!'),
-        backgroundColor: AppColors.darkGreen,
+  void _hydrateFromState(ProducerProfileLoaded state) {
+    if (_hydrated) return;
+    _nameController.text = state.producer.name;
+    _bioController.text = state.producer.story;
+    _phoneController.text = state.producer.phone;
+    _farmNameController.text = state.producer.farmName;
+    _hydrated = true;
+  }
+
+  void _submit() {
+    if (!(_formKey.currentState?.validate() ?? false)) return;
+    context.read<ProducerProfileBloc>().add(
+      ProducerProfileUpdateSubmitted(
+        producerId: _authenticatedProducerId,
+        name: _nameController.text,
+        story: _bioController.text,
+        phone: _phoneController.text,
+        farmName: _farmNameController.text,
       ),
     );
-    context.pop();
   }
 
   @override
@@ -70,124 +98,197 @@ class _ProducerEditProfilePageState extends State<ProducerEditProfilePage> {
           ),
         ),
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Avatar with camera edit
-            Center(
-              child: Stack(
+      body: BlocConsumer<ProducerProfileBloc, ProducerProfileState>(
+        listenWhen: (previous, current) =>
+            current is ProducerProfileLoaded ||
+            current is ProducerProfileUpdateSuccess ||
+            current is ProducerProfileFailure,
+        listener: (context, state) {
+          if (state is ProducerProfileLoaded) {
+            _hydrateFromState(state);
+          } else if (state is ProducerProfileUpdateSuccess) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Perfil atualizado com sucesso!'),
+                backgroundColor: AppColors.darkGreen,
+              ),
+            );
+            context.pop();
+          } else if (state is ProducerProfileFailure) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(state.message),
+                backgroundColor: Colors.red,
+              ),
+            );
+          }
+        },
+        builder: (context, state) {
+          if (state is ProducerProfileLoading ||
+              state is ProducerProfileInitial) {
+            return const Center(
+              child: CircularProgressIndicator(color: AppColors.darkGreen),
+            );
+          }
+
+          final isSaving = state is ProducerProfileUpdating;
+
+          return SingleChildScrollView(
+            padding: const EdgeInsets.all(20),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  CircleAvatar(
-                    radius: 52,
-                    backgroundColor: AppColors.darkGreen.withOpacity(0.1),
-                    child: const Text(
-                      'J',
-                      style: TextStyle(
-                        fontFamily: 'Figtree',
-                        fontWeight: FontWeight.w700,
-                        fontSize: 36,
-                        color: AppColors.darkGreen,
-                      ),
+                  Center(
+                    child: Stack(
+                      children: [
+                        CircleAvatar(
+                          radius: 52,
+                          backgroundColor: AppColors.darkGreen.withValues(
+                            alpha: 0.1,
+                          ),
+                          child: Text(
+                            _nameController.text.isNotEmpty
+                                ? _nameController.text[0].toUpperCase()
+                                : '?',
+                            style: const TextStyle(
+                              fontFamily: 'Figtree',
+                              fontWeight: FontWeight.w700,
+                              fontSize: 36,
+                              color: AppColors.darkGreen,
+                            ),
+                          ),
+                        ),
+                        Positioned(
+                          bottom: 0,
+                          right: 0,
+                          child: GestureDetector(
+                            onTap: () {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('Seleção de foto em breve...'),
+                                ),
+                              );
+                            },
+                            child: Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: const BoxDecoration(
+                                color: AppColors.darkGreen,
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(
+                                Icons.camera_alt,
+                                size: 16,
+                                color: AppColors.white,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                  Positioned(
-                    bottom: 0,
-                    right: 0,
-                    child: GestureDetector(
-                      onTap: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                              content: Text('Seleção de foto em breve...')),
-                        );
-                      },
-                      child: Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: const BoxDecoration(
-                          color: AppColors.darkGreen,
-                          shape: BoxShape.circle,
+                  const SizedBox(height: 28),
+                  const _FieldLabel('Nome'),
+                  const SizedBox(height: 8),
+                  _FormField(
+                    controller: _nameController,
+                    hint: 'Seu nome completo',
+                    validator: (value) {
+                      final trimmed = value?.trim() ?? '';
+                      if (trimmed.isEmpty) return 'Informe seu nome';
+                      if (trimmed.length < 3) {
+                        return 'Nome deve ter ao menos 3 caracteres';
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  const _FieldLabel('Descrição / Bio'),
+                  const SizedBox(height: 8),
+                  _FormField(
+                    controller: _bioController,
+                    hint: 'Conte um pouco sobre você...',
+                    maxLines: 3,
+                    validator: (value) {
+                      if (value?.trim().isEmpty ?? true) {
+                        return 'Conte um pouco sobre você';
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  const _FieldLabel('Telefone'),
+                  const SizedBox(height: 8),
+                  _FormField(
+                    controller: _phoneController,
+                    hint: '(XX) XXXXX-XXXX',
+                    keyboardType: TextInputType.phone,
+                    validator: (value) {
+                      final digits = (value ?? '').replaceAll(
+                        RegExp(r'\D'),
+                        '',
+                      );
+                      if (digits.isEmpty) return 'Informe um telefone';
+                      if (digits.length < 10) {
+                        return 'Telefone deve ter ao menos 10 dígitos';
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  const _FieldLabel('Nome da Fazenda'),
+                  const SizedBox(height: 8),
+                  _FormField(
+                    controller: _farmNameController,
+                    hint: 'Nome da sua propriedade rural',
+                    validator: (value) {
+                      if (value?.trim().isEmpty ?? true) {
+                        return 'Informe o nome da fazenda';
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 32),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: isSaving ? null : _submit,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.darkGreen,
+                        foregroundColor: AppColors.white,
+                        disabledBackgroundColor: AppColors.darkGreen.withValues(
+                          alpha: 0.5,
                         ),
-                        child: const Icon(Icons.camera_alt,
-                            size: 16, color: AppColors.white),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(24),
+                        ),
+                        padding: const EdgeInsets.symmetric(vertical: 16),
                       ),
+                      child: isSaving
+                          ? const SizedBox(
+                              height: 20,
+                              width: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: AppColors.white,
+                              ),
+                            )
+                          : const Text(
+                              'Salvar',
+                              style: TextStyle(
+                                fontFamily: 'Manrope',
+                                fontWeight: FontWeight.w700,
+                                fontSize: 16,
+                              ),
+                            ),
                     ),
                   ),
                 ],
               ),
             ),
-
-            const SizedBox(height: 28),
-
-            _FieldLabel('Nome'),
-            const SizedBox(height: 8),
-            _TextField(controller: _nameController, hint: 'Seu nome completo'),
-
-            const SizedBox(height: 16),
-
-            _FieldLabel('Descrição / Bio'),
-            const SizedBox(height: 8),
-            _TextField(
-              controller: _bioController,
-              hint: 'Conte um pouco sobre você...',
-              maxLines: 3,
-            ),
-
-            const SizedBox(height: 16),
-
-            _FieldLabel('Telefone'),
-            const SizedBox(height: 8),
-            _TextField(
-              controller: _phoneController,
-              hint: '(XX) XXXXX-XXXX',
-              keyboardType: TextInputType.phone,
-            ),
-
-            const SizedBox(height: 16),
-
-            _FieldLabel('Localização'),
-            const SizedBox(height: 8),
-            _TextField(
-              controller: _locationController,
-              hint: 'Cidade, Estado',
-            ),
-
-            const SizedBox(height: 32),
-
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: _saving ? null : _save,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.darkGreen,
-                  foregroundColor: AppColors.white,
-                  disabledBackgroundColor:
-                      AppColors.darkGreen.withOpacity(0.5),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(24)),
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                ),
-                child: _saving
-                    ? const SizedBox(
-                        height: 20,
-                        width: 20,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: AppColors.white,
-                        ),
-                      )
-                    : const Text(
-                        'Salvar',
-                        style: TextStyle(
-                          fontFamily: 'Manrope',
-                          fontWeight: FontWeight.w700,
-                          fontSize: 16,
-                        ),
-                      ),
-              ),
-            ),
-          ],
-        ),
+          );
+        },
       ),
     );
   }
@@ -211,25 +312,29 @@ class _FieldLabel extends StatelessWidget {
   }
 }
 
-class _TextField extends StatelessWidget {
-  const _TextField({
+class _FormField extends StatelessWidget {
+  const _FormField({
     required this.controller,
     required this.hint,
     this.maxLines = 1,
     this.keyboardType = TextInputType.text,
+    this.validator,
   });
 
   final TextEditingController controller;
   final String hint;
   final int maxLines;
   final TextInputType keyboardType;
+  final String? Function(String?)? validator;
 
   @override
   Widget build(BuildContext context) {
-    return TextField(
+    return TextFormField(
       controller: controller,
       maxLines: maxLines,
       keyboardType: keyboardType,
+      validator: validator,
+      autovalidateMode: AutovalidateMode.onUserInteraction,
       decoration: InputDecoration(
         hintText: hint,
         hintStyle: const TextStyle(
@@ -239,8 +344,10 @@ class _TextField extends StatelessWidget {
         ),
         filled: true,
         fillColor: AppColors.inputBackground,
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 14,
+        ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: AppColors.inputBorder),
