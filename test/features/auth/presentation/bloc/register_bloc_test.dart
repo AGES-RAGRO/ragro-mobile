@@ -4,19 +4,19 @@ import 'package:mocktail/mocktail.dart';
 import 'package:ragro_mobile/core/network/api_exception.dart';
 import 'package:ragro_mobile/features/auth/domain/entities/user.dart';
 import 'package:ragro_mobile/features/auth/domain/entities/user_type.dart';
-import 'package:ragro_mobile/features/auth/domain/usecases/register_consumer.dart';
+import 'package:ragro_mobile/features/auth/domain/usecases/register_customer.dart';
 import 'package:ragro_mobile/features/auth/presentation/bloc/register_bloc.dart';
 import 'package:ragro_mobile/features/auth/presentation/bloc/register_event.dart';
 import 'package:ragro_mobile/features/auth/presentation/bloc/register_state.dart';
 
-class MockRegisterConsumer extends Mock implements RegisterConsumer {}
+class MockRegisterCustomer extends Mock implements RegisterCustomer {}
 
 void main() {
   late RegisterBloc bloc;
-  late MockRegisterConsumer mockRegister;
+  late MockRegisterCustomer mockRegister;
 
   setUp(() {
-    mockRegister = MockRegisterConsumer();
+    mockRegister = MockRegisterCustomer();
     bloc = RegisterBloc(mockRegister);
   });
 
@@ -26,7 +26,7 @@ void main() {
     id: '2',
     name: 'Ana',
     email: 'ana@t.com',
-    type: UserType.consumer,
+    type: UserType.customer,
     active: true,
   );
 
@@ -46,20 +46,22 @@ void main() {
   blocTest<RegisterBloc, RegisterState>(
     'emits [Loading, Success] on successful registration',
     build: () {
-      when(() => mockRegister(
-            name: any(named: 'name'),
-            phone: any(named: 'phone'),
-            email: any(named: 'email'),
-            fiscalNumber: any(named: 'fiscalNumber'),
-            password: any(named: 'password'),
-            zipCode: any(named: 'zipCode'),
-            street: any(named: 'street'),
-            number: any(named: 'number'),
-            city: any(named: 'city'),
-            state: any(named: 'state'),
-            complement: any(named: 'complement'),
-            neighborhood: any(named: 'neighborhood'),
-          )).thenAnswer((_) async => tUser);
+      when(
+        () => mockRegister(
+          name: any(named: 'name'),
+          phone: any(named: 'phone'),
+          email: any(named: 'email'),
+          fiscalNumber: any(named: 'fiscalNumber'),
+          password: any(named: 'password'),
+          zipCode: any(named: 'zipCode'),
+          street: any(named: 'street'),
+          number: any(named: 'number'),
+          city: any(named: 'city'),
+          state: any(named: 'state'),
+          complement: any(named: 'complement'),
+          neighborhood: any(named: 'neighborhood'),
+        ),
+      ).thenAnswer((_) async => tUser);
       return bloc;
     },
     act: (b) => b.add(tEvent),
@@ -69,20 +71,22 @@ void main() {
   blocTest<RegisterBloc, RegisterState>(
     'emits [Loading, Failure] on ConflictException (email already exists)',
     build: () {
-      when(() => mockRegister(
-            name: any(named: 'name'),
-            phone: any(named: 'phone'),
-            email: any(named: 'email'),
-            fiscalNumber: any(named: 'fiscalNumber'),
-            password: any(named: 'password'),
-            zipCode: any(named: 'zipCode'),
-            street: any(named: 'street'),
-            number: any(named: 'number'),
-            city: any(named: 'city'),
-            state: any(named: 'state'),
-            complement: any(named: 'complement'),
-            neighborhood: any(named: 'neighborhood'),
-          )).thenThrow(const ConflictException());
+      when(
+        () => mockRegister(
+          name: any(named: 'name'),
+          phone: any(named: 'phone'),
+          email: any(named: 'email'),
+          fiscalNumber: any(named: 'fiscalNumber'),
+          password: any(named: 'password'),
+          zipCode: any(named: 'zipCode'),
+          street: any(named: 'street'),
+          number: any(named: 'number'),
+          city: any(named: 'city'),
+          state: any(named: 'state'),
+          complement: any(named: 'complement'),
+          neighborhood: any(named: 'neighborhood'),
+        ),
+      ).thenThrow(const ConflictException());
       return bloc;
     },
     act: (b) => b.add(tEvent),
