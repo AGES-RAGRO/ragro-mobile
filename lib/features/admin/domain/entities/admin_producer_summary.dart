@@ -35,6 +35,14 @@ class AdminProducerSummary extends Equatable {
   }
 
   @override
-  List<Object?> get props =>
-      [id, name, email, phone, address, active, createdAt, updatedAt];
+  List<Object?> get props => [
+    id,
+    name,
+    email,
+    phone,
+    address,
+    active,
+    createdAt,
+    updatedAt,
+  ];
 }

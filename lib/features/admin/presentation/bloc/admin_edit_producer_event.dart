@@ -21,9 +21,11 @@ class AdminEditProducerSubmitted extends AdminEditProducerEvent {
     required this.cep,
     required this.address,
     required this.number,
-    required this.city,
     required this.state,
     required this.cpfCnpj,
+    required this.city,
+    required this.farmName,
+    required this.description,
     required this.scheduleWeekdays,
     required this.scheduleStart,
     required this.scheduleEnd,
@@ -49,6 +51,8 @@ class AdminEditProducerSubmitted extends AdminEditProducerEvent {
   final String city;
   final String state;
   final String cpfCnpj;
+  final String farmName;
+  final String description;
   final List<bool> scheduleWeekdays;
   final String scheduleStart;
   final String scheduleEnd;
@@ -68,7 +72,22 @@ class AdminEditProducerSubmitted extends AdminEditProducerEvent {
 
   @override
   List<Object?> get props => [
-    name, email, phone, address, number, city, state, cpfCnpj,
-    pixKeyType, pixKey, bankName, agency, accountNumber, accountType, accountHolder,
+    name,
+    email,
+    phone,
+    address,
+    number,
+    city,
+    state,
+    cpfCnpj,
+    farmName,
+    description,
+    pixKeyType,
+    pixKey,
+    bankName,
+    agency,
+    accountNumber,
+    accountType,
+    accountHolder,
   ];
 }

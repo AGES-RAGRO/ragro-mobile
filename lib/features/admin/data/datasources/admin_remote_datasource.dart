@@ -58,6 +58,7 @@ class AdminRemoteDataSource {
           'fiscalNumber': producer.fiscalNumber,
           'fiscalNumberType': producer.fiscalNumberType,
           'farmName': producer.farmName,
+          'description': producer.description,
           'address': address.toJson(),
           'paymentMethods': paymentMethods.map((pm) => pm.toJson()).toList(),
           if (producer.availability != null &&
@@ -81,6 +82,7 @@ class AdminRemoteDataSource {
           'name': producer.name,
           'phone': producer.phone,
           'farmName': producer.farmName,
+          'description': producer.description,
           if (address != null) 'address': address.toJson(),
           if (producer.paymentMethods != null &&
               producer.paymentMethods!.isNotEmpty)

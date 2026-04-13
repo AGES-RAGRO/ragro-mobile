@@ -25,9 +25,33 @@ const _pixKeyTypeLabels = {
 };
 
 const List<String> _brazilianStates = [
-  'AC', 'AL', 'AP', 'AM', 'BA', 'CE', 'DF', 'ES', 'GO', 'MA',
-  'MT', 'MS', 'MG', 'PA', 'PB', 'PR', 'PE', 'PI', 'RJ', 'RN',
-  'RS', 'RO', 'RR', 'SC', 'SP', 'SE', 'TO',
+  'AC',
+  'AL',
+  'AP',
+  'AM',
+  'BA',
+  'CE',
+  'DF',
+  'ES',
+  'GO',
+  'MA',
+  'MT',
+  'MS',
+  'MG',
+  'PA',
+  'PB',
+  'PR',
+  'PE',
+  'PI',
+  'RJ',
+  'RN',
+  'RS',
+  'RO',
+  'RR',
+  'SC',
+  'SP',
+  'SE',
+  'TO',
 ];
 
 class AdminEditProducerPage extends StatelessWidget {
@@ -38,8 +62,9 @@ class AdminEditProducerPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => getIt<AdminEditProducerBloc>()
-        ..add(AdminEditProducerLoadRequested(producerId)),
+      create: (_) =>
+          getIt<AdminEditProducerBloc>()
+            ..add(AdminEditProducerLoadRequested(producerId)),
       child: const _AdminEditProducerView(),
     );
   }
@@ -61,6 +86,8 @@ class _AdminEditProducerViewState extends State<_AdminEditProducerView> {
   final _phoneController = TextEditingController();
   final _emailController = TextEditingController();
   final _cpfCnpjController = TextEditingController();
+  final _farmNameController = TextEditingController();
+  final _descriptionController = TextEditingController();
 
   // ── Endereço ───────────────────────────────────────────────────────────
   final _cepController = TextEditingController();
@@ -90,7 +117,15 @@ class _AdminEditProducerViewState extends State<_AdminEditProducerView> {
   late AdminProducer _original;
   bool _controllersInitialized = false;
 
-  static const _weekdayLabels = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'];
+  static const _weekdayLabels = [
+    'Seg',
+    'Ter',
+    'Qua',
+    'Qui',
+    'Sex',
+    'Sáb',
+    'Dom',
+  ];
 
   String _digitsOnly(String v) => v.replaceAll(RegExp(r'\D'), '');
 
@@ -111,6 +146,8 @@ class _AdminEditProducerViewState extends State<_AdminEditProducerView> {
     _phoneController.dispose();
     _emailController.dispose();
     _cpfCnpjController.dispose();
+    _farmNameController.dispose();
+    _descriptionController.dispose();
     _cepController.dispose();
     _addressController.dispose();
     _numberController.dispose();
@@ -134,6 +171,8 @@ class _AdminEditProducerViewState extends State<_AdminEditProducerView> {
     _phoneController.text = producer.phone;
     _emailController.text = producer.email;
     _cpfCnpjController.text = producer.fiscalNumber;
+    _farmNameController.text = producer.farmName;
+    _descriptionController.text = producer.description;
     _cepController.text = producer.producerAddress?.zipCode ?? '';
     _addressController.text = producer.producerAddress?.street ?? '';
     _numberController.text = producer.producerAddress?.number ?? '';
@@ -141,8 +180,9 @@ class _AdminEditProducerViewState extends State<_AdminEditProducerView> {
     _selectedState = producer.producerAddress?.state;
 
     // Pre-fill PIX
-    final pix =
-        producer.paymentMethods?.where((pm) => pm.type == 'pix').firstOrNull;
+    final pix = producer.paymentMethods
+        ?.where((pm) => pm.type == 'pix')
+        .firstOrNull;
     if (pix != null) {
       _pixKeyType = pix.pixKeyType;
       _pixKeyController.text = pix.pixKey ?? '';
@@ -184,8 +224,9 @@ class _AdminEditProducerViewState extends State<_AdminEditProducerView> {
     final bank = _original.paymentMethods
         ?.where((pm) => pm.type == 'bank_account')
         .firstOrNull;
-    final pix =
-        _original.paymentMethods?.where((pm) => pm.type == 'pix').firstOrNull;
+    final pix = _original.paymentMethods
+        ?.where((pm) => pm.type == 'pix')
+        .firstOrNull;
     return _nameController.text != _original.name ||
         _phoneController.text != _original.phone ||
         _emailController.text != _original.email ||
@@ -199,7 +240,9 @@ class _AdminEditProducerViewState extends State<_AdminEditProducerView> {
         _bankNameController.text != (bank?.bankName ?? '') ||
         _agencyController.text != (bank?.agency ?? '') ||
         _accountController.text != (bank?.accountNumber ?? '') ||
-        _holderController.text != (bank?.holderName ?? '');
+        _holderController.text != (bank?.holderName ?? '') ||
+        _farmNameController.text != _original.farmName ||
+        _descriptionController.text != _original.description;
   }
 
   Future<bool> _confirmDiscard() async {
@@ -260,7 +303,8 @@ class _AdminEditProducerViewState extends State<_AdminEditProducerView> {
     if (!_formKey.currentState!.validate()) return;
 
     // PIX: inclui apenas se o admin preencheu tipo e chave
-    final hasPix = _pixKeyType != null && _pixKeyController.text.trim().isNotEmpty;
+    final hasPix =
+        _pixKeyType != null && _pixKeyController.text.trim().isNotEmpty;
     String? pixKey;
     if (hasPix) {
       final raw = _pixKeyController.text.trim();
@@ -270,47 +314,52 @@ class _AdminEditProducerViewState extends State<_AdminEditProducerView> {
     }
 
     // Conta Bancária: inclui apenas se o admin preencheu banco, agência, conta e titular
-    final hasBank = _bankNameController.text.trim().isNotEmpty &&
+    final hasBank =
+        _bankNameController.text.trim().isNotEmpty &&
         _agencyController.text.trim().isNotEmpty &&
         _accountController.text.trim().isNotEmpty &&
         _holderController.text.trim().isNotEmpty;
 
     if (_bankNameController.text.trim().isNotEmpty && !hasBank) {
-      _showError('Preencha agência, conta e titular para salvar os dados bancários.');
+      _showError(
+        'Preencha agência, conta e titular para salvar os dados bancários.',
+      );
       return;
     }
 
     context.read<AdminEditProducerBloc>().add(
-          AdminEditProducerSubmitted(
-            name: _nameController.text.trim(),
-            email: _emailController.text.trim(),
-            phone: _digitsOnly(_phoneController.text),
-            cep: _digitsOnly(_cepController.text),
-            address: _addressController.text.trim(),
-            number: _numberController.text.trim(),
-            city: _cityController.text.trim(),
-            state: _selectedState ?? '',
-            cpfCnpj: _cpfCnpjController.text.trim(),
-            scheduleWeekdays: List.from(_weekdays),
-            scheduleStart: _scheduleStartController.text.trim(),
-            scheduleEnd: _scheduleEndController.text.trim(),
-            // PIX (opcional)
-            pixKeyType: hasPix ? _pixKeyType : null,
-            pixKey: hasPix ? pixKey : null,
-            // Conta Bancária (opcional)
-            bankName: hasBank ? _bankNameController.text.trim() : null,
-            bankCode: _bankCodeController.text.trim().isNotEmpty
-                ? _bankCodeController.text.trim()
-                : null,
-            agency: hasBank ? _agencyController.text.trim() : null,
-            accountNumber: hasBank ? _accountController.text.trim() : null,
-            accountType: hasBank ? 'checking' : null,
-            accountHolder: hasBank ? _holderController.text.trim() : null,
-            bankFiscalNumber: _bankFiscalController.text.trim().isNotEmpty
-                ? _digitsOnly(_bankFiscalController.text)
-                : null,
-          ),
-        );
+      AdminEditProducerSubmitted(
+        name: _nameController.text.trim(),
+        email: _emailController.text.trim(),
+        phone: _digitsOnly(_phoneController.text),
+        cep: _digitsOnly(_cepController.text),
+        address: _addressController.text.trim(),
+        number: _numberController.text.trim(),
+        city: _cityController.text.trim(),
+        state: _selectedState ?? '',
+        cpfCnpj: _cpfCnpjController.text.trim(),
+        farmName: _farmNameController.text.trim(),
+        description: _descriptionController.text.trim(),
+        scheduleWeekdays: List.from(_weekdays),
+        scheduleStart: _scheduleStartController.text.trim(),
+        scheduleEnd: _scheduleEndController.text.trim(),
+        // PIX (opcional)
+        pixKeyType: hasPix ? _pixKeyType : null,
+        pixKey: hasPix ? pixKey : null,
+        // Conta Bancária (opcional)
+        bankName: hasBank ? _bankNameController.text.trim() : null,
+        bankCode: _bankCodeController.text.trim().isNotEmpty
+            ? _bankCodeController.text.trim()
+            : null,
+        agency: hasBank ? _agencyController.text.trim() : null,
+        accountNumber: hasBank ? _accountController.text.trim() : null,
+        accountType: hasBank ? 'checking' : null,
+        accountHolder: hasBank ? _holderController.text.trim() : null,
+        bankFiscalNumber: _bankFiscalController.text.trim().isNotEmpty
+            ? _digitsOnly(_bankFiscalController.text)
+            : null,
+      ),
+    );
   }
 
   void _showError(String message) {
@@ -347,7 +396,8 @@ class _AdminEditProducerViewState extends State<_AdminEditProducerView> {
       builder: (context, state) {
         final isLoading = state is AdminEditProducerLoading;
         final isSaving = state is AdminEditProducerSaving;
-        final isReady = state is AdminEditProducerLoaded ||
+        final isReady =
+            state is AdminEditProducerLoaded ||
             state is AdminEditProducerSaving ||
             state is AdminEditProducerFailure;
 
@@ -382,11 +432,13 @@ class _AdminEditProducerViewState extends State<_AdminEditProducerView> {
             ),
             body: isLoading
                 ? const Center(
-                    child: CircularProgressIndicator(color: AppColors.darkGreen),
+                    child: CircularProgressIndicator(
+                      color: AppColors.darkGreen,
+                    ),
                   )
                 : isReady
-                    ? _buildForm(isSaving)
-                    : const SizedBox.shrink(),
+                ? _buildForm(isSaving)
+                : const SizedBox.shrink(),
           ),
         );
       },
@@ -412,7 +464,8 @@ class _AdminEditProducerViewState extends State<_AdminEditProducerView> {
               prefixIcon: Icons.person_outline,
               enabled: !isSaving,
               validator: (value) {
-                if ((value ?? '').trim().isEmpty) return 'Informe o nome completo';
+                if ((value ?? '').trim().isEmpty)
+                  return 'Informe o nome completo';
                 return null;
               },
             ),
@@ -458,6 +511,32 @@ class _AdminEditProducerViewState extends State<_AdminEditProducerView> {
               prefixIcon: Icons.badge_outlined,
               keyboardType: TextInputType.number,
               enabled: !isSaving,
+            ),
+            const SizedBox(height: 12),
+            _FieldLabel('Nome da Fazenda'),
+            const SizedBox(height: 8),
+            _TextField(
+              controller: _farmNameController,
+              hint: 'Ex: Fazenda Santa Luzia',
+              prefixIcon: Icons.home_outlined,
+              enabled: !isSaving,
+              validator: (value) {
+                if ((value ?? '').trim().isEmpty)
+                  return 'Informe o nome da fazenda';
+                return null;
+              },
+            ),
+            const SizedBox(height: 12),
+            _FieldLabel('Descrição'),
+            const SizedBox(height: 8),
+            _TextField(
+              controller: _descriptionController,
+              hint: 'Breve descrição sobre o produtor...',
+              prefixIcon: Icons.description_outlined,
+              enabled: !isSaving,
+              minLines: 1,
+              maxLines: null,
+              maxLength: 1000,
             ),
 
             // ── Endereço ───────────────────────────────────────────────
@@ -545,8 +624,7 @@ class _AdminEditProducerViewState extends State<_AdminEditProducerView> {
                       const SizedBox(height: 8),
                       _UfAutocomplete(
                         initialValue: _selectedState,
-                        onSelected: (uf) =>
-                            setState(() => _selectedState = uf),
+                        onSelected: (uf) => setState(() => _selectedState = uf),
                         enabled: !isSaving,
                       ),
                     ],
@@ -621,9 +699,9 @@ class _AdminEditProducerViewState extends State<_AdminEditProducerView> {
                       onChanged: isSaving
                           ? null
                           : (v) => setState(() {
-                                _pixKeyType = v;
-                                _pixKeyController.clear();
-                              }),
+                              _pixKeyType = v;
+                              _pixKeyController.clear();
+                            }),
                     ),
                     if (_pixKeyType != null) ...[
                       const SizedBox(height: 12),
@@ -761,8 +839,10 @@ class _AdminEditProducerViewState extends State<_AdminEditProducerView> {
                       ? null
                       : () => setState(() => _weekdays[i] = !_weekdays[i]),
                   child: Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
+                    ),
                     decoration: BoxDecoration(
                       color: isSelected
                           ? AppColors.darkGreen
@@ -805,8 +885,11 @@ class _AdminEditProducerViewState extends State<_AdminEditProducerView> {
                 ),
                 const Padding(
                   padding: EdgeInsets.only(top: 28, left: 12, right: 12),
-                  child: Icon(Icons.arrow_forward,
-                      color: AppColors.placeholder, size: 18),
+                  child: Icon(
+                    Icons.arrow_forward,
+                    color: AppColors.placeholder,
+                    size: 18,
+                  ),
                 ),
                 Expanded(
                   child: Column(
@@ -836,10 +919,12 @@ class _AdminEditProducerViewState extends State<_AdminEditProducerView> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.darkGreen,
                   foregroundColor: AppColors.white,
-                  disabledBackgroundColor:
-                      AppColors.darkGreen.withValues(alpha: 0.5),
+                  disabledBackgroundColor: AppColors.darkGreen.withValues(
+                    alpha: 0.5,
+                  ),
                   shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(24)),
+                    borderRadius: BorderRadius.circular(24),
+                  ),
                   padding: const EdgeInsets.symmetric(vertical: 16),
                 ),
                 child: isSaving
@@ -945,6 +1030,8 @@ class _TextField extends StatelessWidget {
     required this.hint,
     this.prefixIcon,
     this.maxLines = 1,
+    this.minLines,
+    this.maxLength,
     this.keyboardType = TextInputType.text,
     this.enabled = true,
     this.obscure = false,
@@ -955,7 +1042,9 @@ class _TextField extends StatelessWidget {
   final TextEditingController controller;
   final String hint;
   final IconData? prefixIcon;
-  final int maxLines;
+  final int? maxLines;
+  final int? minLines;
+  final int? maxLength;
   final TextInputType keyboardType;
   final bool enabled;
   final bool obscure;
@@ -967,6 +1056,8 @@ class _TextField extends StatelessWidget {
     return TextFormField(
       controller: controller,
       maxLines: maxLines,
+      minLines: minLines,
+      maxLength: maxLength,
       keyboardType: keyboardType,
       enabled: enabled,
       obscureText: obscure,
@@ -984,8 +1075,10 @@ class _TextField extends StatelessWidget {
             : null,
         filled: true,
         fillColor: AppColors.inputBackground,
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 18,
+        ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(24),
           borderSide: const BorderSide(color: AppColors.inputBorder),
@@ -996,8 +1089,7 @@ class _TextField extends StatelessWidget {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(24),
-          borderSide:
-              const BorderSide(color: AppColors.darkGreen, width: 1.5),
+          borderSide: const BorderSide(color: AppColors.darkGreen, width: 1.5),
         ),
       ),
       style: const TextStyle(
@@ -1059,8 +1151,10 @@ class _UfAutocomplete extends StatelessWidget {
             ),
             filled: true,
             fillColor: AppColors.inputBackground,
-            contentPadding:
-                const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 14,
+            ),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: const BorderSide(color: AppColors.inputBorder),
@@ -1071,8 +1165,10 @@ class _UfAutocomplete extends StatelessWidget {
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide:
-                  const BorderSide(color: AppColors.darkGreen, width: 1.5),
+              borderSide: const BorderSide(
+                color: AppColors.darkGreen,
+                width: 1.5,
+              ),
             ),
           ),
         );
@@ -1114,6 +1210,5 @@ class _UppercaseFormatter extends TextInputFormatter {
   TextEditingValue formatEditUpdate(
     TextEditingValue oldValue,
     TextEditingValue newValue,
-  ) =>
-      newValue.copyWith(text: newValue.text.toUpperCase());
+  ) => newValue.copyWith(text: newValue.text.toUpperCase());
 }

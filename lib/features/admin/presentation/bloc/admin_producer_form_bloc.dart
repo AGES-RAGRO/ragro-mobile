@@ -73,6 +73,7 @@ class AdminProducerFormBloc
         fiscalNumber: event.fiscalNumber,
         fiscalNumberType: event.fiscalNumberType,
         farmName: event.farmName,
+        description: event.description,
         producerAddress: AdminAddress(
           street: event.address,
           number: event.number,
