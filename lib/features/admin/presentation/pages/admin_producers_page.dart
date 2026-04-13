@@ -57,10 +57,7 @@ class _AdminProducersView extends StatelessWidget {
                   ),
                   IconButton(
                     tooltip: 'Sair',
-                    icon: const Icon(
-                      Icons.logout,
-                      color: Color(0xFFDC2626),
-                    ),
+                    icon: const Icon(Icons.logout, color: Color(0xFFDC2626)),
                     onPressed: () => _onLogout(context),
                   ),
                 ],
@@ -137,12 +134,13 @@ class _AdminProducersView extends StatelessWidget {
                               producer: producer,
                             ),
                             onEdit: () async {
-                              await context
-                                  .push('/admin/producers/${producer.id}/edit');
+                              await context.push(
+                                '/admin/producers/${producer.id}/edit',
+                              );
                               if (context.mounted) {
-                                context
-                                    .read<AdminProducersBloc>()
-                                    .add(const AdminProducersStarted());
+                                context.read<AdminProducersBloc>().add(
+                                  const AdminProducersStarted(),
+                                );
                               }
                             },
                           );

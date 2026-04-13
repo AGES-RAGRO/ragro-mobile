@@ -102,6 +102,8 @@ class AdminEditProducerBloc
         ),
         paymentMethods: paymentMethods.isNotEmpty ? paymentMethods : null,
         availability: selectedDays.isNotEmpty ? selectedDays : null,
+        farmName: event.farmName,
+        description: event.description,
         updatedAt: DateTime.now(),
       );
 

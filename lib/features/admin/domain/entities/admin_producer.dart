@@ -16,6 +16,7 @@ class AdminProducer extends Equatable {
     required this.fiscalNumber,
     required this.fiscalNumberType,
     required this.farmName,
+    required this.description,
     this.producerAddress,
     this.paymentMethods,
     this.availability,
@@ -32,6 +33,7 @@ class AdminProducer extends Equatable {
   final String fiscalNumber;
   final String fiscalNumberType;
   final String farmName;
+  final String description;
   final AdminAddress? producerAddress;
   final List<AdminPaymentMethod>? paymentMethods;
   final List<AdminAvailability>? availability;
@@ -47,6 +49,7 @@ class AdminProducer extends Equatable {
     String? fiscalNumber,
     String? fiscalNumberType,
     String? farmName,
+    String? description,
     AdminAddress? producerAddress,
     List<AdminPaymentMethod>? paymentMethods,
     List<AdminAvailability>? availability,
@@ -63,6 +66,7 @@ class AdminProducer extends Equatable {
       fiscalNumber: fiscalNumber ?? this.fiscalNumber,
       fiscalNumberType: fiscalNumberType ?? this.fiscalNumberType,
       farmName: farmName ?? this.farmName,
+      description: description ?? this.description,
       producerAddress: producerAddress ?? this.producerAddress,
       paymentMethods: paymentMethods ?? this.paymentMethods,
       availability: availability ?? this.availability,
@@ -82,5 +86,6 @@ class AdminProducer extends Equatable {
     fiscalNumber,
     fiscalNumberType,
     farmName,
+    description,
   ];
 }

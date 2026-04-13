@@ -19,6 +19,7 @@ class AdminProducerFormSubmitted extends AdminProducerFormEvent {
     required this.fiscalNumber,
     required this.fiscalNumberType,
     required this.farmName,
+    required this.description,
     required this.password,
     required this.scheduleWeekdays,
     required this.scheduleStart,
@@ -47,6 +48,7 @@ class AdminProducerFormSubmitted extends AdminProducerFormEvent {
   final String fiscalNumber;
   final String fiscalNumberType;
   final String farmName;
+  final String description;
   final String password;
   final List<bool> scheduleWeekdays;
   final String scheduleStart;
@@ -67,8 +69,7 @@ class AdminProducerFormSubmitted extends AdminProducerFormEvent {
 
   @override
   List<Object?> get props => [
-    name, email, phone, address, city, state, number, password,
-    fiscalNumber, fiscalNumberType, farmName,
+    fiscalNumber, fiscalNumberType, farmName, description,
     pixKeyType, pixKey, bankName, agency, accountNumber, accountType, accountHolder,
   ];
 }
