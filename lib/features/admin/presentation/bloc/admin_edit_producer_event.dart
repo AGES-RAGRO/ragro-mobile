@@ -20,6 +20,7 @@ class AdminEditProducerSubmitted extends AdminEditProducerEvent {
     required this.phone,
     required this.cep,
     required this.address,
+    required this.number,
     required this.city,
     required this.state,
     required this.cpfCnpj,
@@ -44,6 +45,7 @@ class AdminEditProducerSubmitted extends AdminEditProducerEvent {
   final String phone;
   final String cep;
   final String address;
+  final String number;
   final String city;
   final String state;
   final String cpfCnpj;
@@ -66,7 +68,7 @@ class AdminEditProducerSubmitted extends AdminEditProducerEvent {
 
   @override
   List<Object?> get props => [
-    name, email, phone, address, city, state, cpfCnpj,
+    name, email, phone, address, number, city, state, cpfCnpj,
     pixKeyType, pixKey, bankName, agency, accountNumber, accountType, accountHolder,
   ];
 }

@@ -1,4 +1,6 @@
 import 'package:ragro_mobile/features/admin/domain/entities/admin_address.dart';
+import 'package:ragro_mobile/features/admin/domain/entities/admin_availability.dart';
+import 'package:ragro_mobile/features/admin/domain/entities/admin_payment_method.dart';
 import 'package:ragro_mobile/features/admin/domain/entities/admin_producer.dart';
 
 class AdminProducerModel extends AdminProducer {
@@ -15,6 +17,8 @@ class AdminProducerModel extends AdminProducer {
     required super.fiscalNumberType,
     required super.farmName,
     super.producerAddress,
+    super.paymentMethods,
+    super.availability,
   });
 
   factory AdminProducerModel.fromJson(Map<String, dynamic> json) {
@@ -44,6 +48,22 @@ class AdminProducerModel extends AdminProducer {
       flattenedAddress = addressData;
     }
 
+    final paymentMethodsData = json['paymentMethods'];
+    final paymentMethods = paymentMethodsData is List
+        ? paymentMethodsData
+            .whereType<Map<String, dynamic>>()
+            .map(_paymentMethodFromJson)
+            .toList()
+        : null;
+
+    final availabilityData = json['availability'];
+    final availability = availabilityData is List
+        ? availabilityData
+            .whereType<Map<String, dynamic>>()
+            .map(_availabilityFromJson)
+            .toList()
+        : null;
+
     return AdminProducerModel(
       id: json['id'] as String? ?? '',
       name: json['name'] as String? ?? '',
@@ -57,6 +77,31 @@ class AdminProducerModel extends AdminProducer {
       fiscalNumberType: json['fiscalNumberType'] as String? ?? '',
       farmName: json['farmName'] as String? ?? '',
       producerAddress: producerAddress,
+      paymentMethods: paymentMethods,
+      availability: availability,
+    );
+  }
+
+  static AdminPaymentMethod _paymentMethodFromJson(Map<String, dynamic> json) {
+    return AdminPaymentMethod(
+      type: json['type'] as String? ?? '',
+      pixKeyType: json['pixKeyType'] as String?,
+      pixKey: json['pixKey'] as String?,
+      bankCode: json['bankCode'] as String?,
+      bankName: json['bankName'] as String?,
+      agency: json['agency'] as String?,
+      accountNumber: json['accountNumber'] as String?,
+      accountType: json['accountType'] as String?,
+      holderName: json['holderName'] as String?,
+      fiscalNumber: json['fiscalNumber'] as String?,
+    );
+  }
+
+  static AdminAvailability _availabilityFromJson(Map<String, dynamic> json) {
+    return AdminAvailability(
+      weekday: (json['weekday'] as num?)?.toInt() ?? 0,
+      opensAt: json['opensAt'] as String? ?? '',
+      closesAt: json['closesAt'] as String? ?? '',
     );
   }
 

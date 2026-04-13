@@ -30,9 +30,6 @@ const _pixKeyTypeLabels = {
   'random': 'Chave aleatória',
 };
 
-const _accountTypes = ['checking', 'savings'];
-const _accountTypeLabels = {'checking': 'Corrente', 'savings': 'Poupança'};
-
 class AdminCreateProducerPage extends StatelessWidget {
   const AdminCreateProducerPage({super.key});
 
@@ -85,7 +82,6 @@ class _AdminCreateProducerViewState extends State<_AdminCreateProducerView> {
   final _bankCodeController = TextEditingController();
   final _agencyController = TextEditingController();
   final _accountController = TextEditingController();
-  String? _accountType;
   final _holderController = TextEditingController();
   final _bankFiscalController = TextEditingController();
 
@@ -168,7 +164,6 @@ class _AdminCreateProducerViewState extends State<_AdminCreateProducerView> {
     if (_bankNameController.text.trim().isEmpty ||
         _agencyController.text.trim().isEmpty ||
         _accountController.text.trim().isEmpty ||
-        _accountType == null ||
         _holderController.text.trim().isEmpty) {
       _showError('Preencha todos os campos obrigatórios da conta bancária.');
       return;
@@ -179,7 +174,7 @@ class _AdminCreateProducerViewState extends State<_AdminCreateProducerView> {
         : null;
     final agency = _agencyController.text.trim();
     final accountNumber = _accountController.text.trim();
-    final accountType = _accountType!;
+    const accountType = 'checking';
     final accountHolder = _holderController.text.trim();
     final rawBankFiscal = _bankFiscalController.text.trim();
     final bankFiscalNumber =
@@ -646,38 +641,6 @@ class _AdminCreateProducerViewState extends State<_AdminCreateProducerView> {
                           controller: _accountController,
                           hint: '000000-0',
                           enabled: !isLoading,
-                        ),
-                        const SizedBox(height: 12),
-                        _FieldLabel('Tipo de Conta'),
-                        const SizedBox(height: 8),
-                        DropdownButtonFormField<String>(
-                          value: _accountType,
-                          decoration: _dropdownDecoration(),
-                          hint: const Text(
-                            'Selecione',
-                            style: TextStyle(
-                              fontFamily: 'Manrope',
-                              fontSize: 15,
-                              color: AppColors.placeholder,
-                            ),
-                          ),
-                          items: _accountTypes
-                              .map(
-                                (t) => DropdownMenuItem(
-                                  value: t,
-                                  child: Text(
-                                    _accountTypeLabels[t] ?? t,
-                                    style: const TextStyle(
-                                      fontFamily: 'Manrope',
-                                      fontSize: 15,
-                                    ),
-                                  ),
-                                ),
-                              )
-                              .toList(),
-                          onChanged: isLoading
-                              ? null
-                              : (v) => setState(() => _accountType = v),
                         ),
                         const SizedBox(height: 12),
                         _FieldLabel('Titular'),

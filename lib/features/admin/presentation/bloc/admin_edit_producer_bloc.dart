@@ -95,7 +95,7 @@ class AdminEditProducerBloc
         phone: event.phone,
         producerAddress: AdminAddress(
           street: event.address,
-          number: '',
+          number: event.number,
           city: event.city,
           state: event.state,
           zipCode: event.cep.replaceAll(RegExp(r'\D'), ''),

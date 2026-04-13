@@ -12,6 +12,8 @@ import 'package:ragro_mobile/features/admin/domain/entities/admin_producer_summa
 import 'package:ragro_mobile/features/admin/presentation/bloc/admin_producers_bloc.dart';
 import 'package:ragro_mobile/features/admin/presentation/bloc/admin_producers_event.dart';
 import 'package:ragro_mobile/features/admin/presentation/bloc/admin_producers_state.dart';
+import 'package:ragro_mobile/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:ragro_mobile/features/auth/presentation/bloc/auth_event.dart';
 import 'package:ragro_mobile/shared/widgets/confirm_dialog.dart';
 
 class AdminProducersPage extends StatelessWidget {
@@ -38,16 +40,30 @@ class _AdminProducersView extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Padding(
-              padding: EdgeInsets.fromLTRB(20, 16, 20, 16),
-              child: Text(
-                'Produtores',
-                style: TextStyle(
-                  fontFamily: 'Figtree',
-                  fontWeight: FontWeight.w700,
-                  fontSize: 34,
-                  color: AppColors.darkGreen,
-                ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 16, 12, 16),
+              child: Row(
+                children: [
+                  const Expanded(
+                    child: Text(
+                      'Produtores',
+                      style: TextStyle(
+                        fontFamily: 'Figtree',
+                        fontWeight: FontWeight.w700,
+                        fontSize: 34,
+                        color: AppColors.darkGreen,
+                      ),
+                    ),
+                  ),
+                  IconButton(
+                    tooltip: 'Sair',
+                    icon: const Icon(
+                      Icons.logout,
+                      color: Color(0xFFDC2626),
+                    ),
+                    onPressed: () => _onLogout(context),
+                  ),
+                ],
               ),
             ),
             Expanded(
@@ -191,6 +207,59 @@ class _AdminProducersView extends StatelessWidget {
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
     );
+  }
+
+  Future<void> _onLogout(BuildContext context) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Text(
+          'Sair do aplicativo?',
+          style: TextStyle(
+            fontFamily: 'Figtree',
+            fontWeight: FontWeight.w700,
+            fontSize: 18,
+            color: AppColors.black,
+          ),
+        ),
+        content: const Text(
+          'Você será redirecionado para a tela de login.',
+          style: TextStyle(
+            fontFamily: 'Manrope',
+            fontSize: 14,
+            color: AppColors.placeholder,
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: const Text(
+              'Cancelar',
+              style: TextStyle(
+                fontFamily: 'Manrope',
+                fontWeight: FontWeight.w600,
+                color: AppColors.darkGreen,
+              ),
+            ),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: const Text(
+              'Sair',
+              style: TextStyle(
+                fontFamily: 'Manrope',
+                fontWeight: FontWeight.w700,
+                color: Color(0xFFDC2626),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+    if (confirmed == true && context.mounted) {
+      context.read<AuthBloc>().add(const AuthLogoutRequested());
+    }
   }
 
   Future<void> _confirmMutation({

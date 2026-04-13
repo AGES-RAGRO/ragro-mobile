@@ -24,9 +24,6 @@ const _pixKeyTypeLabels = {
   'random': 'Chave aleatória',
 };
 
-const _accountTypes = ['checking', 'savings'];
-const _accountTypeLabels = {'checking': 'Corrente', 'savings': 'Poupança'};
-
 const List<String> _brazilianStates = [
   'AC', 'AL', 'AP', 'AM', 'BA', 'CE', 'DF', 'ES', 'GO', 'MA',
   'MT', 'MS', 'MG', 'PA', 'PB', 'PR', 'PE', 'PI', 'RJ', 'RN',
@@ -68,6 +65,7 @@ class _AdminEditProducerViewState extends State<_AdminEditProducerView> {
   // ── Endereço ───────────────────────────────────────────────────────────
   final _cepController = TextEditingController();
   final _addressController = TextEditingController();
+  final _numberController = TextEditingController();
   final _cityController = TextEditingController();
   String? _selectedState;
 
@@ -80,7 +78,6 @@ class _AdminEditProducerViewState extends State<_AdminEditProducerView> {
   final _bankCodeController = TextEditingController();
   final _agencyController = TextEditingController();
   final _accountController = TextEditingController();
-  String? _accountType;
   final _holderController = TextEditingController();
   final _bankFiscalController = TextEditingController();
 
@@ -116,6 +113,7 @@ class _AdminEditProducerViewState extends State<_AdminEditProducerView> {
     _cpfCnpjController.dispose();
     _cepController.dispose();
     _addressController.dispose();
+    _numberController.dispose();
     _cityController.dispose();
     _pixKeyController.dispose();
     _bankNameController.dispose();
@@ -138,6 +136,7 @@ class _AdminEditProducerViewState extends State<_AdminEditProducerView> {
     _cpfCnpjController.text = producer.fiscalNumber;
     _cepController.text = producer.producerAddress?.zipCode ?? '';
     _addressController.text = producer.producerAddress?.street ?? '';
+    _numberController.text = producer.producerAddress?.number ?? '';
     _cityController.text = producer.producerAddress?.city ?? '';
     _selectedState = producer.producerAddress?.state;
 
@@ -158,7 +157,6 @@ class _AdminEditProducerViewState extends State<_AdminEditProducerView> {
       _bankCodeController.text = bank.bankCode ?? '';
       _agencyController.text = bank.agency ?? '';
       _accountController.text = bank.accountNumber ?? '';
-      _accountType = bank.accountType;
       _holderController.text = bank.holderName ?? '';
       _bankFiscalController.text = bank.fiscalNumber ?? '';
     }
@@ -193,6 +191,7 @@ class _AdminEditProducerViewState extends State<_AdminEditProducerView> {
         _emailController.text != _original.email ||
         _cepController.text != (_original.producerAddress?.zipCode ?? '') ||
         _addressController.text != (_original.producerAddress?.street ?? '') ||
+        _numberController.text != (_original.producerAddress?.number ?? '') ||
         _cityController.text != (_original.producerAddress?.city ?? '') ||
         _selectedState != (_original.producerAddress?.state) ||
         _pixKeyType != pix?.pixKeyType ||
@@ -288,6 +287,7 @@ class _AdminEditProducerViewState extends State<_AdminEditProducerView> {
             phone: _digitsOnly(_phoneController.text),
             cep: _digitsOnly(_cepController.text),
             address: _addressController.text.trim(),
+            number: _numberController.text.trim(),
             city: _cityController.text.trim(),
             state: _selectedState ?? '',
             cpfCnpj: _cpfCnpjController.text.trim(),
@@ -304,7 +304,7 @@ class _AdminEditProducerViewState extends State<_AdminEditProducerView> {
                 : null,
             agency: hasBank ? _agencyController.text.trim() : null,
             accountNumber: hasBank ? _accountController.text.trim() : null,
-            accountType: _accountType,
+            accountType: hasBank ? 'checking' : null,
             accountHolder: hasBank ? _holderController.text.trim() : null,
             bankFiscalNumber: _bankFiscalController.text.trim().isNotEmpty
                 ? _digitsOnly(_bankFiscalController.text)
@@ -483,11 +483,39 @@ class _AdminEditProducerViewState extends State<_AdminEditProducerView> {
             const SizedBox(height: 12),
             _FieldLabel('Endereço'),
             const SizedBox(height: 8),
-            _TextField(
-              controller: _addressController,
-              hint: 'Rua, número, bairro',
-              prefixIcon: Icons.location_on_outlined,
-              enabled: !isSaving,
+            Row(
+              children: [
+                Expanded(
+                  flex: 3,
+                  child: _TextField(
+                    controller: _addressController,
+                    hint: 'Rua / Avenida',
+                    prefixIcon: Icons.location_on_outlined,
+                    enabled: !isSaving,
+                    validator: (value) {
+                      if ((value ?? '').trim().isEmpty) {
+                        return 'Informe o endereço';
+                      }
+                      return null;
+                    },
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: _TextField(
+                    controller: _numberController,
+                    hint: 'Nº',
+                    keyboardType: TextInputType.number,
+                    enabled: !isSaving,
+                    validator: (value) {
+                      if ((value ?? '').trim().isEmpty) {
+                        return 'Informe o nº';
+                      }
+                      return null;
+                    },
+                  ),
+                ),
+              ],
             ),
             const SizedBox(height: 12),
             Row(
@@ -694,38 +722,6 @@ class _AdminEditProducerViewState extends State<_AdminEditProducerView> {
                       controller: _accountController,
                       hint: '000000-0',
                       enabled: !isSaving,
-                    ),
-                    const SizedBox(height: 12),
-                    _FieldLabel('Tipo de Conta'),
-                    const SizedBox(height: 8),
-                    DropdownButtonFormField<String>(
-                      value: _accountType,
-                      decoration: _dropdownDecoration(),
-                      hint: const Text(
-                        'Selecione',
-                        style: TextStyle(
-                          fontFamily: 'Manrope',
-                          fontSize: 15,
-                          color: AppColors.placeholder,
-                        ),
-                      ),
-                      items: _accountTypes
-                          .map(
-                            (t) => DropdownMenuItem(
-                              value: t,
-                              child: Text(
-                                _accountTypeLabels[t] ?? t,
-                                style: const TextStyle(
-                                  fontFamily: 'Manrope',
-                                  fontSize: 15,
-                                ),
-                              ),
-                            ),
-                          )
-                          .toList(),
-                      onChanged: isSaving
-                          ? null
-                          : (v) => setState(() => _accountType = v),
                     ),
                     const SizedBox(height: 12),
                     _FieldLabel('Titular'),

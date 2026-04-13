@@ -9,8 +9,13 @@ abstract final class AppTheme {
           primary: AppColors.darkGreen,
           secondary: AppColors.lightGreen,
           onSecondary: AppColors.white,
-          surface: AppColors.cream,
+          surface: AppColors.white,
           onSurface: AppColors.black,
+          surfaceContainerLowest: AppColors.white,
+          surfaceContainerLow: AppColors.white,
+          surfaceContainer: AppColors.white,
+          surfaceContainerHigh: AppColors.white,
+          surfaceContainerHighest: AppColors.white,
           error: AppColors.red,
         ),
         scaffoldBackgroundColor: AppColors.cream,
@@ -64,6 +69,28 @@ abstract final class AppTheme {
           unselectedItemColor: AppColors.placeholder,
           type: BottomNavigationBarType.fixed,
           showUnselectedLabels: true,
+        ),
+        dialogTheme: DialogThemeData(
+          backgroundColor: AppColors.white,
+          surfaceTintColor: AppColors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+        ),
+        bottomSheetTheme: const BottomSheetThemeData(
+          backgroundColor: AppColors.white,
+          surfaceTintColor: AppColors.white,
+        ),
+        popupMenuTheme: const PopupMenuThemeData(
+          color: AppColors.white,
+          surfaceTintColor: AppColors.white,
+        ),
+        timePickerTheme: const TimePickerThemeData(
+          backgroundColor: AppColors.white,
+        ),
+        datePickerTheme: const DatePickerThemeData(
+          backgroundColor: AppColors.white,
+          surfaceTintColor: AppColors.white,
         ),
       );
 }
