@@ -124,14 +124,6 @@ class _AdminEditProducerViewState extends State<_AdminEditProducerView> {
         _cpfCnpjController.text != _original.fiscalNumber;
   }
 
-  bool _listEquals(List<bool> a, List<bool> b) {
-    if (a.length != b.length) return false;
-    for (var i = 0; i < a.length; i++) {
-      if (a[i] != b[i]) return false;
-    }
-    return true;
-  }
-
   Future<bool> _confirmDiscard() async {
     if (!_hasChanges()) return true;
 

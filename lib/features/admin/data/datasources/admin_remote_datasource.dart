@@ -18,7 +18,7 @@ class AdminRemoteDataSource {
       final response = await _apiClient.dio.get<Map<String, dynamic>>(
         ApiEndpoints.adminProducers,
       );
-      final content = (response.data!['content'] as List<dynamic>);
+      final content = (response.data?['content'] as List<dynamic>?) ?? [];
       return content
           .map((e) => AdminProducerSummaryModel.fromJson(e as Map<String, dynamic>))
           .toList();
