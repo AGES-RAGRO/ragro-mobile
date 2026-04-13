@@ -22,14 +22,21 @@ class AdminEditProducerSubmitted extends AdminEditProducerEvent {
     required this.address,
     required this.city,
     required this.state,
-    required this.bank,
-    required this.agency,
-    required this.account,
-    required this.accountHolder,
     required this.cpfCnpj,
     required this.scheduleWeekdays,
     required this.scheduleStart,
     required this.scheduleEnd,
+    // ── PIX (opcional no update — partial) ──────────────────────────────
+    this.pixKeyType,
+    this.pixKey,
+    // ── Conta Bancária (opcional no update — partial) ────────────────────
+    this.bankName,
+    this.bankCode,
+    this.agency,
+    this.accountNumber,
+    this.accountType,
+    this.accountHolder,
+    this.bankFiscalNumber,
   });
 
   final String name;
@@ -39,15 +46,27 @@ class AdminEditProducerSubmitted extends AdminEditProducerEvent {
   final String address;
   final String city;
   final String state;
-  final String bank;
-  final String agency;
-  final String account;
-  final String accountHolder;
   final String cpfCnpj;
   final List<bool> scheduleWeekdays;
   final String scheduleStart;
   final String scheduleEnd;
 
+  // PIX (opcional no update)
+  final String? pixKeyType;
+  final String? pixKey;
+
+  // Conta Bancária (opcional no update)
+  final String? bankName;
+  final String? bankCode;
+  final String? agency;
+  final String? accountNumber;
+  final String? accountType;
+  final String? accountHolder;
+  final String? bankFiscalNumber;
+
   @override
-  List<Object?> get props => [name, email, phone];
+  List<Object?> get props => [
+    name, email, phone, address, city, state, cpfCnpj,
+    pixKeyType, pixKey, bankName, agency, accountNumber, accountType, accountHolder,
+  ];
 }

@@ -82,8 +82,11 @@ class AdminRemoteDataSource {
           'phone': producer.phone,
           'farmName': producer.farmName,
           if (address != null) 'address': address.toJson(),
-          // TODO: revisar no PR de edit — ainda usa bankAccount singular
-          // ignore: dead_code
+          if (producer.paymentMethods != null &&
+              producer.paymentMethods!.isNotEmpty)
+            'paymentMethods': producer.paymentMethods!
+                .map((pm) => pm.toJson())
+                .toList(),
           if (producer.availability != null &&
               producer.availability!.isNotEmpty)
             'availability': producer.availability!
