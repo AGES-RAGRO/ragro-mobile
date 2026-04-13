@@ -26,17 +26,23 @@ class ApiClient {
   }
 }
 
-class _ErrorInterceptor extends Interceptor {
-  ApiException _map401(dynamic data) {
-    if (data is Map && data['error'] is String) {
-      final error = (data['error'] as String).toLowerCase();
-      if (error.contains('inativo') || error.contains('desativad')) {
-        return const DeactivatedAccountException();
-      }
+/// Backend retorna 401 em dois cenários distintos:
+///   1. Credenciais inválidas (Keycloak / invalid_grant)
+///   2. Usuário autenticado porém com `active=false` no banco,
+///      via `FarmerAuthInterceptor` — body:
+///      `{"error": "Produtor inativo", ...}`
+/// Diferenciamos inspecionando o campo `error` da resposta.
+ApiException _map401(dynamic data) {
+  if (data is Map && data['error'] is String) {
+    final error = (data['error'] as String).toLowerCase();
+    if (error.contains('inativo') || error.contains('desativad')) {
+      return const DeactivatedAccountException();
     }
-    return const UnauthorizedException();
   }
+  return const UnauthorizedException();
+}
 
+class _ErrorInterceptor extends Interceptor {
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) {
     final statusCode = err.response?.statusCode;
