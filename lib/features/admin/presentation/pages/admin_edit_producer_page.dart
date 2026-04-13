@@ -409,6 +409,7 @@ class _AdminEditProducerViewState extends State<_AdminEditProducerView> {
             _TextField(
               controller: _nameController,
               hint: 'Nome do produtor',
+              prefixIcon: Icons.person_outline,
               enabled: !isSaving,
               validator: (value) {
                 if ((value ?? '').trim().isEmpty) return 'Informe o nome completo';
@@ -421,6 +422,7 @@ class _AdminEditProducerViewState extends State<_AdminEditProducerView> {
             _TextField(
               controller: _phoneController,
               hint: '(XX) XXXXX-XXXX',
+              prefixIcon: Icons.phone_outlined,
               keyboardType: TextInputType.phone,
               enabled: !isSaving,
               inputFormatters: [PhoneInputFormatter()],
@@ -437,6 +439,7 @@ class _AdminEditProducerViewState extends State<_AdminEditProducerView> {
             _TextField(
               controller: _emailController,
               hint: 'email@exemplo.com',
+              prefixIcon: Icons.email_outlined,
               keyboardType: TextInputType.emailAddress,
               enabled: !isSaving,
               validator: (value) {
@@ -452,6 +455,7 @@ class _AdminEditProducerViewState extends State<_AdminEditProducerView> {
             _TextField(
               controller: _cpfCnpjController,
               hint: '000.000.000-00',
+              prefixIcon: Icons.badge_outlined,
               keyboardType: TextInputType.number,
               enabled: !isSaving,
             ),
@@ -465,6 +469,7 @@ class _AdminEditProducerViewState extends State<_AdminEditProducerView> {
             _TextField(
               controller: _cepController,
               hint: '00000-000',
+              prefixIcon: Icons.location_on_outlined,
               keyboardType: TextInputType.number,
               enabled: !isSaving,
               inputFormatters: [CepInputFormatter()],
@@ -481,6 +486,7 @@ class _AdminEditProducerViewState extends State<_AdminEditProducerView> {
             _TextField(
               controller: _addressController,
               hint: 'Rua, número, bairro',
+              prefixIcon: Icons.location_on_outlined,
               enabled: !isSaving,
             ),
             const SizedBox(height: 12),
@@ -496,6 +502,7 @@ class _AdminEditProducerViewState extends State<_AdminEditProducerView> {
                       _TextField(
                         controller: _cityController,
                         hint: 'Cidade',
+                        prefixIcon: Icons.location_city_outlined,
                         enabled: !isSaving,
                       ),
                     ],
@@ -637,6 +644,7 @@ class _AdminEditProducerViewState extends State<_AdminEditProducerView> {
                     _TextField(
                       controller: _bankNameController,
                       hint: 'Nome do banco',
+                      prefixIcon: Icons.account_balance_outlined,
                       enabled: !isSaving,
                     ),
                     const SizedBox(height: 12),
@@ -725,6 +733,7 @@ class _AdminEditProducerViewState extends State<_AdminEditProducerView> {
                     _TextField(
                       controller: _holderController,
                       hint: 'Nome completo do titular',
+                      prefixIcon: Icons.account_circle_outlined,
                       enabled: !isSaving,
                     ),
                     const SizedBox(height: 12),
@@ -733,6 +742,7 @@ class _AdminEditProducerViewState extends State<_AdminEditProducerView> {
                     _TextField(
                       controller: _bankFiscalController,
                       hint: '000.000.000-00',
+                      prefixIcon: Icons.badge_outlined,
                       keyboardType: TextInputType.number,
                       enabled: !isSaving,
                       inputFormatters: [FiscalNumberInputFormatter()],
@@ -790,6 +800,7 @@ class _AdminEditProducerViewState extends State<_AdminEditProducerView> {
                       _TextField(
                         controller: _scheduleStartController,
                         hint: '08:00',
+                        prefixIcon: Icons.schedule_outlined,
                         keyboardType: TextInputType.datetime,
                         enabled: !isSaving,
                       ),
@@ -810,6 +821,7 @@ class _AdminEditProducerViewState extends State<_AdminEditProducerView> {
                       _TextField(
                         controller: _scheduleEndController,
                         hint: '18:00',
+                        prefixIcon: Icons.schedule_outlined,
                         keyboardType: TextInputType.datetime,
                         enabled: !isSaving,
                       ),
@@ -935,6 +947,7 @@ class _TextField extends StatelessWidget {
     super.key,
     required this.controller,
     required this.hint,
+    this.prefixIcon,
     this.maxLines = 1,
     this.keyboardType = TextInputType.text,
     this.enabled = true,
@@ -945,6 +958,7 @@ class _TextField extends StatelessWidget {
 
   final TextEditingController controller;
   final String hint;
+  final IconData? prefixIcon;
   final int maxLines;
   final TextInputType keyboardType;
   final bool enabled;
@@ -965,31 +979,34 @@ class _TextField extends StatelessWidget {
       decoration: InputDecoration(
         hintText: hint,
         hintStyle: const TextStyle(
-          fontFamily: 'Manrope',
-          fontSize: 15,
+          fontFamily: 'Figtree',
+          fontSize: 17,
           color: AppColors.placeholder,
         ),
+        prefixIcon: prefixIcon != null
+            ? Icon(prefixIcon, size: 20, color: AppColors.placeholder)
+            : null,
         filled: true,
         fillColor: AppColors.inputBackground,
         contentPadding:
-            const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(24),
           borderSide: const BorderSide(color: AppColors.inputBorder),
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(24),
           borderSide: const BorderSide(color: AppColors.inputBorder),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(24),
           borderSide:
               const BorderSide(color: AppColors.darkGreen, width: 1.5),
         ),
       ),
       style: const TextStyle(
-        fontFamily: 'Manrope',
-        fontSize: 15,
+        fontFamily: 'Figtree',
+        fontSize: 17,
         color: AppColors.black,
       ),
     );

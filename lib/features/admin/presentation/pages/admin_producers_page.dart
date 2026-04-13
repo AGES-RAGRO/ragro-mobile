@@ -248,16 +248,15 @@ class _ProducerCard extends StatelessWidget {
         : 'Ativar produtor';
 
     return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
+      padding: const EdgeInsets.symmetric(horizontal: 21, vertical: 16),
+      decoration: const BoxDecoration(
         color: AppColors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
-        boxShadow: const [
+        borderRadius: BorderRadius.all(Radius.circular(8)),
+        boxShadow: [
           BoxShadow(
-            color: Color(0x08000000),
+            color: Color(0x40000000),
             blurRadius: 4,
-            offset: Offset(0, 2),
+            offset: Offset(0, 4),
           ),
         ],
       ),
@@ -278,44 +277,44 @@ class _ProducerCard extends StatelessWidget {
                 ),
               ),
               Tooltip(
-                message: 'Editar produtor',
-                child: Semantics(
-                  button: true,
-                  label: 'Editar ${producer.name}',
-                  child: InkWell(
-                    onTap: enabled ? onEdit : null,
-                    borderRadius: BorderRadius.circular(8),
-                    child: Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: AppColors.lightGreen.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: const Icon(
-                        Icons.edit_outlined,
-                        size: 16,
-                        color: AppColors.lightGreen,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 8),
-              Tooltip(
                 message: toggleTooltip,
                 child: Semantics(
                   button: true,
                   label: '$toggleTooltip ${producer.name}',
                   child: InkWell(
                     onTap: enabled ? onToggleActive : null,
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(16),
                     child: Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
                         color: toggleColor.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(8),
+                        borderRadius: BorderRadius.circular(16),
                       ),
                       child: Icon(toggleIcon, size: 16, color: toggleColor),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Tooltip(
+                message: 'Editar produtor',
+                child: Semantics(
+                  button: true,
+                  label: 'Editar ${producer.name}',
+                  child: InkWell(
+                    onTap: enabled ? onEdit : null,
+                    borderRadius: BorderRadius.circular(16),
+                    child: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: AppColors.lightGreen.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: const Icon(
+                        Icons.edit_outlined,
+                        size: 16,
+                        color: AppColors.lightGreen,
+                      ),
                     ),
                   ),
                 ),
@@ -366,8 +365,6 @@ class _ProducerCard extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 8),
-          const Divider(color: Color(0xFFE2E8F0), height: 1),
           const SizedBox(height: 8),
           Row(
             children: [

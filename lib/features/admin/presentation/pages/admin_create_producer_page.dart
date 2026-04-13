@@ -285,6 +285,7 @@ class _AdminCreateProducerViewState extends State<_AdminCreateProducerView> {
                 _TextField(
                   controller: _nameController,
                   hint: 'Nome do produtor',
+                  prefixIcon: Icons.person_outline,
                   enabled: !isLoading,
                   validator: (value) {
                     if ((value ?? '').trim().isEmpty) return 'Informe o nome completo';
@@ -297,6 +298,7 @@ class _AdminCreateProducerViewState extends State<_AdminCreateProducerView> {
                 _TextField(
                   controller: _fiscalController,
                   hint: '000.000.000-00',
+                  prefixIcon: Icons.badge_outlined,
                   keyboardType: TextInputType.number,
                   enabled: !isLoading,
                   inputFormatters: [FiscalNumberInputFormatter()],
@@ -320,6 +322,7 @@ class _AdminCreateProducerViewState extends State<_AdminCreateProducerView> {
                 _TextField(
                   controller: _phoneController,
                   hint: '(XX) XXXXX-XXXX',
+                  prefixIcon: Icons.phone_outlined,
                   keyboardType: TextInputType.phone,
                   enabled: !isLoading,
                   inputFormatters: [PhoneInputFormatter()],
@@ -335,6 +338,7 @@ class _AdminCreateProducerViewState extends State<_AdminCreateProducerView> {
                 _TextField(
                   controller: _emailController,
                   hint: 'email@exemplo.com',
+                  prefixIcon: Icons.email_outlined,
                   keyboardType: TextInputType.emailAddress,
                   enabled: !isLoading,
                   validator: (value) {
@@ -350,6 +354,7 @@ class _AdminCreateProducerViewState extends State<_AdminCreateProducerView> {
                 _TextField(
                   controller: _passwordController,
                   hint: 'Senha de acesso',
+                  prefixIcon: Icons.lock_outline,
                   obscure: true,
                   enabled: !isLoading,
                   validator: (value) {
@@ -367,6 +372,7 @@ class _AdminCreateProducerViewState extends State<_AdminCreateProducerView> {
                 _TextField(
                   controller: _confirmPasswordController,
                   hint: 'Repita a senha',
+                  prefixIcon: Icons.lock_outline,
                   obscure: true,
                   enabled: !isLoading,
                   validator: (value) {
@@ -380,6 +386,7 @@ class _AdminCreateProducerViewState extends State<_AdminCreateProducerView> {
                 _TextField(
                   controller: _farmNameController,
                   hint: 'Ex: Fazenda Santa Luzia',
+                  prefixIcon: Icons.home_outlined,
                   enabled: !isLoading,
                   validator: (value) {
                     if ((value ?? '').trim().isEmpty) return 'Informe o nome da fazenda';
@@ -396,6 +403,7 @@ class _AdminCreateProducerViewState extends State<_AdminCreateProducerView> {
                 _TextField(
                   controller: _cepController,
                   hint: '00000-000',
+                  prefixIcon: Icons.location_on_outlined,
                   keyboardType: TextInputType.number,
                   enabled: !isLoading,
                   inputFormatters: [CepInputFormatter()],
@@ -415,6 +423,7 @@ class _AdminCreateProducerViewState extends State<_AdminCreateProducerView> {
                       child: _TextField(
                         controller: _addressController,
                         hint: 'Rua / Avenida',
+                        prefixIcon: Icons.location_on_outlined,
                         enabled: !isLoading,
                         validator: (value) {
                           if ((value ?? '').trim().isEmpty) return 'Informe o endereço';
@@ -450,6 +459,7 @@ class _AdminCreateProducerViewState extends State<_AdminCreateProducerView> {
                           _TextField(
                             controller: _cityController,
                             hint: 'Cidade',
+                            prefixIcon: Icons.location_city_outlined,
                             enabled: !isLoading,
                             validator: (value) {
                               if ((value ?? '').trim().isEmpty) return 'Informe a cidade';
@@ -586,6 +596,7 @@ class _AdminCreateProducerViewState extends State<_AdminCreateProducerView> {
                         _TextField(
                           controller: _bankNameController,
                           hint: 'Nome do banco',
+                          prefixIcon: Icons.account_balance_outlined,
                           enabled: !isLoading,
                         ),
                         const SizedBox(height: 12),
@@ -674,6 +685,7 @@ class _AdminCreateProducerViewState extends State<_AdminCreateProducerView> {
                         _TextField(
                           controller: _holderController,
                           hint: 'Nome completo do titular',
+                          prefixIcon: Icons.account_circle_outlined,
                           enabled: !isLoading,
                         ),
                         const SizedBox(height: 12),
@@ -682,6 +694,7 @@ class _AdminCreateProducerViewState extends State<_AdminCreateProducerView> {
                         _TextField(
                           controller: _bankFiscalController,
                           hint: '000.000.000-00',
+                          prefixIcon: Icons.badge_outlined,
                           keyboardType: TextInputType.number,
                           enabled: !isLoading,
                           inputFormatters: [FiscalNumberInputFormatter()],
@@ -740,6 +753,7 @@ class _AdminCreateProducerViewState extends State<_AdminCreateProducerView> {
                           _TextField(
                             controller: _scheduleStartController,
                             hint: '08:00',
+                            prefixIcon: Icons.schedule_outlined,
                             keyboardType: TextInputType.datetime,
                             enabled: !isLoading,
                           ),
@@ -764,6 +778,7 @@ class _AdminCreateProducerViewState extends State<_AdminCreateProducerView> {
                           _TextField(
                             controller: _scheduleEndController,
                             hint: '18:00',
+                            prefixIcon: Icons.schedule_outlined,
                             keyboardType: TextInputType.datetime,
                             enabled: !isLoading,
                           ),
@@ -925,6 +940,7 @@ class _TextField extends StatelessWidget {
     super.key,
     required this.controller,
     required this.hint,
+    this.prefixIcon,
     this.maxLines = 1,
     this.keyboardType = TextInputType.text,
     this.enabled = true,
@@ -935,6 +951,7 @@ class _TextField extends StatelessWidget {
 
   final TextEditingController controller;
   final String hint;
+  final IconData? prefixIcon;
   final int maxLines;
   final TextInputType keyboardType;
   final bool enabled;
@@ -955,31 +972,34 @@ class _TextField extends StatelessWidget {
       decoration: InputDecoration(
         hintText: hint,
         hintStyle: const TextStyle(
-          fontFamily: 'Manrope',
-          fontSize: 15,
+          fontFamily: 'Figtree',
+          fontSize: 17,
           color: AppColors.placeholder,
         ),
+        prefixIcon: prefixIcon != null
+            ? Icon(prefixIcon, size: 20, color: AppColors.placeholder)
+            : null,
         filled: true,
         fillColor: AppColors.inputBackground,
         contentPadding:
-            const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(24),
           borderSide: const BorderSide(color: AppColors.inputBorder),
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(24),
           borderSide: const BorderSide(color: AppColors.inputBorder),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(24),
           borderSide:
               const BorderSide(color: AppColors.darkGreen, width: 1.5),
         ),
       ),
       style: const TextStyle(
-        fontFamily: 'Manrope',
-        fontSize: 15,
+        fontFamily: 'Figtree',
+        fontSize: 17,
         color: AppColors.black,
       ),
     );
