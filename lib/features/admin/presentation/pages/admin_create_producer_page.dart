@@ -45,7 +45,9 @@ class _AdminCreateProducerViewState extends State<_AdminCreateProducerView> {
   final _accountController = TextEditingController();
   final _holderController = TextEditingController();
   final _cpfCnpjController = TextEditingController();
+  final _farmNameController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _numberController = TextEditingController();
   final _scheduleStartController = TextEditingController(text: '08:00');
   final _scheduleEndController = TextEditingController(text: '18:00');
 
@@ -73,6 +75,8 @@ class _AdminCreateProducerViewState extends State<_AdminCreateProducerView> {
     _passwordController.dispose();
     _scheduleStartController.dispose();
     _scheduleEndController.dispose();
+    _farmNameController.dispose();
+    _numberController.dispose();
     super.dispose();
   }
 
@@ -86,11 +90,45 @@ class _AdminCreateProducerViewState extends State<_AdminCreateProducerView> {
       );
       return;
     }
+
+    final cleanFiscal = _cpfCnpjController.text.replaceAll(RegExp(r'[^0-9]'), '');
+    final String? type;
+    if (cleanFiscal.length == 11) {
+      type = 'CPF';
+    } else if (cleanFiscal.length == 14) {
+      type = 'CNPJ';
+    } else {
+      type = null;
+    }
+
     if (_nameController.text.trim().isEmpty ||
         _emailController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Preencha os campos obrigatórios.'),
+          backgroundColor: AppColors.red,
+        ),
+      );
+      return;
+    }
+
+    if (type == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('CPF deve ter 11 dígitos ou CNPJ deve ter 14 dígitos.'),
+          backgroundColor: AppColors.red,
+        ),
+      );
+      return;
+    }
+
+    if (_cepController.text.trim().isEmpty ||
+        _addressController.text.trim().isEmpty ||
+        _cityController.text.trim().isEmpty ||
+        _stateController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Preencha o endereço completo.'),
           backgroundColor: AppColors.red,
         ),
       );
@@ -103,13 +141,16 @@ class _AdminCreateProducerViewState extends State<_AdminCreateProducerView> {
             phone: _phoneController.text.trim(),
             cep: _cepController.text.trim(),
             address: _addressController.text.trim(),
+            number: _numberController.text.trim(),
             city: _cityController.text.trim(),
             state: _stateController.text.trim(),
             bank: _bankController.text.trim(),
             agency: _agencyController.text.trim(),
             account: _accountController.text.trim(),
             accountHolder: _holderController.text.trim(),
-            cpfCnpj: _cpfCnpjController.text.trim(),
+            fiscalNumber: cleanFiscal,
+            fiscalNumberType: type,
+            farmName: _farmNameController.text.trim(),
             password: _passwordController.text.trim(),
             scheduleWeekdays: List.from(_weekdays),
             scheduleStart: _scheduleStartController.text.trim(),
@@ -129,7 +170,7 @@ class _AdminCreateProducerViewState extends State<_AdminCreateProducerView> {
               backgroundColor: AppColors.darkGreen,
             ),
           );
-          context.pop();
+          context.pop(true);
         }
         if (state is AdminProducerFormFailure) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -198,6 +239,13 @@ class _AdminCreateProducerViewState extends State<_AdminCreateProducerView> {
                     hint: 'Senha de acesso',
                     obscure: true,
                     enabled: !isLoading),
+                const SizedBox(height: 12),
+                _FieldLabel('Nome da Fazenda'),
+                const SizedBox(height: 8),
+                _TextField(
+                    controller: _farmNameController,
+                    hint: 'Ex: Fazenda Santa Luzia',
+                    enabled: !isLoading),
 
                 const SizedBox(height: 20),
                 _sectionTitle('Endereço'),
@@ -212,10 +260,27 @@ class _AdminCreateProducerViewState extends State<_AdminCreateProducerView> {
                 const SizedBox(height: 12),
                 _FieldLabel('Endereço'),
                 const SizedBox(height: 8),
-                _TextField(
-                    controller: _addressController,
-                    hint: 'Rua, número, bairro',
-                    enabled: !isLoading),
+                Row(
+                  children: [
+                    Expanded(
+                      flex: 3,
+                      child: _TextField(
+                        controller: _addressController,
+                        hint: 'Rua / Avenida',
+                        enabled: !isLoading,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: _TextField(
+                        controller: _numberController,
+                        hint: 'Nº',
+                        keyboardType: TextInputType.number,
+                        enabled: !isLoading,
+                      ),
+                    ),
+                  ],
+                ),
                 const SizedBox(height: 12),
                 Row(
                   children: [
@@ -423,7 +488,7 @@ class _AdminCreateProducerViewState extends State<_AdminCreateProducerView> {
                       backgroundColor: AppColors.darkGreen,
                       foregroundColor: AppColors.white,
                       disabledBackgroundColor:
-                          AppColors.darkGreen.withOpacity(0.5),
+                          AppColors.darkGreen.withValues(alpha: 0.5),
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(24)),
                       padding: const EdgeInsets.symmetric(vertical: 16),

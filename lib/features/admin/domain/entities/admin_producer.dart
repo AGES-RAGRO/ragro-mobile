@@ -1,4 +1,7 @@
 import 'package:equatable/equatable.dart';
+import 'package:ragro_mobile/features/admin/domain/entities/admin_address.dart';
+import 'package:ragro_mobile/features/admin/domain/entities/admin_availability.dart';
+import 'package:ragro_mobile/features/admin/domain/entities/admin_bank_account.dart';
 
 class AdminProducer extends Equatable {
   const AdminProducer({
@@ -6,102 +9,78 @@ class AdminProducer extends Equatable {
     required this.name,
     required this.email,
     required this.phone,
-    required this.fiscalNumber,
-    required this.fiscalNumberType,
-    required this.zipCode,
-    required this.street,
-    required this.neighborhood,
-    required this.city,
-    required this.state,
-    required this.bankName,
-    required this.agency,
-    required this.accountNumber,
-    required this.holderName,
-    required this.scheduleWeekdays,
-    required this.scheduleStart,
-    required this.scheduleEnd,
+    required this.address,
     required this.createdAt,
     required this.updatedAt,
     required this.active,
+    required this.fiscalNumber,
+    required this.fiscalNumberType,
+    required this.farmName,
+    this.producerAddress,
+    this.bankAccount,
+    this.availability,
   });
 
   final String id;
   final String name;
   final String email;
   final String phone;
-  final String fiscalNumber;
-  final String fiscalNumberType;
-  final String zipCode;
-  final String street;
-  final String neighborhood;
-  final String city;
-  final String state;
-  final String bankName;
-  final String agency;
-  final String accountNumber;
-  final String holderName;
-  final List<bool> scheduleWeekdays;
-  final String scheduleStart;
-  final String scheduleEnd;
+  final String address;
   final DateTime createdAt;
   final DateTime updatedAt;
   final bool active;
-
-  String get location => '$city, $state';
-  String get address => '$street, $city, $state';
+  final String fiscalNumber;
+  final String fiscalNumberType;
+  final String farmName;
+  final AdminAddress? producerAddress;
+  final AdminBankAccount? bankAccount;
+  final List<AdminAvailability>? availability;
 
   AdminProducer copyWith({
     String? name,
     String? email,
     String? phone,
-    String? fiscalNumber,
-    String? fiscalNumberType,
-    String? zipCode,
-    String? street,
-    String? neighborhood,
-    String? city,
-    String? state,
-    String? bankName,
-    String? agency,
-    String? accountNumber,
-    String? holderName,
-    List<bool>? scheduleWeekdays,
-    String? scheduleStart,
-    String? scheduleEnd,
+    String? address,
+    DateTime? createdAt,
     DateTime? updatedAt,
     bool? active,
+    String? fiscalNumber,
+    String? fiscalNumberType,
+    String? farmName,
+    AdminAddress? producerAddress,
+    AdminBankAccount? bankAccount,
+    List<AdminAvailability>? availability,
   }) {
     return AdminProducer(
       id: id,
       name: name ?? this.name,
       email: email ?? this.email,
       phone: phone ?? this.phone,
-      fiscalNumber: fiscalNumber ?? this.fiscalNumber,
-      fiscalNumberType: fiscalNumberType ?? this.fiscalNumberType,
-      zipCode: zipCode ?? this.zipCode,
-      street: street ?? this.street,
-      neighborhood: neighborhood ?? this.neighborhood,
-      city: city ?? this.city,
-      state: state ?? this.state,
-      bankName: bankName ?? this.bankName,
-      agency: agency ?? this.agency,
-      accountNumber: accountNumber ?? this.accountNumber,
-      holderName: holderName ?? this.holderName,
-      scheduleWeekdays: scheduleWeekdays ?? this.scheduleWeekdays,
-      scheduleStart: scheduleStart ?? this.scheduleStart,
-      scheduleEnd: scheduleEnd ?? this.scheduleEnd,
-      createdAt: createdAt,
+      address: address ?? this.address,
+      createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       active: active ?? this.active,
+      fiscalNumber: fiscalNumber ?? this.fiscalNumber,
+      fiscalNumberType: fiscalNumberType ?? this.fiscalNumberType,
+      farmName: farmName ?? this.farmName,
+      producerAddress: producerAddress ?? this.producerAddress,
+      bankAccount: bankAccount ?? this.bankAccount,
+      availability: availability ?? this.availability,
     );
   }
 
   @override
   List<Object?> get props => [
-        id, name, email, phone, fiscalNumber, fiscalNumberType,
-        zipCode, street, neighborhood, city, state,
-        bankName, agency, accountNumber, holderName,
-        scheduleWeekdays, scheduleStart, scheduleEnd,
-        createdAt, updatedAt, active,
-      ];
+    id,
+    name,
+    email,
+    phone,
+    address,
+    createdAt,
+    updatedAt,
+    active,
+    fiscalNumber,
+    fiscalNumberType,
+    farmName,
+  ];
 }

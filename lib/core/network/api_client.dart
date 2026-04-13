@@ -24,6 +24,22 @@ class ApiClient {
   void clearAuthToken() {
     _dio.options.headers.remove('Authorization');
   }
+
+  /// Backend retorna 401 em dois cenários distintos:
+  ///   1. Credenciais inválidas (Keycloak / invalid_grant)
+  ///   2. Usuário autenticado porém com `active=false` no banco,
+  ///      via `FarmerAuthInterceptor` — body:
+  ///      `{"error": "Produtor inativo", ...}`
+  /// Diferenciamos inspecionando o campo `error` da resposta.
+  ApiException _map401(dynamic data) {
+    if (data is Map && data['error'] is String) {
+      final error = (data['error'] as String).toLowerCase();
+      if (error.contains('inativo') || error.contains('desativad')) {
+        return const DeactivatedAccountException();
+      }
+    }
+    return const UnauthorizedException();
+  }
 }
 
 class _ErrorInterceptor extends Interceptor {
@@ -38,9 +54,7 @@ class _ErrorInterceptor extends Interceptor {
     if (statusCode != null) {
       exception = switch (statusCode) {
         400 => UnknownApiException(responseMessage ?? 'Dados invalidos'),
-        401 => UnauthorizedException(
-          responseMessage ?? 'Credenciais invalidas',
-        ),
+        401 => _map401(err.response?.data),
         404 => NotFoundException(responseMessage ?? 'Recurso nao encontrado'),
         409 => ConflictException(responseMessage ?? 'Recurso ja existe'),
         429 => const RateLimitedException(),

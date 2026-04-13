@@ -17,6 +17,14 @@ class AdminProducerDeactivated extends AdminProducersEvent {
   List<Object?> get props => [producerId];
 }
 
+class AdminProducerActivated extends AdminProducersEvent {
+  const AdminProducerActivated(this.producerId);
+  final String producerId;
+  @override
+  List<Object?> get props => [producerId];
+}
+
+
 class AdminProducersRefreshed extends AdminProducersEvent {
   const AdminProducersRefreshed();
 }

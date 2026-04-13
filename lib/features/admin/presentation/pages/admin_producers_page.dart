@@ -12,6 +12,7 @@ import 'package:ragro_mobile/features/admin/domain/entities/admin_producer_summa
 import 'package:ragro_mobile/features/admin/presentation/bloc/admin_producers_bloc.dart';
 import 'package:ragro_mobile/features/admin/presentation/bloc/admin_producers_event.dart';
 import 'package:ragro_mobile/features/admin/presentation/bloc/admin_producers_state.dart';
+import 'package:ragro_mobile/shared/widgets/confirm_dialog.dart';
 
 class AdminProducersPage extends StatelessWidget {
   const AdminProducersPage({super.key});
@@ -50,22 +51,48 @@ class _AdminProducersView extends StatelessWidget {
               ),
             ),
             Expanded(
-              child: BlocBuilder<AdminProducersBloc, AdminProducersState>(
+              child: BlocConsumer<AdminProducersBloc, AdminProducersState>(
+                listenWhen: (previous, current) =>
+                    current is AdminProducerMutationFailure,
+                listener: (context, state) {
+                  if (state is AdminProducerMutationFailure) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(state.message),
+                        backgroundColor: AppColors.red,
+                      ),
+                    );
+                  }
+                },
                 builder: (context, state) {
                   if (state is AdminProducersLoading ||
                       state is AdminProducersInitial) {
                     return const Center(
                       child: CircularProgressIndicator(
-                          color: AppColors.darkGreen),
+                        color: AppColors.darkGreen,
+                      ),
                     );
                   }
                   if (state is AdminProducersFailure) {
                     return Center(child: Text(state.message));
                   }
-                  if (state is! AdminProducersLoaded) {
+
+                  final List<AdminProducerSummary> producers;
+                  final bool isMutating;
+                  if (state is AdminProducersLoaded) {
+                    producers = state.producers;
+                    isMutating = false;
+                  } else if (state is AdminProducersMutating) {
+                    producers = state.previousProducers;
+                    isMutating = true;
+                  } else if (state is AdminProducerMutationFailure) {
+                    producers = state.previousProducers;
+                    isMutating = false;
+                  } else {
                     return const SizedBox.shrink();
                   }
-                  if (state.producers.isEmpty) {
+
+                  if (producers.isEmpty) {
                     return const Center(
                       child: Text(
                         'Nenhum produtor cadastrado',
@@ -77,30 +104,46 @@ class _AdminProducersView extends StatelessWidget {
                       ),
                     );
                   }
-                  return ListView.separated(
-                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 80),
-                    itemCount: state.producers.length,
-                    separatorBuilder: (_, __) => const SizedBox(height: 12),
-                    itemBuilder: (context, index) {
-                      final producer = state.producers[index];
-                      return _ProducerCard(
-                        producer: producer,
-                        onDelete: () => _confirmDeactivate(
-                          context,
-                          producer.id,
-                          producer.name,
+
+                  return Stack(
+                    children: [
+                      ListView.separated(
+                        padding: const EdgeInsets.fromLTRB(16, 0, 16, 80),
+                        itemCount: producers.length,
+                        separatorBuilder: (_, __) => const SizedBox(height: 12),
+                        itemBuilder: (context, index) {
+                          final producer = producers[index];
+                          return _ProducerCard(
+                            producer: producer,
+                            enabled: !isMutating,
+                            onToggleActive: () => _confirmMutation(
+                              context: context,
+                              producer: producer,
+                            ),
+                            onEdit: () {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    'Editar ${producer.name} — em breve',
+                                  ),
+                                ),
+                              );
+                            },
+                          );
+                        },
+                      ),
+                      if (isMutating)
+                        Positioned.fill(
+                          child: ColoredBox(
+                            color: Colors.black.withValues(alpha: 0.08),
+                            child: const Center(
+                              child: CircularProgressIndicator(
+                                color: AppColors.darkGreen,
+                              ),
+                            ),
+                          ),
                         ),
-                        onEdit: () =>
-                            context.push('/admin/producers/${producer.id}/edit')
-                                .then((_) {
-                              if (context.mounted) {
-                                context
-                                    .read<AdminProducersBloc>()
-                                    .add(const AdminProducersRefreshed());
-                              }
-                            }),
-                      );
-                    },
+                    ],
                   );
                 },
               ),
@@ -115,7 +158,16 @@ class _AdminProducersView extends StatelessWidget {
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: ElevatedButton.icon(
-              onPressed: () => context.push('/admin/producers/new'),
+              onPressed: () async {
+                final created = await context.push<bool>(
+                  '/admin/producers/new',
+                );
+                if ((created ?? false) && context.mounted) {
+                  context.read<AdminProducersBloc>().add(
+                    const AdminProducersStarted(),
+                  );
+                }
+              },
               icon: const Icon(Icons.add, size: 18),
               label: const Text(
                 'Novo produtor',
@@ -129,7 +181,8 @@ class _AdminProducersView extends StatelessWidget {
                 backgroundColor: AppColors.darkGreen,
                 foregroundColor: AppColors.white,
                 shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(24)),
+                  borderRadius: BorderRadius.circular(24),
+                ),
                 padding: const EdgeInsets.symmetric(vertical: 16),
               ),
             ),
@@ -140,42 +193,60 @@ class _AdminProducersView extends StatelessWidget {
     );
   }
 
-  void _confirmDeactivate(
-      BuildContext context, String producerId, String producerName) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Desativar "$producerName"?'),
-        action: SnackBarAction(
-          label: 'Confirmar',
-          textColor: AppColors.white,
-          onPressed: () {
-            context
-                .read<AdminProducersBloc>()
-                .add(AdminProducerDeactivated(producerId));
-          },
-        ),
-        backgroundColor: AppColors.red,
-      ),
+  Future<void> _confirmMutation({
+    required BuildContext context,
+    required AdminProducerSummary producer,
+  }) async {
+    final isDeactivating = producer.active;
+    final verb = isDeactivating ? 'desativar' : 'ativar';
+    final confirmLabel = isDeactivating ? 'Desativar' : 'Ativar';
+    final highlightColor = isDeactivating ? AppColors.red : AppColors.darkGreen;
+
+    final confirmed = await ConfirmDialog.show(
+      context: context,
+      title: 'Tem certeza que deseja\n$verb ',
+      highlight: producer.name,
+      highlightColor: highlightColor,
+      trailingTitle: '?',
+      confirmLabel: confirmLabel,
+      confirmColor: highlightColor,
     );
+
+    if (confirmed != true || !context.mounted) return;
+
+    final bloc = context.read<AdminProducersBloc>();
+    if (isDeactivating) {
+      bloc.add(AdminProducerDeactivated(producer.id));
+    } else {
+      bloc.add(AdminProducerActivated(producer.id));
+    }
   }
 }
 
 class _ProducerCard extends StatelessWidget {
   const _ProducerCard({
     required this.producer,
-    required this.onDelete,
+    required this.onToggleActive,
     required this.onEdit,
+    required this.enabled,
   });
 
-
   final AdminProducerSummary producer;
-  final VoidCallback onDelete;
+  final VoidCallback onToggleActive;
   final VoidCallback onEdit;
+  final bool enabled;
 
   @override
   Widget build(BuildContext context) {
     String fmtDate(DateTime d) =>
         '${d.day.toString().padLeft(2, '0')}/${d.month.toString().padLeft(2, '0')}/${d.year}';
+
+    final toggleColor = producer.active ? AppColors.red : AppColors.darkGreen;
+    final toggleIcon = producer.active ? Icons.delete_outline : Icons.restore;
+    final toggleTooltip = producer.active
+        ? 'Desativar produtor'
+        : 'Ativar produtor';
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -193,7 +264,6 @@ class _ProducerCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Name + action buttons row
           Row(
             children: [
               Expanded(
@@ -207,43 +277,59 @@ class _ProducerCard extends StatelessWidget {
                   ),
                 ),
               ),
-              // Edit
-              GestureDetector(
-                onTap: onEdit,
-                child: Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: AppColors.lightGreen.withOpacity(0.1),
+              Tooltip(
+                message: 'Editar produtor',
+                child: Semantics(
+                  button: true,
+                  label: 'Editar ${producer.name}',
+                  child: InkWell(
+                    onTap: enabled ? onEdit : null,
                     borderRadius: BorderRadius.circular(8),
+                    child: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: AppColors.lightGreen.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: const Icon(
+                        Icons.edit_outlined,
+                        size: 16,
+                        color: AppColors.lightGreen,
+                      ),
+                    ),
                   ),
-                  child: const Icon(Icons.edit_outlined,
-                      size: 16, color: AppColors.lightGreen),
                 ),
               ),
               const SizedBox(width: 8),
-              // Delete
-              GestureDetector(
-                onTap: onDelete,
-                child: Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: AppColors.red.withOpacity(0.1),
+              Tooltip(
+                message: toggleTooltip,
+                child: Semantics(
+                  button: true,
+                  label: '$toggleTooltip ${producer.name}',
+                  child: InkWell(
+                    onTap: enabled ? onToggleActive : null,
                     borderRadius: BorderRadius.circular(8),
+                    child: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: toggleColor.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Icon(toggleIcon, size: 16, color: toggleColor),
+                    ),
                   ),
-                  child: const Icon(Icons.delete_outline,
-                      size: 16, color: AppColors.red),
                 ),
               ),
             ],
           ),
-
           const SizedBox(height: 8),
-
-          // Email
           Row(
             children: [
-              const Icon(Icons.email_outlined,
-                  size: 14, color: AppColors.placeholder),
+              const Icon(
+                Icons.email_outlined,
+                size: 14,
+                color: AppColors.placeholder,
+              ),
               const SizedBox(width: 6),
               Expanded(
                 child: Text(
@@ -258,15 +344,15 @@ class _ProducerCard extends StatelessWidget {
               ),
             ],
           ),
-
           const SizedBox(height: 4),
-
-          // Address
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Icon(Icons.location_on_outlined,
-                  size: 14, color: AppColors.placeholder),
+              const Icon(
+                Icons.location_on_outlined,
+                size: 14,
+                color: AppColors.placeholder,
+              ),
               const SizedBox(width: 6),
               Expanded(
                 child: Text(
@@ -280,18 +366,12 @@ class _ProducerCard extends StatelessWidget {
               ),
             ],
           ),
-
           const SizedBox(height: 8),
           const Divider(color: Color(0xFFE2E8F0), height: 1),
           const SizedBox(height: 8),
-
-          // Dates
           Row(
             children: [
-              _DateBadge(
-                label: 'CADASTRO',
-                date: fmtDate(producer.createdAt),
-              ),
+              _DateBadge(label: 'CADASTRO', date: fmtDate(producer.createdAt)),
               const SizedBox(width: 12),
               _DateBadge(
                 label: 'MODIFICADO',
@@ -299,12 +379,11 @@ class _ProducerCard extends StatelessWidget {
               ),
               const Spacer(),
               Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                 decoration: BoxDecoration(
                   color: producer.active
-                      ? AppColors.lightGreen.withOpacity(0.1)
-                      : AppColors.red.withOpacity(0.1),
+                      ? AppColors.lightGreen.withValues(alpha: 0.1)
+                      : AppColors.red.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(6),
                 ),
                 child: Text(
