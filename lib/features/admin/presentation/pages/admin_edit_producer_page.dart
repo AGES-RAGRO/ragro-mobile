@@ -8,6 +8,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:ragro_mobile/core/di/injection.dart';
 import 'package:ragro_mobile/core/theme/app_colors.dart';
+import 'package:ragro_mobile/features/admin/domain/entities/admin_payment_method.dart'; // TODO: revisar no PR de edit
 import 'package:ragro_mobile/features/admin/domain/entities/admin_producer.dart';
 import 'package:ragro_mobile/features/admin/presentation/bloc/admin_edit_producer_bloc.dart';
 import 'package:ragro_mobile/features/admin/presentation/bloc/admin_edit_producer_event.dart';
@@ -87,10 +88,10 @@ class _AdminEditProducerViewState extends State<_AdminEditProducerView> {
     _addressController.text = producer.producerAddress?.street ?? '';
     _cityController.text = producer.producerAddress?.city ?? '';
     _stateController.text = producer.producerAddress?.state ?? '';
-    _bankController.text = producer.bankAccount?.bankName ?? '';
-    _agencyController.text = producer.bankAccount?.agency ?? '';
-    _accountController.text = producer.bankAccount?.accountNumber ?? '';
-    _holderController.text = producer.bankAccount?.holderName ?? '';
+    _bankController.text = _bankAccountOf(producer)?.bankName ?? ''; // TODO: revisar no PR de edit
+    _agencyController.text = _bankAccountOf(producer)?.agency ?? '';
+    _accountController.text = _bankAccountOf(producer)?.accountNumber ?? '';
+    _holderController.text = _bankAccountOf(producer)?.holderName ?? '';
     _cpfCnpjController.text = producer.fiscalNumber;
     _scheduleStartController.text =
         producer.availability?.firstOrNull?.opensAt ?? '';
@@ -117,10 +118,10 @@ class _AdminEditProducerViewState extends State<_AdminEditProducerView> {
         _addressController.text != (_original.producerAddress?.street ?? '') ||
         _cityController.text != (_original.producerAddress?.city ?? '') ||
         _stateController.text != (_original.producerAddress?.state ?? '') ||
-        _bankController.text != (_original.bankAccount?.bankName ?? '') ||
-        _agencyController.text != (_original.bankAccount?.agency ?? '') ||
-        _accountController.text != (_original.bankAccount?.accountNumber ?? '') ||
-        _holderController.text != (_original.bankAccount?.holderName ?? '') ||
+        _bankController.text != (_bankAccountOf(_original)?.bankName ?? '') ||
+        _agencyController.text != (_bankAccountOf(_original)?.agency ?? '') ||
+        _accountController.text != (_bankAccountOf(_original)?.accountNumber ?? '') ||
+        _holderController.text != (_bankAccountOf(_original)?.holderName ?? '') ||
         _cpfCnpjController.text != _original.fiscalNumber;
   }
 
@@ -602,6 +603,11 @@ class _AdminEditProducerViewState extends State<_AdminEditProducerView> {
       ),
     );
   }
+
+  // TODO: revisar no PR de edit — helper temporário para acessar bank_account da lista
+  AdminPaymentMethod? _bankAccountOf(AdminProducer producer) {
+    return producer.paymentMethods?.where((pm) => pm.type == 'bank_account').firstOrNull;
+  }
 }
 
 class _FieldLabel extends StatelessWidget {
@@ -672,4 +678,5 @@ class _FormTextField extends StatelessWidget {
       ),
     );
   }
+
 }
