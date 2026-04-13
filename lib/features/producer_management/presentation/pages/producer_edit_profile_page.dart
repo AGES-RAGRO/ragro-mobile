@@ -1,36 +1,43 @@
 // Screen: Producer Edit Profile (Editar Perfil do Produtor)
 // User Story: US-25 — Edit Producer Profile
 // Epic: EPIC 4 — Producer Features
-// Routes: PUT /producers/:id
+// Routes: GET /producers/:id, PUT /producers/:id
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:ragro_mobile/core/di/injection.dart';
 import 'package:ragro_mobile/core/theme/app_colors.dart';
+import 'package:ragro_mobile/features/auth/data/datasources/auth_local_datasource.dart';
 import 'package:ragro_mobile/features/producer_profile/presentation/bloc/producer_profile_bloc.dart';
 import 'package:ragro_mobile/features/producer_profile/presentation/bloc/producer_profile_event.dart';
 import 'package:ragro_mobile/features/producer_profile/presentation/bloc/producer_profile_state.dart';
-
-/// ID do produtor autenticado. O backend resolve via JWT.
-const String _authenticatedProducerId = 'me';
 
 class ProducerEditProfilePage extends StatelessWidget {
   const ProducerEditProfilePage({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final producerId = getIt<AuthLocalDataSource>().getUserId();
+    if (producerId == null || producerId.isEmpty) {
+      return const Scaffold(
+        body: Center(
+          child: Text('Sessão expirada. Faça login novamente.'),
+        ),
+      );
+    }
     return BlocProvider<ProducerProfileBloc>(
-      create: (_) =>
-          getIt<ProducerProfileBloc>()
-            ..add(const ProducerProfileStarted(_authenticatedProducerId)),
-      child: const _ProducerEditProfileView(),
+      create: (_) => getIt<ProducerProfileBloc>()
+        ..add(ProducerProfileStarted(producerId)),
+      child: _ProducerEditProfileView(producerId: producerId),
     );
   }
 }
 
 class _ProducerEditProfileView extends StatefulWidget {
-  const _ProducerEditProfileView();
+  const _ProducerEditProfileView({required this.producerId});
+
+  final String producerId;
 
   @override
   State<_ProducerEditProfileView> createState() =>
@@ -68,7 +75,7 @@ class _ProducerEditProfileViewState extends State<_ProducerEditProfileView> {
     if (!(_formKey.currentState?.validate() ?? false)) return;
     context.read<ProducerProfileBloc>().add(
       ProducerProfileUpdateSubmitted(
-        producerId: _authenticatedProducerId,
+        producerId: widget.producerId,
         name: _nameController.text,
         story: _bioController.text,
         phone: _phoneController.text,
@@ -128,6 +135,22 @@ class _ProducerEditProfileViewState extends State<_ProducerEditProfileView> {
               state is ProducerProfileInitial) {
             return const Center(
               child: CircularProgressIndicator(color: AppColors.darkGreen),
+            );
+          }
+          if (state is ProducerProfileFailure && !_hydrated) {
+            return Center(
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Text(
+                  state.message,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontFamily: 'Manrope',
+                    fontSize: 14,
+                    color: AppColors.black,
+                  ),
+                ),
+              ),
             );
           }
 
