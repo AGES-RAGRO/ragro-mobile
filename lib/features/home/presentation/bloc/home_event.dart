@@ -14,3 +14,7 @@ class HomeStarted extends HomeEvent {
 class HomeRefreshed extends HomeEvent {
   const HomeRefreshed();
 }
+
+class HomeLoadMoreProducers extends HomeEvent {
+  const HomeLoadMoreProducers();
+}

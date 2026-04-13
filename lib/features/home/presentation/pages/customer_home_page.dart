@@ -64,6 +64,7 @@ class _CustomerHomeView extends StatelessWidget {
                       child: ProducersSection(
                         producers: producers,
                         onProducerTap: (p) => _onProducerTap(context, p),
+                        isLoadingMore: state is HomeLoaded && state.isFetchingMoreProducers,
                       ),
                     ),
                     const SliverToBoxAdapter(child: SizedBox(height: 32)),
