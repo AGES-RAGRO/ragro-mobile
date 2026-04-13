@@ -120,14 +120,14 @@ class _AdminProducersView extends StatelessWidget {
                               context: context,
                               producer: producer,
                             ),
-                            onEdit: () {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(
-                                    'Editar ${producer.name} — em breve',
-                                  ),
-                                ),
-                              );
+                            onEdit: () async {
+                              await context
+                                  .push('/admin/producers/${producer.id}/edit');
+                              if (context.mounted) {
+                                context
+                                    .read<AdminProducersBloc>()
+                                    .add(const AdminProducersStarted());
+                              }
                             },
                           );
                         },
