@@ -1,7 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 import 'package:ragro_mobile/core/network/api_exception.dart';
-import 'package:ragro_mobile/features/admin/domain/entities/admin_producer.dart';
+import 'package:ragro_mobile/features/admin/domain/entities/admin_producer_summary.dart';
 import 'package:ragro_mobile/features/admin/domain/usecases/activate_admin_producer.dart';
 import 'package:ragro_mobile/features/admin/domain/usecases/deactivate_admin_producer.dart';
 import 'package:ragro_mobile/features/admin/domain/usecases/get_admin_producers.dart';
@@ -82,7 +82,7 @@ class AdminProducersBloc
     }
   }
 
-  List<AdminProducer>? _currentProducers() {
+  List<AdminProducerSummary>? _currentProducers() {
     final current = state;
     if (current is AdminProducersLoaded) return current.producers;
     if (current is AdminProducersMutating) return current.previousProducers;

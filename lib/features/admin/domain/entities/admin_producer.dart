@@ -36,22 +36,36 @@ class AdminProducer extends Equatable {
   final AdminBankAccount? bankAccount;
   final List<AdminAvailability>? availability;
 
-  AdminProducer copyWith({bool? active}) {
+  AdminProducer copyWith({
+    String? name,
+    String? email,
+    String? phone,
+    String? address,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    bool? active,
+    String? fiscalNumber,
+    String? fiscalNumberType,
+    String? farmName,
+    AdminAddress? producerAddress,
+    AdminBankAccount? bankAccount,
+    List<AdminAvailability>? availability,
+  }) {
     return AdminProducer(
       id: id,
-      name: name,
-      email: email,
-      phone: phone,
-      address: address,
-      createdAt: createdAt,
-      updatedAt: updatedAt,
+      name: name ?? this.name,
+      email: email ?? this.email,
+      phone: phone ?? this.phone,
+      address: address ?? this.address,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
       active: active ?? this.active,
-      fiscalNumber: fiscalNumber,
-      fiscalNumberType: fiscalNumberType,
-      farmName: farmName,
-      producerAddress: producerAddress,
-      bankAccount: bankAccount,
-      availability: availability,
+      fiscalNumber: fiscalNumber ?? this.fiscalNumber,
+      fiscalNumberType: fiscalNumberType ?? this.fiscalNumberType,
+      farmName: farmName ?? this.farmName,
+      producerAddress: producerAddress ?? this.producerAddress,
+      bankAccount: bankAccount ?? this.bankAccount,
+      availability: availability ?? this.availability,
     );
   }
 

@@ -27,7 +27,7 @@ class AdminProducersLoaded extends AdminProducersState {
 /// a loading overlay instead of going blank.
 class AdminProducersMutating extends AdminProducersState {
   const AdminProducersMutating(this.previousProducers);
-  final List<AdminProducer> previousProducers;
+  final List<AdminProducerSummary> previousProducers;
   @override
   List<Object?> get props => [previousProducers];
 }
@@ -47,7 +47,7 @@ class AdminProducerMutationFailure extends AdminProducersState {
     required this.previousProducers,
     required this.message,
   });
-  final List<AdminProducer> previousProducers;
+  final List<AdminProducerSummary> previousProducers;
   final String message;
   @override
   List<Object?> get props => [previousProducers, message];

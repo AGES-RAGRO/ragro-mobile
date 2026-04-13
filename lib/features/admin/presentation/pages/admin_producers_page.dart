@@ -8,7 +8,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:ragro_mobile/core/di/injection.dart';
 import 'package:ragro_mobile/core/theme/app_colors.dart';
-import 'package:ragro_mobile/features/admin/domain/entities/admin_producer.dart';
+import 'package:ragro_mobile/features/admin/domain/entities/admin_producer_summary.dart';
 import 'package:ragro_mobile/features/admin/presentation/bloc/admin_producers_bloc.dart';
 import 'package:ragro_mobile/features/admin/presentation/bloc/admin_producers_event.dart';
 import 'package:ragro_mobile/features/admin/presentation/bloc/admin_producers_state.dart';
@@ -77,7 +77,7 @@ class _AdminProducersView extends StatelessWidget {
                     return Center(child: Text(state.message));
                   }
 
-                  final List<AdminProducer> producers;
+                  final List<AdminProducerSummary> producers;
                   final bool isMutating;
                   if (state is AdminProducersLoaded) {
                     producers = state.producers;
@@ -195,7 +195,7 @@ class _AdminProducersView extends StatelessWidget {
 
   Future<void> _confirmMutation({
     required BuildContext context,
-    required AdminProducer producer,
+    required AdminProducerSummary producer,
   }) async {
     final isDeactivating = producer.active;
     final verb = isDeactivating ? 'desativar' : 'ativar';
@@ -231,7 +231,7 @@ class _ProducerCard extends StatelessWidget {
     required this.enabled,
   });
 
-  final AdminProducer producer;
+  final AdminProducerSummary producer;
   final VoidCallback onToggleActive;
   final VoidCallback onEdit;
   final bool enabled;

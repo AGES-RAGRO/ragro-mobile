@@ -4,21 +4,35 @@ import 'package:ragro_mobile/core/network/api_client.dart';
 import 'package:ragro_mobile/core/network/api_endpoints.dart';
 import 'package:ragro_mobile/core/network/api_exception.dart';
 import 'package:ragro_mobile/features/admin/data/models/admin_producer_model.dart';
+import 'package:ragro_mobile/features/admin/data/models/admin_producer_summary_model.dart';
 import 'package:ragro_mobile/features/admin/domain/entities/admin_producer.dart';
+import 'package:ragro_mobile/features/admin/domain/entities/admin_producer_summary.dart';
 
 @lazySingleton
 class AdminRemoteDataSource {
   const AdminRemoteDataSource(this._apiClient);
   final ApiClient _apiClient;
 
-  Future<List<AdminProducer>> getProducers() async {
+  Future<List<AdminProducerSummary>> getProducers() async {
     try {
-      final response = await _apiClient.dio.get<List<dynamic>>(
+      final response = await _apiClient.dio.get<Map<String, dynamic>>(
         ApiEndpoints.adminProducers,
       );
-      return (response.data ?? [])
-          .map((e) => AdminProducerModel.fromJson(e as Map<String, dynamic>))
+      final content = (response.data!['content'] as List<dynamic>);
+      return content
+          .map((e) => AdminProducerSummaryModel.fromJson(e as Map<String, dynamic>))
           .toList();
+    } on DioException catch (e) {
+      throw e.error as ApiException? ?? const UnknownApiException();
+    }
+  }
+
+  Future<AdminProducer> getProducerById(String id) async {
+    try {
+      final response = await _apiClient.dio.get<Map<String, dynamic>>(
+        ApiEndpoints.adminProducer(id),
+      );
+      return AdminProducerModel.fromJson(response.data!);
     } on DioException catch (e) {
       throw e.error as ApiException? ?? const UnknownApiException();
     }
@@ -42,7 +56,37 @@ class AdminRemoteDataSource {
           'farmName': producer.farmName,
           'address': address.toJson(),
           if (producer.bankAccount != null)
-            'bankAccount': producer.bankAccount!.toJson(),
+            'paymentMethod': {
+              'type': 'bank_account',
+              ...producer.bankAccount!.toJson(),
+            },
+          if (producer.availability != null &&
+              producer.availability!.isNotEmpty)
+            'availability': producer.availability!
+                .map((a) => a.toJson())
+                .toList(),
+        },
+      );
+    } on DioException catch (e) {
+      throw e.error as ApiException? ?? const UnknownApiException();
+    }
+  }
+
+  Future<void> updateProducer(AdminProducer producer) async {
+    try {
+      final address = producer.producerAddress;
+      await _apiClient.dio.put<void>(
+        ApiEndpoints.adminProducer(producer.id),
+        data: {
+          'name': producer.name,
+          'phone': producer.phone,
+          'farmName': producer.farmName,
+          if (address != null) 'address': address.toJson(),
+          if (producer.bankAccount != null)
+            'paymentMethod': {
+              'type': 'bank_account',
+              ...producer.bankAccount!.toJson(),
+            },
           if (producer.availability != null &&
               producer.availability!.isNotEmpty)
             'availability': producer.availability!

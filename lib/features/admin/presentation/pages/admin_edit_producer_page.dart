@@ -83,19 +83,27 @@ class _AdminEditProducerViewState extends State<_AdminEditProducerView> {
     _nameController.text = producer.name;
     _phoneController.text = producer.phone;
     _emailController.text = producer.email;
-    _cepController.text = producer.zipCode;
-    _addressController.text = producer.street;
-    _cityController.text = producer.city;
-    _stateController.text = producer.state;
-    _bankController.text = producer.bankName;
-    _agencyController.text = producer.agency;
-    _accountController.text = producer.accountNumber;
-    _holderController.text = producer.holderName;
+    _cepController.text = producer.producerAddress?.zipCode ?? '';
+    _addressController.text = producer.producerAddress?.street ?? '';
+    _cityController.text = producer.producerAddress?.city ?? '';
+    _stateController.text = producer.producerAddress?.state ?? '';
+    _bankController.text = producer.bankAccount?.bankName ?? '';
+    _agencyController.text = producer.bankAccount?.agency ?? '';
+    _accountController.text = producer.bankAccount?.accountNumber ?? '';
+    _holderController.text = producer.bankAccount?.holderName ?? '';
     _cpfCnpjController.text = producer.fiscalNumber;
-    _scheduleStartController.text = producer.scheduleStart;
-    _scheduleEndController.text = producer.scheduleEnd;
+    _scheduleStartController.text =
+        producer.availability?.firstOrNull?.opensAt ?? '';
+    _scheduleEndController.text =
+        producer.availability?.firstOrNull?.closesAt ?? '';
     for (var i = 0; i < 7; i++) {
-      _weekdays[i] = producer.scheduleWeekdays[i];
+      _weekdays[i] = false;
+    }
+    if (producer.availability != null) {
+      for (final slot in producer.availability!) {
+        final uiIndex = slot.weekday == 0 ? 6 : slot.weekday - 1;
+        if (uiIndex >= 0 && uiIndex < 7) _weekdays[uiIndex] = true;
+      }
     }
     _controllersInitialized = true;
   }
@@ -105,18 +113,15 @@ class _AdminEditProducerViewState extends State<_AdminEditProducerView> {
     return _nameController.text != _original.name ||
         _phoneController.text != _original.phone ||
         _emailController.text != _original.email ||
-        _cepController.text != _original.zipCode ||
-        _addressController.text != _original.street ||
-        _cityController.text != _original.city ||
-        _stateController.text != _original.state ||
-        _bankController.text != _original.bankName ||
-        _agencyController.text != _original.agency ||
-        _accountController.text != _original.accountNumber ||
-        _holderController.text != _original.holderName ||
-        _cpfCnpjController.text != _original.fiscalNumber ||
-        _scheduleStartController.text != _original.scheduleStart ||
-        _scheduleEndController.text != _original.scheduleEnd ||
-        !_listEquals(_weekdays, _original.scheduleWeekdays);
+        _cepController.text != (_original.producerAddress?.zipCode ?? '') ||
+        _addressController.text != (_original.producerAddress?.street ?? '') ||
+        _cityController.text != (_original.producerAddress?.city ?? '') ||
+        _stateController.text != (_original.producerAddress?.state ?? '') ||
+        _bankController.text != (_original.bankAccount?.bankName ?? '') ||
+        _agencyController.text != (_original.bankAccount?.agency ?? '') ||
+        _accountController.text != (_original.bankAccount?.accountNumber ?? '') ||
+        _holderController.text != (_original.bankAccount?.holderName ?? '') ||
+        _cpfCnpjController.text != _original.fiscalNumber;
   }
 
   bool _listEquals(List<bool> a, List<bool> b) {
