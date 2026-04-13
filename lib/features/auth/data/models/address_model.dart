@@ -22,8 +22,11 @@ class AddressModel extends Address {
       number: json['number'] as String,
       city: json['city'] as String,
       state: json['state'] as String,
-      zipCode: json['zip_code'] as String,
-      isPrimary: json['is_primary'] as bool? ?? true,
+      zipCode: (json['zipCode'] ?? json['zip_code']) as String,
+      isPrimary:
+          (json['isPrimary'] ?? json['primary'] ?? json['is_primary'])
+              as bool? ??
+          true,
       complement: json['complement'] as String?,
       neighborhood: json['neighborhood'] as String?,
       latitude: (json['latitude'] as num?)?.toDouble(),

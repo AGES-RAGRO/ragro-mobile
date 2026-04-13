@@ -14,6 +14,38 @@ class AuthRemoteDataSource {
   const AuthRemoteDataSource(this._apiClient);
   final ApiClient _apiClient;
 
+  ApiException _mapKeycloakLoginError(DioException error) {
+    final statusCode = error.response?.statusCode;
+    final responseData = error.response?.data;
+    final responseMap = responseData is Map<String, dynamic>
+        ? responseData
+        : null;
+    final errorCode = responseMap?['error'] as String?;
+    final errorDescription = responseMap?['error_description'] as String?;
+
+    if (statusCode == 400 && errorCode == 'invalid_grant') {
+      return const InvalidCredentialsApiException();
+    }
+
+    if (statusCode == 401) {
+      return const InvalidCredentialsApiException();
+    }
+
+    if (error.type == DioExceptionType.connectionTimeout ||
+        error.type == DioExceptionType.receiveTimeout ||
+        error.type == DioExceptionType.sendTimeout) {
+      return const ApiTimeoutException();
+    }
+
+    if (error.type == DioExceptionType.connectionError) {
+      return const NetworkException(
+        'Falha ao conectar com o servidor de login. Verifique se o backend e o Keycloak estao ativos e liberados para a UI web.',
+      );
+    }
+
+    return UnknownApiException(errorDescription ?? 'Erro desconhecido');
+  }
+
   /// Authenticates a user via the three-step Keycloak flow:
   /// 1. GET /auth/config — fetch Keycloak token URL and client ID
   /// 2. POST {tokenUrl} — authenticate directly with Keycloak
@@ -46,10 +78,7 @@ class AuthRemoteDataSource {
       );
       keycloakToken = KeycloakTokenModel.fromJson(tokenResponse.data!);
     } on DioException catch (e) {
-      if (e.response?.statusCode == 401) {
-        throw const InvalidCredentialsApiException();
-      }
-      throw const UnknownApiException();
+      throw _mapKeycloakLoginError(e);
     } finally {
       keycloakDio.close();
     }

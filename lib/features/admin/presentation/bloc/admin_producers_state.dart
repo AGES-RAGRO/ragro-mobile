@@ -1,5 +1,5 @@
 import 'package:equatable/equatable.dart';
-import 'package:ragro_mobile/features/admin/domain/entities/admin_producer.dart';
+import 'package:ragro_mobile/features/admin/domain/entities/admin_producer_summary.dart';
 
 sealed class AdminProducersState extends Equatable {
   const AdminProducersState();
@@ -17,7 +17,7 @@ class AdminProducersLoading extends AdminProducersState {
 
 class AdminProducersLoaded extends AdminProducersState {
   const AdminProducersLoaded(this.producers);
-  final List<AdminProducer> producers;
+  final List<AdminProducerSummary> producers;
   @override
   List<Object?> get props => [producers];
 }
