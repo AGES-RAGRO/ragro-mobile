@@ -39,3 +39,12 @@ class ProducerProfileUpdating extends ProducerProfileState {
 class ProducerProfileUpdateSuccess extends ProducerProfileState {
   const ProducerProfileUpdateSuccess();
 }
+
+class ProducerPhotoUploading extends ProducerProfileState {
+  const ProducerPhotoUploading({required this.producer, required this.isAvatar});
+  final PublicProducer producer;
+  final bool isAvatar;
+
+  @override
+  List<Object?> get props => [producer, isAvatar];
+}

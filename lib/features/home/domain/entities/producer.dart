@@ -6,6 +6,7 @@ class Producer extends Equatable {
     required this.name,
     required this.description,
     required this.avatarUrl,
+    required this.coverUrl,
     required this.averageRating,
     required this.ownerName,
   });
@@ -14,9 +15,18 @@ class Producer extends Equatable {
   final String name;
   final String description;
   final String avatarUrl;
+  final String coverUrl;
   final double averageRating;
   final String ownerName;
 
   @override
-  List<Object?> get props => [id, name, description, avatarUrl, averageRating, ownerName];
+  List<Object?> get props => [
+    id,
+    name,
+    description,
+    avatarUrl,
+    coverUrl,
+    averageRating,
+    ownerName,
+  ];
 }

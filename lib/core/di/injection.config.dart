@@ -192,6 +192,8 @@ import 'package:ragro_mobile/features/producer_profile/domain/usecases/get_produ
     as _i1031;
 import 'package:ragro_mobile/features/producer_profile/domain/usecases/update_producer.dart'
     as _i240;
+import 'package:ragro_mobile/features/producer_profile/domain/usecases/upload_producer_photo.dart'
+    as _i657;
 import 'package:ragro_mobile/features/producer_profile/presentation/bloc/producer_profile_bloc.dart'
     as _i756;
 import 'package:ragro_mobile/features/product_detail/data/datasources/product_detail_remote_datasource.dart'
@@ -339,21 +341,6 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i456.UpdateCartItemQuantity>(
       () => _i456.UpdateCartItemQuantity(gh<_i830.CartRepository>()),
     );
-    gh.lazySingleton<_i321.CreateAdminProducer>(
-      () => _i321.CreateAdminProducer(gh<_i759.AdminRepository>()),
-    );
-    gh.lazySingleton<_i514.DeactivateAdminProducer>(
-      () => _i514.DeactivateAdminProducer(gh<_i759.AdminRepository>()),
-    );
-    gh.lazySingleton<_i852.GetAdminProducerById>(
-      () => _i852.GetAdminProducerById(gh<_i759.AdminRepository>()),
-    );
-    gh.lazySingleton<_i1054.GetAdminProducers>(
-      () => _i1054.GetAdminProducers(gh<_i759.AdminRepository>()),
-    );
-    gh.lazySingleton<_i711.UpdateAdminProducer>(
-      () => _i711.UpdateAdminProducer(gh<_i759.AdminRepository>()),
-    );
     gh.factory<_i432.RateProducerBloc>(
       () => _i432.RateProducerBloc(gh<_i907.RateProducer>()),
     );
@@ -413,12 +400,6 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i127.ProductDetailRemoteDataSource>(),
       ),
     );
-    gh.factory<_i914.AdminEditProducerBloc>(
-      () => _i914.AdminEditProducerBloc(
-        gh<_i852.GetAdminProducerById>(),
-        gh<_i711.UpdateAdminProducer>(),
-      ),
-    );
     gh.lazySingleton<_i43.AuthRepository>(
       () => _i579.AuthRepositoryImpl(
         gh<_i201.AuthRemoteDataSource>(),
@@ -456,9 +437,6 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i759.AdminRepository>(
       () => _i780.AdminRepositoryImpl(gh<_i16.AdminRemoteDataSource>()),
     );
-    gh.factory<_i846.AdminProducerFormBloc>(
-      () => _i846.AdminProducerFormBloc(gh<_i321.CreateAdminProducer>()),
-    );
     gh.lazySingleton<_i841.CartBloc>(
       () => _i841.CartBloc(
         gh<_i535.GetCart>(),
@@ -476,6 +454,21 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i671.ActivateAdminProducer>(
       () => _i671.ActivateAdminProducer(gh<_i759.AdminRepository>()),
+    );
+    gh.lazySingleton<_i321.CreateAdminProducer>(
+      () => _i321.CreateAdminProducer(gh<_i759.AdminRepository>()),
+    );
+    gh.lazySingleton<_i514.DeactivateAdminProducer>(
+      () => _i514.DeactivateAdminProducer(gh<_i759.AdminRepository>()),
+    );
+    gh.lazySingleton<_i852.GetAdminProducerById>(
+      () => _i852.GetAdminProducerById(gh<_i759.AdminRepository>()),
+    );
+    gh.lazySingleton<_i1054.GetAdminProducers>(
+      () => _i1054.GetAdminProducers(gh<_i759.AdminRepository>()),
+    );
+    gh.lazySingleton<_i711.UpdateAdminProducer>(
+      () => _i711.UpdateAdminProducer(gh<_i759.AdminRepository>()),
     );
     gh.lazySingleton<_i420.ProducerProfileRepository>(
       () => _i86.ProducerProfileRepositoryImpl(
@@ -507,6 +500,12 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i856.SearchBloc(gh<_i894.SearchProducersAndProducts>()),
     );
     gh.factory<_i151.HomeBloc>(() => _i151.HomeBloc(gh<_i159.GetHomeData>()));
+    gh.factory<_i914.AdminEditProducerBloc>(
+      () => _i914.AdminEditProducerBloc(
+        gh<_i852.GetAdminProducerById>(),
+        gh<_i711.UpdateAdminProducer>(),
+      ),
+    );
     gh.factory<_i1056.AdminProducersBloc>(
       () => _i1056.AdminProducersBloc(
         gh<_i1054.GetAdminProducers>(),
@@ -520,8 +519,17 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i240.UpdateProducer>(
       () => _i240.UpdateProducer(gh<_i420.ProducerProfileRepository>()),
     );
+    gh.lazySingleton<_i657.UploadProducerAvatar>(
+      () => _i657.UploadProducerAvatar(gh<_i420.ProducerProfileRepository>()),
+    );
+    gh.lazySingleton<_i657.UploadProducerCover>(
+      () => _i657.UploadProducerCover(gh<_i420.ProducerProfileRepository>()),
+    );
     gh.lazySingleton<_i419.AppRouter>(
       () => _i419.AppRouter(gh<_i475.AuthBloc>()),
+    );
+    gh.factory<_i846.AdminProducerFormBloc>(
+      () => _i846.AdminProducerFormBloc(gh<_i321.CreateAdminProducer>()),
     );
     gh.factory<_i526.CustomerProfileBloc>(
       () => _i526.CustomerProfileBloc(
@@ -533,6 +541,8 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i756.ProducerProfileBloc(
         gh<_i1031.GetProducerProfile>(),
         gh<_i240.UpdateProducer>(),
+        gh<_i657.UploadProducerAvatar>(),
+        gh<_i657.UploadProducerCover>(),
       ),
     );
     return this;

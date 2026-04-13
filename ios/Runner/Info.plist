@@ -4,6 +4,10 @@
 <dict>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Permita acesso às suas fotos para escolher uma imagem de perfil ou capa.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Permita acesso à câmera para tirar uma foto de perfil ou capa.</string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>

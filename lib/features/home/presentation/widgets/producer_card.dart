@@ -45,9 +45,9 @@ class ProducerCard extends StatelessWidget {
                   height: 160,
                   width: double.infinity,
                   color: AppColors.mintGreen,
-                  child: producer.avatarUrl.isNotEmpty
+                  child: producer.coverUrl.isNotEmpty
                       ? Image.network(
-                          producer.avatarUrl,
+                          producer.coverUrl,
                           fit: BoxFit.cover,
                           errorBuilder: (_, __, ___) => const _PlaceholderImage(),
                         )
@@ -118,7 +118,16 @@ class ProducerCard extends StatelessWidget {
                       CircleAvatar(
                         radius: 12,
                         backgroundColor: AppColors.mintGreen.withOpacity(0.3),
-                        child: const Icon(Icons.person, size: 14, color: AppColors.darkGreen),
+                        backgroundImage: producer.avatarUrl.isNotEmpty
+                            ? NetworkImage(producer.avatarUrl)
+                            : null,
+                        child: producer.avatarUrl.isEmpty
+                            ? const Icon(
+                                Icons.person,
+                                size: 14,
+                                color: AppColors.darkGreen,
+                              )
+                            : null,
                       ),
                       const SizedBox(width: 8),
                       Text(

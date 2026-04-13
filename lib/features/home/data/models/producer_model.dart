@@ -6,6 +6,7 @@ class ProducerModel extends Producer {
     required super.name,
     required super.description,
     required super.avatarUrl,
+    required super.coverUrl,
     required super.averageRating,
     required super.ownerName,
   });
@@ -17,6 +18,9 @@ class ProducerModel extends Producer {
       description: json['description'] as String? ?? '',
       avatarUrl:
           json['avatar_s3'] as String? ?? json['avatarUrl'] as String? ?? '',
+      coverUrl: json['display_photo_s3'] as String? ??
+          json['coverUrl'] as String? ??
+          '',
       averageRating: (json['average_rating'] as num?)?.toDouble() ?? 0.0,
       ownerName: json['owner_name'] as String? ?? '',
     );
@@ -28,6 +32,7 @@ class ProducerModel extends Producer {
       name: 'Fazenda Sol Nascente',
       description: '"Orgânicos colhidos no dia para...',
       avatarUrl: '',
+      coverUrl: '',
       averageRating: 4.9,
       ownerName: 'Sr. Manoel Silva',
     );

@@ -42,7 +42,8 @@ class _ProducerPublicProfileView extends StatelessWidget {
             ProducerProfileLoading() ||
             ProducerProfileInitial() ||
             ProducerProfileUpdating() ||
-            ProducerProfileUpdateSuccess() => const Center(
+            ProducerProfileUpdateSuccess() ||
+            ProducerPhotoUploading() => const Center(
               child: CircularProgressIndicator(color: AppColors.darkGreen),
             ),
             ProducerProfileFailure(:final message) => Center(
