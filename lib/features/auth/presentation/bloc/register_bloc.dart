@@ -34,8 +34,22 @@ class RegisterBloc extends Bloc<RegisterEvent, RegisterState> {
         neighborhood: event.neighborhood,
       );
       emit(RegisterSuccess(user));
+    } on ConflictException catch (e) {
+      emit(RegisterFailure(_mapConflictMessage(e.message)));
     } on ApiException catch (e) {
       emit(RegisterFailure(e.message));
     }
+  }
+
+  // Traduz mensagens do backend (EN) para o usuário final (PT-BR).
+  String _mapConflictMessage(String raw) {
+    final lower = raw.toLowerCase();
+    if (lower.contains('e-mail') || lower.contains('email')) {
+      return 'Este e-mail já está cadastrado.';
+    }
+    if (lower.contains('fiscal')) {
+      return 'Este CPF já está cadastrado.';
+    }
+    return 'Cadastro já existente.';
   }
 }

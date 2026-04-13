@@ -5,16 +5,25 @@
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:ragro_mobile/core/di/injection.dart';
+import 'package:ragro_mobile/core/formatters/input_masks.dart';
 import 'package:ragro_mobile/core/theme/app_colors.dart';
 import 'package:ragro_mobile/core/theme/app_text_styles.dart';
+import 'package:ragro_mobile/core/validators/cpf_validator.dart';
 import 'package:ragro_mobile/features/auth/presentation/bloc/register_bloc.dart';
 import 'package:ragro_mobile/features/auth/presentation/bloc/register_event.dart';
 import 'package:ragro_mobile/features/auth/presentation/bloc/register_state.dart';
 import 'package:ragro_mobile/features/auth/presentation/widgets/auth_submit_button.dart';
 import 'package:ragro_mobile/features/auth/presentation/widgets/auth_text_field.dart';
+
+const List<String> _brazilianStates = [
+  'AC', 'AL', 'AP', 'AM', 'BA', 'CE', 'DF', 'ES', 'GO', 'MA',
+  'MT', 'MS', 'MG', 'PA', 'PB', 'PR', 'PE', 'PI', 'RJ', 'RN',
+  'RS', 'RO', 'RR', 'SC', 'SP', 'SE', 'TO',
+];
 
 class CustomerRegisterPage extends StatelessWidget {
   const CustomerRegisterPage({super.key});
@@ -50,9 +59,11 @@ class _CustomerRegisterViewState extends State<_CustomerRegisterView> {
   final _complementController = TextEditingController();
   final _neighborhoodController = TextEditingController();
   final _cityController = TextEditingController();
-  final _stateController = TextEditingController();
+  String? _selectedState;
 
   bool _termsAccepted = false;
+
+  String _digitsOnly(String input) => input.replaceAll(RegExp(r'\D'), '');
 
   @override
   void dispose() {
@@ -68,7 +79,6 @@ class _CustomerRegisterViewState extends State<_CustomerRegisterView> {
     _complementController.dispose();
     _neighborhoodController.dispose();
     _cityController.dispose();
-    _stateController.dispose();
     super.dispose();
   }
 
@@ -87,15 +97,15 @@ class _CustomerRegisterViewState extends State<_CustomerRegisterView> {
     context.read<RegisterBloc>().add(
       RegisterSubmitted(
         name: _nameController.text.trim(),
-        phone: _phoneController.text.trim(),
+        phone: _digitsOnly(_phoneController.text),
         email: _emailController.text.trim(),
-        fiscalNumber: _cpfController.text.trim(),
+        fiscalNumber: _digitsOnly(_cpfController.text),
         password: _passwordController.text,
-        zipCode: _zipCodeController.text.trim(),
+        zipCode: _digitsOnly(_zipCodeController.text),
         street: _streetController.text.trim(),
         number: _numberController.text.trim(),
         city: _cityController.text.trim(),
-        state: _stateController.text.trim(),
+        state: _selectedState!,
         complement: _complementController.text.trim().isEmpty
             ? null
             : _complementController.text.trim(),
@@ -151,8 +161,9 @@ class _CustomerRegisterViewState extends State<_CustomerRegisterView> {
                   icon: Icons.phone_outlined,
                   controller: _phoneController,
                   keyboardType: TextInputType.phone,
+                  inputFormatters: [PhoneInputFormatter()],
                   validator: (value) {
-                    final digits = value?.replaceAll(RegExp(r'\D'), '') ?? '';
+                    final digits = _digitsOnly(value ?? '');
                     if (digits.length != 11) {
                       return 'DDD + número com 11 dígitos';
                     }
@@ -178,10 +189,14 @@ class _CustomerRegisterViewState extends State<_CustomerRegisterView> {
                   icon: Icons.badge_outlined,
                   controller: _cpfController,
                   keyboardType: TextInputType.number,
+                  inputFormatters: [CpfInputFormatter()],
                   validator: (value) {
-                    final digits = value?.replaceAll(RegExp(r'\D'), '') ?? '';
+                    final digits = _digitsOnly(value ?? '');
                     if (digits.length != 11) {
                       return 'CPF deve ter 11 dígitos';
+                    }
+                    if (!CpfValidator.isValid(digits)) {
+                      return 'CPF inválido';
                     }
                     return null;
                   },
@@ -226,8 +241,9 @@ class _CustomerRegisterViewState extends State<_CustomerRegisterView> {
                   icon: Icons.location_on_outlined,
                   controller: _zipCodeController,
                   keyboardType: TextInputType.number,
+                  inputFormatters: [CepInputFormatter()],
                   validator: (value) {
-                    final digits = value?.replaceAll(RegExp(r'\D'), '') ?? '';
+                    final digits = _digitsOnly(value ?? '');
                     if (digits.length != 8) {
                       return 'CEP deve ter 8 dígitos';
                     }
@@ -290,19 +306,10 @@ class _CustomerRegisterViewState extends State<_CustomerRegisterView> {
                     ),
                     const SizedBox(width: 12),
                     SizedBox(
-                      width: 100,
-                      child: AuthTextField(
-                        label: 'Estado',
-                        icon: Icons.map_outlined,
-                        controller: _stateController,
-                        validator: (value) {
-                          final v = value?.trim().toUpperCase() ?? '';
-                          if (v.length != 2 ||
-                              !RegExp(r'^[A-Z]{2}$').hasMatch(v)) {
-                            return 'UF com 2 letras (ex: RS)';
-                          }
-                          return null;
-                        },
+                      width: 110,
+                      child: _UfAutocomplete(
+                        initialValue: _selectedState,
+                        onSelected: (uf) => setState(() => _selectedState = uf),
                       ),
                     ),
                   ],
@@ -392,6 +399,132 @@ class _TermsCheckboxState extends State<_TermsCheckbox> {
           ),
         ),
       ],
+    );
+  }
+}
+
+class _UfAutocomplete extends StatelessWidget {
+  const _UfAutocomplete({required this.initialValue, required this.onSelected});
+
+  final String? initialValue;
+  final ValueChanged<String> onSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    return Autocomplete<String>(
+      initialValue: TextEditingValue(text: initialValue ?? ''),
+      optionsBuilder: (value) {
+        final query = value.text.toUpperCase();
+        if (query.isEmpty) return _brazilianStates;
+        return _brazilianStates.where((uf) => uf.startsWith(query));
+      },
+      onSelected: onSelected,
+      fieldViewBuilder:
+          (context, controller, focusNode, onFieldSubmitted) {
+        return TextFormField(
+          controller: controller,
+          focusNode: focusNode,
+          textCapitalization: TextCapitalization.characters,
+          inputFormatters: [
+            LengthLimitingTextInputFormatter(2),
+            _UppercaseFormatter(),
+          ],
+          onChanged: (v) {
+            if (_brazilianStates.contains(v.toUpperCase())) {
+              onSelected(v.toUpperCase());
+            }
+          },
+          style: AppTextStyles.body.copyWith(color: AppColors.black),
+          decoration: InputDecoration(
+            labelText: 'UF',
+            labelStyle: AppTextStyles.textfieldLabel,
+            prefixIcon: const Icon(
+              Icons.map_outlined,
+              color: AppColors.darkGreen,
+              size: 20,
+            ),
+            filled: true,
+            fillColor: AppColors.inputBackground,
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 12,
+              vertical: 18,
+            ),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide.none,
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide.none,
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide:
+                  const BorderSide(color: AppColors.darkGreen, width: 1.5),
+            ),
+            errorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(color: AppColors.red, width: 1.5),
+            ),
+            focusedErrorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(color: AppColors.red, width: 1.5),
+            ),
+          ),
+          validator: (value) {
+            final v = value?.trim().toUpperCase() ?? '';
+            if (!_brazilianStates.contains(v)) return 'UF inválida';
+            return null;
+          },
+        );
+      },
+      optionsViewBuilder: (context, onSelected, options) {
+        return Align(
+          alignment: Alignment.topLeft,
+          child: Material(
+            elevation: 4,
+            borderRadius: BorderRadius.circular(12),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxHeight: 220, maxWidth: 120),
+              child: ListView.builder(
+                padding: EdgeInsets.zero,
+                shrinkWrap: true,
+                itemCount: options.length,
+                itemBuilder: (context, index) {
+                  final option = options.elementAt(index);
+                  return InkWell(
+                    onTap: () => onSelected(option),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 12,
+                      ),
+                      child: Text(
+                        option,
+                        style: AppTextStyles.body
+                            .copyWith(color: AppColors.black),
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _UppercaseFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    return TextEditingValue(
+      text: newValue.text.toUpperCase(),
+      selection: newValue.selection,
     );
   }
 }
