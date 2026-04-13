@@ -3,7 +3,7 @@ import 'package:injectable/injectable.dart';
 import 'package:ragro_mobile/core/network/api_exception.dart';
 import 'package:ragro_mobile/features/admin/domain/entities/admin_address.dart';
 import 'package:ragro_mobile/features/admin/domain/entities/admin_availability.dart';
-import 'package:ragro_mobile/features/admin/domain/entities/admin_bank_account.dart';
+import 'package:ragro_mobile/features/admin/domain/entities/admin_payment_method.dart';
 import 'package:ragro_mobile/features/admin/domain/entities/admin_producer.dart';
 import 'package:ragro_mobile/features/admin/domain/usecases/create_admin_producer.dart';
 import 'package:ragro_mobile/features/admin/presentation/bloc/admin_producer_form_event.dart';
@@ -29,7 +29,7 @@ class AdminProducerFormBloc
       //   UI index 0..5 = Seg..Sáb  → backend 1..6
       //   UI index 6    = Dom       → backend 0
       final selectedDays = <AdminAvailability>[];
-      for (int i = 0; i < event.scheduleWeekdays.length; i++) {
+      for (var i = 0; i < event.scheduleWeekdays.length; i++) {
         if (event.scheduleWeekdays[i]) {
           selectedDays.add(
             AdminAvailability(
@@ -40,6 +40,27 @@ class AdminProducerFormBloc
           );
         }
       }
+
+      // Backend exige os 2 payment methods (pix + bank_account) —
+      // a page valida antes de disparar o evento.
+      final paymentMethods = <AdminPaymentMethod>[
+        AdminPaymentMethod(
+          type: 'pix',
+          pixKeyType: event.pixKeyType,
+          pixKey: event.pixKey,
+        ),
+        AdminPaymentMethod(
+          type: 'bank_account',
+          bankCode: event.bankCode,
+          bankName: event.bankName,
+          agency: event.agency,
+          accountNumber: event.accountNumber,
+          accountType: event.accountType,
+          holderName: event.accountHolder,
+          fiscalNumber: event.bankFiscalNumber,
+        ),
+      ];
+
       final producer = AdminProducer(
         id: DateTime.now().millisecondsSinceEpoch.toString(),
         name: event.name,
@@ -59,15 +80,7 @@ class AdminProducerFormBloc
           state: event.state,
           zipCode: event.cep.replaceAll(RegExp(r'\D'), ''),
         ),
-        bankAccount: event.bank.isNotEmpty
-            ? AdminBankAccount(
-                bankName: event.bank,
-                agency: event.agency,
-                accountNumber: event.account,
-                holderName: event.accountHolder,
-                fiscalNumber: event.fiscalNumber,
-              )
-            : null,
+        paymentMethods: paymentMethods,
         availability: selectedDays.isNotEmpty ? selectedDays : null,
       );
       await _createProducer(producer, event.password);

@@ -43,6 +43,10 @@ class AdminRemoteDataSource {
     if (address == null) {
       throw const UnknownApiException('Endereço obrigatório para cadastro');
     }
+    final paymentMethods = producer.paymentMethods ?? [];
+    if (paymentMethods.isEmpty) {
+      throw const UnknownApiException('Ao menos um método de pagamento é obrigatório');
+    }
     try {
       await _apiClient.dio.post<void>(
         ApiEndpoints.adminProducers,
@@ -55,11 +59,7 @@ class AdminRemoteDataSource {
           'fiscalNumberType': producer.fiscalNumberType,
           'farmName': producer.farmName,
           'address': address.toJson(),
-          if (producer.bankAccount != null)
-            'paymentMethod': {
-              'type': 'bank_account',
-              ...producer.bankAccount!.toJson(),
-            },
+          'paymentMethods': paymentMethods.map((pm) => pm.toJson()).toList(),
           if (producer.availability != null &&
               producer.availability!.isNotEmpty)
             'availability': producer.availability!
@@ -82,11 +82,11 @@ class AdminRemoteDataSource {
           'phone': producer.phone,
           'farmName': producer.farmName,
           if (address != null) 'address': address.toJson(),
-          if (producer.bankAccount != null)
-            'paymentMethod': {
-              'type': 'bank_account',
-              ...producer.bankAccount!.toJson(),
-            },
+          if (producer.paymentMethods != null &&
+              producer.paymentMethods!.isNotEmpty)
+            'paymentMethods': producer.paymentMethods!
+                .map((pm) => pm.toJson())
+                .toList(),
           if (producer.availability != null &&
               producer.availability!.isNotEmpty)
             'availability': producer.availability!

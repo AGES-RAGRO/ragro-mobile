@@ -12,6 +12,8 @@ import 'package:ragro_mobile/features/admin/domain/entities/admin_producer_summa
 import 'package:ragro_mobile/features/admin/presentation/bloc/admin_producers_bloc.dart';
 import 'package:ragro_mobile/features/admin/presentation/bloc/admin_producers_event.dart';
 import 'package:ragro_mobile/features/admin/presentation/bloc/admin_producers_state.dart';
+import 'package:ragro_mobile/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:ragro_mobile/features/auth/presentation/bloc/auth_event.dart';
 import 'package:ragro_mobile/shared/widgets/confirm_dialog.dart';
 
 class AdminProducersPage extends StatelessWidget {
@@ -38,16 +40,30 @@ class _AdminProducersView extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Padding(
-              padding: EdgeInsets.fromLTRB(20, 16, 20, 16),
-              child: Text(
-                'Produtores',
-                style: TextStyle(
-                  fontFamily: 'Figtree',
-                  fontWeight: FontWeight.w700,
-                  fontSize: 34,
-                  color: AppColors.darkGreen,
-                ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 16, 12, 16),
+              child: Row(
+                children: [
+                  const Expanded(
+                    child: Text(
+                      'Produtores',
+                      style: TextStyle(
+                        fontFamily: 'Figtree',
+                        fontWeight: FontWeight.w700,
+                        fontSize: 34,
+                        color: AppColors.darkGreen,
+                      ),
+                    ),
+                  ),
+                  IconButton(
+                    tooltip: 'Sair',
+                    icon: const Icon(
+                      Icons.logout,
+                      color: Color(0xFFDC2626),
+                    ),
+                    onPressed: () => _onLogout(context),
+                  ),
+                ],
               ),
             ),
             Expanded(
@@ -120,14 +136,14 @@ class _AdminProducersView extends StatelessWidget {
                               context: context,
                               producer: producer,
                             ),
-                            onEdit: () {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(
-                                    'Editar ${producer.name} — em breve',
-                                  ),
-                                ),
-                              );
+                            onEdit: () async {
+                              await context
+                                  .push('/admin/producers/${producer.id}/edit');
+                              if (context.mounted) {
+                                context
+                                    .read<AdminProducersBloc>()
+                                    .add(const AdminProducersStarted());
+                              }
                             },
                           );
                         },
@@ -193,6 +209,59 @@ class _AdminProducersView extends StatelessWidget {
     );
   }
 
+  Future<void> _onLogout(BuildContext context) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Text(
+          'Sair do aplicativo?',
+          style: TextStyle(
+            fontFamily: 'Figtree',
+            fontWeight: FontWeight.w700,
+            fontSize: 18,
+            color: AppColors.black,
+          ),
+        ),
+        content: const Text(
+          'Você será redirecionado para a tela de login.',
+          style: TextStyle(
+            fontFamily: 'Manrope',
+            fontSize: 14,
+            color: AppColors.placeholder,
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: const Text(
+              'Cancelar',
+              style: TextStyle(
+                fontFamily: 'Manrope',
+                fontWeight: FontWeight.w600,
+                color: AppColors.darkGreen,
+              ),
+            ),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: const Text(
+              'Sair',
+              style: TextStyle(
+                fontFamily: 'Manrope',
+                fontWeight: FontWeight.w700,
+                color: Color(0xFFDC2626),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+    if (confirmed == true && context.mounted) {
+      context.read<AuthBloc>().add(const AuthLogoutRequested());
+    }
+  }
+
   Future<void> _confirmMutation({
     required BuildContext context,
     required AdminProducerSummary producer,
@@ -248,16 +317,15 @@ class _ProducerCard extends StatelessWidget {
         : 'Ativar produtor';
 
     return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
+      padding: const EdgeInsets.symmetric(horizontal: 21, vertical: 16),
+      decoration: const BoxDecoration(
         color: AppColors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
-        boxShadow: const [
+        borderRadius: BorderRadius.all(Radius.circular(8)),
+        boxShadow: [
           BoxShadow(
-            color: Color(0x08000000),
+            color: Color(0x40000000),
             blurRadius: 4,
-            offset: Offset(0, 2),
+            offset: Offset(0, 4),
           ),
         ],
       ),
@@ -278,44 +346,44 @@ class _ProducerCard extends StatelessWidget {
                 ),
               ),
               Tooltip(
-                message: 'Editar produtor',
-                child: Semantics(
-                  button: true,
-                  label: 'Editar ${producer.name}',
-                  child: InkWell(
-                    onTap: enabled ? onEdit : null,
-                    borderRadius: BorderRadius.circular(8),
-                    child: Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: AppColors.lightGreen.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: const Icon(
-                        Icons.edit_outlined,
-                        size: 16,
-                        color: AppColors.lightGreen,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 8),
-              Tooltip(
                 message: toggleTooltip,
                 child: Semantics(
                   button: true,
                   label: '$toggleTooltip ${producer.name}',
                   child: InkWell(
                     onTap: enabled ? onToggleActive : null,
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(16),
                     child: Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
                         color: toggleColor.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(8),
+                        borderRadius: BorderRadius.circular(16),
                       ),
                       child: Icon(toggleIcon, size: 16, color: toggleColor),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Tooltip(
+                message: 'Editar produtor',
+                child: Semantics(
+                  button: true,
+                  label: 'Editar ${producer.name}',
+                  child: InkWell(
+                    onTap: enabled ? onEdit : null,
+                    borderRadius: BorderRadius.circular(16),
+                    child: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: AppColors.lightGreen.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: const Icon(
+                        Icons.edit_outlined,
+                        size: 16,
+                        color: AppColors.lightGreen,
+                      ),
                     ),
                   ),
                 ),
@@ -366,8 +434,6 @@ class _ProducerCard extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 8),
-          const Divider(color: Color(0xFFE2E8F0), height: 1),
           const SizedBox(height: 8),
           Row(
             children: [

@@ -1,7 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:ragro_mobile/features/admin/domain/entities/admin_address.dart';
 import 'package:ragro_mobile/features/admin/domain/entities/admin_availability.dart';
-import 'package:ragro_mobile/features/admin/domain/entities/admin_bank_account.dart';
+import 'package:ragro_mobile/features/admin/domain/entities/admin_payment_method.dart';
 
 class AdminProducer extends Equatable {
   const AdminProducer({
@@ -17,7 +17,7 @@ class AdminProducer extends Equatable {
     required this.fiscalNumberType,
     required this.farmName,
     this.producerAddress,
-    this.bankAccount,
+    this.paymentMethods,
     this.availability,
   });
 
@@ -33,7 +33,7 @@ class AdminProducer extends Equatable {
   final String fiscalNumberType;
   final String farmName;
   final AdminAddress? producerAddress;
-  final AdminBankAccount? bankAccount;
+  final List<AdminPaymentMethod>? paymentMethods;
   final List<AdminAvailability>? availability;
 
   AdminProducer copyWith({
@@ -48,7 +48,7 @@ class AdminProducer extends Equatable {
     String? fiscalNumberType,
     String? farmName,
     AdminAddress? producerAddress,
-    AdminBankAccount? bankAccount,
+    List<AdminPaymentMethod>? paymentMethods,
     List<AdminAvailability>? availability,
   }) {
     return AdminProducer(
@@ -64,7 +64,7 @@ class AdminProducer extends Equatable {
       fiscalNumberType: fiscalNumberType ?? this.fiscalNumberType,
       farmName: farmName ?? this.farmName,
       producerAddress: producerAddress ?? this.producerAddress,
-      bankAccount: bankAccount ?? this.bankAccount,
+      paymentMethods: paymentMethods ?? this.paymentMethods,
       availability: availability ?? this.availability,
     );
   }
