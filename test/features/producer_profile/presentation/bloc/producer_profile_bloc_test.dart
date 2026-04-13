@@ -4,6 +4,7 @@ import 'package:mocktail/mocktail.dart';
 import 'package:ragro_mobile/core/network/api_exception.dart';
 import 'package:ragro_mobile/features/producer_profile/domain/usecases/get_producer_profile.dart';
 import 'package:ragro_mobile/features/producer_profile/domain/usecases/update_producer.dart';
+import 'package:ragro_mobile/features/producer_profile/domain/usecases/upload_producer_photo.dart';
 import 'package:ragro_mobile/features/producer_profile/presentation/bloc/producer_profile_bloc.dart';
 import 'package:ragro_mobile/features/producer_profile/presentation/bloc/producer_profile_event.dart';
 import 'package:ragro_mobile/features/producer_profile/presentation/bloc/producer_profile_state.dart';
@@ -12,15 +13,28 @@ class MockGetProducerProfile extends Mock implements GetProducerProfile {}
 
 class MockUpdateProducer extends Mock implements UpdateProducer {}
 
+class MockUploadProducerAvatar extends Mock implements UploadProducerAvatar {}
+
+class MockUploadProducerCover extends Mock implements UploadProducerCover {}
+
 void main() {
   late ProducerProfileBloc bloc;
   late MockGetProducerProfile mockGetProducer;
   late MockUpdateProducer mockUpdateProducer;
+  late MockUploadProducerAvatar mockUploadAvatar;
+  late MockUploadProducerCover mockUploadCover;
 
   setUp(() {
     mockGetProducer = MockGetProducerProfile();
     mockUpdateProducer = MockUpdateProducer();
-    bloc = ProducerProfileBloc(mockGetProducer, mockUpdateProducer);
+    mockUploadAvatar = MockUploadProducerAvatar();
+    mockUploadCover = MockUploadProducerCover();
+    bloc = ProducerProfileBloc(
+      mockGetProducer,
+      mockUpdateProducer,
+      mockUploadAvatar,
+      mockUploadCover,
+    );
   });
 
   tearDown(() => bloc.close());

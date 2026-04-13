@@ -5,6 +5,7 @@ class ProducerDashboard extends Equatable {
     required this.producerName,
     required this.producerTitle,
     required this.avatarUrl,
+    required this.coverUrl,
     required this.totalSales,
     required this.salesGrowthPercent,
     required this.totalOrders,
@@ -18,6 +19,7 @@ class ProducerDashboard extends Equatable {
   final String producerName;
   final String producerTitle;
   final String avatarUrl;
+  final String coverUrl;
   final double totalSales;
   final double salesGrowthPercent;
   final int totalOrders;
@@ -32,6 +34,7 @@ class ProducerDashboard extends Equatable {
         producerName,
         producerTitle,
         avatarUrl,
+        coverUrl,
         totalSales,
         salesGrowthPercent,
         totalOrders,

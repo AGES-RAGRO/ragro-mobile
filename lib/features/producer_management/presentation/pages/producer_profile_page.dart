@@ -96,45 +96,89 @@ class _ProducerProfileView extends StatelessWidget {
             ),
           ),
 
-          // Avatar + name section
+          const SizedBox(height: 12),
+
+          // Cover photo + overlapping avatar
+          SizedBox(
+            height: 210,
+            child: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                SizedBox(
+                  height: 150,
+                  width: double.infinity,
+                  child: dashboard.coverUrl.isNotEmpty
+                      ? Image.network(
+                          dashboard.coverUrl,
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, __, ___) => const ColoredBox(
+                            color: Color(0xFFE0E0E0),
+                          ),
+                        )
+                      : const ColoredBox(color: Color(0xFFE0E0E0)),
+                ),
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  child: Center(
+                    child: Stack(
+                      children: [
+                        CircleAvatar(
+                          radius: 60,
+                          backgroundColor: AppColors.white,
+                          child: CircleAvatar(
+                            radius: 56,
+                            backgroundColor:
+                                AppColors.darkGreen.withOpacity(0.1),
+                            backgroundImage: dashboard.avatarUrl.isNotEmpty
+                                ? NetworkImage(dashboard.avatarUrl)
+                                : null,
+                            child: dashboard.avatarUrl.isEmpty
+                                ? Text(
+                                    dashboard.producerName.isNotEmpty
+                                        ? dashboard.producerName[0]
+                                        : 'P',
+                                    style: const TextStyle(
+                                      fontFamily: 'Figtree',
+                                      fontWeight: FontWeight.w700,
+                                      fontSize: 40,
+                                      color: AppColors.darkGreen,
+                                    ),
+                                  )
+                                : null,
+                          ),
+                        ),
+                        Positioned(
+                          bottom: 4,
+                          right: 4,
+                          child: Container(
+                            padding: const EdgeInsets.all(6),
+                            decoration: const BoxDecoration(
+                              color: AppColors.darkGreen,
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(
+                              Icons.camera_alt,
+                              size: 14,
+                              color: AppColors.white,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // Name + edit button
           Center(
             child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 20),
+              padding: const EdgeInsets.symmetric(vertical: 12),
               child: Column(
                 children: [
-                  Stack(
-                    children: [
-                      CircleAvatar(
-                        radius: 56,
-                        backgroundColor: AppColors.darkGreen.withOpacity(0.1),
-                        child: Text(
-                          dashboard.producerName.isNotEmpty
-                              ? dashboard.producerName[0]
-                              : 'P',
-                          style: const TextStyle(
-                            fontFamily: 'Figtree',
-                            fontWeight: FontWeight.w700,
-                            fontSize: 40,
-                            color: AppColors.darkGreen,
-                          ),
-                        ),
-                      ),
-                      Positioned(
-                        bottom: 0,
-                        right: 0,
-                        child: Container(
-                          padding: const EdgeInsets.all(6),
-                          decoration: const BoxDecoration(
-                            color: AppColors.darkGreen,
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Icon(Icons.camera_alt,
-                              size: 14, color: AppColors.white),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
                   Text(
                     dashboard.producerName,
                     style: const TextStyle(

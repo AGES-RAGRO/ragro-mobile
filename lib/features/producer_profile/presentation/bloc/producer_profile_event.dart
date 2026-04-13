@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:image_picker/image_picker.dart';
 
 sealed class ProducerProfileEvent extends Equatable {
   const ProducerProfileEvent();
@@ -34,4 +35,22 @@ class ProducerProfileUpdateSubmitted extends ProducerProfileEvent {
 
   @override
   List<Object?> get props => [producerId, name, story, phone, farmName];
+}
+
+class ProducerAvatarPicked extends ProducerProfileEvent {
+  const ProducerAvatarPicked(this.producerId, this.file);
+  final String producerId;
+  final XFile file;
+
+  @override
+  List<Object?> get props => [producerId, file.path];
+}
+
+class ProducerCoverPicked extends ProducerProfileEvent {
+  const ProducerCoverPicked(this.producerId, this.file);
+  final String producerId;
+  final XFile file;
+
+  @override
+  List<Object?> get props => [producerId, file.path];
 }

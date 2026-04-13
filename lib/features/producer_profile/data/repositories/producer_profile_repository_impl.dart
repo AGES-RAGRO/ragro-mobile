@@ -1,3 +1,4 @@
+import 'package:image_picker/image_picker.dart';
 import 'package:injectable/injectable.dart';
 import 'package:ragro_mobile/features/producer_profile/data/datasources/producer_profile_remote_datasource.dart';
 import 'package:ragro_mobile/features/producer_profile/data/models/producer_update_request.dart';
@@ -31,4 +32,12 @@ class ProducerProfileRepositoryImpl implements ProducerProfileRepository {
     );
     return _dataSource.updateProducer(producerId, request);
   }
+
+  @override
+  Future<PublicProducer> uploadAvatar(String producerId, XFile file) =>
+      _dataSource.uploadAvatar(producerId, file);
+
+  @override
+  Future<PublicProducer> uploadCover(String producerId, XFile file) =>
+      _dataSource.uploadCover(producerId, file);
 }
