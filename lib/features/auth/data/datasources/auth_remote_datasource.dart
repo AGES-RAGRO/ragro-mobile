@@ -55,10 +55,21 @@ class AuthRemoteDataSource {
     required String password,
   }) async {
     // Step 1: Get Keycloak configuration from our backend
-    final configResponse = await _apiClient.dio.get<Map<String, dynamic>>(
-      ApiEndpoints.authConfig,
-    );
-    final config = AuthConfigModel.fromJson(configResponse.data!);
+    final AuthConfigModel config;
+    try {
+      final configResponse = await _apiClient.dio.get<Map<String, dynamic>>(
+        ApiEndpoints.authConfig,
+      );
+      final data = configResponse.data;
+      if (data == null) {
+        throw const UnknownApiException(
+          'Resposta inválida ao carregar configuração de autenticação.',
+        );
+      }
+      config = AuthConfigModel.fromJson(data);
+    } on DioException catch (e) {
+      throw e.error as ApiException? ?? const UnknownApiException();
+    }
 
     // Step 2: Authenticate directly with Keycloak (form-urlencoded)
     // Uses a separate Dio instance because Keycloak expects

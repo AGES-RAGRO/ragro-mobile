@@ -26,7 +26,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
       emit(LoginSuccess(result.user));
     } on ApiException catch (e) {
       emit(LoginFailure(e.message));
-    } on Exception catch (_) {
+    } on Object catch (_) {
       emit(const LoginFailure('Unexpected error. Please try again.'));
     }
   }

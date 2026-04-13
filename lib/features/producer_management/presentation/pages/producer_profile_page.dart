@@ -29,6 +29,14 @@ class ProducerProfilePage extends StatelessWidget {
 class _ProducerProfileView extends StatelessWidget {
   const _ProducerProfileView();
 
+  Future<void> _openEditProfile(BuildContext context) async {
+    await context.push('/producer/profile/edit');
+    if (!context.mounted) return;
+    context.read<ProducerManagementBloc>().add(
+      const ProducerManagementRefreshed(),
+    );
+  }
+
   String _formatPrice(double price) {
     final formatted = price.toStringAsFixed(2).replaceAll('.', ',');
     return 'R\$ $formatted';
@@ -147,7 +155,7 @@ class _ProducerProfileView extends StatelessWidget {
                   ),
                   const SizedBox(height: 12),
                   OutlinedButton.icon(
-                    onPressed: () => context.push('/producer/profile/edit'),
+                    onPressed: () => _openEditProfile(context),
                     icon: const Icon(Icons.edit_outlined, size: 16),
                     label: const Text('Editar Perfil'),
                     style: OutlinedButton.styleFrom(
