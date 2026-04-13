@@ -86,13 +86,41 @@ void main() {
           complement: any(named: 'complement'),
           neighborhood: any(named: 'neighborhood'),
         ),
-      ).thenThrow(const ConflictException());
+      ).thenThrow(const ConflictException('E-mail already registered'));
       return bloc;
     },
     act: (b) => b.add(tEvent),
     expect: () => [
       const RegisterLoading(),
-      const RegisterFailure('Recurso já existe'),
+      const RegisterFailure('Este e-mail já está cadastrado.'),
+    ],
+  );
+
+  blocTest<RegisterBloc, RegisterState>(
+    'emits [Loading, Failure] on ConflictException (fiscal number)',
+    build: () {
+      when(
+        () => mockRegister(
+          name: any(named: 'name'),
+          phone: any(named: 'phone'),
+          email: any(named: 'email'),
+          fiscalNumber: any(named: 'fiscalNumber'),
+          password: any(named: 'password'),
+          zipCode: any(named: 'zipCode'),
+          street: any(named: 'street'),
+          number: any(named: 'number'),
+          city: any(named: 'city'),
+          state: any(named: 'state'),
+          complement: any(named: 'complement'),
+          neighborhood: any(named: 'neighborhood'),
+        ),
+      ).thenThrow(const ConflictException('Fiscal number already registered'));
+      return bloc;
+    },
+    act: (b) => b.add(tEvent),
+    expect: () => [
+      const RegisterLoading(),
+      const RegisterFailure('Este CPF já está cadastrado.'),
     ],
   );
 }
