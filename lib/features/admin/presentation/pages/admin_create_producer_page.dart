@@ -522,13 +522,19 @@ class _AdminCreateProducerViewState extends State<_AdminCreateProducerView> {
                     ],
                   ),
                   const SizedBox(height: 12),
-                  const _FieldLabel('Bairro (opcional)'),
+                  const _FieldLabel('Bairro'),
                   const SizedBox(height: 8),
                   _TextField(
                     controller: _neighborhoodController,
                     hint: 'Bairro',
                     prefixIcon: Icons.map_outlined,
                     enabled: !isLoading,
+                    validator: (value) {
+                      if ((value ?? '').trim().isEmpty) {
+                        return 'Informe o bairro';
+                      }
+                      return null;
+                    },
                   ),
                   const SizedBox(height: 12),
                   Row(
@@ -719,6 +725,10 @@ class _AdminCreateProducerViewState extends State<_AdminCreateProducerView> {
                                       hint: '0000',
                                       keyboardType: TextInputType.number,
                                       enabled: !isLoading,
+                                      inputFormatters: [
+                                        LengthLimitingTextInputFormatter(4),
+                                        FilteringTextInputFormatter.digitsOnly,
+                                      ],
                                     ),
                                   ],
                                 ),
@@ -732,6 +742,8 @@ class _AdminCreateProducerViewState extends State<_AdminCreateProducerView> {
                             controller: _accountController,
                             hint: '000000-0',
                             enabled: !isLoading,
+                            keyboardType: TextInputType.number,
+                            inputFormatters: [BankAccountInputFormatter()],
                           ),
                           const SizedBox(height: 12),
                           const _FieldLabel('Titular'),

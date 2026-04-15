@@ -16,6 +16,73 @@ class AvailabilitySlot extends Equatable {
   List<Object?> get props => [weekday, opensAt, closesAt];
 }
 
+class ProducerAddress extends Equatable {
+  const ProducerAddress({
+    required this.street,
+    required this.number,
+    required this.city,
+    required this.state,
+    required this.zipCode,
+    this.complement,
+    this.neighborhood,
+    this.latitude,
+    this.longitude,
+  });
+
+  final String street;
+  final String number;
+  final String city;
+  final String state;
+  final String zipCode;
+  final String? complement;
+  final String? neighborhood;
+  final double? latitude;
+  final double? longitude;
+
+  @override
+  List<Object?> get props => [street, number, city, state, zipCode, complement, neighborhood, latitude, longitude];
+}
+
+class ProducerPaymentMethod extends Equatable {
+  const ProducerPaymentMethod({
+    required this.type,
+    this.pixKeyType,
+    this.pixKey,
+    this.bankCode,
+    this.bankName,
+    this.agency,
+    this.accountNumber,
+    this.accountType,
+    this.holderName,
+    this.fiscalNumber,
+  });
+
+  final String type; // 'pix', 'bank_account', etc
+  final String? pixKeyType; // 'cpf', 'cnpj', 'email', 'phone', 'random'
+  final String? pixKey;
+  final String? bankCode;
+  final String? bankName;
+  final String? agency;
+  final String? accountNumber;
+  final String? accountType;
+  final String? holderName;
+  final String? fiscalNumber;
+
+  @override
+  List<Object?> get props => [
+        type,
+        pixKeyType,
+        pixKey,
+        bankCode,
+        bankName,
+        agency,
+        accountNumber,
+        accountType,
+        holderName,
+        fiscalNumber,
+      ];
+}
+
 class PublicProducer extends Equatable {
   const PublicProducer({
     required this.id,
@@ -33,6 +100,9 @@ class PublicProducer extends Equatable {
     required this.products,
     required this.availability,
     required this.memberSince,
+    this.fiscalNumber,
+    this.producerAddress,
+    this.paymentMethods,
   });
 
   final String id;
@@ -50,11 +120,16 @@ class PublicProducer extends Equatable {
   final List<HomeProduct> products;
   final List<AvailabilitySlot> availability;
   final DateTime memberSince;
+  
+  // Private fields for profile editing
+  final String? fiscalNumber;
+  final ProducerAddress? producerAddress;
+  final List<ProducerPaymentMethod>? paymentMethods;
 
   int get yearsOnPlatform {
     return DateTime.now().difference(memberSince).inDays ~/ 365;
   }
 
   @override
-  List<Object?> get props => [id, farmName, averageRating, products.length];
+  List<Object?> get props => [id, farmName, averageRating, products.length, fiscalNumber, producerAddress, paymentMethods];
 }

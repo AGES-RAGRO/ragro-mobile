@@ -57,6 +57,9 @@ class ProducerProfileBloc
         story: event.story,
         phone: event.phone,
         farmName: event.farmName,
+        address: event.address,
+        paymentMethods: event.paymentMethods,
+        availability: event.availability,
       );
       emit(const ProducerProfileUpdateSuccess());
     } on ApiException catch (e) {

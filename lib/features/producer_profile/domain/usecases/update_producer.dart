@@ -13,11 +13,17 @@ class UpdateProducer {
     required String story,
     required String phone,
     required String farmName,
+    Map<String, dynamic>? address,
+    List<Map<String, dynamic>>? paymentMethods,
+    List<Map<String, dynamic>>? availability,
   }) => _repository.updateProducer(
     producerId: producerId,
     name: name,
     story: story,
     phone: phone,
     farmName: farmName,
+    address: address,
+    paymentMethods: paymentMethods,
+    availability: availability,
   );
 }

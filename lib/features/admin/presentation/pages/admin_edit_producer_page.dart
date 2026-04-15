@@ -130,9 +130,17 @@ class _AdminEditProducerViewState extends State<_AdminEditProducerView> {
 
   String _digitsOnly(String v) => v.replaceAll(RegExp(r'\D'), '');
 
+  String _applyMask(String val, TextInputFormatter formatter) {
+    if (val.isEmpty) return val;
+    return formatter
+        .formatEditUpdate(TextEditingValue.empty, TextEditingValue(text: val))
+        .text;
+  }
+
   List<TextInputFormatter> _pixKeyFormatters() {
     switch (_pixKeyType) {
       case 'cpf':
+      case 'cnpj':
         return [FiscalNumberInputFormatter()];
       case 'phone':
         return [PhoneInputFormatter()];
@@ -170,12 +178,12 @@ class _AdminEditProducerViewState extends State<_AdminEditProducerView> {
     _original = producer;
 
     _nameController.text = producer.name;
-    _phoneController.text = producer.phone;
+    _phoneController.text = _applyMask(producer.phone, PhoneInputFormatter());
     _emailController.text = producer.email;
-    _cpfCnpjController.text = producer.fiscalNumber;
+    _cpfCnpjController.text = _applyMask(producer.fiscalNumber, FiscalNumberInputFormatter());
     _farmNameController.text = producer.farmName;
     _descriptionController.text = producer.description;
-    _cepController.text = producer.producerAddress?.zipCode ?? '';
+    _cepController.text = _applyMask(producer.producerAddress?.zipCode ?? '', CepInputFormatter());
     _addressController.text = producer.producerAddress?.street ?? '';
     _numberController.text = producer.producerAddress?.number ?? '';
     _neighborhoodController.text = producer.producerAddress?.neighborhood ?? '';
@@ -188,7 +196,13 @@ class _AdminEditProducerViewState extends State<_AdminEditProducerView> {
         .firstOrNull;
     if (pix != null) {
       _pixKeyType = pix.pixKeyType;
-      _pixKeyController.text = pix.pixKey ?? '';
+      if (_pixKeyType == 'cpf' || _pixKeyType == 'cnpj') {
+        _pixKeyController.text = _applyMask(pix.pixKey ?? '', FiscalNumberInputFormatter());
+      } else if (_pixKeyType == 'phone') {
+        _pixKeyController.text = _applyMask(pix.pixKey ?? '', PhoneInputFormatter());
+      } else {
+        _pixKeyController.text = pix.pixKey ?? '';
+      }
     }
 
     // Pre-fill Conta Bancária
@@ -199,9 +213,9 @@ class _AdminEditProducerViewState extends State<_AdminEditProducerView> {
       _bankNameController.text = bank.bankName ?? '';
       _bankCodeController.text = bank.bankCode ?? '';
       _agencyController.text = bank.agency ?? '';
-      _accountController.text = bank.accountNumber ?? '';
+      _accountController.text = _applyMask(bank.accountNumber ?? '', BankAccountInputFormatter());
       _holderController.text = bank.holderName ?? '';
-      _bankFiscalController.text = bank.fiscalNumber ?? '';
+      _bankFiscalController.text = _applyMask(bank.fiscalNumber ?? '', FiscalNumberInputFormatter());
     }
 
     // Pre-fill horário
@@ -340,9 +354,7 @@ class _AdminEditProducerViewState extends State<_AdminEditProducerView> {
         cep: _digitsOnly(_cepController.text),
         address: _addressController.text.trim(),
         number: _numberController.text.trim(),
-        neighborhood: _neighborhoodController.text.trim().isNotEmpty
-            ? _neighborhoodController.text.trim()
-            : null,
+        neighborhood: _neighborhoodController.text.trim(),
         city: _cityController.text.trim(),
         state: _selectedState ?? '',
         cpfCnpj: _cpfCnpjController.text.trim(),
@@ -607,13 +619,19 @@ class _AdminEditProducerViewState extends State<_AdminEditProducerView> {
               ],
             ),
             const SizedBox(height: 12),
-            const _FieldLabel('Bairro (opcional)'),
+            const _FieldLabel('Bairro'),
             const SizedBox(height: 8),
             _TextField(
               controller: _neighborhoodController,
               hint: 'Bairro',
               prefixIcon: Icons.map_outlined,
               enabled: !isSaving,
+              validator: (value) {
+                if ((value ?? '').trim().isEmpty) {
+                  return 'Informe o bairro';
+                }
+                return null;
+              },
             ),
             const SizedBox(height: 12),
             Row(
@@ -806,6 +824,10 @@ class _AdminEditProducerViewState extends State<_AdminEditProducerView> {
                                 hint: '0000',
                                 keyboardType: TextInputType.number,
                                 enabled: !isSaving,
+                                inputFormatters: [
+                                  LengthLimitingTextInputFormatter(4),
+                                  FilteringTextInputFormatter.digitsOnly,
+                                ],
                               ),
                             ],
                           ),
@@ -819,6 +841,8 @@ class _AdminEditProducerViewState extends State<_AdminEditProducerView> {
                       controller: _accountController,
                       hint: '000000-0',
                       enabled: !isSaving,
+                      keyboardType: TextInputType.number,
+                      inputFormatters: [BankAccountInputFormatter()],
                     ),
                     const SizedBox(height: 12),
                     const _FieldLabel('Titular'),

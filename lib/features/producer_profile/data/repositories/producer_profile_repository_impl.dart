@@ -21,14 +21,19 @@ class ProducerProfileRepositoryImpl implements ProducerProfileRepository {
     required String name,
     required String story,
     required String phone,
-
     required String farmName,
+    Map<String, dynamic>? address,
+    List<Map<String, dynamic>>? paymentMethods,
+    List<Map<String, dynamic>>? availability,
   }) {
     final request = ProducerUpdateRequest(
       name: name.trim(),
       story: story.trim(),
       phone: phone.trim(),
       farmName: farmName.trim(),
+      address: address,
+      paymentMethods: paymentMethods,
+      availability: availability,
     );
     return _dataSource.updateProducer(producerId, request);
   }

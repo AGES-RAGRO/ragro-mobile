@@ -143,3 +143,25 @@ class FiscalNumberInputFormatter extends TextInputFormatter {
     return buffer.toString();
   }
 }
+
+class BankAccountInputFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    final digits = _digits(newValue.text, max: 7);
+    if (digits.isEmpty) return TextEditingValue.empty;
+    
+    final formatted = _formatAccount(digits);
+    return TextEditingValue(
+      text: formatted,
+      selection: TextSelection.collapsed(offset: formatted.length),
+    );
+  }
+
+  String _formatAccount(String digits) {
+    if (digits.length <= 1) return digits;
+    return '${digits.substring(0, digits.length - 1)}-${digits.substring(digits.length - 1)}';
+  }
+}

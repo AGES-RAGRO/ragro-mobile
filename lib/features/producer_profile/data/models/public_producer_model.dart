@@ -18,6 +18,9 @@ class PublicProducerModel extends PublicProducer {
     required super.products,
     required super.availability,
     required super.memberSince,
+    super.fiscalNumber,
+    super.producerAddress,
+    super.paymentMethods,
   });
 
   factory PublicProducerModel.mock(String id) {
@@ -56,6 +59,21 @@ class PublicProducerModel extends PublicProducer {
     final address = json['address'] as Map<String, dynamic>?;
     final location = _deriveLocation(json, address);
 
+    ProducerAddress? producerAddress;
+    if (address != null) {
+      producerAddress = ProducerAddress(
+        street: address['street'] as String? ?? '',
+        number: address['number'] as String? ?? '',
+        city: address['city'] as String? ?? '',
+        state: address['state'] as String? ?? '',
+        zipCode: address['zipCode'] as String? ?? '',
+        complement: address['complement'] as String?,
+        neighborhood: address['neighborhood'] as String?,
+        latitude: (address['latitude'] as num?)?.toDouble(),
+        longitude: (address['longitude'] as num?)?.toDouble(),
+      );
+    }
+
     final memberSinceRaw =
         json['memberSince'] as String? ?? json['created_at'] as String?;
 
@@ -87,6 +105,9 @@ class PublicProducerModel extends PublicProducer {
       memberSince: memberSinceRaw != null
           ? DateTime.parse(memberSinceRaw)
           : DateTime(2016),
+      fiscalNumber: json['fiscalNumber'] as String?,
+      producerAddress: producerAddress,
+      paymentMethods: _parsePaymentMethods(json['paymentMethods']),
     );
   }
 
@@ -121,6 +142,25 @@ class PublicProducerModel extends PublicProducer {
             slot['opensAt'] as String? ?? slot['opens_at'] as String? ?? '',
         closesAt:
             slot['closesAt'] as String? ?? slot['closes_at'] as String? ?? '',
+      );
+    }).toList();
+  }
+
+  static List<ProducerPaymentMethod>? _parsePaymentMethods(dynamic raw) {
+    if (raw is! List) return null;
+    return raw.map((pm) {
+      final json = pm as Map<String, dynamic>;
+      return ProducerPaymentMethod(
+        type: json['type'] as String? ?? '',
+        pixKeyType: json['pixKeyType'] as String?,
+        pixKey: json['pixKey'] as String?,
+        bankCode: json['bankCode'] as String?,
+        bankName: json['bankName'] as String?,
+        agency: json['agency'] as String?,
+        accountNumber: json['accountNumber'] as String?,
+        accountType: json['accountType'] as String?,
+        holderName: json['holderName'] as String?,
+        fiscalNumber: json['fiscalNumber'] as String?,
       );
     }).toList();
   }

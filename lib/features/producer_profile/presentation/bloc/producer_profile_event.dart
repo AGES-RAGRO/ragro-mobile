@@ -22,8 +22,10 @@ class ProducerProfileUpdateSubmitted extends ProducerProfileEvent {
     required this.name,
     required this.story,
     required this.phone,
-
     required this.farmName,
+    this.address,
+    this.paymentMethods,
+    this.availability,
   });
 
   final String producerId;
@@ -31,9 +33,21 @@ class ProducerProfileUpdateSubmitted extends ProducerProfileEvent {
   final String story;
   final String phone;
   final String farmName;
+  final Map<String, dynamic>? address;
+  final List<Map<String, dynamic>>? paymentMethods;
+  final List<Map<String, dynamic>>? availability;
 
   @override
-  List<Object?> get props => [producerId, name, story, phone, farmName];
+  List<Object?> get props => [
+        producerId,
+        name,
+        story,
+        phone,
+        farmName,
+        address,
+        paymentMethods,
+        availability,
+      ];
 }
 
 class ProducerAvatarPicked extends ProducerProfileEvent {

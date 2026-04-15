@@ -10,6 +10,9 @@ abstract class ProducerProfileRepository {
     required String story,
     required String phone,
     required String farmName,
+    Map<String, dynamic>? address,
+    List<Map<String, dynamic>>? paymentMethods,
+    List<Map<String, dynamic>>? availability,
   });
 
   Future<PublicProducer> uploadAvatar(String producerId, XFile file);
