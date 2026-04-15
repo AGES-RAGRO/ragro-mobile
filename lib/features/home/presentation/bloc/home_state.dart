@@ -18,13 +18,44 @@ class HomeLoading extends HomeState {
 }
 
 class HomeLoaded extends HomeState {
-  const HomeLoaded({required this.producers, required this.products});
+  const HomeLoaded({
+    required this.producers,
+    required this.products,
+    this.currentProducersPage = 0,
+    this.hasMoreProducers = true,
+    this.isFetchingMoreProducers = false,
+  });
 
   final List<Producer> producers;
   final List<HomeProduct> products;
+  final int currentProducersPage;
+  final bool hasMoreProducers;
+  final bool isFetchingMoreProducers;
+
+  HomeLoaded copyWith({
+    List<Producer>? producers,
+    List<HomeProduct>? products,
+    int? currentProducersPage,
+    bool? hasMoreProducers,
+    bool? isFetchingMoreProducers,
+  }) {
+    return HomeLoaded(
+      producers: producers ?? this.producers,
+      products: products ?? this.products,
+      currentProducersPage: currentProducersPage ?? this.currentProducersPage,
+      hasMoreProducers: hasMoreProducers ?? this.hasMoreProducers,
+      isFetchingMoreProducers: isFetchingMoreProducers ?? this.isFetchingMoreProducers,
+    );
+  }
 
   @override
-  List<Object?> get props => [producers, products];
+  List<Object?> get props => [
+    producers,
+    products,
+    currentProducersPage,
+    hasMoreProducers,
+    isFetchingMoreProducers,
+  ];
 }
 
 class HomeFailure extends HomeState {

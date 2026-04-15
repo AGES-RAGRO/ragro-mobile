@@ -15,6 +15,8 @@ class PaginatedResponse<T> {
   final int totalElements;
   final int totalPages;
 
+  bool get isLast => page + 1 >= totalPages;
+
   factory PaginatedResponse.fromJson(
     Map<String, dynamic> json,
     T Function(Map<String, dynamic>) fromJsonT,
