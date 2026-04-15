@@ -90,42 +90,44 @@ void main() {
     });
 
     group('primaryAddress', () {
-      test('returns address with isPrimary=true when multiple addresses exist',
-          () {
-        // Arrange — two addresses, second one is primary
-        final json = <String, dynamic>{
-          'id': 'customer-uuid-abc',
-          'name': 'Pedro Alves',
-          'email': 'pedro@example.com',
-          'addresses': [
-            <String, dynamic>{
-              'id': 'addr-secondary',
-              'street': 'Rua Secundária',
-              'number': '10',
-              'city': 'Curitiba',
-              'state': 'PR',
-              'zipCode': '80000000',
-              'isPrimary': false,
-            },
-            <String, dynamic>{
-              'id': 'addr-primary',
-              'street': 'Rua Principal',
-              'number': '99',
-              'city': 'Curitiba',
-              'state': 'PR',
-              'zipCode': '80100000',
-              'isPrimary': true,
-            },
-          ],
-        };
+      test(
+        'returns address with isPrimary=true when multiple addresses exist',
+        () {
+          // Arrange — two addresses, second one is primary
+          final json = <String, dynamic>{
+            'id': 'customer-uuid-abc',
+            'name': 'Pedro Alves',
+            'email': 'pedro@example.com',
+            'addresses': [
+              <String, dynamic>{
+                'id': 'addr-secondary',
+                'street': 'Rua Secundária',
+                'number': '10',
+                'city': 'Curitiba',
+                'state': 'PR',
+                'zipCode': '80000000',
+                'isPrimary': false,
+              },
+              <String, dynamic>{
+                'id': 'addr-primary',
+                'street': 'Rua Principal',
+                'number': '99',
+                'city': 'Curitiba',
+                'state': 'PR',
+                'zipCode': '80100000',
+                'isPrimary': true,
+              },
+            ],
+          };
 
-        // Act
-        final model = CustomerProfileModel.fromJson(json);
+          // Act
+          final model = CustomerProfileModel.fromJson(json);
 
-        // Assert
-        expect(model.primaryAddress, isNotNull);
-        expect(model.primaryAddress!.id, 'addr-primary');
-      });
+          // Assert
+          expect(model.primaryAddress, isNotNull);
+          expect(model.primaryAddress!.id, 'addr-primary');
+        },
+      );
 
       test('returns null when addresses list is empty', () {
         // Arrange

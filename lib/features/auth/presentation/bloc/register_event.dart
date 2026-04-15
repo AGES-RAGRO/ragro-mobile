@@ -37,17 +37,17 @@ class RegisterSubmitted extends RegisterEvent {
 
   @override
   List<Object?> get props => [
-        name,
-        phone,
-        email,
-        fiscalNumber,
-        password,
-        zipCode,
-        street,
-        number,
-        city,
-        state,
-        complement,
-        neighborhood,
-      ];
+    name,
+    phone,
+    email,
+    fiscalNumber,
+    password,
+    zipCode,
+    street,
+    number,
+    city,
+    state,
+    complement,
+    neighborhood,
+  ];
 }

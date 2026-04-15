@@ -19,14 +19,14 @@ class AddressRequest {
   final String? neighborhood;
 
   Map<String, dynamic> toJson() => {
-        'street': street,
-        'number': number,
-        'city': city,
-        'state': state,
-        'zipCode': zipCode,
-        if (complement != null && complement!.trim().isNotEmpty)
-          'complement': complement!.trim(),
-        if (neighborhood != null && neighborhood!.trim().isNotEmpty)
-          'neighborhood': neighborhood!.trim(),
-      };
+    'street': street,
+    'number': number,
+    'city': city,
+    'state': state,
+    'zipCode': zipCode,
+    if (complement != null && complement!.trim().isNotEmpty)
+      'complement': complement!.trim(),
+    if (neighborhood != null && neighborhood!.trim().isNotEmpty)
+      'neighborhood': neighborhood!.trim(),
+  };
 }

@@ -5,9 +5,7 @@ import 'package:ragro_mobile/core/formatters/input_masks.dart';
 TextEditingValue _edit(String text) => TextEditingValue(text: text);
 
 String _apply(TextInputFormatter formatter, String input) {
-  return formatter
-      .formatEditUpdate(_edit(''), _edit(input))
-      .text;
+  return formatter.formatEditUpdate(_edit(''), _edit(input)).text;
 }
 
 void main() {

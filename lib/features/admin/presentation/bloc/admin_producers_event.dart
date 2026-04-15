@@ -24,7 +24,6 @@ class AdminProducerActivated extends AdminProducersEvent {
   List<Object?> get props => [producerId];
 }
 
-
 class AdminProducersRefreshed extends AdminProducersEvent {
   const AdminProducersRefreshed();
 }

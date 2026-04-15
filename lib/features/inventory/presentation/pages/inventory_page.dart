@@ -67,15 +67,20 @@ class _InventoryView extends StatelessWidget {
                           onTap: () => context.push('/producer/stock/new'),
                           child: Container(
                             padding: const EdgeInsets.symmetric(
-                                horizontal: 16, vertical: 8),
+                              horizontal: 16,
+                              vertical: 8,
+                            ),
                             decoration: BoxDecoration(
                               color: AppColors.darkGreen,
                               borderRadius: BorderRadius.circular(24),
                             ),
                             child: const Row(
                               children: [
-                                Icon(Icons.add,
-                                    size: 16, color: AppColors.white),
+                                Icon(
+                                  Icons.add,
+                                  size: 16,
+                                  color: AppColors.white,
+                                ),
                                 SizedBox(width: 4),
                                 Text(
                                   'Novo',
@@ -144,19 +149,21 @@ class _InventoryView extends StatelessWidget {
                         final count = f.$1 == 'all'
                             ? state.totalItems
                             : f.$1 == 'active'
-                                ? state.products
-                                    .where((p) => p.active && p.stock > 0)
-                                    .length
-                                : null;
+                            ? state.products
+                                  .where((p) => p.active && p.stock > 0)
+                                  .length
+                            : null;
                         return Padding(
                           padding: const EdgeInsets.only(right: 8),
                           child: GestureDetector(
-                            onTap: () => context
-                                .read<InventoryBloc>()
-                                .add(InventoryFilterChanged(f.$1)),
+                            onTap: () => context.read<InventoryBloc>().add(
+                              InventoryFilterChanged(f.$1),
+                            ),
                             child: Container(
                               padding: const EdgeInsets.symmetric(
-                                  horizontal: 16, vertical: 8),
+                                horizontal: 16,
+                                vertical: 8,
+                              ),
                               decoration: BoxDecoration(
                                 color: isActive
                                     ? AppColors.darkGreen
@@ -195,8 +202,11 @@ class _InventoryView extends StatelessWidget {
                             child: Column(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                Icon(Icons.inventory_2_outlined,
-                                    size: 64, color: AppColors.placeholder),
+                                Icon(
+                                  Icons.inventory_2_outlined,
+                                  size: 64,
+                                  color: AppColors.placeholder,
+                                ),
                                 SizedBox(height: 16),
                                 Text(
                                   'Nenhum produto encontrado',
@@ -210,8 +220,7 @@ class _InventoryView extends StatelessWidget {
                             ),
                           )
                         : ListView.separated(
-                            padding:
-                                const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                            padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
                             itemCount: state.products.length,
                             separatorBuilder: (_, __) =>
                                 const SizedBox(height: 12),
@@ -235,13 +244,12 @@ class _InventoryView extends StatelessWidget {
                   const Expanded(
                     child: Center(
                       child: CircularProgressIndicator(
-                          color: AppColors.darkGreen),
+                        color: AppColors.darkGreen,
+                      ),
                     ),
                   ),
                 ] else if (state is InventoryFailure) ...[
-                  Expanded(
-                    child: Center(child: Text(state.message)),
-                  ),
+                  Expanded(child: Center(child: Text(state.message))),
                 ] else ...[
                   const Expanded(child: SizedBox.shrink()),
                 ],
@@ -253,17 +261,18 @@ class _InventoryView extends StatelessWidget {
     );
   }
 
-  void _confirmDelete(BuildContext context, String productId, String productName) {
+  void _confirmDelete(
+    BuildContext context,
+    String productId,
+    String productName,
+  ) {
     showDialog<void>(
       context: context,
       builder: (dialogContext) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: const Text(
           'Excluir produto?',
-          style: TextStyle(
-            fontFamily: 'Figtree',
-            fontWeight: FontWeight.w700,
-          ),
+          style: TextStyle(fontFamily: 'Figtree', fontWeight: FontWeight.w700),
         ),
         content: Text(
           'Tem certeza que deseja excluir "$productName"?',
@@ -280,19 +289,23 @@ class _InventoryView extends StatelessWidget {
           ElevatedButton(
             onPressed: () {
               Navigator.of(dialogContext).pop();
-              context
-                  .read<InventoryBloc>()
-                  .add(InventoryProductDeleted(productId));
+              context.read<InventoryBloc>().add(
+                InventoryProductDeleted(productId),
+              );
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.red,
               foregroundColor: AppColors.white,
               shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8)),
+                borderRadius: BorderRadius.circular(8),
+              ),
             ),
             child: const Text(
               'Excluir',
-              style: TextStyle(fontFamily: 'Manrope', fontWeight: FontWeight.w700),
+              style: TextStyle(
+                fontFamily: 'Manrope',
+                fontWeight: FontWeight.w700,
+              ),
             ),
           ),
         ],
@@ -333,7 +346,7 @@ class _SummaryCard extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: AppColors.darkGreen.withOpacity(0.08),
+              color: AppColors.darkGreen.withValues(alpha: 0.08),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Icon(icon, size: 20, color: AppColors.darkGreen),

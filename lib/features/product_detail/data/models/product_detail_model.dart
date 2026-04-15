@@ -32,20 +32,19 @@ class ProductDetailModel extends ProductDetail {
     );
   }
 
-  static ProductDetailModel mock(String id) {
-    return const ProductDetailModel(
-      id: 'product_1',
-      name: 'Tomate',
-      description:
-          'Os Tomates da fazenda Sol Nascente são cultivados em solos férteis com irrigação equilibrada e acompanhamento constante, crescendo de forma saudável sob a luz natural até atingir sua cor vermelha intensa; quando chega ao ponto ideal de maturação, a colheita é feita manualmente para preservar sua textura firme e sabor adocicado.',
-      price: 8.90,
-      unityType: 'kg',
-      category: 'Hortaliças',
-      imageUrl: '',
-      farmName: 'Fazenda Sol Nascente',
-      producerName: 'João Nascimento',
-      producerId: 'producer_1',
-      stockQuantity: 50.0,
-    );
-  }
+  const ProductDetailModel.mock()
+    : this(
+        id: 'product_1',
+        name: 'Tomate',
+        description:
+            'Os Tomates da fazenda Sol Nascente são cultivados em solos férteis com irrigação equilibrada e acompanhamento constante, crescendo de forma saudável sob a luz natural até atingir sua cor vermelha intensa; quando chega ao ponto ideal de maturação, a colheita é feita manualmente para preservar sua textura firme e sabor adocicado.',
+        price: 8.90,
+        unityType: 'kg',
+        category: 'Hortaliças',
+        imageUrl: '',
+        farmName: 'Fazenda Sol Nascente',
+        producerName: 'João Nascimento',
+        producerId: 'producer_1',
+        stockQuantity: 50,
+      );
 }

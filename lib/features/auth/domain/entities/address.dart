@@ -29,7 +29,16 @@ class Address extends Equatable {
 
   @override
   List<Object?> get props => [
-    id, street, number, city, state, zipCode,
-    isPrimary, complement, neighborhood, latitude, longitude,
+    id,
+    street,
+    number,
+    city,
+    state,
+    zipCode,
+    isPrimary,
+    complement,
+    neighborhood,
+    latitude,
+    longitude,
   ];
 }

@@ -6,6 +6,9 @@ class ProducerUpdateRequest {
     this.phone,
     this.farmName,
     this.description,
+    this.address,
+    this.paymentMethods,
+    this.availability,
   });
 
   final String? name;
@@ -13,6 +16,9 @@ class ProducerUpdateRequest {
   final String? phone;
   final String? farmName;
   final String? description;
+  final Map<String, dynamic>? address;
+  final List<Map<String, dynamic>>? paymentMethods;
+  final List<Map<String, dynamic>>? availability;
 
   Map<String, dynamic> toJson() => {
     if (name != null) 'name': name,
@@ -20,5 +26,8 @@ class ProducerUpdateRequest {
     if (phone != null) 'phone': phone,
     if (farmName != null) 'farmName': farmName,
     if (description != null) 'description': description,
+    if (address != null) 'address': address,
+    if (paymentMethods != null) 'paymentMethods': paymentMethods,
+    if (availability != null) 'availability': availability,
   };
 }

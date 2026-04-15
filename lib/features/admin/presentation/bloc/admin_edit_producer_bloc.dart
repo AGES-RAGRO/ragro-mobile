@@ -13,7 +13,7 @@ import 'package:ragro_mobile/features/admin/presentation/bloc/admin_edit_produce
 class AdminEditProducerBloc
     extends Bloc<AdminEditProducerEvent, AdminEditProducerState> {
   AdminEditProducerBloc(this._getById, this._update)
-      : super(const AdminEditProducerInitial()) {
+    : super(const AdminEditProducerInitial()) {
     on<AdminEditProducerLoadRequested>(_onLoadRequested);
     on<AdminEditProducerSubmitted>(_onSubmitted);
   }
@@ -29,7 +29,7 @@ class AdminEditProducerBloc
     try {
       final producer = await _getById(event.producerId);
       emit(AdminEditProducerLoaded(producer));
-    } catch (e) {
+    } on Exception catch (e) {
       emit(AdminEditProducerFailure(e.toString()));
     }
   }
@@ -61,7 +61,8 @@ class AdminEditProducerBloc
       // Regra: só inclui um item se o admin preencheu o bloco inteiro daquele tipo.
       final paymentMethods = <AdminPaymentMethod>[];
 
-      final hasPix = event.pixKeyType != null &&
+      final hasPix =
+          event.pixKeyType != null &&
           event.pixKey != null &&
           event.pixKey!.isNotEmpty;
       if (hasPix) {
@@ -99,6 +100,9 @@ class AdminEditProducerBloc
           city: event.city,
           state: event.state,
           zipCode: event.cep.replaceAll(RegExp(r'\D'), ''),
+          neighborhood: (event.neighborhood?.isNotEmpty ?? false)
+              ? event.neighborhood
+              : null,
         ),
         paymentMethods: paymentMethods.isNotEmpty ? paymentMethods : null,
         availability: selectedDays.isNotEmpty ? selectedDays : null,
@@ -111,7 +115,7 @@ class AdminEditProducerBloc
       emit(const AdminEditProducerSuccess());
     } on ApiException catch (e) {
       emit(AdminEditProducerFailure(e.message));
-    } catch (e) {
+    } on Exception catch (e) {
       emit(AdminEditProducerFailure(e.toString()));
     }
   }

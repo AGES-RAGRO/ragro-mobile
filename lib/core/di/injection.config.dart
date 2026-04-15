@@ -381,10 +381,10 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i889.ProducerProfileRemoteDataSource(gh<_i873.ApiClient>()),
     );
     gh.lazySingleton<_i127.ProductDetailRemoteDataSource>(
-      () => _i127.ProductDetailRemoteDataSource(gh<_i873.ApiClient>()),
+      () => _i127.ProductDetailRemoteDataSource(),
     );
     gh.lazySingleton<_i987.SearchRemoteDataSource>(
-      () => _i987.SearchRemoteDataSource(gh<_i873.ApiClient>()),
+      () => _i987.SearchRemoteDataSource(),
     );
     gh.factory<_i767.ProducerManagementBloc>(
       () => _i767.ProducerManagementBloc(gh<_i805.GetProducerDashboard>()),

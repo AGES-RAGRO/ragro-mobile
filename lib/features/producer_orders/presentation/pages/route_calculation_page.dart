@@ -2,7 +2,7 @@
 // User Story: US-33 / US-34 — View Today's Deliveries / View Delivery Route
 // Epic: EPIC 9 — Logistics and Routing
 // Routes: GET /orders/today (delivery route based on today's in-delivery orders)
-// TODO: Integrate Google Maps SDK for real route visualization
+// TODO(dev): Integrate Google Maps SDK for real route visualization
 
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -51,7 +51,7 @@ class RouteCalculationPage extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       // Stats cards row
-                      Row(
+                      const Row(
                         children: [
                           Expanded(
                             child: _RouteStatCard(
@@ -60,7 +60,7 @@ class RouteCalculationPage extends StatelessWidget {
                               icon: Icons.access_time_outlined,
                             ),
                           ),
-                          const SizedBox(width: 12),
+                          SizedBox(width: 12),
                           Expanded(
                             child: _RouteStatCard(
                               label: 'Distância Total',
@@ -80,18 +80,18 @@ class RouteCalculationPage extends StatelessWidget {
                           color: const Color(0xFFF0FBF4),
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(
-                            color: AppColors.darkGreen.withOpacity(0.15),
+                            color: AppColors.darkGreen.withValues(alpha: 0.15),
                           ),
                         ),
-                        child: Row(
+                        child: const Row(
                           children: [
-                            const Icon(
+                            Icon(
                               Icons.auto_awesome_outlined,
                               size: 18,
                               color: AppColors.darkGreen,
                             ),
-                            const SizedBox(width: 10),
-                            const Expanded(
+                            SizedBox(width: 10),
+                            Expanded(
                               child: Text(
                                 'Rota otimizada para menor tempo de entrega considerando o trânsito atual.',
                                 style: TextStyle(
@@ -109,7 +109,7 @@ class RouteCalculationPage extends StatelessWidget {
                       const SizedBox(height: 20),
 
                       // Map placeholder
-                      // TODO: Replace with Google Maps widget when Maps SDK is integrated
+                      // TODO(dev): Replace with Google Maps widget when Maps SDK is integrated
                       ClipRRect(
                         borderRadius: BorderRadius.circular(16),
                         child: Container(
@@ -178,7 +178,7 @@ class RouteCalculationPage extends StatelessWidget {
                       const SizedBox(height: 12),
 
                       // Delivery stops
-                      // TODO: Replace with real stops from /orders/today response
+                      // TODO(dev): Replace with real stops from /orders/today response
                       const _DeliveryStop(
                         stopNumber: 1,
                         placeName: 'Mercado Central',
@@ -214,19 +214,15 @@ class RouteCalculationPage extends StatelessWidget {
             child: Container(
               padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.97),
-                border: const Border(
-                  top: BorderSide(color: Color(0x1A2E5729)),
-                ),
+                color: Colors.white.withValues(alpha: 0.97),
+                border: const Border(top: BorderSide(color: Color(0x1A2E5729))),
               ),
               child: GestureDetector(
                 onTap: () {
-                  // TODO: Open Google Maps or in-app navigation when Maps SDK is integrated
+                  // TODO(dev): Open Google Maps or in-app navigation when Maps SDK is integrated
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
-                      content: Text(
-                        'Navegação por mapa disponível em breve',
-                      ),
+                      content: Text('Navegação por mapa disponível em breve'),
                     ),
                   );
                 },
@@ -287,7 +283,7 @@ class _RouteStatCard extends StatelessWidget {
           end: Alignment.bottomRight,
           colors: [
             AppColors.darkGreen,
-            AppColors.darkGreen.withOpacity(0.8),
+            AppColors.darkGreen.withValues(alpha: 0.8),
           ],
         ),
         borderRadius: BorderRadius.circular(16),
@@ -414,7 +410,7 @@ class _MapGridPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = Colors.white.withOpacity(0.05)
+      ..color = Colors.white.withValues(alpha: 0.05)
       ..strokeWidth = 1;
 
     const spacing = 24.0;

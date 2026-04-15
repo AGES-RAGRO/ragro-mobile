@@ -12,12 +12,15 @@ class OrderDetailBloc extends Bloc<OrderDetailEvent, OrderDetailState> {
 
   final GetOrderDetail _getOrderDetail;
 
-  Future<void> _onStarted(OrderDetailStarted event, Emitter<OrderDetailState> emit) async {
+  Future<void> _onStarted(
+    OrderDetailStarted event,
+    Emitter<OrderDetailState> emit,
+  ) async {
     emit(const OrderDetailLoading());
     try {
       final order = await _getOrderDetail(event.orderId);
       emit(OrderDetailLoaded(order));
-    } catch (e) {
+    } on Exception catch (e) {
       emit(OrderDetailFailure(e.toString()));
     }
   }

@@ -16,7 +16,9 @@ class ProducerManagementRemoteDataSource {
   Future<ProducerDashboard> getDashboard() async {
     final producerId = _authLocal.getUserId();
     if (producerId == null || producerId.isEmpty) {
-      throw const UnauthorizedException('Sessão expirada. Faça login novamente.');
+      throw const UnauthorizedException(
+        'Sessão expirada. Faça login novamente.',
+      );
     }
 
     try {
@@ -32,10 +34,10 @@ class ProducerManagementRemoteDataSource {
       return ProducerDashboard(
         producerName: (data['name'] as String? ?? '').trim(),
         producerTitle: farmName.isNotEmpty ? farmName : 'Produtor',
-        avatarUrl: data['avatarS3'] as String? ??
-            data['avatar_s3'] as String? ??
-            '',
-        coverUrl: data['displayPhotoS3'] as String? ??
+        avatarUrl:
+            data['avatarS3'] as String? ?? data['avatar_s3'] as String? ?? '',
+        coverUrl:
+            data['displayPhotoS3'] as String? ??
             data['display_photo_s3'] as String? ??
             '',
         totalSales: 0,

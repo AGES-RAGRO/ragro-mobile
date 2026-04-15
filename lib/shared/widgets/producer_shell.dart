@@ -3,7 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:ragro_mobile/core/theme/app_colors.dart';
 
 class ProducerShell extends StatelessWidget {
-  const ProducerShell({super.key, required this.navigationShell});
+  const ProducerShell({required this.navigationShell, super.key});
 
   final StatefulNavigationShell navigationShell;
 
@@ -91,8 +91,7 @@ class _NavItem extends StatelessWidget {
             Icon(
               isActive ? activeIcon : icon,
               size: 24,
-              color:
-                  isActive ? AppColors.darkGreen : AppColors.placeholder,
+              color: isActive ? AppColors.darkGreen : AppColors.placeholder,
             ),
             const SizedBox(height: 4),
             Text(
@@ -101,8 +100,7 @@ class _NavItem extends StatelessWidget {
                 fontFamily: 'Figtree',
                 fontWeight: FontWeight.w500,
                 fontSize: 12,
-                color:
-                    isActive ? AppColors.darkGreen : AppColors.placeholder,
+                color: isActive ? AppColors.darkGreen : AppColors.placeholder,
               ),
             ),
           ],

@@ -18,7 +18,8 @@ class ProducerModel extends Producer {
       description: json['description'] as String? ?? '',
       avatarUrl:
           json['avatar_s3'] as String? ?? json['avatarUrl'] as String? ?? '',
-      coverUrl: json['display_photo_s3'] as String? ??
+      coverUrl:
+          json['display_photo_s3'] as String? ??
           json['coverUrl'] as String? ??
           '',
       averageRating: (json['average_rating'] as num?)?.toDouble() ?? 0.0,
@@ -26,15 +27,14 @@ class ProducerModel extends Producer {
     );
   }
 
-  static ProducerModel mock(int index) {
-    return ProducerModel(
-      id: 'producer_$index',
-      name: 'Fazenda Sol Nascente',
-      description: '"Orgânicos colhidos no dia para...',
-      avatarUrl: '',
-      coverUrl: '',
-      averageRating: 4.9,
-      ownerName: 'Sr. Manoel Silva',
-    );
-  }
+  const ProducerModel.mock(int index)
+    : this(
+        id: 'producer_$index',
+        name: 'Fazenda Sol Nascente',
+        description: '"Orgânicos colhidos no dia para...',
+        avatarUrl: '',
+        coverUrl: '',
+        averageRating: 4.9,
+        ownerName: 'Sr. Manoel Silva',
+      );
 }

@@ -31,6 +31,5 @@ class AdminRepositoryImpl implements AdminRepository {
       _dataSource.deactivateProducer(id);
 
   @override
-  Future<void> activateProducer(String id) =>
-      _dataSource.activateProducer(id);
+  Future<void> activateProducer(String id) => _dataSource.activateProducer(id);
 }

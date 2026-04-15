@@ -8,10 +8,10 @@ import 'package:ragro_mobile/features/home/presentation/widgets/producer_card.da
 
 class ProducersSection extends StatefulWidget {
   const ProducersSection({
-    super.key,
     required this.producers,
     required this.onProducerTap,
-    this.isLoadingMore = false,
+    required this.isLoadingMore,
+    super.key,
   });
 
   final List<Producer> producers;

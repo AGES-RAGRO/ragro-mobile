@@ -25,7 +25,7 @@ class ProductDetailBloc extends Bloc<ProductDetailEvent, ProductDetailState> {
       emit(ProductDetailLoaded(product: product));
     } on ApiException catch (e) {
       emit(ProductDetailFailure(e.message));
-    } catch (_) {
+    } on Exception catch (_) {
       emit(const ProductDetailFailure('Erro ao carregar produto.'));
     }
   }

@@ -16,7 +16,8 @@ class CartRepositoryImpl implements CartRepository {
   Cart addItem(CartItem item) => _datasource.addItem(item);
 
   @override
-  Cart updateQuantity(String productId, int quantity) => _datasource.updateQuantity(productId, quantity);
+  Cart updateQuantity(String productId, int quantity) =>
+      _datasource.updateQuantity(productId, quantity);
 
   @override
   Cart removeItem(String productId) => _datasource.removeItem(productId);

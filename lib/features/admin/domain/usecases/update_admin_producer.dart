@@ -8,5 +8,6 @@ class UpdateAdminProducer {
 
   final AdminRepository _repository;
 
-  Future<void> call(AdminProducer producer) => _repository.updateProducer(producer);
+  Future<void> call(AdminProducer producer) =>
+      _repository.updateProducer(producer);
 }

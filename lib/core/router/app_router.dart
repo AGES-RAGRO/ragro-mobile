@@ -243,9 +243,8 @@ class AppRouter {
         ),
         GoRoute(
           path: '/admin/producers/:id/edit',
-          builder: (_, state) => AdminEditProducerPage(
-            producerId: state.pathParameters['id']!,
-          ),
+          builder: (_, state) =>
+              AdminEditProducerPage(producerId: state.pathParameters['id']!),
         ),
       ],
     );

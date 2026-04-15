@@ -21,16 +21,10 @@ class HomeRemoteDataSource {
     try {
       final response = await _apiClient.dio.get<Map<String, dynamic>>(
         ApiEndpoints.producers,
-        queryParameters: {
-          'page': page,
-          'size': size,
-        },
+        queryParameters: {'page': page, 'size': size},
       );
 
-      return PaginatedResponse.fromJson(
-        response.data!,
-        (json) => ProducerModel.fromJson(json),
-      );
+      return PaginatedResponse.fromJson(response.data!, ProducerModel.fromJson);
     } on DioException catch (e) {
       throw e.error as ApiException? ?? const UnknownApiException();
     }
@@ -38,7 +32,7 @@ class HomeRemoteDataSource {
 
   /// Gets recommended products for the home screen.
   Future<List<HomeProductModel>> getRecommendedProducts() async {
-    await Future.delayed(const Duration(milliseconds: 600));
+    await Future<void>.delayed(const Duration(milliseconds: 600));
     return HomeProductModel.mocks();
   }
 }

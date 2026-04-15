@@ -46,10 +46,7 @@ class ProducerProfileRemoteDataSource {
     return _uploadPhoto(ApiEndpoints.producerAvatar(producerId), file);
   }
 
-  Future<PublicProducerModel> uploadCover(
-    String producerId,
-    XFile file,
-  ) async {
+  Future<PublicProducerModel> uploadCover(String producerId, XFile file) async {
     return _uploadPhoto(ApiEndpoints.producerCover(producerId), file);
   }
 

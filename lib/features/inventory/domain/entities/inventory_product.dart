@@ -48,6 +48,15 @@ class InventoryProduct extends Equatable {
   }
 
   @override
-  List<Object?> get props =>
-      [id, producerId, name, description, imageUrl, price, unit, stock, active];
+  List<Object?> get props => [
+    id,
+    producerId,
+    name,
+    description,
+    imageUrl,
+    price,
+    unit,
+    stock,
+    active,
+  ];
 }

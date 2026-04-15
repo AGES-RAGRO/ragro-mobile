@@ -20,9 +20,33 @@ import 'package:ragro_mobile/features/auth/presentation/widgets/auth_submit_butt
 import 'package:ragro_mobile/features/auth/presentation/widgets/auth_text_field.dart';
 
 const List<String> _brazilianStates = [
-  'AC', 'AL', 'AP', 'AM', 'BA', 'CE', 'DF', 'ES', 'GO', 'MA',
-  'MT', 'MS', 'MG', 'PA', 'PB', 'PR', 'PE', 'PI', 'RJ', 'RN',
-  'RS', 'RO', 'RR', 'SC', 'SP', 'SE', 'TO',
+  'AC',
+  'AL',
+  'AP',
+  'AM',
+  'BA',
+  'CE',
+  'DF',
+  'ES',
+  'GO',
+  'MA',
+  'MT',
+  'MS',
+  'MG',
+  'PA',
+  'PB',
+  'PR',
+  'PE',
+  'PI',
+  'RJ',
+  'RN',
+  'RS',
+  'RO',
+  'RR',
+  'SC',
+  'SP',
+  'SE',
+  'TO',
 ];
 
 class CustomerRegisterPage extends StatelessWidget {
@@ -419,8 +443,7 @@ class _UfAutocomplete extends StatelessWidget {
         return _brazilianStates.where((uf) => uf.startsWith(query));
       },
       onSelected: onSelected,
-      fieldViewBuilder:
-          (context, controller, focusNode, onFieldSubmitted) {
+      fieldViewBuilder: (context, controller, focusNode, onFieldSubmitted) {
         return TextFormField(
           controller: controller,
           focusNode: focusNode,
@@ -459,8 +482,10 @@ class _UfAutocomplete extends StatelessWidget {
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide:
-                  const BorderSide(color: AppColors.darkGreen, width: 1.5),
+              borderSide: const BorderSide(
+                color: AppColors.darkGreen,
+                width: 1.5,
+              ),
             ),
             errorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
@@ -501,8 +526,9 @@ class _UfAutocomplete extends StatelessWidget {
                       ),
                       child: Text(
                         option,
-                        style: AppTextStyles.body
-                            .copyWith(color: AppColors.black),
+                        style: AppTextStyles.body.copyWith(
+                          color: AppColors.black,
+                        ),
                       ),
                     ),
                   );

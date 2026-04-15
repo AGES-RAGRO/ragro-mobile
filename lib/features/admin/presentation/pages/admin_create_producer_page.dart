@@ -10,10 +10,10 @@ import 'package:go_router/go_router.dart';
 import 'package:ragro_mobile/core/di/injection.dart';
 import 'package:ragro_mobile/core/formatters/input_masks.dart';
 import 'package:ragro_mobile/core/theme/app_colors.dart';
-import 'package:ragro_mobile/features/admin/presentation/bloc/admin_producer_form_bloc.dart';
-import 'package:ragro_mobile/features/admin/presentation/bloc/admin_producer_form_event.dart';
 import 'package:ragro_mobile/core/validators/cnpj_validator.dart';
 import 'package:ragro_mobile/core/validators/cpf_validator.dart';
+import 'package:ragro_mobile/features/admin/presentation/bloc/admin_producer_form_bloc.dart';
+import 'package:ragro_mobile/features/admin/presentation/bloc/admin_producer_form_event.dart';
 import 'package:ragro_mobile/features/admin/presentation/bloc/admin_producer_form_state.dart';
 
 const List<String> _brazilianStates = [
@@ -91,6 +91,7 @@ class _AdminCreateProducerViewState extends State<_AdminCreateProducerView> {
   final _cepController = TextEditingController();
   final _addressController = TextEditingController();
   final _numberController = TextEditingController();
+  final _neighborhoodController = TextEditingController();
   final _cityController = TextEditingController();
   String? _selectedState;
 
@@ -151,6 +152,7 @@ class _AdminCreateProducerViewState extends State<_AdminCreateProducerView> {
     _cepController.dispose();
     _addressController.dispose();
     _numberController.dispose();
+    _neighborhoodController.dispose();
     _cityController.dispose();
     _scheduleStartController.dispose();
     _scheduleEndController.dispose();
@@ -174,7 +176,7 @@ class _AdminCreateProducerViewState extends State<_AdminCreateProducerView> {
     }
 
     final cleanFiscal = _digitsOnly(_fiscalController.text);
-    final String fiscalType = cleanFiscal.length == 11 ? 'CPF' : 'CNPJ';
+    final fiscalType = cleanFiscal.length == 11 ? 'CPF' : 'CNPJ';
 
     // PIX sempre obrigatório
     if (_pixKeyType == null) {
@@ -227,6 +229,9 @@ class _AdminCreateProducerViewState extends State<_AdminCreateProducerView> {
         cep: _digitsOnly(_cepController.text),
         address: _addressController.text.trim(),
         number: _numberController.text.trim(),
+        neighborhood: _neighborhoodController.text.trim().isNotEmpty
+            ? _neighborhoodController.text.trim()
+            : null,
         city: _cityController.text.trim(),
         state: _selectedState ?? '',
         fiscalNumber: cleanFiscal,
@@ -309,7 +314,7 @@ class _AdminCreateProducerViewState extends State<_AdminCreateProducerView> {
                   // ── Dados Pessoais ─────────────────────────────────────
                   _sectionTitle('Dados Pessoais'),
                   const SizedBox(height: 12),
-                  _FieldLabel('Nome Completo'),
+                  const _FieldLabel('Nome Completo'),
                   const SizedBox(height: 8),
                   _TextField(
                     controller: _nameController,
@@ -317,13 +322,14 @@ class _AdminCreateProducerViewState extends State<_AdminCreateProducerView> {
                     prefixIcon: Icons.person_outline,
                     enabled: !isLoading,
                     validator: (value) {
-                      if ((value ?? '').trim().isEmpty)
+                      if ((value ?? '').trim().isEmpty) {
                         return 'Informe o nome completo';
+                      }
                       return null;
                     },
                   ),
                   const SizedBox(height: 12),
-                  _FieldLabel('CPF / CNPJ'),
+                  const _FieldLabel('CPF / CNPJ'),
                   const SizedBox(height: 8),
                   _TextField(
                     controller: _fiscalController,
@@ -349,7 +355,7 @@ class _AdminCreateProducerViewState extends State<_AdminCreateProducerView> {
                     },
                   ),
                   const SizedBox(height: 12),
-                  _FieldLabel('Telefone'),
+                  const _FieldLabel('Telefone'),
                   const SizedBox(height: 8),
                   _TextField(
                     controller: _phoneController,
@@ -360,13 +366,14 @@ class _AdminCreateProducerViewState extends State<_AdminCreateProducerView> {
                     inputFormatters: [PhoneInputFormatter()],
                     validator: (value) {
                       final digits = _digitsOnly(value ?? '');
-                      if (digits.length != 11)
+                      if (digits.length != 11) {
                         return 'DDD + número com 11 dígitos';
+                      }
                       return null;
                     },
                   ),
                   const SizedBox(height: 12),
-                  _FieldLabel('Email'),
+                  const _FieldLabel('Email'),
                   const SizedBox(height: 8),
                   _TextField(
                     controller: _emailController,
@@ -375,15 +382,16 @@ class _AdminCreateProducerViewState extends State<_AdminCreateProducerView> {
                     keyboardType: TextInputType.emailAddress,
                     enabled: !isLoading,
                     validator: (value) {
-                      if (value == null || value.isEmpty)
+                      if (value == null || value.isEmpty) {
                         return 'E-mail obrigatório';
+                      }
                       final emailRegex = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$');
                       if (!emailRegex.hasMatch(value)) return 'E-mail inválido';
                       return null;
                     },
                   ),
                   const SizedBox(height: 12),
-                  _FieldLabel('Senha'),
+                  const _FieldLabel('Senha'),
                   const SizedBox(height: 8),
                   _TextField(
                     controller: _passwordController,
@@ -392,10 +400,12 @@ class _AdminCreateProducerViewState extends State<_AdminCreateProducerView> {
                     obscure: true,
                     enabled: !isLoading,
                     validator: (value) {
-                      if (value == null || value.isEmpty)
+                      if (value == null || value.isEmpty) {
                         return 'Informe uma senha';
-                      if (value.length < 8 || value.length > 50)
+                      }
+                      if (value.length < 8 || value.length > 50) {
                         return 'Entre 8 e 50 caracteres';
+                      }
                       if (!RegExp(
                         r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$',
                       ).hasMatch(value)) {
@@ -405,7 +415,7 @@ class _AdminCreateProducerViewState extends State<_AdminCreateProducerView> {
                     },
                   ),
                   const SizedBox(height: 12),
-                  _FieldLabel('Confirmar Senha'),
+                  const _FieldLabel('Confirmar Senha'),
                   const SizedBox(height: 8),
                   _TextField(
                     controller: _confirmPasswordController,
@@ -414,13 +424,14 @@ class _AdminCreateProducerViewState extends State<_AdminCreateProducerView> {
                     obscure: true,
                     enabled: !isLoading,
                     validator: (value) {
-                      if (value != _passwordController.text)
+                      if (value != _passwordController.text) {
                         return 'As senhas não coincidem';
+                      }
                       return null;
                     },
                   ),
                   const SizedBox(height: 12),
-                  _FieldLabel('Nome da Fazenda'),
+                  const _FieldLabel('Nome da Fazenda'),
                   const SizedBox(height: 8),
                   _TextField(
                     controller: _farmNameController,
@@ -428,13 +439,14 @@ class _AdminCreateProducerViewState extends State<_AdminCreateProducerView> {
                     prefixIcon: Icons.home_outlined,
                     enabled: !isLoading,
                     validator: (value) {
-                      if ((value ?? '').trim().isEmpty)
+                      if ((value ?? '').trim().isEmpty) {
                         return 'Informe o nome da fazenda';
+                      }
                       return null;
                     },
                   ),
                   const SizedBox(height: 12),
-                  _FieldLabel('Descrição'),
+                  const _FieldLabel('Descrição'),
                   const SizedBox(height: 8),
                   _TextField(
                     controller: _descriptionController,
@@ -445,8 +457,9 @@ class _AdminCreateProducerViewState extends State<_AdminCreateProducerView> {
                     maxLines: null,
                     maxLength: 1000,
                     validator: (value) {
-                      if ((value ?? '').trim().isEmpty)
+                      if ((value ?? '').trim().isEmpty) {
                         return 'Informe uma descrição';
+                      }
                       if (value!.length > 1000) return 'Máximo 1000 caracteres';
                       return null;
                     },
@@ -456,7 +469,7 @@ class _AdminCreateProducerViewState extends State<_AdminCreateProducerView> {
                   const SizedBox(height: 20),
                   _sectionTitle('Endereço'),
                   const SizedBox(height: 12),
-                  _FieldLabel('CEP'),
+                  const _FieldLabel('CEP'),
                   const SizedBox(height: 8),
                   _TextField(
                     controller: _cepController,
@@ -472,7 +485,7 @@ class _AdminCreateProducerViewState extends State<_AdminCreateProducerView> {
                     },
                   ),
                   const SizedBox(height: 12),
-                  _FieldLabel('Endereço'),
+                  const _FieldLabel('Endereço'),
                   const SizedBox(height: 8),
                   Row(
                     children: [
@@ -484,8 +497,9 @@ class _AdminCreateProducerViewState extends State<_AdminCreateProducerView> {
                           prefixIcon: Icons.location_on_outlined,
                           enabled: !isLoading,
                           validator: (value) {
-                            if ((value ?? '').trim().isEmpty)
+                            if ((value ?? '').trim().isEmpty) {
                               return 'Informe o endereço';
+                            }
                             return null;
                           },
                         ),
@@ -498,13 +512,29 @@ class _AdminCreateProducerViewState extends State<_AdminCreateProducerView> {
                           keyboardType: TextInputType.number,
                           enabled: !isLoading,
                           validator: (value) {
-                            if ((value ?? '').trim().isEmpty)
+                            if ((value ?? '').trim().isEmpty) {
                               return 'Informe o número';
+                            }
                             return null;
                           },
                         ),
                       ),
                     ],
+                  ),
+                  const SizedBox(height: 12),
+                  const _FieldLabel('Bairro'),
+                  const SizedBox(height: 8),
+                  _TextField(
+                    controller: _neighborhoodController,
+                    hint: 'Bairro',
+                    prefixIcon: Icons.map_outlined,
+                    enabled: !isLoading,
+                    validator: (value) {
+                      if ((value ?? '').trim().isEmpty) {
+                        return 'Informe o bairro';
+                      }
+                      return null;
+                    },
                   ),
                   const SizedBox(height: 12),
                   Row(
@@ -514,7 +544,7 @@ class _AdminCreateProducerViewState extends State<_AdminCreateProducerView> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            _FieldLabel('Cidade'),
+                            const _FieldLabel('Cidade'),
                             const SizedBox(height: 8),
                             _TextField(
                               controller: _cityController,
@@ -522,8 +552,9 @@ class _AdminCreateProducerViewState extends State<_AdminCreateProducerView> {
                               prefixIcon: Icons.location_city_outlined,
                               enabled: !isLoading,
                               validator: (value) {
-                                if ((value ?? '').trim().isEmpty)
+                                if ((value ?? '').trim().isEmpty) {
                                   return 'Informe a cidade';
+                                }
                                 return null;
                               },
                             ),
@@ -535,7 +566,7 @@ class _AdminCreateProducerViewState extends State<_AdminCreateProducerView> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            _FieldLabel('Estado'),
+                            const _FieldLabel('Estado'),
                             const SizedBox(height: 8),
                             _UfAutocomplete(
                               initialValue: _selectedState,
@@ -576,10 +607,10 @@ class _AdminCreateProducerViewState extends State<_AdminCreateProducerView> {
                             ),
                           ),
                           const SizedBox(height: 12),
-                          _FieldLabel('Tipo da chave'),
+                          const _FieldLabel('Tipo da chave'),
                           const SizedBox(height: 8),
                           DropdownButtonFormField<String>(
-                            value: _pixKeyType,
+                            initialValue: _pixKeyType,
                             decoration: _dropdownDecoration(),
                             hint: const Text(
                               'Selecione',
@@ -612,7 +643,7 @@ class _AdminCreateProducerViewState extends State<_AdminCreateProducerView> {
                           ),
                           if (_pixKeyType != null) ...[
                             const SizedBox(height: 12),
-                            _FieldLabel('Chave Pix'),
+                            const _FieldLabel('Chave Pix'),
                             const SizedBox(height: 8),
                             _TextField(
                               key: ValueKey(_pixKeyType),
@@ -652,7 +683,7 @@ class _AdminCreateProducerViewState extends State<_AdminCreateProducerView> {
                             ),
                           ),
                           const SizedBox(height: 12),
-                          _FieldLabel('Banco'),
+                          const _FieldLabel('Banco'),
                           const SizedBox(height: 8),
                           _TextField(
                             controller: _bankNameController,
@@ -667,7 +698,7 @@ class _AdminCreateProducerViewState extends State<_AdminCreateProducerView> {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    _FieldLabel('Código (3 dígitos)'),
+                                    const _FieldLabel('Código (3 dígitos)'),
                                     const SizedBox(height: 8),
                                     _TextField(
                                       controller: _bankCodeController,
@@ -687,13 +718,17 @@ class _AdminCreateProducerViewState extends State<_AdminCreateProducerView> {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    _FieldLabel('Agência'),
+                                    const _FieldLabel('Agência'),
                                     const SizedBox(height: 8),
                                     _TextField(
                                       controller: _agencyController,
                                       hint: '0000',
                                       keyboardType: TextInputType.number,
                                       enabled: !isLoading,
+                                      inputFormatters: [
+                                        LengthLimitingTextInputFormatter(4),
+                                        FilteringTextInputFormatter.digitsOnly,
+                                      ],
                                     ),
                                   ],
                                 ),
@@ -701,15 +736,17 @@ class _AdminCreateProducerViewState extends State<_AdminCreateProducerView> {
                             ],
                           ),
                           const SizedBox(height: 12),
-                          _FieldLabel('Conta'),
+                          const _FieldLabel('Conta'),
                           const SizedBox(height: 8),
                           _TextField(
                             controller: _accountController,
                             hint: '000000-0',
                             enabled: !isLoading,
+                            keyboardType: TextInputType.number,
+                            inputFormatters: [BankAccountInputFormatter()],
                           ),
                           const SizedBox(height: 12),
-                          _FieldLabel('Titular'),
+                          const _FieldLabel('Titular'),
                           const SizedBox(height: 8),
                           _TextField(
                             controller: _holderController,
@@ -718,7 +755,7 @@ class _AdminCreateProducerViewState extends State<_AdminCreateProducerView> {
                             enabled: !isLoading,
                           ),
                           const SizedBox(height: 12),
-                          _FieldLabel('CPF / CNPJ do Titular (opcional)'),
+                          const _FieldLabel('CPF / CNPJ do Titular (opcional)'),
                           const SizedBox(height: 8),
                           _TextField(
                             controller: _bankFiscalController,
@@ -777,7 +814,7 @@ class _AdminCreateProducerViewState extends State<_AdminCreateProducerView> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            _FieldLabel('Início'),
+                            const _FieldLabel('Início'),
                             const SizedBox(height: 8),
                             _TextField(
                               controller: _scheduleStartController,
@@ -801,7 +838,7 @@ class _AdminCreateProducerViewState extends State<_AdminCreateProducerView> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            _FieldLabel('Fim'),
+                            const _FieldLabel('Fim'),
                             const SizedBox(height: 8),
                             _TextField(
                               controller: _scheduleEndController,
@@ -965,9 +1002,9 @@ class _FieldLabel extends StatelessWidget {
 
 class _TextField extends StatelessWidget {
   const _TextField({
-    super.key,
     required this.controller,
     required this.hint,
+    super.key,
     this.prefixIcon,
     this.maxLines = 1,
     this.minLines,

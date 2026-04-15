@@ -7,5 +7,6 @@ import 'package:ragro_mobile/features/orders/domain/repositories/orders_reposito
 class GetOrders {
   const GetOrders(this._repository);
   final OrdersRepository _repository;
-  Future<List<Order>> call({OrderStatus? status}) => _repository.getOrders(status: status);
+  Future<List<Order>> call({OrderStatus? status}) =>
+      _repository.getOrders(status: status);
 }

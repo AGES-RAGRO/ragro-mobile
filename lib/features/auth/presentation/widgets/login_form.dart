@@ -35,8 +35,8 @@ class _LoginFormState extends State<LoginForm> {
   final _passwordController = TextEditingController();
   late final TapGestureRecognizer? _registerTapRecognizer =
       widget.onRegisterTap != null
-          ? (TapGestureRecognizer()..onTap = widget.onRegisterTap)
-          : null;
+      ? (TapGestureRecognizer()..onTap = widget.onRegisterTap)
+      : null;
 
   @override
   void dispose() {
@@ -49,11 +49,11 @@ class _LoginFormState extends State<LoginForm> {
   void _submit() {
     if (_formKey.currentState?.validate() ?? false) {
       context.read<LoginBloc>().add(
-            LoginSubmitted(
-              email: _emailController.text.trim(),
-              password: _passwordController.text,
-            ),
-          );
+        LoginSubmitted(
+          email: _emailController.text.trim(),
+          password: _passwordController.text,
+        ),
+      );
     }
   }
 
@@ -120,9 +120,7 @@ class _LoginFormState extends State<LoginForm> {
             Center(
               child: RichText(
                 text: TextSpan(
-                  style: AppTextStyles.caption.copyWith(
-                    color: AppColors.black,
-                  ),
+                  style: AppTextStyles.caption.copyWith(color: AppColors.black),
                   children: [
                     const TextSpan(text: 'Não tem conta? '),
                     TextSpan(
