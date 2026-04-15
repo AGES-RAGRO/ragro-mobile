@@ -5,7 +5,10 @@ import 'package:ragro_mobile/features/producer_orders/domain/entities/producer_o
 
 class ProducerOrderCard extends StatelessWidget {
   const ProducerOrderCard({
-    required this.order, required this.onDetailTap, required this.onActionTap, super.key,
+    required this.order,
+    required this.onDetailTap,
+    required this.onActionTap,
+    super.key,
   });
 
   final ProducerOrder order;

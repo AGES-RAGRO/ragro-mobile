@@ -3,7 +3,10 @@ import 'package:ragro_mobile/core/theme/app_colors.dart';
 
 class CategoryChip extends StatelessWidget {
   const CategoryChip({
-    required this.label, required this.isSelected, required this.onTap, super.key,
+    required this.label,
+    required this.isSelected,
+    required this.onTap,
+    super.key,
   });
 
   final String label;

@@ -4,7 +4,10 @@ import 'package:ragro_mobile/features/inventory/domain/entities/inventory_produc
 
 class InventoryProductCard extends StatelessWidget {
   const InventoryProductCard({
-    required this.product, required this.onEditTap, required this.onDeleteTap, super.key,
+    required this.product,
+    required this.onEditTap,
+    required this.onDeleteTap,
+    super.key,
   });
 
   final InventoryProduct product;

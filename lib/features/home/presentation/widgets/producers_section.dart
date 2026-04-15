@@ -5,7 +5,9 @@ import 'package:ragro_mobile/features/home/presentation/widgets/producer_card.da
 
 class ProducersSection extends StatelessWidget {
   const ProducersSection({
-    required this.producers, required this.onProducerTap, super.key,
+    required this.producers,
+    required this.onProducerTap,
+    super.key,
   });
 
   final List<Producer> producers;

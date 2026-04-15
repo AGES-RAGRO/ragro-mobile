@@ -4,7 +4,10 @@ import 'package:ragro_mobile/features/home/domain/entities/home_product.dart';
 
 class HomeProductCard extends StatelessWidget {
   const HomeProductCard({
-    required this.product, required this.onTap, required this.onAddToCart, super.key,
+    required this.product,
+    required this.onTap,
+    required this.onAddToCart,
+    super.key,
   });
 
   final HomeProduct product;

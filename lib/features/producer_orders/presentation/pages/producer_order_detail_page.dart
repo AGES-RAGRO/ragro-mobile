@@ -151,7 +151,9 @@ class _ProducerOrderDetailView extends StatelessWidget {
                             vertical: 4,
                           ),
                           decoration: BoxDecoration(
-                            color: _statusColor(order.status).withValues(alpha: 0.15),
+                            color: _statusColor(
+                              order.status,
+                            ).withValues(alpha: 0.15),
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Text(
@@ -189,7 +191,9 @@ class _ProducerOrderDetailView extends StatelessWidget {
                       children: [
                         CircleAvatar(
                           radius: 28,
-                          backgroundColor: AppColors.darkGreen.withValues(alpha: 0.1),
+                          backgroundColor: AppColors.darkGreen.withValues(
+                            alpha: 0.1,
+                          ),
                           child: Text(
                             order.consumerName.isNotEmpty
                                 ? order.consumerName[0]
@@ -327,7 +331,9 @@ class _ProducerOrderDetailView extends StatelessWidget {
                               ),
                               if (!isLast)
                                 Divider(
-                                  color: AppColors.lightGreen.withValues(alpha: 0.1),
+                                  color: AppColors.lightGreen.withValues(
+                                    alpha: 0.1,
+                                  ),
                                   height: 1,
                                 ),
                             ],
@@ -342,7 +348,9 @@ class _ProducerOrderDetailView extends StatelessWidget {
                             ),
                             border: Border(
                               top: BorderSide(
-                                color: AppColors.lightGreen.withValues(alpha: 0.15),
+                                color: AppColors.lightGreen.withValues(
+                                  alpha: 0.15,
+                                ),
                               ),
                             ),
                           ),
@@ -507,7 +515,9 @@ class _BottomActions extends StatelessWidget {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.red,
                       foregroundColor: AppColors.white,
-                      disabledBackgroundColor: AppColors.red.withValues(alpha: 0.5),
+                      disabledBackgroundColor: AppColors.red.withValues(
+                        alpha: 0.5,
+                      ),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(24),
                       ),

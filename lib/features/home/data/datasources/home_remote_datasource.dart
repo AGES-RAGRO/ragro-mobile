@@ -24,10 +24,7 @@ class HomeRemoteDataSource {
         queryParameters: {'page': page, 'size': size},
       );
 
-      return PaginatedResponse.fromJson(
-        response.data!,
-        ProducerModel.fromJson,
-      );
+      return PaginatedResponse.fromJson(response.data!, ProducerModel.fromJson);
     } on DioException catch (e) {
       throw e.error as ApiException? ?? const UnknownApiException();
     }

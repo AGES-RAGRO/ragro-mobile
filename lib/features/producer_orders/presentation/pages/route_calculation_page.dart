@@ -281,7 +281,10 @@ class _RouteStatCard extends StatelessWidget {
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [AppColors.darkGreen, AppColors.darkGreen.withValues(alpha: 0.8)],
+          colors: [
+            AppColors.darkGreen,
+            AppColors.darkGreen.withValues(alpha: 0.8),
+          ],
         ),
         borderRadius: BorderRadius.circular(16),
       ),

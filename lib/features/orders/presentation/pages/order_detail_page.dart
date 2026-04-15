@@ -102,7 +102,9 @@ class OrderDetailPage extends StatelessWidget {
                             color: AppColors.white,
                             borderRadius: BorderRadius.circular(24),
                             border: Border.all(
-                              color: AppColors.lightGreen.withValues(alpha: 0.05),
+                              color: AppColors.lightGreen.withValues(
+                                alpha: 0.05,
+                              ),
                             ),
                             boxShadow: const [
                               BoxShadow(
@@ -138,7 +140,9 @@ class OrderDetailPage extends StatelessWidget {
                               // Total
                               Container(
                                 decoration: BoxDecoration(
-                                  color: AppColors.lightGreen.withValues(alpha: 0.05),
+                                  color: AppColors.lightGreen.withValues(
+                                    alpha: 0.05,
+                                  ),
                                   borderRadius: const BorderRadius.vertical(
                                     bottom: Radius.circular(24),
                                   ),
@@ -208,7 +212,9 @@ class OrderDetailPage extends StatelessWidget {
                             color: AppColors.white,
                             borderRadius: BorderRadius.circular(24),
                             border: Border.all(
-                              color: AppColors.lightGreen.withValues(alpha: 0.05),
+                              color: AppColors.lightGreen.withValues(
+                                alpha: 0.05,
+                              ),
                             ),
                             boxShadow: const [
                               BoxShadow(

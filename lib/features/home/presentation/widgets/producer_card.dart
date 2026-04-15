@@ -121,7 +121,9 @@ class ProducerCard extends StatelessWidget {
                     children: [
                       CircleAvatar(
                         radius: 12,
-                        backgroundColor: AppColors.mintGreen.withValues(alpha: 0.3),
+                        backgroundColor: AppColors.mintGreen.withValues(
+                          alpha: 0.3,
+                        ),
                         backgroundImage: producer.avatarUrl.isNotEmpty
                             ? NetworkImage(producer.avatarUrl)
                             : null,

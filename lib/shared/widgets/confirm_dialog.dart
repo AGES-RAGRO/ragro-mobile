@@ -9,7 +9,10 @@ import 'package:ragro_mobile/core/theme/app_colors.dart';
 /// and cancel actions.
 class ConfirmDialog extends StatelessWidget {
   const ConfirmDialog({
-    required this.title, required this.confirmLabel, required this.confirmColor, super.key,
+    required this.title,
+    required this.confirmLabel,
+    required this.confirmColor,
+    super.key,
     this.highlight,
     this.highlightColor,
     this.trailingTitle,

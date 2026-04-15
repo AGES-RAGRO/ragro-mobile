@@ -4,7 +4,9 @@ import 'package:ragro_mobile/features/search/domain/entities/search_result.dart'
 
 class SearchResultTile extends StatelessWidget {
   const SearchResultTile({
-    required this.result, required this.onTap, super.key,
+    required this.result,
+    required this.onTap,
+    super.key,
   });
 
   final SearchResult result;
