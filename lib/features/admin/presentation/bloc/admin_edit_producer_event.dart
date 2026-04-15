@@ -29,6 +29,7 @@ class AdminEditProducerSubmitted extends AdminEditProducerEvent {
     required this.scheduleWeekdays,
     required this.scheduleStart,
     required this.scheduleEnd,
+    this.neighborhood,
     // ── PIX (opcional no update — partial) ──────────────────────────────
     this.pixKeyType,
     this.pixKey,
@@ -50,6 +51,7 @@ class AdminEditProducerSubmitted extends AdminEditProducerEvent {
   final String number;
   final String city;
   final String state;
+  final String? neighborhood;
   final String cpfCnpj;
   final String farmName;
   final String description;

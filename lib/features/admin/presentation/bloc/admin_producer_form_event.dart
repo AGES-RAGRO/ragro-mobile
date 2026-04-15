@@ -33,6 +33,7 @@ class AdminProducerFormSubmitted extends AdminProducerFormEvent {
     required this.accountNumber,
     required this.accountType,
     required this.accountHolder,
+    this.neighborhood,
     this.bankCode,
     this.bankFiscalNumber,
   });
@@ -45,6 +46,7 @@ class AdminProducerFormSubmitted extends AdminProducerFormEvent {
   final String city;
   final String state;
   final String number;
+  final String? neighborhood;
   final String fiscalNumber;
   final String fiscalNumberType;
   final String farmName;
@@ -69,7 +71,16 @@ class AdminProducerFormSubmitted extends AdminProducerFormEvent {
 
   @override
   List<Object?> get props => [
-    fiscalNumber, fiscalNumberType, farmName, description,
-    pixKeyType, pixKey, bankName, agency, accountNumber, accountType, accountHolder,
+    fiscalNumber,
+    fiscalNumberType,
+    farmName,
+    description,
+    pixKeyType,
+    pixKey,
+    bankName,
+    agency,
+    accountNumber,
+    accountType,
+    accountHolder,
   ];
 }

@@ -80,6 +80,9 @@ class AdminProducerFormBloc
           city: event.city,
           state: event.state,
           zipCode: event.cep.replaceAll(RegExp(r'\D'), ''),
+          neighborhood: (event.neighborhood?.isNotEmpty ?? false)
+              ? event.neighborhood
+              : null,
         ),
         paymentMethods: paymentMethods,
         availability: selectedDays.isNotEmpty ? selectedDays : null,
