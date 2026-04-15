@@ -8,7 +8,8 @@ class InventoryRemoteDataSource {
       id: 'inv001',
       producerId: 'prod001',
       name: 'Tomate Cereja Orgânico',
-      description: 'Tomate cereja cultivado sem agrotóxicos, colhido fresco da horta.',
+      description:
+          'Tomate cereja cultivado sem agrotóxicos, colhido fresco da horta.',
       imageUrl: '',
       price: 2.50,
       unit: 'kg',
@@ -30,7 +31,8 @@ class InventoryRemoteDataSource {
       id: 'inv003',
       producerId: 'prod001',
       name: 'Batata Monalisa',
-      description: 'Batata de casca fina e polpa macia, perfeita para purês e cozidos.',
+      description:
+          'Batata de casca fina e polpa macia, perfeita para purês e cozidos.',
       imageUrl: '',
       price: 8.20,
       unit: 'kg',

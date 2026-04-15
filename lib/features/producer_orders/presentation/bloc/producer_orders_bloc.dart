@@ -6,8 +6,10 @@ import 'package:ragro_mobile/features/producer_orders/presentation/bloc/producer
 import 'package:ragro_mobile/features/producer_orders/presentation/bloc/producer_orders_state.dart';
 
 @injectable
-class ProducerOrdersBloc extends Bloc<ProducerOrdersEvent, ProducerOrdersState> {
-  ProducerOrdersBloc(this._getProducerOrders) : super(const ProducerOrdersInitial()) {
+class ProducerOrdersBloc
+    extends Bloc<ProducerOrdersEvent, ProducerOrdersState> {
+  ProducerOrdersBloc(this._getProducerOrders)
+    : super(const ProducerOrdersInitial()) {
     on<ProducerOrdersStarted>(_onStarted);
     on<ProducerOrdersTabChanged>(_onTabChanged);
     on<ProducerOrdersRefreshed>(_onRefreshed);
@@ -16,7 +18,10 @@ class ProducerOrdersBloc extends Bloc<ProducerOrdersEvent, ProducerOrdersState> 
   final GetProducerOrders _getProducerOrders;
   ProducerOrderStatus _activeTab = ProducerOrderStatus.pending;
 
-  Future<void> _onStarted(ProducerOrdersStarted event, Emitter<ProducerOrdersState> emit) async {
+  Future<void> _onStarted(
+    ProducerOrdersStarted event,
+    Emitter<ProducerOrdersState> emit,
+  ) async {
     _activeTab = event.tab;
     emit(ProducerOrdersLoading(_activeTab));
     try {
@@ -27,7 +32,10 @@ class ProducerOrdersBloc extends Bloc<ProducerOrdersEvent, ProducerOrdersState> 
     }
   }
 
-  Future<void> _onTabChanged(ProducerOrdersTabChanged event, Emitter<ProducerOrdersState> emit) async {
+  Future<void> _onTabChanged(
+    ProducerOrdersTabChanged event,
+    Emitter<ProducerOrdersState> emit,
+  ) async {
     _activeTab = event.tab;
     emit(ProducerOrdersLoading(_activeTab));
     try {
@@ -38,7 +46,10 @@ class ProducerOrdersBloc extends Bloc<ProducerOrdersEvent, ProducerOrdersState> 
     }
   }
 
-  Future<void> _onRefreshed(ProducerOrdersRefreshed event, Emitter<ProducerOrdersState> emit) async {
+  Future<void> _onRefreshed(
+    ProducerOrdersRefreshed event,
+    Emitter<ProducerOrdersState> emit,
+  ) async {
     emit(ProducerOrdersLoading(_activeTab));
     try {
       final orders = await _getProducerOrders(status: _activeTab);

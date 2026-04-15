@@ -8,11 +8,11 @@ class OrderStatusBadge extends StatelessWidget {
   final OrderStatus status;
 
   Color get _backgroundColor => switch (status) {
-        OrderStatus.pending => const Color(0xFFFFB413),
-        OrderStatus.accepted => AppColors.lightGreen,
-        OrderStatus.delivered => const Color(0xFF3B82F6),
-        OrderStatus.cancelled => AppColors.red,
-      };
+    OrderStatus.pending => const Color(0xFFFFB413),
+    OrderStatus.accepted => AppColors.lightGreen,
+    OrderStatus.delivered => const Color(0xFF3B82F6),
+    OrderStatus.cancelled => AppColors.red,
+  };
 
   @override
   Widget build(BuildContext context) {
@@ -26,7 +26,11 @@ class OrderStatusBadge extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           if (status != OrderStatus.cancelled) ...[
-            const Icon(Icons.check_circle_outline, color: Colors.white, size: 12),
+            const Icon(
+              Icons.check_circle_outline,
+              color: Colors.white,
+              size: 12,
+            ),
             const SizedBox(width: 4),
           ],
           Text(

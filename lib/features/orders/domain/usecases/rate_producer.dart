@@ -5,5 +5,6 @@ import 'package:ragro_mobile/features/orders/domain/repositories/orders_reposito
 class RateProducer {
   const RateProducer(this._repository);
   final OrdersRepository _repository;
-  Future<void> call(String orderId, int rating) => _repository.rateProducer(orderId, rating);
+  Future<void> call(String orderId, int rating) =>
+      _repository.rateProducer(orderId, rating);
 }

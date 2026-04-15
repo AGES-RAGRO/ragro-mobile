@@ -24,5 +24,14 @@ class SearchResult extends Equatable {
   final String? category;
 
   @override
-  List<Object?> get props => [id, type, name, subtitle, imageUrl, price, rating, category];
+  List<Object?> get props => [
+    id,
+    type,
+    name,
+    subtitle,
+    imageUrl,
+    price,
+    rating,
+    category,
+  ];
 }

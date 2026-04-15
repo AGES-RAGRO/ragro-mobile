@@ -22,8 +22,10 @@ class ProductDetailLoaded extends ProductDetailState {
   final ProductDetail product;
   final int quantity;
 
-  ProductDetailLoaded copyWith({int? quantity}) =>
-      ProductDetailLoaded(product: product, quantity: quantity ?? this.quantity);
+  ProductDetailLoaded copyWith({int? quantity}) => ProductDetailLoaded(
+    product: product,
+    quantity: quantity ?? this.quantity,
+  );
 
   @override
   List<Object?> get props => [product, quantity];

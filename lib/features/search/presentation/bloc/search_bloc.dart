@@ -21,7 +21,9 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
     Emitter<SearchState> emit,
   ) async {
     if (event.query.trim().isEmpty) {
-      final recent = state is SearchIdle ? (state as SearchIdle).recentSearches : <String>[];
+      final recent = state is SearchIdle
+          ? (state as SearchIdle).recentSearches
+          : <String>[];
       emit(SearchIdle(recentSearches: recent));
       return;
     }
@@ -46,7 +48,10 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
     _currentCategory = event.category ?? 'Tudo';
   }
 
-  void _onRecentRemoved(SearchRecentItemRemoved event, Emitter<SearchState> emit) {
+  void _onRecentRemoved(
+    SearchRecentItemRemoved event,
+    Emitter<SearchState> emit,
+  ) {
     if (state is SearchIdle) {
       final recent = List<String>.from((state as SearchIdle).recentSearches)
         ..remove(event.query);

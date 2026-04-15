@@ -41,7 +41,10 @@ class ProducerProfileUpdateSuccess extends ProducerProfileState {
 }
 
 class ProducerPhotoUploading extends ProducerProfileState {
-  const ProducerPhotoUploading({required this.producer, required this.isAvatar});
+  const ProducerPhotoUploading({
+    required this.producer,
+    required this.isAvatar,
+  });
   final PublicProducer producer;
   final bool isAvatar;
 

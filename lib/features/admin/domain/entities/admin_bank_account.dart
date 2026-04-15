@@ -27,5 +27,11 @@ class AdminBankAccount extends Equatable {
   };
 
   @override
-  List<Object?> get props => [bankName, agency, accountNumber, holderName, fiscalNumber];
+  List<Object?> get props => [
+    bankName,
+    agency,
+    accountNumber,
+    holderName,
+    fiscalNumber,
+  ];
 }

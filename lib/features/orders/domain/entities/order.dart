@@ -70,10 +70,25 @@ class Order extends Equatable {
 
   String get shortItemsPreview {
     if (items.isEmpty) return '';
-    return items.take(3).map((i) => '${i.name} ${i.quantity}${i.unityType}').join(' | ') +
+    return items
+            .take(3)
+            .map((i) => '${i.name} ${i.quantity}${i.unityType}')
+            .join(' | ') +
         (items.length > 3 ? ' ...' : '');
   }
 
   @override
-  List<Object?> get props => [id, producerId, farmName, farmAvatarUrl, ownerName, items, totalAmount, status, createdAt, deliveryAddress, bankInfo];
+  List<Object?> get props => [
+    id,
+    producerId,
+    farmName,
+    farmAvatarUrl,
+    ownerName,
+    items,
+    totalAmount,
+    status,
+    createdAt,
+    deliveryAddress,
+    bankInfo,
+  ];
 }

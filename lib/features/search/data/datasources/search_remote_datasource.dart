@@ -35,7 +35,10 @@ class SearchRemoteDataSource {
   /// === END REAL IMPLEMENTATION ===
   ///
   /// MOCK TEMPORÁRIO — remover quando backend estiver conectado:
-  Future<List<SearchResultModel>> search({required String query, String? category}) async {
+  Future<List<SearchResultModel>> search({
+    required String query,
+    String? category,
+  }) async {
     await Future.delayed(const Duration(milliseconds: 500));
     return SearchResultModel.mocks(query);
   }

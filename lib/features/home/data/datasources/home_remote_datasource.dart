@@ -21,10 +21,7 @@ class HomeRemoteDataSource {
     try {
       final response = await _apiClient.dio.get<Map<String, dynamic>>(
         ApiEndpoints.producers,
-        queryParameters: {
-          'page': page,
-          'size': size,
-        },
+        queryParameters: {'page': page, 'size': size},
       );
 
       return PaginatedResponse.fromJson(

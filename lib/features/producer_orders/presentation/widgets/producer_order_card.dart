@@ -16,20 +16,20 @@ class ProducerOrderCard extends StatelessWidget {
   final VoidCallback onActionTap;
 
   String get _actionLabel => switch (order.status) {
-        ProducerOrderStatus.pending => 'Aceitar',
-        ProducerOrderStatus.accepted => 'A caminho',
-        ProducerOrderStatus.inDelivery => 'Entregue',
-        ProducerOrderStatus.delivered => 'Ver',
-        ProducerOrderStatus.cancelled => 'Ver',
-      };
+    ProducerOrderStatus.pending => 'Aceitar',
+    ProducerOrderStatus.accepted => 'A caminho',
+    ProducerOrderStatus.inDelivery => 'Entregue',
+    ProducerOrderStatus.delivered => 'Ver',
+    ProducerOrderStatus.cancelled => 'Ver',
+  };
 
   String get _subtitleLabel => switch (order.status) {
-        ProducerOrderStatus.pending => 'Pedido pendente',
-        ProducerOrderStatus.accepted => 'Pedido aceito',
-        ProducerOrderStatus.inDelivery => 'Pedido a caminho',
-        ProducerOrderStatus.delivered => 'Pedido entregue',
-        ProducerOrderStatus.cancelled => 'Pedido cancelado',
-      };
+    ProducerOrderStatus.pending => 'Pedido pendente',
+    ProducerOrderStatus.accepted => 'Pedido aceito',
+    ProducerOrderStatus.inDelivery => 'Pedido a caminho',
+    ProducerOrderStatus.delivered => 'Pedido entregue',
+    ProducerOrderStatus.cancelled => 'Pedido cancelado',
+  };
 
   String _formatPrice(double price) =>
       'R\$ ${price.toStringAsFixed(2).replaceAll('.', ',')}';
@@ -98,7 +98,10 @@ class ProducerOrderCard extends StatelessWidget {
               // NOVO badge
               if (order.isNew)
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: AppColors.darkGreen.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(6),

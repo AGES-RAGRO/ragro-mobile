@@ -69,18 +69,18 @@ class PublicProducerModel extends PublicProducer {
       story: json['story'] as String? ?? '',
       avatarUrl:
           json['avatarS3'] as String? ?? json['avatar_s3'] as String? ?? '',
-      coverUrl: json['displayPhotoS3'] as String? ??
+      coverUrl:
+          json['displayPhotoS3'] as String? ??
           json['display_photo_s3'] as String? ??
           '',
-      averageRating: (json['averageRating'] as num?)?.toDouble() ??
+      averageRating:
+          (json['averageRating'] as num?)?.toDouble() ??
           (json['average_rating'] as num?)?.toDouble() ??
           0.0,
-      totalReviews: json['totalReviews'] as int? ??
-          json['total_reviews'] as int? ??
-          0,
-      totalOrders: json['totalOrders'] as int? ??
-          json['total_orders'] as int? ??
-          0,
+      totalReviews:
+          json['totalReviews'] as int? ?? json['total_reviews'] as int? ?? 0,
+      totalOrders:
+          json['totalOrders'] as int? ?? json['total_orders'] as int? ?? 0,
       phone: json['phone'] as String? ?? '',
       products: _parseProducts(json['products']),
       availability: _parseAvailability(json['availability']),
@@ -124,5 +124,4 @@ class PublicProducerModel extends PublicProducer {
       );
     }).toList();
   }
-
 }

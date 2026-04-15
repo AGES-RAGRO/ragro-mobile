@@ -29,6 +29,7 @@ class AdminPaymentMethod extends Equatable {
   final String? bankName;
   final String? agency;
   final String? accountNumber;
+
   /// 'checking' | 'savings'
   final String? accountType;
   final String? holderName;
@@ -49,7 +50,15 @@ class AdminPaymentMethod extends Equatable {
 
   @override
   List<Object?> get props => [
-    type, pixKeyType, pixKey, bankCode, bankName,
-    agency, accountNumber, accountType, holderName, fiscalNumber,
+    type,
+    pixKeyType,
+    pixKey,
+    bankCode,
+    bankName,
+    agency,
+    accountNumber,
+    accountType,
+    holderName,
+    fiscalNumber,
   ];
 }

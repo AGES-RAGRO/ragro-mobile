@@ -13,12 +13,24 @@ class RateProducerBloc extends Bloc<RateProducerEvent, RateProducerState> {
 
   final RateProducer _rateProducer;
 
-  void _onStarSelected(RateProducerStarSelected event, Emitter<RateProducerState> emit) {
-    final current = state is RateProducerInitial ? (state as RateProducerInitial).selectedRating : 0;
-    emit(RateProducerInitial(selectedRating: event.rating == current ? 0 : event.rating));
+  void _onStarSelected(
+    RateProducerStarSelected event,
+    Emitter<RateProducerState> emit,
+  ) {
+    final current = state is RateProducerInitial
+        ? (state as RateProducerInitial).selectedRating
+        : 0;
+    emit(
+      RateProducerInitial(
+        selectedRating: event.rating == current ? 0 : event.rating,
+      ),
+    );
   }
 
-  Future<void> _onSubmitted(RateProducerSubmitted event, Emitter<RateProducerState> emit) async {
+  Future<void> _onSubmitted(
+    RateProducerSubmitted event,
+    Emitter<RateProducerState> emit,
+  ) async {
     emit(const RateProducerSubmitting());
     try {
       await _rateProducer(event.orderId, event.rating);

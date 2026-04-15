@@ -18,7 +18,8 @@ class ProducerModel extends Producer {
       description: json['description'] as String? ?? '',
       avatarUrl:
           json['avatar_s3'] as String? ?? json['avatarUrl'] as String? ?? '',
-      coverUrl: json['display_photo_s3'] as String? ??
+      coverUrl:
+          json['display_photo_s3'] as String? ??
           json['coverUrl'] as String? ??
           '',
       averageRating: (json['average_rating'] as num?)?.toDouble() ?? 0.0,

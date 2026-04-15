@@ -23,9 +23,7 @@ class CategoryChip extends StatelessWidget {
         decoration: BoxDecoration(
           color: isSelected ? AppColors.darkGreen : const Color(0xFFF1F5F9),
           borderRadius: BorderRadius.circular(24),
-          border: isSelected
-              ? null
-              : Border.all(color: AppColors.black),
+          border: isSelected ? null : Border.all(color: AppColors.black),
           boxShadow: isSelected
               ? [
                   const BoxShadow(

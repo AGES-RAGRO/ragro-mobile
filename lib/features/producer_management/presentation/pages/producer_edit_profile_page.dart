@@ -24,14 +24,12 @@ class ProducerEditProfilePage extends StatelessWidget {
     final producerId = getIt<AuthLocalDataSource>().getUserId();
     if (producerId == null || producerId.isEmpty) {
       return const Scaffold(
-        body: Center(
-          child: Text('Sessão expirada. Faça login novamente.'),
-        ),
+        body: Center(child: Text('Sessão expirada. Faça login novamente.')),
       );
     }
     return BlocProvider<ProducerProfileBloc>(
-      create: (_) => getIt<ProducerProfileBloc>()
-        ..add(ProducerProfileStarted(producerId)),
+      create: (_) =>
+          getIt<ProducerProfileBloc>()..add(ProducerProfileStarted(producerId)),
       child: _ProducerEditProfileView(producerId: producerId),
     );
   }
@@ -223,163 +221,166 @@ class _ProducerEditProfileViewState extends State<_ProducerEditProfileView> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                  Center(
-                    child: Stack(
-                      children: [
-                        CircleAvatar(
-                          radius: 52,
-                          backgroundColor: AppColors.darkGreen.withValues(
-                            alpha: 0.1,
-                          ),
-                          backgroundImage:
-                              avatarUrl.isNotEmpty ? NetworkImage(avatarUrl) : null,
-                          child: avatarUrl.isEmpty
-                              ? Text(
-                                  _nameController.text.isNotEmpty
-                                      ? _nameController.text[0].toUpperCase()
-                                      : '?',
-                                  style: const TextStyle(
-                                    fontFamily: 'Figtree',
-                                    fontWeight: FontWeight.w700,
-                                    fontSize: 36,
-                                    color: AppColors.darkGreen,
-                                  ),
-                                )
-                              : null,
-                        ),
-                        if (isUploadingAvatar)
-                          Positioned.fill(
-                            child: DecoratedBox(
-                              decoration: BoxDecoration(
-                                color: Colors.black.withValues(alpha: 0.35),
-                                shape: BoxShape.circle,
+                        Center(
+                          child: Stack(
+                            children: [
+                              CircleAvatar(
+                                radius: 52,
+                                backgroundColor: AppColors.darkGreen.withValues(
+                                  alpha: 0.1,
+                                ),
+                                backgroundImage: avatarUrl.isNotEmpty
+                                    ? NetworkImage(avatarUrl)
+                                    : null,
+                                child: avatarUrl.isEmpty
+                                    ? Text(
+                                        _nameController.text.isNotEmpty
+                                            ? _nameController.text[0]
+                                                  .toUpperCase()
+                                            : '?',
+                                        style: const TextStyle(
+                                          fontFamily: 'Figtree',
+                                          fontWeight: FontWeight.w700,
+                                          fontSize: 36,
+                                          color: AppColors.darkGreen,
+                                        ),
+                                      )
+                                    : null,
                               ),
-                              child: const Center(
-                                child: CircularProgressIndicator(
-                                  color: AppColors.white,
-                                  strokeWidth: 2.5,
+                              if (isUploadingAvatar)
+                                Positioned.fill(
+                                  child: DecoratedBox(
+                                    decoration: BoxDecoration(
+                                      color: Colors.black.withValues(
+                                        alpha: 0.35,
+                                      ),
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: const Center(
+                                      child: CircularProgressIndicator(
+                                        color: AppColors.white,
+                                        strokeWidth: 2.5,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              Positioned(
+                                bottom: 0,
+                                right: 0,
+                                child: GestureDetector(
+                                  onTap: isUploadingAvatar ? null : _pickAvatar,
+                                  child: Container(
+                                    padding: const EdgeInsets.all(8),
+                                    decoration: const BoxDecoration(
+                                      color: AppColors.darkGreen,
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: const Icon(
+                                      Icons.camera_alt,
+                                      size: 16,
+                                      color: AppColors.white,
+                                    ),
+                                  ),
                                 ),
                               ),
-                            ),
-                          ),
-                        Positioned(
-                          bottom: 0,
-                          right: 0,
-                          child: GestureDetector(
-                            onTap: isUploadingAvatar ? null : _pickAvatar,
-                            child: Container(
-                              padding: const EdgeInsets.all(8),
-                              decoration: const BoxDecoration(
-                                color: AppColors.darkGreen,
-                                shape: BoxShape.circle,
-                              ),
-                              child: const Icon(
-                                Icons.camera_alt,
-                                size: 16,
-                                color: AppColors.white,
-                              ),
-                            ),
+                            ],
                           ),
                         ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 28),
-                  const _FieldLabel('Nome'),
-                  const SizedBox(height: 8),
-                  _FormField(
-                    controller: _nameController,
-                    hint: 'Seu nome completo',
-                    validator: (value) {
-                      final trimmed = value?.trim() ?? '';
-                      if (trimmed.isEmpty) return 'Informe seu nome';
-                      if (trimmed.length < 3) {
-                        return 'Nome deve ter ao menos 3 caracteres';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 16),
-                  const _FieldLabel('Descrição / Bio'),
-                  const SizedBox(height: 8),
-                  _FormField(
-                    controller: _bioController,
-                    hint: 'Conte um pouco sobre você...',
-                    maxLines: 3,
-                    validator: (value) {
-                      if (value?.trim().isEmpty ?? true) {
-                        return 'Conte um pouco sobre você';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 16),
-                  const _FieldLabel('Telefone'),
-                  const SizedBox(height: 8),
-                  _FormField(
-                    controller: _phoneController,
-                    hint: '(XX) XXXXX-XXXX',
-                    keyboardType: TextInputType.phone,
-                    validator: (value) {
-                      final digits = (value ?? '').replaceAll(
-                        RegExp(r'\D'),
-                        '',
-                      );
-                      if (digits.isEmpty) return 'Informe um telefone';
-                      if (digits.length < 10) {
-                        return 'Telefone deve ter ao menos 10 dígitos';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 16),
-                  const _FieldLabel('Nome da Fazenda'),
-                  const SizedBox(height: 8),
-                  _FormField(
-                    controller: _farmNameController,
-                    hint: 'Nome da sua propriedade rural',
-                    validator: (value) {
-                      if (value?.trim().isEmpty ?? true) {
-                        return 'Informe o nome da fazenda';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 32),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: isSaving ? null : _submit,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.darkGreen,
-                        foregroundColor: AppColors.white,
-                        disabledBackgroundColor: AppColors.darkGreen.withValues(
-                          alpha: 0.5,
+                        const SizedBox(height: 28),
+                        const _FieldLabel('Nome'),
+                        const SizedBox(height: 8),
+                        _FormField(
+                          controller: _nameController,
+                          hint: 'Seu nome completo',
+                          validator: (value) {
+                            final trimmed = value?.trim() ?? '';
+                            if (trimmed.isEmpty) return 'Informe seu nome';
+                            if (trimmed.length < 3) {
+                              return 'Nome deve ter ao menos 3 caracteres';
+                            }
+                            return null;
+                          },
                         ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(24),
+                        const SizedBox(height: 16),
+                        const _FieldLabel('Descrição / Bio'),
+                        const SizedBox(height: 8),
+                        _FormField(
+                          controller: _bioController,
+                          hint: 'Conte um pouco sobre você...',
+                          maxLines: 3,
+                          validator: (value) {
+                            if (value?.trim().isEmpty ?? true) {
+                              return 'Conte um pouco sobre você';
+                            }
+                            return null;
+                          },
                         ),
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                      ),
-                      child: isSaving
-                          ? const SizedBox(
-                              height: 20,
-                              width: 20,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                color: AppColors.white,
+                        const SizedBox(height: 16),
+                        const _FieldLabel('Telefone'),
+                        const SizedBox(height: 8),
+                        _FormField(
+                          controller: _phoneController,
+                          hint: '(XX) XXXXX-XXXX',
+                          keyboardType: TextInputType.phone,
+                          validator: (value) {
+                            final digits = (value ?? '').replaceAll(
+                              RegExp(r'\D'),
+                              '',
+                            );
+                            if (digits.isEmpty) return 'Informe um telefone';
+                            if (digits.length < 10) {
+                              return 'Telefone deve ter ao menos 10 dígitos';
+                            }
+                            return null;
+                          },
+                        ),
+                        const SizedBox(height: 16),
+                        const _FieldLabel('Nome da Fazenda'),
+                        const SizedBox(height: 8),
+                        _FormField(
+                          controller: _farmNameController,
+                          hint: 'Nome da sua propriedade rural',
+                          validator: (value) {
+                            if (value?.trim().isEmpty ?? true) {
+                              return 'Informe o nome da fazenda';
+                            }
+                            return null;
+                          },
+                        ),
+                        const SizedBox(height: 32),
+                        SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton(
+                            onPressed: isSaving ? null : _submit,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.darkGreen,
+                              foregroundColor: AppColors.white,
+                              disabledBackgroundColor: AppColors.darkGreen
+                                  .withValues(alpha: 0.5),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(24),
                               ),
-                            )
-                          : const Text(
-                              'Salvar',
-                              style: TextStyle(
-                                fontFamily: 'Manrope',
-                                fontWeight: FontWeight.w700,
-                                fontSize: 16,
-                              ),
+                              padding: const EdgeInsets.symmetric(vertical: 16),
                             ),
-                    ),
-                  ),
+                            child: isSaving
+                                ? const SizedBox(
+                                    height: 20,
+                                    width: 20,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      color: AppColors.white,
+                                    ),
+                                  )
+                                : const Text(
+                                    'Salvar',
+                                    style: TextStyle(
+                                      fontFamily: 'Manrope',
+                                      fontWeight: FontWeight.w700,
+                                      fontSize: 16,
+                                    ),
+                                  ),
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -416,9 +417,8 @@ class _CoverPhotoSection extends StatelessWidget {
                 ? Image.network(
                     coverUrl,
                     fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) => const ColoredBox(
-                      color: Color(0xFFE0E0E0),
-                    ),
+                    errorBuilder: (_, __, ___) =>
+                        const ColoredBox(color: Color(0xFFE0E0E0)),
                   )
                 : const ColoredBox(color: Color(0xFFE0E0E0)),
           ),

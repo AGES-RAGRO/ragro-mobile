@@ -23,7 +23,6 @@ class ProducerProfileUpdateSubmitted extends ProducerProfileEvent {
     required this.story,
     required this.phone,
 
-
     required this.farmName,
   });
 

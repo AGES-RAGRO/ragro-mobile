@@ -96,7 +96,9 @@ class ProducerProfileBloc
     final current = state;
     if (current is! ProducerProfileLoaded) return;
 
-    emit(ProducerPhotoUploading(producer: current.producer, isAvatar: isAvatar));
+    emit(
+      ProducerPhotoUploading(producer: current.producer, isAvatar: isAvatar),
+    );
     try {
       final updated = await upload();
       emit(ProducerProfileLoaded(updated));

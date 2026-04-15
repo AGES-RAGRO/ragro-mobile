@@ -13,7 +13,10 @@ class CheckoutBloc extends Bloc<CheckoutEvent, CheckoutState> {
 
   final ConfirmOrder _confirmOrder;
 
-  Future<void> _onStarted(CheckoutStarted event, Emitter<CheckoutState> emit) async {
+  Future<void> _onStarted(
+    CheckoutStarted event,
+    Emitter<CheckoutState> emit,
+  ) async {
     emit(const CheckoutLoading());
     try {
       // Load the order preview from the cart
@@ -24,7 +27,10 @@ class CheckoutBloc extends Bloc<CheckoutEvent, CheckoutState> {
     }
   }
 
-  Future<void> _onConfirmed(CheckoutConfirmed event, Emitter<CheckoutState> emit) async {
+  Future<void> _onConfirmed(
+    CheckoutConfirmed event,
+    Emitter<CheckoutState> emit,
+  ) async {
     emit(const CheckoutLoading());
     try {
       final order = await _confirmOrder(event.cartId);

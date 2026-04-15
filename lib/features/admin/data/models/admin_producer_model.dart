@@ -52,17 +52,17 @@ class AdminProducerModel extends AdminProducer {
     final paymentMethodsData = json['paymentMethods'];
     final paymentMethods = paymentMethodsData is List
         ? paymentMethodsData
-            .whereType<Map<String, dynamic>>()
-            .map(_paymentMethodFromJson)
-            .toList()
+              .whereType<Map<String, dynamic>>()
+              .map(_paymentMethodFromJson)
+              .toList()
         : null;
 
     final availabilityData = json['availability'];
     final availability = availabilityData is List
         ? availabilityData
-            .whereType<Map<String, dynamic>>()
-            .map(_availabilityFromJson)
-            .toList()
+              .whereType<Map<String, dynamic>>()
+              .map(_availabilityFromJson)
+              .toList()
         : null;
 
     return AdminProducerModel(

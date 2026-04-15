@@ -20,7 +20,10 @@ class AdminRemoteDataSource {
       );
       final content = (response.data?['content'] as List<dynamic>?) ?? [];
       return content
-          .map((e) => AdminProducerSummaryModel.fromJson(e as Map<String, dynamic>))
+          .map(
+            (e) =>
+                AdminProducerSummaryModel.fromJson(e as Map<String, dynamic>),
+          )
           .toList();
     } on DioException catch (e) {
       throw e.error as ApiException? ?? const UnknownApiException();
@@ -45,7 +48,9 @@ class AdminRemoteDataSource {
     }
     final paymentMethods = producer.paymentMethods ?? [];
     if (paymentMethods.isEmpty) {
-      throw const UnknownApiException('Ao menos um método de pagamento é obrigatório');
+      throw const UnknownApiException(
+        'Ao menos um método de pagamento é obrigatório',
+      );
     }
     try {
       await _apiClient.dio.post<void>(

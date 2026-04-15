@@ -20,7 +20,9 @@ class CartLocalDatasource {
     }
     // same producer: add or increment
     if (_cart.producerId == item.producerId) {
-      final existingIndex = _cart.items.indexWhere((i) => i.productId == item.productId);
+      final existingIndex = _cart.items.indexWhere(
+        (i) => i.productId == item.productId,
+      );
       if (existingIndex >= 0) {
         final updated = List<CartItem>.from(_cart.items);
         updated[existingIndex] = updated[existingIndex].copyWith(
@@ -54,7 +56,9 @@ class CartLocalDatasource {
 
   Cart removeItem(String productId) {
     final updated = _cart.items.where((i) => i.productId != productId).toList();
-    _cart = updated.isEmpty ? const Cart.empty() : _cart.copyWith(items: updated);
+    _cart = updated.isEmpty
+        ? const Cart.empty()
+        : _cart.copyWith(items: updated);
     return _cart;
   }
 

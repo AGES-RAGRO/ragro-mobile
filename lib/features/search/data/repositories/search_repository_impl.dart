@@ -10,6 +10,8 @@ class SearchRepositoryImpl implements SearchRepository {
   final SearchRemoteDataSource _dataSource;
 
   @override
-  Future<List<SearchResult>> search({required String query, String? category}) =>
-      _dataSource.search(query: query, category: category);
+  Future<List<SearchResult>> search({
+    required String query,
+    String? category,
+  }) => _dataSource.search(query: query, category: category);
 }

@@ -3,11 +3,7 @@ import 'package:ragro_mobile/core/theme/app_colors.dart';
 import 'package:ragro_mobile/features/home/domain/entities/producer.dart';
 
 class ProducerCard extends StatelessWidget {
-  const ProducerCard({
-    super.key,
-    required this.producer,
-    required this.onTap,
-  });
+  const ProducerCard({super.key, required this.producer, required this.onTap});
 
   final Producer producer;
   final VoidCallback onTap;
@@ -49,7 +45,8 @@ class ProducerCard extends StatelessWidget {
                       ? Image.network(
                           producer.coverUrl,
                           fit: BoxFit.cover,
-                          errorBuilder: (_, __, ___) => const _PlaceholderImage(),
+                          errorBuilder: (_, __, ___) =>
+                              const _PlaceholderImage(),
                         )
                       : const _PlaceholderImage(),
                 ),
@@ -58,7 +55,10 @@ class ProducerCard extends StatelessWidget {
                   top: 12,
                   left: 12,
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.white.withOpacity(0.9),
                       borderRadius: BorderRadius.circular(9999),
@@ -66,7 +66,11 @@ class ProducerCard extends StatelessWidget {
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Icon(Icons.star, color: Color(0xFFFFC107), size: 12),
+                        const Icon(
+                          Icons.star,
+                          color: Color(0xFFFFC107),
+                          size: 12,
+                        ),
                         const SizedBox(width: 4),
                         Text(
                           producer.averageRating.toStringAsFixed(1),

@@ -9,9 +9,36 @@ class CnpjValidator {
     if (RegExp(r'^(\d)\1{13}$').hasMatch(digits)) return false;
 
     final numbers = digits.split('').map(int.parse).toList();
-    final first = _checkDigit(numbers.sublist(0, 12), const [5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2]);
+    final first = _checkDigit(numbers.sublist(0, 12), const [
+      5,
+      4,
+      3,
+      2,
+      9,
+      8,
+      7,
+      6,
+      5,
+      4,
+      3,
+      2,
+    ]);
     if (first != numbers[12]) return false;
-    final second = _checkDigit(numbers.sublist(0, 13), const [6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2]);
+    final second = _checkDigit(numbers.sublist(0, 13), const [
+      6,
+      5,
+      4,
+      3,
+      2,
+      9,
+      8,
+      7,
+      6,
+      5,
+      4,
+      3,
+      2,
+    ]);
     return second == numbers[13];
   }
 

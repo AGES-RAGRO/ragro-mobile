@@ -53,7 +53,9 @@ class RateProducerPage extends StatelessWidget {
               ),
               child: BlocBuilder<RateProducerBloc, RateProducerState>(
                 builder: (context, state) {
-                  final selectedRating = state is RateProducerInitial ? state.selectedRating : 0;
+                  final selectedRating = state is RateProducerInitial
+                      ? state.selectedRating
+                      : 0;
                   final isSubmitting = state is RateProducerSubmitting;
 
                   return Column(
@@ -91,7 +93,11 @@ class RateProducerPage extends StatelessWidget {
                       CircleAvatar(
                         radius: 40,
                         backgroundColor: AppColors.lightGreen.withOpacity(0.2),
-                        child: const Icon(Icons.storefront, size: 40, color: AppColors.lightGreen),
+                        child: const Icon(
+                          Icons.storefront,
+                          size: 40,
+                          color: AppColors.lightGreen,
+                        ),
                       ),
                       const SizedBox(height: 12),
                       // Farm name
@@ -119,12 +125,16 @@ class RateProducerPage extends StatelessWidget {
                           final starValue = index + 1;
                           return GestureDetector(
                             onTap: () => context.read<RateProducerBloc>().add(
-                                  RateProducerStarSelected(starValue),
-                                ),
+                              RateProducerStarSelected(starValue),
+                            ),
                             child: Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 4),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 4,
+                              ),
                               child: Icon(
-                                starValue <= selectedRating ? Icons.star : Icons.star_border,
+                                starValue <= selectedRating
+                                    ? Icons.star
+                                    : Icons.star_border,
                                 color: const Color(0xFFFFB413),
                                 size: 36,
                               ),
@@ -138,18 +148,22 @@ class RateProducerPage extends StatelessWidget {
                         onTap: (isSubmitting || selectedRating == 0)
                             ? null
                             : () => context.read<RateProducerBloc>().add(
-                                  RateProducerSubmitted(orderId, selectedRating),
-                                ),
+                                RateProducerSubmitted(orderId, selectedRating),
+                              ),
                         child: Container(
                           width: double.infinity,
                           height: 56,
                           decoration: BoxDecoration(
-                            color: selectedRating > 0 ? AppColors.darkGreen : AppColors.placeholder,
+                            color: selectedRating > 0
+                                ? AppColors.darkGreen
+                                : AppColors.placeholder,
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Center(
                             child: isSubmitting
-                                ? const CircularProgressIndicator(color: AppColors.white)
+                                ? const CircularProgressIndicator(
+                                    color: AppColors.white,
+                                  )
                                 : const Text(
                                     'Enviar',
                                     style: TextStyle(

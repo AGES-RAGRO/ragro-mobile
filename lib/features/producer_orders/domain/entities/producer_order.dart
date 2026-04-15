@@ -56,19 +56,19 @@ class ProducerOrder extends Equatable {
 
   @override
   List<Object?> get props => [
-        id,
-        consumerName,
-        consumerAvatarUrl,
-        consumerSince,
-        status,
-        totalPrice,
-        deliveryAddress,
-        deliveryNeighborhood,
-        deliveryCityState,
-        deliveryComplement,
-        items,
-        createdAt,
-        isNew,
-        consumerPhone,
-      ];
+    id,
+    consumerName,
+    consumerAvatarUrl,
+    consumerSince,
+    status,
+    totalPrice,
+    deliveryAddress,
+    deliveryNeighborhood,
+    deliveryCityState,
+    deliveryComplement,
+    items,
+    createdAt,
+    isNew,
+    consumerPhone,
+  ];
 }
