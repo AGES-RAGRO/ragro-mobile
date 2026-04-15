@@ -10,6 +10,7 @@ class ProducersSection extends StatefulWidget {
   const ProducersSection({
     required this.producers,
     required this.onProducerTap,
+    required this.isLoadingMore,
     super.key,
   });
 

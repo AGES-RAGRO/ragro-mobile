@@ -10,7 +10,7 @@ class GetHomeData {
 
   final HomeRepository _repository;
 
-  Future<({List<Producer> producers, List<HomeProduct> products})>
+  Future<({PaginatedResponse<Producer> producers, List<HomeProduct> products})>
   call() async {
     final results = await Future.wait([
       _repository.getProducers(),
@@ -20,6 +20,6 @@ class GetHomeData {
     final producersResponse = results[0] as PaginatedResponse<Producer>;
     final products = results[1] as List<HomeProduct>;
 
-    return (producers: producersResponse.content, products: products);
+    return (producers: producersResponse, products: products);
   }
 }

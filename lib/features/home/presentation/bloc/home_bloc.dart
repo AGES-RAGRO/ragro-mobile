@@ -26,7 +26,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
           producers: data.producers.content,
           products: data.products,
           currentProducersPage: data.producers.page,
-          hasMoreProducers: !data.producers.isLast,
+          hasMoreProducers: data.producers.page < data.producers.totalPages - 1,
         ),
       );
     } on ApiException catch (e) {
@@ -58,7 +58,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
         currentState.copyWith(
           producers: [...currentState.producers, ...response.content],
           currentProducersPage: response.page,
-          hasMoreProducers: !response.isLast,
+          hasMoreProducers: response.page < response.totalPages - 1,
           isFetchingMoreProducers: false,
         ),
       );
