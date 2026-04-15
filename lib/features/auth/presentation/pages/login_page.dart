@@ -43,9 +43,9 @@ class LoginPage extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 24),
               child: Column(
                 children: [
-                  const Spacer(flex: 2),
+                  const Spacer(flex: 3),
                   const RagroLogo(),
-                  const Spacer(flex: 2),
+                  const Spacer(flex: 1),
                   LoginForm(onRegisterTap: () => context.push('/register')),
                   const Spacer(),
                 ],
