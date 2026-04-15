@@ -216,6 +216,8 @@ import 'package:ragro_mobile/features/search/domain/usecases/search_producers_an
     as _i894;
 import 'package:ragro_mobile/features/search/presentation/bloc/search_bloc.dart'
     as _i856;
+import 'package:ragro_mobile/features/home/domain/usecases/get_producers.dart'
+    as _i2000;
 import 'package:shared_preferences/shared_preferences.dart' as _i460;
 
 extension GetItInjectableX on _i174.GetIt {
@@ -489,6 +491,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i159.GetHomeData>(
       () => _i159.GetHomeData(gh<_i285.HomeRepository>()),
     );
+    gh.lazySingleton<_i2000.GetProducers>(
+      () => _i2000.GetProducers(gh<_i285.HomeRepository>()),
+    );
     gh.lazySingleton<_i626.GetCustomerProfile>(
       () => _i626.GetCustomerProfile(gh<_i788.CustomerProfileRepository>()),
     );
@@ -499,7 +504,10 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i856.SearchBloc>(
       () => _i856.SearchBloc(gh<_i894.SearchProducersAndProducts>()),
     );
-    gh.factory<_i151.HomeBloc>(() => _i151.HomeBloc(gh<_i159.GetHomeData>()));
+    gh.factory<_i151.HomeBloc>(() => _i151.HomeBloc(
+          gh<_i159.GetHomeData>(),
+          gh<_i2000.GetProducers>(),
+        ));
     gh.factory<_i914.AdminEditProducerBloc>(
       () => _i914.AdminEditProducerBloc(
         gh<_i852.GetAdminProducerById>(),
