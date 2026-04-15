@@ -14,10 +14,7 @@ import 'package:ragro_mobile/features/orders/presentation/bloc/rate_producer_sta
 
 class RateProducerPage extends StatelessWidget {
   const RateProducerPage({
-    super.key,
-    required this.orderId,
-    required this.farmName,
-    required this.ownerName,
+    required this.orderId, required this.farmName, required this.ownerName, super.key,
   });
 
   final String orderId;
@@ -92,7 +89,7 @@ class RateProducerPage extends StatelessWidget {
                       // Avatar
                       CircleAvatar(
                         radius: 40,
-                        backgroundColor: AppColors.lightGreen.withOpacity(0.2),
+                        backgroundColor: AppColors.lightGreen.withValues(alpha: 0.2),
                         child: const Icon(
                           Icons.storefront,
                           size: 40,

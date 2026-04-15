@@ -346,7 +346,7 @@ class _SummaryCard extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: AppColors.darkGreen.withOpacity(0.08),
+              color: AppColors.darkGreen.withValues(alpha: 0.08),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Icon(icon, size: 20, color: AppColors.darkGreen),

@@ -45,15 +45,15 @@ class InventoryRemoteDataSource {
   ///
   /// === REAL IMPLEMENTATION (uncomment when backend is ready) ===
   ///
-  /// Future<List<InventoryProduct>> getProducts() async {
+  /// Future`<List<InventoryProduct>>` getProducts() async {
   ///   try {
   ///     // Producer ID is derived from the auth token on the backend.
-  ///     final response = await _apiClient.dio.get<Map<String, dynamic>>(
+  ///     final response = await _apiClient.dio.get`<Map<String, dynamic>>`(
   ///       ApiEndpoints.products,
   ///       queryParameters: {'producer_id': 'me'},
   ///     );
   ///     return (response.data!['data'] as List)
-  ///         .map((e) => InventoryProduct.fromJson(e as Map<String, dynamic>))
+  ///         .map((e) => InventoryProduct.fromJson(e as `Map<String, dynamic>`))
   ///         .toList();
   ///   } on DioException catch (e) {
   ///     throw e.error as ApiException? ?? const UnknownApiException();
@@ -64,7 +64,7 @@ class InventoryRemoteDataSource {
   ///
   /// MOCK TEMPORÁRIO — remover quando backend estiver conectado:
   Future<List<InventoryProduct>> getProducts() async {
-    await Future.delayed(const Duration(milliseconds: 400));
+    await Future<void>.delayed(const Duration(milliseconds: 400));
     return List.from(_mockProducts);
   }
 
@@ -72,9 +72,9 @@ class InventoryRemoteDataSource {
   ///
   /// === REAL IMPLEMENTATION (uncomment when backend is ready) ===
   ///
-  /// Future<void> createProduct(InventoryProduct product) async {
+  /// Future`<void>` createProduct(InventoryProduct product) async {
   ///   try {
-  ///     await _apiClient.dio.post<void>(
+  ///     await _apiClient.dio.post`<void>`(
   ///       ApiEndpoints.products,
   ///       data: product.toJson(),
   ///     );
@@ -87,7 +87,7 @@ class InventoryRemoteDataSource {
   ///
   /// MOCK TEMPORÁRIO — remover quando backend estiver conectado:
   Future<void> createProduct(InventoryProduct product) async {
-    await Future.delayed(const Duration(milliseconds: 300));
+    await Future<void>.delayed(const Duration(milliseconds: 300));
     _mockProducts.add(product);
   }
 
@@ -95,9 +95,9 @@ class InventoryRemoteDataSource {
   ///
   /// === REAL IMPLEMENTATION (uncomment when backend is ready) ===
   ///
-  /// Future<void> updateProduct(InventoryProduct product) async {
+  /// Future`<void>` updateProduct(InventoryProduct product) async {
   ///   try {
-  ///     await _apiClient.dio.put<void>(
+  ///     await _apiClient.dio.put`<void>`(
   ///       ApiEndpoints.product(product.id),
   ///       data: product.toJson(),
   ///     );
@@ -110,7 +110,7 @@ class InventoryRemoteDataSource {
   ///
   /// MOCK TEMPORÁRIO — remover quando backend estiver conectado:
   Future<void> updateProduct(InventoryProduct product) async {
-    await Future.delayed(const Duration(milliseconds: 300));
+    await Future<void>.delayed(const Duration(milliseconds: 300));
     final idx = _mockProducts.indexWhere((p) => p.id == product.id);
     if (idx >= 0) _mockProducts[idx] = product;
   }
@@ -119,9 +119,9 @@ class InventoryRemoteDataSource {
   ///
   /// === REAL IMPLEMENTATION (uncomment when backend is ready) ===
   ///
-  /// Future<void> deleteProduct(String id) async {
+  /// Future`<void>` deleteProduct(String id) async {
   ///   try {
-  ///     await _apiClient.dio.delete<void>(
+  ///     await _apiClient.dio.delete`<void>`(
   ///       ApiEndpoints.product(id),
   ///     );
   ///   } on DioException catch (e) {
@@ -133,7 +133,7 @@ class InventoryRemoteDataSource {
   ///
   /// MOCK TEMPORÁRIO — remover quando backend estiver conectado:
   Future<void> deleteProduct(String id) async {
-    await Future.delayed(const Duration(milliseconds: 300));
+    await Future<void>.delayed(const Duration(milliseconds: 300));
     _mockProducts.removeWhere((p) => p.id == id);
   }
 }

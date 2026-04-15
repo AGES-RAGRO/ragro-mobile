@@ -15,7 +15,7 @@ import 'package:ragro_mobile/features/producer_orders/presentation/bloc/producer
 import 'package:ragro_mobile/features/producer_orders/presentation/bloc/producer_order_detail_state.dart';
 
 class ProducerOrderDetailPage extends StatelessWidget {
-  const ProducerOrderDetailPage({super.key, required this.orderId});
+  const ProducerOrderDetailPage({required this.orderId, super.key});
 
   final String orderId;
 
@@ -63,7 +63,7 @@ class ProducerOrderDetailPage extends StatelessWidget {
             return Scaffold(body: Center(child: Text(state.message)));
           }
 
-          final ProducerOrder? order = switch (state) {
+          final order = switch (state) {
             ProducerOrderDetailLoaded(:final order) => order,
             ProducerOrderDetailConfirming(:final order) => order,
             ProducerOrderDetailRefusing(:final order) => order,
@@ -151,7 +151,7 @@ class _ProducerOrderDetailView extends StatelessWidget {
                             vertical: 4,
                           ),
                           decoration: BoxDecoration(
-                            color: _statusColor(order.status).withOpacity(0.15),
+                            color: _statusColor(order.status).withValues(alpha: 0.15),
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Text(
@@ -189,7 +189,7 @@ class _ProducerOrderDetailView extends StatelessWidget {
                       children: [
                         CircleAvatar(
                           radius: 28,
-                          backgroundColor: AppColors.darkGreen.withOpacity(0.1),
+                          backgroundColor: AppColors.darkGreen.withValues(alpha: 0.1),
                           child: Text(
                             order.consumerName.isNotEmpty
                                 ? order.consumerName[0]
@@ -251,7 +251,7 @@ class _ProducerOrderDetailView extends StatelessWidget {
                       color: AppColors.white,
                       borderRadius: BorderRadius.circular(24),
                       border: Border.all(
-                        color: AppColors.lightGreen.withOpacity(0.1),
+                        color: AppColors.lightGreen.withValues(alpha: 0.1),
                       ),
                       boxShadow: const [
                         BoxShadow(
@@ -276,8 +276,8 @@ class _ProducerOrderDetailView extends StatelessWidget {
                                       width: 64,
                                       height: 64,
                                       decoration: BoxDecoration(
-                                        color: AppColors.darkGreen.withOpacity(
-                                          0.05,
+                                        color: AppColors.darkGreen.withValues(
+                                          alpha: 0.05,
                                         ),
                                         borderRadius: BorderRadius.circular(12),
                                       ),
@@ -327,7 +327,7 @@ class _ProducerOrderDetailView extends StatelessWidget {
                               ),
                               if (!isLast)
                                 Divider(
-                                  color: AppColors.lightGreen.withOpacity(0.1),
+                                  color: AppColors.lightGreen.withValues(alpha: 0.1),
                                   height: 1,
                                 ),
                             ],
@@ -336,13 +336,13 @@ class _ProducerOrderDetailView extends StatelessWidget {
                         // Total row
                         Container(
                           decoration: BoxDecoration(
-                            color: AppColors.darkGreen.withOpacity(0.06),
+                            color: AppColors.darkGreen.withValues(alpha: 0.06),
                             borderRadius: const BorderRadius.vertical(
                               bottom: Radius.circular(24),
                             ),
                             border: Border(
                               top: BorderSide(
-                                color: AppColors.lightGreen.withOpacity(0.15),
+                                color: AppColors.lightGreen.withValues(alpha: 0.15),
                               ),
                             ),
                           ),
@@ -398,7 +398,7 @@ class _ProducerOrderDetailView extends StatelessWidget {
                       color: AppColors.white,
                       borderRadius: BorderRadius.circular(16),
                       border: Border.all(
-                        color: AppColors.lightGreen.withOpacity(0.1),
+                        color: AppColors.lightGreen.withValues(alpha: 0.1),
                       ),
                       boxShadow: const [
                         BoxShadow(
@@ -507,7 +507,7 @@ class _BottomActions extends StatelessWidget {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.red,
                       foregroundColor: AppColors.white,
-                      disabledBackgroundColor: AppColors.red.withOpacity(0.5),
+                      disabledBackgroundColor: AppColors.red.withValues(alpha: 0.5),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(24),
                       ),
@@ -533,8 +533,8 @@ class _BottomActions extends StatelessWidget {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.darkGreen,
                       foregroundColor: AppColors.white,
-                      disabledBackgroundColor: AppColors.darkGreen.withOpacity(
-                        0.5,
+                      disabledBackgroundColor: AppColors.darkGreen.withValues(
+                        alpha: 0.5,
                       ),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(24),
@@ -646,7 +646,7 @@ class _BottomActions extends StatelessWidget {
               child: ElevatedButton(
                 onPressed: null,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.darkGreen.withOpacity(0.4),
+                  backgroundColor: AppColors.darkGreen.withValues(alpha: 0.4),
                   foregroundColor: AppColors.white,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(24),

@@ -4,10 +4,7 @@ import 'package:ragro_mobile/features/home/domain/entities/home_product.dart';
 
 class HomeProductCard extends StatelessWidget {
   const HomeProductCard({
-    super.key,
-    required this.product,
-    required this.onTap,
-    required this.onAddToCart,
+    required this.product, required this.onTap, required this.onAddToCart, super.key,
   });
 
   final HomeProduct product;
@@ -135,8 +132,8 @@ class _ProductPlaceholder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      color: AppColors.mintGreen.withOpacity(0.2),
+    return ColoredBox(
+      color: AppColors.mintGreen.withValues(alpha: 0.2),
       child: const Center(
         child: Icon(Icons.eco, size: 32, color: AppColors.darkGreen),
       ),

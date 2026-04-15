@@ -5,10 +5,7 @@ import 'package:ragro_mobile/features/producer_orders/domain/entities/producer_o
 
 class ProducerOrderCard extends StatelessWidget {
   const ProducerOrderCard({
-    super.key,
-    required this.order,
-    required this.onDetailTap,
-    required this.onActionTap,
+    required this.order, required this.onDetailTap, required this.onActionTap, super.key,
   });
 
   final ProducerOrder order;
@@ -59,7 +56,7 @@ class ProducerOrderCard extends StatelessWidget {
               // Avatar
               CircleAvatar(
                 radius: 20,
-                backgroundColor: AppColors.darkGreen.withOpacity(0.1),
+                backgroundColor: AppColors.darkGreen.withValues(alpha: 0.1),
                 child: Text(
                   order.consumerName.isNotEmpty ? order.consumerName[0] : '?',
                   style: const TextStyle(
@@ -103,7 +100,7 @@ class ProducerOrderCard extends StatelessWidget {
                     vertical: 4,
                   ),
                   decoration: BoxDecoration(
-                    color: AppColors.darkGreen.withOpacity(0.1),
+                    color: AppColors.darkGreen.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(6),
                   ),
                   child: const Text(

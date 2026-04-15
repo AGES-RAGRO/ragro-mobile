@@ -25,7 +25,7 @@ class AdminProducerModel extends AdminProducer {
   factory AdminProducerModel.fromJson(Map<String, dynamic> json) {
     final addressData = json['address'];
     AdminAddress? producerAddress;
-    String flattenedAddress = '';
+    var flattenedAddress = '';
 
     if (addressData is Map<String, dynamic>) {
       producerAddress = AdminAddress(

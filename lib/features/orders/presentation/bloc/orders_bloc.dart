@@ -25,7 +25,7 @@ class OrdersBloc extends Bloc<OrdersEvent, OrdersState> {
     try {
       final orders = await _getOrders(status: _activeTab);
       emit(OrdersLoaded(orders: orders, activeTab: _activeTab));
-    } catch (e) {
+    } on Exception catch (e) {
       emit(OrdersFailure(e.toString()));
     }
   }
@@ -39,7 +39,7 @@ class OrdersBloc extends Bloc<OrdersEvent, OrdersState> {
     try {
       final orders = await _getOrders(status: _activeTab);
       emit(OrdersLoaded(orders: orders, activeTab: _activeTab));
-    } catch (e) {
+    } on Exception catch (e) {
       emit(OrdersFailure(e.toString()));
     }
   }
@@ -52,7 +52,7 @@ class OrdersBloc extends Bloc<OrdersEvent, OrdersState> {
     try {
       final orders = await _getOrders(status: _activeTab);
       emit(OrdersLoaded(orders: orders, activeTab: _activeTab));
-    } catch (e) {
+    } on Exception catch (e) {
       emit(OrdersFailure(e.toString()));
     }
   }

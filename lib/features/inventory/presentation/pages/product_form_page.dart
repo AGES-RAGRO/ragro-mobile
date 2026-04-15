@@ -149,7 +149,7 @@ class _ProductFormViewState extends State<_ProductFormView> {
                   width: double.infinity,
                   height: 210,
                   decoration: BoxDecoration(
-                    color: AppColors.darkGreen.withOpacity(0.06),
+                    color: AppColors.darkGreen.withValues(alpha: 0.06),
                     borderRadius: BorderRadius.circular(16),
                   ),
                   child: Stack(
@@ -208,7 +208,7 @@ class _ProductFormViewState extends State<_ProductFormView> {
                 const SizedBox(height: 24),
 
                 // Nome
-                _FieldLabel('Nome do Produto'),
+                const _FieldLabel('Nome do Produto'),
                 const SizedBox(height: 8),
                 _TextField(
                   controller: _nameController,
@@ -219,7 +219,7 @@ class _ProductFormViewState extends State<_ProductFormView> {
                 const SizedBox(height: 16),
 
                 // Descrição
-                _FieldLabel('Descrição do Produto'),
+                const _FieldLabel('Descrição do Produto'),
                 const SizedBox(height: 8),
                 _TextField(
                   controller: _descriptionController,
@@ -238,7 +238,7 @@ class _ProductFormViewState extends State<_ProductFormView> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          _FieldLabel('Preço (R\$)'),
+                          const _FieldLabel(r'Preço (R$)'),
                           const SizedBox(height: 8),
                           _TextField(
                             controller: _priceController,
@@ -257,7 +257,7 @@ class _ProductFormViewState extends State<_ProductFormView> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          _FieldLabel('Unidade'),
+                          const _FieldLabel('Unidade'),
                           const SizedBox(height: 8),
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -303,7 +303,7 @@ class _ProductFormViewState extends State<_ProductFormView> {
                 const SizedBox(height: 16),
 
                 // Estoque
-                _FieldLabel('Quantidade em Estoque'),
+                const _FieldLabel('Quantidade em Estoque'),
                 const SizedBox(height: 8),
                 _StockStepper(
                   value: _stockCount,
@@ -322,8 +322,8 @@ class _ProductFormViewState extends State<_ProductFormView> {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.darkGreen,
                       foregroundColor: AppColors.white,
-                      disabledBackgroundColor: AppColors.darkGreen.withOpacity(
-                        0.5,
+                      disabledBackgroundColor: AppColors.darkGreen.withValues(
+                        alpha: 0.5,
                       ),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(24),

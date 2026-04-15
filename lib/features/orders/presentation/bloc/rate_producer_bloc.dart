@@ -35,7 +35,7 @@ class RateProducerBloc extends Bloc<RateProducerEvent, RateProducerState> {
     try {
       await _rateProducer(event.orderId, event.rating);
       emit(const RateProducerSuccess());
-    } catch (e) {
+    } on Exception catch (e) {
       emit(RateProducerFailure(e.toString()));
     }
   }

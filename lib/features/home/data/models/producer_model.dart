@@ -27,15 +27,14 @@ class ProducerModel extends Producer {
     );
   }
 
-  static ProducerModel mock(int index) {
-    return ProducerModel(
-      id: 'producer_$index',
-      name: 'Fazenda Sol Nascente',
-      description: '"Orgânicos colhidos no dia para...',
-      avatarUrl: '',
-      coverUrl: '',
-      averageRating: 4.9,
-      ownerName: 'Sr. Manoel Silva',
-    );
-  }
+  const ProducerModel.mock(int index)
+    : this(
+        id: 'producer_$index',
+        name: 'Fazenda Sol Nascente',
+        description: '"Orgânicos colhidos no dia para...',
+        avatarUrl: '',
+        coverUrl: '',
+        averageRating: 4.9,
+        ownerName: 'Sr. Manoel Silva',
+      );
 }

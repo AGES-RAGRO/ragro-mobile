@@ -38,7 +38,7 @@ class ProductFormBloc extends Bloc<ProductFormEvent, ProductFormState> {
         orElse: () => throw Exception('Produto não encontrado'),
       );
       emit(ProductFormReady(product: product));
-    } catch (e) {
+    } on Exception catch (e) {
       emit(ProductFormFailure(e.toString()));
     }
   }
@@ -81,7 +81,7 @@ class ProductFormBloc extends Bloc<ProductFormEvent, ProductFormState> {
         await _updateProduct(updated);
       }
       emit(const ProductFormSuccess());
-    } catch (e) {
+    } on Exception catch (e) {
       emit(ProductFormFailure(e.toString()));
     }
   }

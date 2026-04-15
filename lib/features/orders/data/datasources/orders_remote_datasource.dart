@@ -27,7 +27,7 @@ class OrdersRemoteDatasource {
           imageUrl: '',
           quantity: 3,
           unityType: 'kg',
-          totalPrice: 18.00,
+          totalPrice: 18,
         ),
         OrderItem(
           productId: 'prod3',
@@ -35,7 +35,7 @@ class OrdersRemoteDatasource {
           imageUrl: '',
           quantity: 1,
           unityType: 'kg',
-          totalPrice: 9.00,
+          totalPrice: 9,
         ),
         OrderItem(
           productId: 'prod4',
@@ -84,7 +84,7 @@ class OrdersRemoteDatasource {
           imageUrl: '',
           quantity: 3,
           unityType: 'kg',
-          totalPrice: 18.00,
+          totalPrice: 18,
         ),
         OrderItem(
           productId: 'prod3',
@@ -92,7 +92,7 @@ class OrdersRemoteDatasource {
           imageUrl: '',
           quantity: 1,
           unityType: 'kg',
-          totalPrice: 9.00,
+          totalPrice: 9,
         ),
       ],
       totalAmount: 145.90,
@@ -133,7 +133,7 @@ class OrdersRemoteDatasource {
           imageUrl: '',
           quantity: 1,
           unityType: 'kg',
-          totalPrice: 9.00,
+          totalPrice: 9,
         ),
       ],
       totalAmount: 145.90,
@@ -166,7 +166,7 @@ class OrdersRemoteDatasource {
           imageUrl: '',
           quantity: 3,
           unityType: 'kg',
-          totalPrice: 18.00,
+          totalPrice: 18,
         ),
       ],
       totalAmount: 145.90,
@@ -192,16 +192,16 @@ class OrdersRemoteDatasource {
   ///
   /// === REAL IMPLEMENTATION (uncomment when backend is ready) ===
   ///
-  /// Future<List<Order>> getOrders({OrderStatus? status}) async {
+  /// Future`<List<Order>>` getOrders({OrderStatus? status}) async {
   ///   try {
-  ///     final response = await _apiClient.dio.get<Map<String, dynamic>>(
+  ///     final response = await _apiClient.dio.get`<Map<String, dynamic>>`(
   ///       ApiEndpoints.orders,
   ///       queryParameters: {
   ///         if (status != null) 'status': status.name,
   ///       },
   ///     );
   ///     return (response.data!['data'] as List)
-  ///         .map((e) => Order.fromJson(e as Map<String, dynamic>))
+  ///         .map((e) => Order.fromJson(e as `Map<String, dynamic>`))
   ///         .toList();
   ///   } on DioException catch (e) {
   ///     throw e.error as ApiException? ?? const UnknownApiException();
@@ -221,9 +221,9 @@ class OrdersRemoteDatasource {
   ///
   /// === REAL IMPLEMENTATION (uncomment when backend is ready) ===
   ///
-  /// Future<Order> getOrderById(String id) async {
+  /// Future`<Order>` getOrderById(String id) async {
   ///   try {
-  ///     final response = await _apiClient.dio.get<Map<String, dynamic>>(
+  ///     final response = await _apiClient.dio.get`<Map<String, dynamic>>`(
   ///       ApiEndpoints.order(id),
   ///     );
   ///     return Order.fromJson(response.data!);
@@ -247,9 +247,9 @@ class OrdersRemoteDatasource {
   ///
   /// === REAL IMPLEMENTATION (uncomment when backend is ready) ===
   ///
-  /// Future<Order> confirmOrder(String cartId) async {
+  /// Future`<Order>` confirmOrder(String cartId) async {
   ///   try {
-  ///     final response = await _apiClient.dio.post<Map<String, dynamic>>(
+  ///     final response = await _apiClient.dio.post`<Map<String, dynamic>>`(
   ///       ApiEndpoints.orders,
   ///       data: {'cart_id': cartId},
   ///     );
@@ -271,9 +271,9 @@ class OrdersRemoteDatasource {
   ///
   /// === REAL IMPLEMENTATION (uncomment when backend is ready) ===
   ///
-  /// Future<void> rateProducer(String orderId, int rating) async {
+  /// Future`<void>` rateProducer(String orderId, int rating) async {
   ///   try {
-  ///     await _apiClient.dio.post<void>(
+  ///     await _apiClient.dio.post`<void>`(
   ///       ApiEndpoints.orderRating(orderId),
   ///       data: {'rating': rating},
   ///     );

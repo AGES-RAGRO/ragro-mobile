@@ -15,7 +15,7 @@ import 'package:ragro_mobile/features/orders/presentation/widgets/order_item_row
 import 'package:ragro_mobile/features/orders/presentation/widgets/order_status_badge.dart';
 
 class OrderDetailPage extends StatelessWidget {
-  const OrderDetailPage({super.key, required this.orderId});
+  const OrderDetailPage({required this.orderId, super.key});
 
   final String orderId;
 
@@ -102,7 +102,7 @@ class OrderDetailPage extends StatelessWidget {
                             color: AppColors.white,
                             borderRadius: BorderRadius.circular(24),
                             border: Border.all(
-                              color: AppColors.lightGreen.withOpacity(0.05),
+                              color: AppColors.lightGreen.withValues(alpha: 0.05),
                             ),
                             boxShadow: const [
                               BoxShadow(
@@ -127,8 +127,8 @@ class OrderDetailPage extends StatelessWidget {
                                     ),
                                     if (!isLast)
                                       Divider(
-                                        color: AppColors.lightGreen.withOpacity(
-                                          0.05,
+                                        color: AppColors.lightGreen.withValues(
+                                          alpha: 0.05,
                                         ),
                                         height: 1,
                                       ),
@@ -138,14 +138,14 @@ class OrderDetailPage extends StatelessWidget {
                               // Total
                               Container(
                                 decoration: BoxDecoration(
-                                  color: AppColors.lightGreen.withOpacity(0.05),
+                                  color: AppColors.lightGreen.withValues(alpha: 0.05),
                                   borderRadius: const BorderRadius.vertical(
                                     bottom: Radius.circular(24),
                                   ),
                                   border: Border(
                                     top: BorderSide(
-                                      color: AppColors.lightGreen.withOpacity(
-                                        0.1,
+                                      color: AppColors.lightGreen.withValues(
+                                        alpha: 0.1,
                                       ),
                                     ),
                                   ),
@@ -208,7 +208,7 @@ class OrderDetailPage extends StatelessWidget {
                             color: AppColors.white,
                             borderRadius: BorderRadius.circular(24),
                             border: Border.all(
-                              color: AppColors.lightGreen.withOpacity(0.05),
+                              color: AppColors.lightGreen.withValues(alpha: 0.05),
                             ),
                             boxShadow: const [
                               BoxShadow(

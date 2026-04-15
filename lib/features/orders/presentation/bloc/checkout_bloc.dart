@@ -22,7 +22,7 @@ class CheckoutBloc extends Bloc<CheckoutEvent, CheckoutState> {
       // Load the order preview from the cart
       final order = await _confirmOrder(event.cartId);
       emit(CheckoutReady(order));
-    } catch (e) {
+    } on Exception catch (e) {
       emit(CheckoutFailure(e.toString()));
     }
   }
@@ -35,7 +35,7 @@ class CheckoutBloc extends Bloc<CheckoutEvent, CheckoutState> {
     try {
       final order = await _confirmOrder(event.cartId);
       emit(CheckoutSuccess(order));
-    } catch (e) {
+    } on Exception catch (e) {
       emit(CheckoutFailure(e.toString()));
     }
   }

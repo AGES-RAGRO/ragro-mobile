@@ -58,7 +58,7 @@ class HomeProductModel extends HomeProduct {
         id: 'p4',
         name: 'Manga Palmer',
         category: 'FRUTAS',
-        price: 6.00,
+        price: 6,
         imageUrl: '',
         farmName: 'Sítio Verde Vivo',
         producerId: 'producer_2',

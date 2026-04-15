@@ -255,7 +255,7 @@ class _AdminProducersView extends StatelessWidget {
         ],
       ),
     );
-    if (confirmed == true && context.mounted) {
+    if ((confirmed ?? false) && context.mounted) {
       context.read<AuthBloc>().add(const AuthLogoutRequested());
     }
   }

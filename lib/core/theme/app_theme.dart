@@ -9,7 +9,6 @@ abstract final class AppTheme {
       primary: AppColors.darkGreen,
       secondary: AppColors.lightGreen,
       onSecondary: AppColors.white,
-      surface: AppColors.white,
       onSurface: AppColors.black,
       surfaceContainerLowest: AppColors.white,
       surfaceContainerLow: AppColors.white,

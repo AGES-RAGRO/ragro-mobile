@@ -182,7 +182,7 @@ class _SearchViewState extends State<_SearchView> {
                               itemBuilder: (_, i) => SearchResultTile(
                                 result: results[i],
                                 onTap: () {
-                                  // TODO: navigate to producer/product detail
+                                  // TODO(dev): navigate to producer/product detail
                                 },
                               ),
                             ),
@@ -241,10 +241,10 @@ class _SearchViewState extends State<_SearchView> {
                   color: AppColors.darkGreen,
                 ),
                 const SizedBox(width: 12),
-                Expanded(
+                const Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    children: const [
+                    children: [
                       Text(
                         'Caxias do Sul, RS',
                         style: TextStyle(

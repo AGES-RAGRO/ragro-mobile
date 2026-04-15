@@ -3,7 +3,7 @@ import 'package:ragro_mobile/core/theme/app_colors.dart';
 import 'package:ragro_mobile/features/home/domain/entities/producer.dart';
 
 class ProducerCard extends StatelessWidget {
-  const ProducerCard({super.key, required this.producer, required this.onTap});
+  const ProducerCard({required this.producer, required this.onTap, super.key});
 
   final Producer producer;
   final VoidCallback onTap;
@@ -60,7 +60,7 @@ class ProducerCard extends StatelessWidget {
                       vertical: 4,
                     ),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.9),
+                      color: Colors.white.withValues(alpha: 0.9),
                       borderRadius: BorderRadius.circular(9999),
                     ),
                     child: Row(
@@ -121,7 +121,7 @@ class ProducerCard extends StatelessWidget {
                     children: [
                       CircleAvatar(
                         radius: 12,
-                        backgroundColor: AppColors.mintGreen.withOpacity(0.3),
+                        backgroundColor: AppColors.mintGreen.withValues(alpha: 0.3),
                         backgroundImage: producer.avatarUrl.isNotEmpty
                             ? NetworkImage(producer.avatarUrl)
                             : null,
@@ -160,8 +160,8 @@ class _PlaceholderImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      color: AppColors.mintGreen.withOpacity(0.2),
+    return ColoredBox(
+      color: AppColors.mintGreen.withValues(alpha: 0.2),
       child: const Center(
         child: Icon(Icons.landscape, size: 48, color: AppColors.darkGreen),
       ),

@@ -36,7 +36,7 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
       emit(SearchLoaded(results: results, query: event.query));
     } on ApiException catch (e) {
       emit(SearchFailure(e.message));
-    } catch (_) {
+    } on Exception catch (_) {
       emit(const SearchFailure('Erro ao buscar. Tente novamente.'));
     }
   }

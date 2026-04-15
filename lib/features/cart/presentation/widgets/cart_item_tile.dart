@@ -6,7 +6,7 @@ import 'package:ragro_mobile/features/cart/presentation/bloc/cart_bloc.dart';
 import 'package:ragro_mobile/features/cart/presentation/bloc/cart_event.dart';
 
 class CartItemTile extends StatelessWidget {
-  const CartItemTile({super.key, required this.item});
+  const CartItemTile({required this.item, super.key});
 
   final CartItem item;
 
@@ -40,9 +40,9 @@ class CartItemTile extends StatelessWidget {
               height: 80,
               child: item.imageUrl.isNotEmpty
                   ? Image.network(item.imageUrl, fit: BoxFit.cover)
-                  : Container(
-                      color: const Color(0xFFF1F5F9),
-                      child: const Icon(Icons.eco, color: AppColors.lightGreen),
+                  : const ColoredBox(
+                      color: Color(0xFFF1F5F9),
+                      child: Icon(Icons.eco, color: AppColors.lightGreen),
                     ),
             ),
           ),

@@ -27,7 +27,7 @@ class ProducerOrdersBloc
     try {
       final orders = await _getProducerOrders(status: _activeTab);
       emit(ProducerOrdersLoaded(orders: orders, activeTab: _activeTab));
-    } catch (e) {
+    } on Exception catch (e) {
       emit(ProducerOrdersFailure(e.toString()));
     }
   }
@@ -41,7 +41,7 @@ class ProducerOrdersBloc
     try {
       final orders = await _getProducerOrders(status: _activeTab);
       emit(ProducerOrdersLoaded(orders: orders, activeTab: _activeTab));
-    } catch (e) {
+    } on Exception catch (e) {
       emit(ProducerOrdersFailure(e.toString()));
     }
   }
@@ -54,7 +54,7 @@ class ProducerOrdersBloc
     try {
       final orders = await _getProducerOrders(status: _activeTab);
       emit(ProducerOrdersLoaded(orders: orders, activeTab: _activeTab));
-    } catch (e) {
+    } on Exception catch (e) {
       emit(ProducerOrdersFailure(e.toString()));
     }
   }

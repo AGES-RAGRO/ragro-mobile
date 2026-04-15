@@ -10,13 +10,12 @@ class CartLocalDatasource {
 
   Cart addItem(CartItem item) {
     if (_cart.isEmpty) {
-      _cart = Cart(
+      return _cart = Cart(
         producerId: item.producerId,
         farmName: item.farmName,
         farmLocation: item.farmLocation,
         items: [item],
       );
-      return _cart;
     }
     // same producer: add or increment
     if (_cart.producerId == item.producerId) {
@@ -50,20 +49,17 @@ class CartLocalDatasource {
     final updated = _cart.items.map((i) {
       return i.productId == productId ? i.copyWith(quantity: quantity) : i;
     }).toList();
-    _cart = _cart.copyWith(items: updated);
-    return _cart;
+    return _cart = _cart.copyWith(items: updated);
   }
 
   Cart removeItem(String productId) {
     final updated = _cart.items.where((i) => i.productId != productId).toList();
-    _cart = updated.isEmpty
+    return _cart = updated.isEmpty
         ? const Cart.empty()
         : _cart.copyWith(items: updated);
-    return _cart;
   }
 
   Cart clear() {
-    _cart = const Cart.empty();
-    return _cart;
+    return _cart = const Cart.empty();
   }
 }

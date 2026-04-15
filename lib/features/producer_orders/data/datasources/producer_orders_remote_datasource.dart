@@ -23,7 +23,7 @@ class ProducerOrdersRemoteDataSource {
           name: 'Tomate Cereja Orgânico',
           imageUrl: '',
           unitPrice: 2.50,
-          totalPrice: 25.00,
+          totalPrice: 25,
           quantity: 10,
           unityType: 'kg',
         ),
@@ -146,7 +146,7 @@ class ProducerOrdersRemoteDataSource {
           name: 'Tomate Cereja Orgânico',
           imageUrl: '',
           unitPrice: 2.50,
-          totalPrice: 25.00,
+          totalPrice: 25,
           quantity: 10,
           unityType: 'kg',
         ),
@@ -179,16 +179,16 @@ class ProducerOrdersRemoteDataSource {
   ///
   /// === REAL IMPLEMENTATION (uncomment when backend is ready) ===
   ///
-  /// Future<List<ProducerOrder>> getOrders({ProducerOrderStatus? status}) async {
+  /// Future`<List<ProducerOrder>>` getOrders({ProducerOrderStatus? status}) async {
   ///   try {
-  ///     final response = await _apiClient.dio.get<Map<String, dynamic>>(
+  ///     final response = await _apiClient.dio.get`<Map<String, dynamic>>`(
   ///       ApiEndpoints.producerOrders,
   ///       queryParameters: {
   ///         if (status != null) 'status': status.name,
   ///       },
   ///     );
   ///     return (response.data!['data'] as List)
-  ///         .map((e) => ProducerOrder.fromJson(e as Map<String, dynamic>))
+  ///         .map((e) => ProducerOrder.fromJson(e as `Map<String, dynamic>`))
   ///         .toList();
   ///   } on DioException catch (e) {
   ///     throw e.error as ApiException? ?? const UnknownApiException();
@@ -199,7 +199,7 @@ class ProducerOrdersRemoteDataSource {
   ///
   /// MOCK TEMPORÁRIO — remover quando backend estiver conectado:
   Future<List<ProducerOrder>> getOrders({ProducerOrderStatus? status}) async {
-    await Future.delayed(const Duration(milliseconds: 400));
+    await Future<void>.delayed(const Duration(milliseconds: 400));
     if (status == null) return List.from(_mockOrders);
     return _mockOrders.where((o) => o.status == status).toList();
   }
@@ -208,9 +208,9 @@ class ProducerOrdersRemoteDataSource {
   ///
   /// === REAL IMPLEMENTATION (uncomment when backend is ready) ===
   ///
-  /// Future<ProducerOrder> getOrderById(String id) async {
+  /// Future`<ProducerOrder>` getOrderById(String id) async {
   ///   try {
-  ///     final response = await _apiClient.dio.get<Map<String, dynamic>>(
+  ///     final response = await _apiClient.dio.get`<Map<String, dynamic>>`(
   ///       '${ApiEndpoints.producerOrders}/$id',
   ///     );
   ///     return ProducerOrder.fromJson(response.data!);
@@ -223,7 +223,7 @@ class ProducerOrdersRemoteDataSource {
   ///
   /// MOCK TEMPORÁRIO — remover quando backend estiver conectado:
   Future<ProducerOrder> getOrderById(String id) async {
-    await Future.delayed(const Duration(milliseconds: 300));
+    await Future<void>.delayed(const Duration(milliseconds: 300));
     return _mockOrders.firstWhere((o) => o.id == id);
   }
 
@@ -231,9 +231,9 @@ class ProducerOrdersRemoteDataSource {
   ///
   /// === REAL IMPLEMENTATION (uncomment when backend is ready) ===
   ///
-  /// Future<void> confirmOrder(String id) async {
+  /// Future`<void>` confirmOrder(String id) async {
   ///   try {
-  ///     await _apiClient.dio.post<void>(
+  ///     await _apiClient.dio.post`<void>`(
   ///       ApiEndpoints.producerOrderConfirm(id),
   ///     );
   ///   } on DioException catch (e) {
@@ -245,7 +245,7 @@ class ProducerOrdersRemoteDataSource {
   ///
   /// MOCK TEMPORÁRIO — remover quando backend estiver conectado:
   Future<void> confirmOrder(String id) async {
-    await Future.delayed(const Duration(milliseconds: 300));
+    await Future<void>.delayed(const Duration(milliseconds: 300));
     final idx = _mockOrders.indexWhere((o) => o.id == id);
     if (idx >= 0) {
       _mockOrders[idx] = _mockOrders[idx].copyWith(
@@ -259,9 +259,9 @@ class ProducerOrdersRemoteDataSource {
   ///
   /// === REAL IMPLEMENTATION (uncomment when backend is ready) ===
   ///
-  /// Future<void> refuseOrder(String id) async {
+  /// Future`<void>` refuseOrder(String id) async {
   ///   try {
-  ///     await _apiClient.dio.post<void>(
+  ///     await _apiClient.dio.post`<void>`(
   ///       ApiEndpoints.producerOrderCancel(id),
   ///     );
   ///   } on DioException catch (e) {
@@ -273,7 +273,7 @@ class ProducerOrdersRemoteDataSource {
   ///
   /// MOCK TEMPORÁRIO — remover quando backend estiver conectado:
   Future<void> refuseOrder(String id) async {
-    await Future.delayed(const Duration(milliseconds: 300));
+    await Future<void>.delayed(const Duration(milliseconds: 300));
     final idx = _mockOrders.indexWhere((o) => o.id == id);
     if (idx >= 0) {
       _mockOrders[idx] = _mockOrders[idx].copyWith(
@@ -286,9 +286,9 @@ class ProducerOrdersRemoteDataSource {
   ///
   /// === REAL IMPLEMENTATION (uncomment when backend is ready) ===
   ///
-  /// Future<void> updateStatus(String id, ProducerOrderStatus status) async {
+  /// Future`<void>` updateStatus(String id, ProducerOrderStatus status) async {
   ///   try {
-  ///     await _apiClient.dio.patch<void>(
+  ///     await _apiClient.dio.patch`<void>`(
   ///       ApiEndpoints.producerOrderStatus(id),
   ///       data: {'status': status.name},
   ///     );
@@ -301,7 +301,7 @@ class ProducerOrdersRemoteDataSource {
   ///
   /// MOCK TEMPORÁRIO — remover quando backend estiver conectado:
   Future<void> updateStatus(String id, ProducerOrderStatus status) async {
-    await Future.delayed(const Duration(milliseconds: 300));
+    await Future<void>.delayed(const Duration(milliseconds: 300));
     final idx = _mockOrders.indexWhere((o) => o.id == id);
     if (idx >= 0) {
       _mockOrders[idx] = _mockOrders[idx].copyWith(status: status);

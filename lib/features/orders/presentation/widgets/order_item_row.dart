@@ -3,7 +3,7 @@ import 'package:ragro_mobile/core/theme/app_colors.dart';
 import 'package:ragro_mobile/features/orders/domain/entities/order_item.dart';
 
 class OrderItemRow extends StatelessWidget {
-  const OrderItemRow({super.key, required this.item});
+  const OrderItemRow({required this.item, super.key});
 
   final OrderItem item;
 
@@ -22,7 +22,7 @@ class OrderItemRow extends StatelessWidget {
             child: Container(
               width: 64,
               height: 64,
-              color: AppColors.lightGreen.withOpacity(0.05),
+              color: AppColors.lightGreen.withValues(alpha: 0.05),
               child: item.imageUrl.isNotEmpty
                   ? Image.network(item.imageUrl, fit: BoxFit.cover)
                   : const Icon(Icons.eco, color: AppColors.lightGreen),

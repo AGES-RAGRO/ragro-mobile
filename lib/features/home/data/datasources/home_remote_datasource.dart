@@ -26,7 +26,7 @@ class HomeRemoteDataSource {
 
       return PaginatedResponse.fromJson(
         response.data!,
-        (json) => ProducerModel.fromJson(json),
+        ProducerModel.fromJson,
       );
     } on DioException catch (e) {
       throw e.error as ApiException? ?? const UnknownApiException();
@@ -35,7 +35,7 @@ class HomeRemoteDataSource {
 
   /// Gets recommended products for the home screen.
   Future<List<HomeProductModel>> getRecommendedProducts() async {
-    await Future.delayed(const Duration(milliseconds: 600));
+    await Future<void>.delayed(const Duration(milliseconds: 600));
     return HomeProductModel.mocks();
   }
 }

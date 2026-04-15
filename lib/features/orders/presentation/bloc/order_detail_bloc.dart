@@ -20,7 +20,7 @@ class OrderDetailBloc extends Bloc<OrderDetailEvent, OrderDetailState> {
     try {
       final order = await _getOrderDetail(event.orderId);
       emit(OrderDetailLoaded(order));
-    } catch (e) {
+    } on Exception catch (e) {
       emit(OrderDetailFailure(e.toString()));
     }
   }

@@ -9,12 +9,6 @@ class PaginatedResponse<T> {
     required this.totalPages,
   });
 
-  final List<T> content;
-  final int page;
-  final int size;
-  final int totalElements;
-  final int totalPages;
-
   factory PaginatedResponse.fromJson(
     Map<String, dynamic> json,
     T Function(Map<String, dynamic>) fromJsonT,
@@ -31,6 +25,12 @@ class PaginatedResponse<T> {
       totalPages: json['totalPages'] as int? ?? 0,
     );
   }
+
+  final List<T> content;
+  final int page;
+  final int size;
+  final int totalElements;
+  final int totalPages;
 
   PaginatedResponse<R> map<R>(R Function(T) mapper) {
     return PaginatedResponse<R>(

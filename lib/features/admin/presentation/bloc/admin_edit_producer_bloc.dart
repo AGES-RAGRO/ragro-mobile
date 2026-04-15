@@ -29,7 +29,7 @@ class AdminEditProducerBloc
     try {
       final producer = await _getById(event.producerId);
       emit(AdminEditProducerLoaded(producer));
-    } catch (e) {
+    } on Exception catch (e) {
       emit(AdminEditProducerFailure(e.toString()));
     }
   }
@@ -115,7 +115,7 @@ class AdminEditProducerBloc
       emit(const AdminEditProducerSuccess());
     } on ApiException catch (e) {
       emit(AdminEditProducerFailure(e.message));
-    } catch (e) {
+    } on Exception catch (e) {
       emit(AdminEditProducerFailure(e.toString()));
     }
   }

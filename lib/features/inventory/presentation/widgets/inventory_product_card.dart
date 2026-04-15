@@ -4,10 +4,7 @@ import 'package:ragro_mobile/features/inventory/domain/entities/inventory_produc
 
 class InventoryProductCard extends StatelessWidget {
   const InventoryProductCard({
-    super.key,
-    required this.product,
-    required this.onEditTap,
-    required this.onDeleteTap,
+    required this.product, required this.onEditTap, required this.onDeleteTap, super.key,
   });
 
   final InventoryProduct product;
@@ -42,7 +39,7 @@ class InventoryProductCard extends StatelessWidget {
             width: 96,
             height: 96,
             decoration: BoxDecoration(
-              color: AppColors.darkGreen.withOpacity(0.06),
+              color: AppColors.darkGreen.withValues(alpha: 0.06),
               borderRadius: BorderRadius.circular(16),
             ),
             child: const Icon(
@@ -82,8 +79,8 @@ class InventoryProductCard extends StatelessWidget {
                       ),
                       decoration: BoxDecoration(
                         color: isAvailable
-                            ? AppColors.lightGreen.withOpacity(0.12)
-                            : AppColors.placeholder.withOpacity(0.12),
+                            ? AppColors.lightGreen.withValues(alpha: 0.12)
+                            : AppColors.placeholder.withValues(alpha: 0.12),
                         borderRadius: BorderRadius.circular(6),
                       ),
                       child: Text(
@@ -142,7 +139,7 @@ class InventoryProductCard extends StatelessWidget {
                           vertical: 6,
                         ),
                         decoration: BoxDecoration(
-                          color: AppColors.lightGreen.withOpacity(0.1),
+                          color: AppColors.lightGreen.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: const Row(
@@ -176,7 +173,7 @@ class InventoryProductCard extends StatelessWidget {
                           vertical: 6,
                         ),
                         decoration: BoxDecoration(
-                          color: AppColors.red.withOpacity(0.1),
+                          color: AppColors.red.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: const Row(

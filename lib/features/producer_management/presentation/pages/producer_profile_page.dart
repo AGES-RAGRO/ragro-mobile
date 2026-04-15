@@ -129,8 +129,8 @@ class _ProducerProfileView extends StatelessWidget {
                           backgroundColor: AppColors.white,
                           child: CircleAvatar(
                             radius: 56,
-                            backgroundColor: AppColors.darkGreen.withOpacity(
-                              0.1,
+                            backgroundColor: AppColors.darkGreen.withValues(
+                              alpha: 0.1,
                             ),
                             backgroundImage: dashboard.avatarUrl.isNotEmpty
                                 ? NetworkImage(dashboard.avatarUrl)
@@ -231,10 +231,10 @@ class _ProducerProfileView extends StatelessWidget {
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(color: const Color(0xFFE2E8F0)),
               ),
-              child: Column(
+              child: const Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
+                  Text(
                     'Horário de atendimento',
                     style: TextStyle(
                       fontFamily: 'Figtree',
@@ -243,10 +243,10 @@ class _ProducerProfileView extends StatelessWidget {
                       color: AppColors.black,
                     ),
                   ),
-                  const SizedBox(height: 12),
+                  SizedBox(height: 12),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: const [
+                    children: [
                       _DaySchedule(day: 'Seg'),
                       _DaySchedule(day: 'Ter'),
                       _DaySchedule(day: 'Qua'),
@@ -355,7 +355,7 @@ class _ProducerProfileView extends StatelessWidget {
                           vertical: 4,
                         ),
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.15),
+                          color: Colors.white.withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: Row(
@@ -420,11 +420,11 @@ class _ProducerProfileView extends StatelessWidget {
           const SizedBox(height: 24),
 
           // Visão Semanal
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 20),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: const [
+              children: [
                 Text(
                   'Visão Semanal',
                   style: TextStyle(
@@ -570,7 +570,7 @@ class _WeeklyChart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final maxVal = data.fold(0.0, (m, v) => v > m ? v : m);
+    final maxVal = data.fold<double>(0, (m, v) => v > m ? v : m);
     final activeDay = data.indexOf(maxVal);
     return Container(
       padding: const EdgeInsets.all(16),
@@ -598,7 +598,7 @@ class _WeeklyChart extends StatelessWidget {
                       decoration: BoxDecoration(
                         color: isActive
                             ? AppColors.darkGreen
-                            : AppColors.darkGreen.withOpacity(0.1),
+                            : AppColors.darkGreen.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(6),
                       ),
                     ),

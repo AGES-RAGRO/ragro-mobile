@@ -23,7 +23,7 @@ class ProducerManagementBloc
     try {
       final dashboard = await _getDashboard();
       emit(ProducerManagementLoaded(dashboard));
-    } catch (e) {
+    } on Exception catch (e) {
       emit(ProducerManagementFailure(e.toString()));
     }
   }
@@ -36,7 +36,7 @@ class ProducerManagementBloc
     try {
       final dashboard = await _getDashboard();
       emit(ProducerManagementLoaded(dashboard));
-    } catch (e) {
+    } on Exception catch (e) {
       emit(ProducerManagementFailure(e.toString()));
     }
   }

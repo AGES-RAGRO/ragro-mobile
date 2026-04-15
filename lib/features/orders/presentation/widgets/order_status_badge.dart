@@ -3,7 +3,7 @@ import 'package:ragro_mobile/core/theme/app_colors.dart';
 import 'package:ragro_mobile/features/orders/domain/entities/order_status.dart';
 
 class OrderStatusBadge extends StatelessWidget {
-  const OrderStatusBadge({super.key, required this.status});
+  const OrderStatusBadge({required this.status, super.key});
 
   final OrderStatus status;
 

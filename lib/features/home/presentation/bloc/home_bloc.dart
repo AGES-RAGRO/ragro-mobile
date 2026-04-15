@@ -21,7 +21,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
       emit(HomeLoaded(producers: data.producers, products: data.products));
     } on ApiException catch (e) {
       emit(HomeFailure(e.message));
-    } catch (_) {
+    } on Exception catch (_) {
       emit(const HomeFailure('Erro ao carregar dados. Tente novamente.'));
     }
   }
