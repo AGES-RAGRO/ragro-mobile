@@ -15,15 +15,16 @@ import 'package:ragro_mobile/features/producer_orders/presentation/bloc/producer
 import 'package:ragro_mobile/features/producer_orders/presentation/bloc/producer_order_detail_state.dart';
 
 class ProducerOrderDetailPage extends StatelessWidget {
-  const ProducerOrderDetailPage({super.key, required this.orderId});
+  const ProducerOrderDetailPage({required this.orderId, super.key});
 
   final String orderId;
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => getIt<ProducerOrderDetailBloc>()
-        ..add(ProducerOrderDetailStarted(orderId)),
+      create: (_) =>
+          getIt<ProducerOrderDetailBloc>()
+            ..add(ProducerOrderDetailStarted(orderId)),
       child: BlocConsumer<ProducerOrderDetailBloc, ProducerOrderDetailState>(
         listener: (context, state) {
           if (state is ProducerOrderDetailSuccess) {
@@ -54,16 +55,15 @@ class ProducerOrderDetailPage extends StatelessWidget {
               state is ProducerOrderDetailInitial) {
             return const Scaffold(
               body: Center(
-                  child: CircularProgressIndicator(color: AppColors.darkGreen)),
+                child: CircularProgressIndicator(color: AppColors.darkGreen),
+              ),
             );
           }
           if (state is ProducerOrderDetailFailure) {
-            return Scaffold(
-              body: Center(child: Text(state.message)),
-            );
+            return Scaffold(body: Center(child: Text(state.message)));
           }
 
-          final ProducerOrder? order = switch (state) {
+          final order = switch (state) {
             ProducerOrderDetailLoaded(:final order) => order,
             ProducerOrderDetailConfirming(:final order) => order,
             ProducerOrderDetailRefusing(:final order) => order,
@@ -74,7 +74,8 @@ class ProducerOrderDetailPage extends StatelessWidget {
 
           if (order == null) return const Scaffold();
 
-          final isProcessing = state is ProducerOrderDetailConfirming ||
+          final isProcessing =
+              state is ProducerOrderDetailConfirming ||
               state is ProducerOrderDetailRefusing ||
               state is ProducerOrderDetailUpdatingStatus;
 
@@ -101,12 +102,12 @@ class _ProducerOrderDetailView extends StatelessWidget {
       'R\$ ${price.toStringAsFixed(2).replaceAll('.', ',')}';
 
   Color _statusColor(ProducerOrderStatus status) => switch (status) {
-        ProducerOrderStatus.pending => const Color(0xFFFFC107),
-        ProducerOrderStatus.accepted => AppColors.lightGreen,
-        ProducerOrderStatus.inDelivery => const Color(0xFF2196F3),
-        ProducerOrderStatus.delivered => AppColors.darkGreen,
-        ProducerOrderStatus.cancelled => AppColors.red,
-      };
+    ProducerOrderStatus.pending => const Color(0xFFFFC107),
+    ProducerOrderStatus.accepted => AppColors.lightGreen,
+    ProducerOrderStatus.inDelivery => const Color(0xFF2196F3),
+    ProducerOrderStatus.delivered => AppColors.darkGreen,
+    ProducerOrderStatus.cancelled => AppColors.red,
+  };
 
   @override
   Widget build(BuildContext context) {
@@ -146,9 +147,13 @@ class _ProducerOrderDetailView extends StatelessWidget {
                         ),
                         Container(
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 10, vertical: 4),
+                            horizontal: 10,
+                            vertical: 4,
+                          ),
                           decoration: BoxDecoration(
-                            color: _statusColor(order.status).withOpacity(0.15),
+                            color: _statusColor(
+                              order.status,
+                            ).withValues(alpha: 0.15),
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Text(
@@ -186,7 +191,9 @@ class _ProducerOrderDetailView extends StatelessWidget {
                       children: [
                         CircleAvatar(
                           radius: 28,
-                          backgroundColor: AppColors.darkGreen.withOpacity(0.1),
+                          backgroundColor: AppColors.darkGreen.withValues(
+                            alpha: 0.1,
+                          ),
                           child: Text(
                             order.consumerName.isNotEmpty
                                 ? order.consumerName[0]
@@ -248,7 +255,8 @@ class _ProducerOrderDetailView extends StatelessWidget {
                       color: AppColors.white,
                       borderRadius: BorderRadius.circular(24),
                       border: Border.all(
-                          color: AppColors.lightGreen.withOpacity(0.1)),
+                        color: AppColors.lightGreen.withValues(alpha: 0.1),
+                      ),
                       boxShadow: const [
                         BoxShadow(
                           color: Color(0x0D000000),
@@ -261,8 +269,7 @@ class _ProducerOrderDetailView extends StatelessWidget {
                       children: [
                         ...order.items.asMap().entries.map((entry) {
                           final item = entry.value;
-                          final isLast =
-                              entry.key == order.items.length - 1;
+                          final isLast = entry.key == order.items.length - 1;
                           return Column(
                             children: [
                               Padding(
@@ -273,10 +280,10 @@ class _ProducerOrderDetailView extends StatelessWidget {
                                       width: 64,
                                       height: 64,
                                       decoration: BoxDecoration(
-                                        color: AppColors.darkGreen
-                                            .withOpacity(0.05),
-                                        borderRadius:
-                                            BorderRadius.circular(12),
+                                        color: AppColors.darkGreen.withValues(
+                                          alpha: 0.05,
+                                        ),
+                                        borderRadius: BorderRadius.circular(12),
                                       ),
                                       child: const Icon(
                                         Icons.eco_outlined,
@@ -324,8 +331,9 @@ class _ProducerOrderDetailView extends StatelessWidget {
                               ),
                               if (!isLast)
                                 Divider(
-                                  color:
-                                      AppColors.lightGreen.withOpacity(0.1),
+                                  color: AppColors.lightGreen.withValues(
+                                    alpha: 0.1,
+                                  ),
                                   height: 1,
                                 ),
                             ],
@@ -334,13 +342,15 @@ class _ProducerOrderDetailView extends StatelessWidget {
                         // Total row
                         Container(
                           decoration: BoxDecoration(
-                            color: AppColors.darkGreen.withOpacity(0.06),
+                            color: AppColors.darkGreen.withValues(alpha: 0.06),
                             borderRadius: const BorderRadius.vertical(
                               bottom: Radius.circular(24),
                             ),
                             border: Border(
                               top: BorderSide(
-                                color: AppColors.lightGreen.withOpacity(0.15),
+                                color: AppColors.lightGreen.withValues(
+                                  alpha: 0.15,
+                                ),
                               ),
                             ),
                           ),
@@ -396,7 +406,8 @@ class _ProducerOrderDetailView extends StatelessWidget {
                       color: AppColors.white,
                       borderRadius: BorderRadius.circular(16),
                       border: Border.all(
-                          color: AppColors.lightGreen.withOpacity(0.1)),
+                        color: AppColors.lightGreen.withValues(alpha: 0.1),
+                      ),
                       boxShadow: const [
                         BoxShadow(
                           color: Color(0x0D000000),
@@ -408,8 +419,11 @@ class _ProducerOrderDetailView extends StatelessWidget {
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Icon(Icons.location_on_outlined,
-                            size: 20, color: AppColors.darkGreen),
+                        const Icon(
+                          Icons.location_on_outlined,
+                          size: 20,
+                          color: AppColors.darkGreen,
+                        ),
                         const SizedBox(width: 12),
                         Expanded(
                           child: Column(
@@ -501,8 +515,9 @@ class _BottomActions extends StatelessWidget {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.red,
                       foregroundColor: AppColors.white,
-                      disabledBackgroundColor:
-                          AppColors.red.withOpacity(0.5),
+                      disabledBackgroundColor: AppColors.red.withValues(
+                        alpha: 0.5,
+                      ),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(24),
                       ),
@@ -524,12 +539,13 @@ class _BottomActions extends StatelessWidget {
                     onPressed: isProcessing
                         ? null
                         : () =>
-                            bloc.add(ProducerOrderDetailConfirmed(order.id)),
+                              bloc.add(ProducerOrderDetailConfirmed(order.id)),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.darkGreen,
                       foregroundColor: AppColors.white,
-                      disabledBackgroundColor:
-                          AppColors.darkGreen.withOpacity(0.5),
+                      disabledBackgroundColor: AppColors.darkGreen.withValues(
+                        alpha: 0.5,
+                      ),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(24),
                       ),
@@ -562,10 +578,12 @@ class _BottomActions extends StatelessWidget {
               child: ElevatedButton(
                 onPressed: isProcessing
                     ? null
-                    : () => bloc.add(ProducerOrderDetailStatusUpdated(
+                    : () => bloc.add(
+                        ProducerOrderDetailStatusUpdated(
                           order.id,
                           ProducerOrderStatus.inDelivery,
-                        )),
+                        ),
+                      ),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.darkGreen,
                   foregroundColor: AppColors.white,
@@ -599,10 +617,12 @@ class _BottomActions extends StatelessWidget {
               child: ElevatedButton(
                 onPressed: isProcessing
                     ? null
-                    : () => bloc.add(ProducerOrderDetailStatusUpdated(
+                    : () => bloc.add(
+                        ProducerOrderDetailStatusUpdated(
                           order.id,
                           ProducerOrderStatus.delivered,
-                        )),
+                        ),
+                      ),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.darkGreen,
                   foregroundColor: AppColors.white,
@@ -636,7 +656,7 @@ class _BottomActions extends StatelessWidget {
               child: ElevatedButton(
                 onPressed: null,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.darkGreen.withOpacity(0.4),
+                  backgroundColor: AppColors.darkGreen.withValues(alpha: 0.4),
                   foregroundColor: AppColors.white,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(24),

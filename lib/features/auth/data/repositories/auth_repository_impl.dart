@@ -2,6 +2,8 @@ import 'package:injectable/injectable.dart';
 import 'package:ragro_mobile/core/network/api_client.dart';
 import 'package:ragro_mobile/features/auth/data/datasources/auth_local_datasource.dart';
 import 'package:ragro_mobile/features/auth/data/datasources/auth_remote_datasource.dart';
+import 'package:ragro_mobile/features/auth/data/models/address_request.dart';
+import 'package:ragro_mobile/features/auth/data/models/customer_registration_request.dart';
 import 'package:ragro_mobile/features/auth/data/models/user_model.dart';
 import 'package:ragro_mobile/features/auth/domain/entities/user.dart';
 import 'package:ragro_mobile/features/auth/domain/entities/user_type.dart';
@@ -20,13 +22,13 @@ class AuthRepositoryImpl implements AuthRepository {
     required String email,
     required String password,
   }) async {
-    final response = await _remote.loginUser(
-      email: email,
-      password: password,
-    );
+    final response = await _remote.loginUser(email: email, password: password);
     try {
       await _local.saveSession(
-        token: response.token,
+        token: response.accessToken,
+        refreshToken: response.refreshToken,
+        tokenUrl: response.tokenUrl,
+        clientId: response.clientId,
         userType: response.user.type.name,
         userId: response.user.id,
         userName: response.user.name,
@@ -38,15 +40,16 @@ class AuthRepositoryImpl implements AuthRepository {
       // Network auth succeeded but local persistence failed.
       // Session will not survive app restart, but current session still works.
     }
-    _apiClient.setAuthToken(response.token);
-    return (user: response.user, token: response.token);
+    _apiClient.setAuthToken(response.accessToken);
+    return (user: response.user, token: response.accessToken);
   }
 
   @override
-  Future<User> registerConsumer({
+  Future<User> registerCustomer({
     required String name,
     required String phone,
     required String email,
+    required String fiscalNumber,
     required String password,
     required String zipCode,
     required String street,
@@ -54,19 +57,27 @@ class AuthRepositoryImpl implements AuthRepository {
     required String city,
     required String state,
     String? complement,
-  }) =>
-      _remote.registerConsumer(
-        name: name,
-        phone: phone,
-        email: email,
-        password: password,
-        zipCode: zipCode,
-        street: street,
-        number: number,
-        city: city,
-        state: state,
-        complement: complement,
-      );
+    String? neighborhood,
+  }) {
+    String digits(String s) => s.replaceAll(RegExp(r'\D'), '');
+    final request = CustomerRegistrationRequest(
+      name: name.trim(),
+      email: email.trim(),
+      phone: digits(phone),
+      fiscalNumber: digits(fiscalNumber),
+      password: password,
+      address: AddressRequest(
+        street: street.trim(),
+        number: number.trim(),
+        city: city.trim(),
+        state: state.trim().toUpperCase(),
+        zipCode: digits(zipCode),
+        complement: complement?.trim(),
+        neighborhood: neighborhood?.trim(),
+      ),
+    );
+    return _remote.registerCustomer(request);
+  }
 
   @override
   Future<void> logout() async {
@@ -79,12 +90,27 @@ class AuthRepositoryImpl implements AuthRepository {
     // DEMO_MODE: bypass auth — used for Playwright visual testing only.
     // Run with: flutter run -d chrome --dart-define=DEMO_MODE=true
     const demoMode = bool.fromEnvironment('DEMO_MODE');
-    const demoRole = String.fromEnvironment('DEMO_ROLE', defaultValue: 'producer');
+    const demoRole = String.fromEnvironment(
+      'DEMO_ROLE',
+      defaultValue: 'producer',
+    );
     if (demoMode) {
       final (id, name, email) = switch (demoRole) {
-        'consumer' => ('demo_consumer_001', 'Ricardo Aguiar (Demo)', 'consumer@ragro.com.br'),
-        'admin'    => ('demo_admin_001',    'Admin RAGRO (Demo)',    'admin@ragro.com.br'),
-        _          => ('demo_producer_001', 'João Silva (Demo)',     'produtor@ragro.com.br'),
+        'customer' || 'consumer' => (
+          'demo_customer_001',
+          'Ricardo Aguiar (Demo)',
+          'customer@ragro.com.br',
+        ),
+        'admin' => (
+          'demo_admin_001',
+          'Admin RAGRO (Demo)',
+          'admin@ragro.com.br',
+        ),
+        _ => (
+          'demo_producer_001',
+          'João Silva (Demo)',
+          'produtor@ragro.com.br',
+        ),
       };
       return UserModel(
         id: id,
@@ -96,16 +122,54 @@ class AuthRepositoryImpl implements AuthRepository {
       );
     }
 
-    final token  = _local.getToken();
+    final token = _local.getToken();
     if (token == null) return null;
-    final id     = _local.getUserId();
-    final name   = _local.getUserName();
-    final email  = _local.getUserEmail();
-    final type   = _local.getUserType();
+
+    final refreshToken = _local.getRefreshToken();
+    final tokenUrl = _local.getTokenUrl();
+    final clientId = _local.getClientId();
+
+    // Try to refresh the access token if we have the Keycloak data saved
+    if (refreshToken != null && tokenUrl != null && clientId != null) {
+      try {
+        final newToken = await _remote.refreshAccessToken(
+          refreshToken: refreshToken,
+          tokenUrl: tokenUrl,
+          clientId: clientId,
+        );
+        _apiClient.setAuthToken(newToken.accessToken);
+        await _local.saveSession(
+          token: newToken.accessToken,
+          refreshToken: newToken.refreshToken,
+          tokenUrl: tokenUrl,
+          clientId: clientId,
+          userType: _local.getUserType()!,
+          userId: _local.getUserId()!,
+          userName: _local.getUserName()!,
+          userEmail: _local.getUserEmail()!,
+          active: _local.getUserActive() ?? true,
+          phone: _local.getUserPhone(),
+        );
+      } on Exception catch (_) {
+        // Refresh failed — session expired, force re-login
+        await _local.clearSession();
+        _apiClient.clearAuthToken();
+        return null;
+      }
+    } else {
+      // No refresh data (legacy session) — use saved access token as-is
+      _apiClient.setAuthToken(token);
+    }
+
+    final id = _local.getUserId();
+    final name = _local.getUserName();
+    final email = _local.getUserEmail();
+    final type = _local.getUserType();
     final active = _local.getUserActive();
-    if (id == null || name == null || email == null || type == null) return null;
+    if (id == null || name == null || email == null || type == null) {
+      return null;
+    }
     final phone = _local.getUserPhone();
-    _apiClient.setAuthToken(token);
     return UserModel(
       id: id,
       name: name,

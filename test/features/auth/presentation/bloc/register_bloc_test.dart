@@ -4,19 +4,19 @@ import 'package:mocktail/mocktail.dart';
 import 'package:ragro_mobile/core/network/api_exception.dart';
 import 'package:ragro_mobile/features/auth/domain/entities/user.dart';
 import 'package:ragro_mobile/features/auth/domain/entities/user_type.dart';
-import 'package:ragro_mobile/features/auth/domain/usecases/register_consumer.dart';
+import 'package:ragro_mobile/features/auth/domain/usecases/register_customer.dart';
 import 'package:ragro_mobile/features/auth/presentation/bloc/register_bloc.dart';
 import 'package:ragro_mobile/features/auth/presentation/bloc/register_event.dart';
 import 'package:ragro_mobile/features/auth/presentation/bloc/register_state.dart';
 
-class MockRegisterConsumer extends Mock implements RegisterConsumer {}
+class MockRegisterCustomer extends Mock implements RegisterCustomer {}
 
 void main() {
   late RegisterBloc bloc;
-  late MockRegisterConsumer mockRegister;
+  late MockRegisterCustomer mockRegister;
 
   setUp(() {
-    mockRegister = MockRegisterConsumer();
+    mockRegister = MockRegisterCustomer();
     bloc = RegisterBloc(mockRegister);
   });
 
@@ -26,7 +26,7 @@ void main() {
     id: '2',
     name: 'Ana',
     email: 'ana@t.com',
-    type: UserType.consumer,
+    type: UserType.customer,
     active: true,
   );
 
@@ -34,6 +34,7 @@ void main() {
     name: 'Ana',
     phone: '11900000000',
     email: 'ana@t.com',
+    fiscalNumber: '12345678901',
     password: 'password123',
     zipCode: '01310100',
     street: 'Av. Paulista',
@@ -45,18 +46,22 @@ void main() {
   blocTest<RegisterBloc, RegisterState>(
     'emits [Loading, Success] on successful registration',
     build: () {
-      when(() => mockRegister(
-            name: any(named: 'name'),
-            phone: any(named: 'phone'),
-            email: any(named: 'email'),
-            password: any(named: 'password'),
-            zipCode: any(named: 'zipCode'),
-            street: any(named: 'street'),
-            number: any(named: 'number'),
-            city: any(named: 'city'),
-            state: any(named: 'state'),
-            complement: any(named: 'complement'),
-          )).thenAnswer((_) async => tUser);
+      when(
+        () => mockRegister(
+          name: any(named: 'name'),
+          phone: any(named: 'phone'),
+          email: any(named: 'email'),
+          fiscalNumber: any(named: 'fiscalNumber'),
+          password: any(named: 'password'),
+          zipCode: any(named: 'zipCode'),
+          street: any(named: 'street'),
+          number: any(named: 'number'),
+          city: any(named: 'city'),
+          state: any(named: 'state'),
+          complement: any(named: 'complement'),
+          neighborhood: any(named: 'neighborhood'),
+        ),
+      ).thenAnswer((_) async => tUser);
       return bloc;
     },
     act: (b) => b.add(tEvent),
@@ -66,24 +71,56 @@ void main() {
   blocTest<RegisterBloc, RegisterState>(
     'emits [Loading, Failure] on ConflictException (email already exists)',
     build: () {
-      when(() => mockRegister(
-            name: any(named: 'name'),
-            phone: any(named: 'phone'),
-            email: any(named: 'email'),
-            password: any(named: 'password'),
-            zipCode: any(named: 'zipCode'),
-            street: any(named: 'street'),
-            number: any(named: 'number'),
-            city: any(named: 'city'),
-            state: any(named: 'state'),
-            complement: any(named: 'complement'),
-          )).thenThrow(const ConflictException());
+      when(
+        () => mockRegister(
+          name: any(named: 'name'),
+          phone: any(named: 'phone'),
+          email: any(named: 'email'),
+          fiscalNumber: any(named: 'fiscalNumber'),
+          password: any(named: 'password'),
+          zipCode: any(named: 'zipCode'),
+          street: any(named: 'street'),
+          number: any(named: 'number'),
+          city: any(named: 'city'),
+          state: any(named: 'state'),
+          complement: any(named: 'complement'),
+          neighborhood: any(named: 'neighborhood'),
+        ),
+      ).thenThrow(const ConflictException('E-mail already registered'));
       return bloc;
     },
     act: (b) => b.add(tEvent),
     expect: () => [
       const RegisterLoading(),
-      const RegisterFailure('Recurso já existe'),
+      const RegisterFailure('Este e-mail já está cadastrado.'),
+    ],
+  );
+
+  blocTest<RegisterBloc, RegisterState>(
+    'emits [Loading, Failure] on ConflictException (fiscal number)',
+    build: () {
+      when(
+        () => mockRegister(
+          name: any(named: 'name'),
+          phone: any(named: 'phone'),
+          email: any(named: 'email'),
+          fiscalNumber: any(named: 'fiscalNumber'),
+          password: any(named: 'password'),
+          zipCode: any(named: 'zipCode'),
+          street: any(named: 'street'),
+          number: any(named: 'number'),
+          city: any(named: 'city'),
+          state: any(named: 'state'),
+          complement: any(named: 'complement'),
+          neighborhood: any(named: 'neighborhood'),
+        ),
+      ).thenThrow(const ConflictException('Fiscal number already registered'));
+      return bloc;
+    },
+    act: (b) => b.add(tEvent),
+    expect: () => [
+      const RegisterLoading(),
+      const RegisterFailure('Este CPF já está cadastrado.'),
     ],
   );
 }

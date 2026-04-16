@@ -6,5 +6,6 @@ import 'package:ragro_mobile/features/cart/domain/repositories/cart_repository.d
 class UpdateCartItemQuantity {
   const UpdateCartItemQuantity(this._repository);
   final CartRepository _repository;
-  Cart call(String productId, int quantity) => _repository.updateQuantity(productId, quantity);
+  Cart call(String productId, int quantity) =>
+      _repository.updateQuantity(productId, quantity);
 }

@@ -35,7 +35,7 @@ class ProducerOrderDetailBloc
     try {
       final order = await _getDetail(event.orderId);
       emit(ProducerOrderDetailLoaded(order));
-    } catch (e) {
+    } on Exception catch (e) {
       emit(ProducerOrderDetailFailure(e.toString()));
     }
   }
@@ -52,7 +52,7 @@ class ProducerOrderDetailBloc
       final updated = await _getDetail(event.orderId);
       emit(ProducerOrderDetailSuccess(order: updated, action: 'confirmed'));
       emit(ProducerOrderDetailLoaded(updated));
-    } catch (e) {
+    } on Exception catch (e) {
       emit(ProducerOrderDetailFailure(e.toString()));
     }
   }
@@ -69,7 +69,7 @@ class ProducerOrderDetailBloc
       final updated = await _getDetail(event.orderId);
       emit(ProducerOrderDetailSuccess(order: updated, action: 'refused'));
       emit(ProducerOrderDetailLoaded(updated));
-    } catch (e) {
+    } on Exception catch (e) {
       emit(ProducerOrderDetailFailure(e.toString()));
     }
   }
@@ -84,9 +84,11 @@ class ProducerOrderDetailBloc
     try {
       await _updateStatus(event.orderId, event.status);
       final updated = await _getDetail(event.orderId);
-      emit(ProducerOrderDetailSuccess(order: updated, action: 'status_updated'));
+      emit(
+        ProducerOrderDetailSuccess(order: updated, action: 'status_updated'),
+      );
       emit(ProducerOrderDetailLoaded(updated));
-    } catch (e) {
+    } on Exception catch (e) {
       emit(ProducerOrderDetailFailure(e.toString()));
     }
   }

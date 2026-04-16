@@ -20,5 +20,13 @@ class HomeProduct extends Equatable {
   final String producerId;
 
   @override
-  List<Object?> get props => [id, name, category, price, imageUrl, farmName, producerId];
+  List<Object?> get props => [
+    id,
+    name,
+    category,
+    price,
+    imageUrl,
+    farmName,
+    producerId,
+  ];
 }

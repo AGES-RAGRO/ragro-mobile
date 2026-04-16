@@ -4,10 +4,10 @@ import 'package:ragro_mobile/features/inventory/domain/entities/inventory_produc
 
 class InventoryProductCard extends StatelessWidget {
   const InventoryProductCard({
-    super.key,
     required this.product,
     required this.onEditTap,
     required this.onDeleteTap,
+    super.key,
   });
 
   final InventoryProduct product;
@@ -42,7 +42,7 @@ class InventoryProductCard extends StatelessWidget {
             width: 96,
             height: 96,
             decoration: BoxDecoration(
-              color: AppColors.darkGreen.withOpacity(0.06),
+              color: AppColors.darkGreen.withValues(alpha: 0.06),
               borderRadius: BorderRadius.circular(16),
             ),
             child: const Icon(
@@ -77,11 +77,13 @@ class InventoryProductCard extends StatelessWidget {
                     const SizedBox(width: 8),
                     Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 3),
+                        horizontal: 8,
+                        vertical: 3,
+                      ),
                       decoration: BoxDecoration(
                         color: isAvailable
-                            ? AppColors.lightGreen.withOpacity(0.12)
-                            : AppColors.placeholder.withOpacity(0.12),
+                            ? AppColors.lightGreen.withValues(alpha: 0.12)
+                            : AppColors.placeholder.withValues(alpha: 0.12),
                         borderRadius: BorderRadius.circular(6),
                       ),
                       child: Text(
@@ -136,15 +138,20 @@ class InventoryProductCard extends StatelessWidget {
                       onTap: onEditTap,
                       child: Container(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 12, vertical: 6),
+                          horizontal: 12,
+                          vertical: 6,
+                        ),
                         decoration: BoxDecoration(
-                          color: AppColors.lightGreen.withOpacity(0.1),
+                          color: AppColors.lightGreen.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: const Row(
                           children: [
-                            Icon(Icons.edit_outlined,
-                                size: 14, color: AppColors.lightGreen),
+                            Icon(
+                              Icons.edit_outlined,
+                              size: 14,
+                              color: AppColors.lightGreen,
+                            ),
                             SizedBox(width: 4),
                             Text(
                               'Editar',
@@ -165,15 +172,20 @@ class InventoryProductCard extends StatelessWidget {
                       onTap: onDeleteTap,
                       child: Container(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 12, vertical: 6),
+                          horizontal: 12,
+                          vertical: 6,
+                        ),
                         decoration: BoxDecoration(
-                          color: AppColors.red.withOpacity(0.1),
+                          color: AppColors.red.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: const Row(
                           children: [
-                            Icon(Icons.delete_outline,
-                                size: 14, color: AppColors.red),
+                            Icon(
+                              Icons.delete_outline,
+                              size: 14,
+                              color: AppColors.red,
+                            ),
                             SizedBox(width: 4),
                             Text(
                               'Excluir',

@@ -31,7 +31,7 @@ Built with **Clean Architecture + BLoC**.
 | [`docs/architecture/05-dependency-injection.md`](docs/architecture/05-dependency-injection.md) | get_it + injectable annotations and how to regenerate |
 | [`docs/architecture/06-navigation.md`](docs/architecture/06-navigation.md) | GoRouter: auth guard, shell routes, route table |
 | [`docs/architecture/07-new-feature.md`](docs/architecture/07-new-feature.md) | Step-by-step guide for adding a new feature |
-| [`docs/api/overview.md`](docs/api/overview.md) | Base URL, authentication, demo credentials |
+| [`docs/api/overview.md`](docs/api/overview.md) | Base URL, Keycloak authentication, test users |
 | [`docs/api/endpoints.md`](docs/api/endpoints.md) | All endpoints by domain |
 | [`docs/conventions.md`](docs/conventions.md) | Naming conventions and layer boundary rules |
 | [`docs/backlog_ragro.md`](docs/backlog_ragro.md) | User stories and acceptance criteria |
@@ -62,7 +62,37 @@ dart run build_runner build --delete-conflicting-outputs
 flutter run -d chrome
 ```
 
-### Demo mode (skip login)
+### Testing with the backend (real login)
+
+The app authenticates via Keycloak. You need the backend running locally.
+
+**1. Start the backend** (from `ragro-backend/`):
+
+```bash
+docker compose up -d --build
+```
+
+This starts PostgreSQL, Keycloak, and the Spring Boot API. Three test users are created automatically in both Keycloak and the database.
+
+**2. Run the Flutter app:**
+
+```bash
+flutter run -d chrome
+```
+
+The app defaults to `http://localhost:8080` as the API base URL.
+
+**3. Log in with one of the test users:**
+
+| Role | Email | Password |
+|------|-------|----------|
+| Customer | `customer@ragro.com.br` | `Test@123` |
+| Farmer | `farmer@ragro.com.br` | `Test@123` |
+| Admin | `admin@ragro.com.br` | `Admin@123` |
+
+The login flow calls `GET /auth/config` to discover the Keycloak token URL, authenticates directly with Keycloak, then calls `GET /auth/session` to get the user's profile. The app routes to the correct home screen based on the user type.
+
+### Demo mode (skip login, no backend needed)
 
 ```bash
 # As consumer
@@ -75,13 +105,11 @@ flutter run -d chrome --dart-define=DEMO_MODE=true --dart-define=DEMO_ROLE=produ
 flutter run -d chrome --dart-define=DEMO_MODE=true --dart-define=DEMO_ROLE=admin
 ```
 
-### Login credentials (mock)
+### Production base URL
 
-| Role | Email | Password |
-|------|-------|----------|
-| Consumer | `consumer@ragro.com.br` | `123456` |
-| Producer | `produtor@ragro.com.br` | `123456` |
-| Admin | `admin@ragro.com.br` | `123456` |
+```bash
+flutter run --dart-define=API_BASE_URL=https://api.ragro.com.br
+```
 
 ### Run on Android
 

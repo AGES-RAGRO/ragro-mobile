@@ -39,18 +39,25 @@ class LoginPage extends StatelessWidget {
         child: Scaffold(
           backgroundColor: AppColors.white,
           body: SafeArea(
-            child: Padding(
+            child: SingleChildScrollView(
               padding: const EdgeInsets.symmetric(horizontal: 24),
-              child: Column(
-                children: [
-                  const Spacer(flex: 2),
-                  const RagroLogo(),
-                  const Spacer(flex: 2),
-                  LoginForm(
-                    onRegisterTap: () => context.push('/register'),
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  minHeight: MediaQuery.of(context).size.height -
+                      MediaQuery.of(context).padding.top -
+                      MediaQuery.of(context).padding.bottom,
+                ),
+                child: IntrinsicHeight(
+                  child: Column(
+                    children: [
+                      const Spacer(flex: 3),
+                      const RagroLogo(),
+                      const Spacer(flex: 1),
+                      LoginForm(onRegisterTap: () => context.push('/register')),
+                      const Spacer(),
+                    ],
                   ),
-                  const Spacer(),
-                ],
+                ),
               ),
             ),
           ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:ragro_mobile/core/theme/app_colors.dart';
 import 'package:ragro_mobile/core/theme/app_text_styles.dart';
 
@@ -15,6 +16,8 @@ class AuthTextField extends StatefulWidget {
     this.isPassword = false,
     this.onChanged,
     this.validator,
+    this.inputFormatters,
+    this.textCapitalization = TextCapitalization.none,
   });
 
   final String label;
@@ -24,6 +27,8 @@ class AuthTextField extends StatefulWidget {
   final bool isPassword;
   final ValueChanged<String>? onChanged;
   final FormFieldValidator<String>? validator;
+  final List<TextInputFormatter>? inputFormatters;
+  final TextCapitalization textCapitalization;
 
   @override
   State<AuthTextField> createState() => _AuthTextFieldState();
@@ -42,6 +47,8 @@ class _AuthTextFieldState extends State<AuthTextField> {
       obscureText: isPassword && _obscureText,
       onChanged: widget.onChanged,
       validator: widget.validator,
+      inputFormatters: widget.inputFormatters,
+      textCapitalization: widget.textCapitalization,
       style: AppTextStyles.body.copyWith(color: AppColors.black),
       decoration: InputDecoration(
         labelText: widget.label,

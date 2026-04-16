@@ -15,15 +15,27 @@ class AdminProducerFormSubmitted extends AdminProducerFormEvent {
     required this.address,
     required this.city,
     required this.state,
-    required this.bank,
-    required this.agency,
-    required this.account,
-    required this.accountHolder,
-    required this.cpfCnpj,
+    required this.number,
+    required this.fiscalNumber,
+    required this.fiscalNumberType,
+    required this.farmName,
+    required this.description,
     required this.password,
     required this.scheduleWeekdays,
     required this.scheduleStart,
     required this.scheduleEnd,
+    // ── PIX (obrigatório) ────────────────────────────────────────────────
+    required this.pixKeyType,
+    required this.pixKey,
+    // ── Conta Bancária (obrigatória) ─────────────────────────────────────
+    required this.bankName,
+    required this.agency,
+    required this.accountNumber,
+    required this.accountType,
+    required this.accountHolder,
+    this.neighborhood,
+    this.bankCode,
+    this.bankFiscalNumber,
   });
 
   final String name;
@@ -33,16 +45,42 @@ class AdminProducerFormSubmitted extends AdminProducerFormEvent {
   final String address;
   final String city;
   final String state;
-  final String bank;
-  final String agency;
-  final String account;
-  final String accountHolder;
-  final String cpfCnpj;
+  final String number;
+  final String? neighborhood;
+  final String fiscalNumber;
+  final String fiscalNumberType;
+  final String farmName;
+  final String description;
   final String password;
   final List<bool> scheduleWeekdays;
   final String scheduleStart;
   final String scheduleEnd;
 
+  // PIX (obrigatório)
+  final String pixKeyType;
+  final String pixKey;
+
+  // Conta Bancária (obrigatória)
+  final String bankName;
+  final String agency;
+  final String accountNumber;
+  final String accountType;
+  final String accountHolder;
+  final String? bankCode;
+  final String? bankFiscalNumber;
+
   @override
-  List<Object?> get props => [name, email, phone];
+  List<Object?> get props => [
+    fiscalNumber,
+    fiscalNumberType,
+    farmName,
+    description,
+    pixKeyType,
+    pixKey,
+    bankName,
+    agency,
+    accountNumber,
+    accountType,
+    accountHolder,
+  ];
 }

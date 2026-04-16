@@ -31,3 +31,23 @@ class ProducerProfileFailure extends ProducerProfileState {
   @override
   List<Object?> get props => [message];
 }
+
+class ProducerProfileUpdating extends ProducerProfileState {
+  const ProducerProfileUpdating();
+}
+
+class ProducerProfileUpdateSuccess extends ProducerProfileState {
+  const ProducerProfileUpdateSuccess();
+}
+
+class ProducerPhotoUploading extends ProducerProfileState {
+  const ProducerPhotoUploading({
+    required this.producer,
+    required this.isAvatar,
+  });
+  final PublicProducer producer;
+  final bool isAvatar;
+
+  @override
+  List<Object?> get props => [producer, isAvatar];
+}

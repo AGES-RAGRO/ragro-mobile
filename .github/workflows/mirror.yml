@@ -1,0 +1,27 @@
+name: Mirror
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  mirror-to-gitlab:
+    name: Mirror to GitLab
+    runs-on: ubuntu-22.04
+
+    # Só executa em push na main (não roda em PR)
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Checkout full history
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Push to GitLab
+        run: |
+          git remote add gitlab https://oauth2:${{ secrets.GITLAB_TOKEN }}@tools.ages.pucrs.br/ragro/ragro-mobile.git
+          git push gitlab main --force

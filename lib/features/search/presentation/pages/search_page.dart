@@ -84,12 +84,18 @@ class _SearchViewState extends State<_SearchView> {
                 child: Row(
                   children: [
                     const SizedBox(width: 16),
-                    const Icon(Icons.search, color: AppColors.placeholder, size: 20),
+                    const Icon(
+                      Icons.search,
+                      color: AppColors.placeholder,
+                      size: 20,
+                    ),
                     const SizedBox(width: 8),
                     Expanded(
                       child: TextField(
                         controller: _controller,
-                        onChanged: (q) => context.read<SearchBloc>().add(SearchQueryChanged(q)),
+                        onChanged: (q) => context.read<SearchBloc>().add(
+                          SearchQueryChanged(q),
+                        ),
                         style: const TextStyle(
                           fontFamily: 'Figtree',
                           fontSize: 16,
@@ -158,26 +164,31 @@ class _SearchViewState extends State<_SearchView> {
                   return switch (state) {
                     SearchIdle() => _buildIdleContent(),
                     SearchLoading() => const Center(
-                        child: CircularProgressIndicator(color: AppColors.darkGreen),
+                      child: CircularProgressIndicator(
+                        color: AppColors.darkGreen,
                       ),
-                    SearchLoaded(:final results) => results.isEmpty
-                        ? const Center(
-                            child: Text(
-                              'Nenhum resultado encontrado.',
-                              style: TextStyle(color: AppColors.placeholder),
+                    ),
+                    SearchLoaded(:final results) =>
+                      results.isEmpty
+                          ? const Center(
+                              child: Text(
+                                'Nenhum resultado encontrado.',
+                                style: TextStyle(color: AppColors.placeholder),
+                              ),
+                            )
+                          : ListView.builder(
+                              padding: const EdgeInsets.only(top: 8),
+                              itemCount: results.length,
+                              itemBuilder: (_, i) => SearchResultTile(
+                                result: results[i],
+                                onTap: () {
+                                  // TODO(dev): navigate to producer/product detail
+                                },
+                              ),
                             ),
-                          )
-                        : ListView.builder(
-                            padding: const EdgeInsets.only(top: 8),
-                            itemCount: results.length,
-                            itemBuilder: (_, i) => SearchResultTile(
-                              result: results[i],
-                              onTap: () {
-                                // TODO: navigate to producer/product detail
-                              },
-                            ),
-                          ),
-                    SearchFailure(:final message) => Center(child: Text(message)),
+                    SearchFailure(:final message) => Center(
+                      child: Text(message),
+                    ),
                   };
                 },
               ),
@@ -224,12 +235,16 @@ class _SearchViewState extends State<_SearchView> {
             ),
             child: Row(
               children: [
-                const Icon(Icons.location_on_outlined, size: 18, color: AppColors.darkGreen),
+                const Icon(
+                  Icons.location_on_outlined,
+                  size: 18,
+                  color: AppColors.darkGreen,
+                ),
                 const SizedBox(width: 12),
-                Expanded(
+                const Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    children: const [
+                    children: [
                       Text(
                         'Caxias do Sul, RS',
                         style: TextStyle(
@@ -287,7 +302,9 @@ class _SearchViewState extends State<_SearchView> {
                     _controller.text = q;
                     context.read<SearchBloc>().add(SearchQueryChanged(q));
                   },
-                  onRemove: () => context.read<SearchBloc>().add(SearchRecentItemRemoved(q)),
+                  onRemove: () => context.read<SearchBloc>().add(
+                    SearchRecentItemRemoved(q),
+                  ),
                 ),
                 const Divider(color: Color(0xFFF1F5F9), height: 1),
               ],
@@ -332,7 +349,11 @@ class _RecentSearchItem extends StatelessWidget {
             ),
             GestureDetector(
               onTap: onRemove,
-              child: const Icon(Icons.close, size: 14, color: AppColors.placeholder),
+              child: const Icon(
+                Icons.close,
+                size: 14,
+                color: AppColors.placeholder,
+              ),
             ),
           ],
         ),

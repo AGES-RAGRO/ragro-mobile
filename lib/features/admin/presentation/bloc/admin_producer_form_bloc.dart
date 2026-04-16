@@ -1,5 +1,9 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
+import 'package:ragro_mobile/core/network/api_exception.dart';
+import 'package:ragro_mobile/features/admin/domain/entities/admin_address.dart';
+import 'package:ragro_mobile/features/admin/domain/entities/admin_availability.dart';
+import 'package:ragro_mobile/features/admin/domain/entities/admin_payment_method.dart';
 import 'package:ragro_mobile/features/admin/domain/entities/admin_producer.dart';
 import 'package:ragro_mobile/features/admin/domain/usecases/create_admin_producer.dart';
 import 'package:ragro_mobile/features/admin/presentation/bloc/admin_producer_form_event.dart';
@@ -9,7 +13,7 @@ import 'package:ragro_mobile/features/admin/presentation/bloc/admin_producer_for
 class AdminProducerFormBloc
     extends Bloc<AdminProducerFormEvent, AdminProducerFormState> {
   AdminProducerFormBloc(this._createProducer)
-      : super(const AdminProducerFormInitial()) {
+    : super(const AdminProducerFormInitial()) {
     on<AdminProducerFormSubmitted>(_onSubmitted);
   }
 
@@ -21,20 +25,72 @@ class AdminProducerFormBloc
   ) async {
     emit(const AdminProducerFormLoading());
     try {
+      // Mapeamento UI → backend weekday:
+      //   UI index 0..5 = Seg..Sáb  → backend 1..6
+      //   UI index 6    = Dom       → backend 0
+      final selectedDays = <AdminAvailability>[];
+      for (var i = 0; i < event.scheduleWeekdays.length; i++) {
+        if (event.scheduleWeekdays[i]) {
+          selectedDays.add(
+            AdminAvailability(
+              weekday: i == 6 ? 0 : i + 1,
+              opensAt: event.scheduleStart,
+              closesAt: event.scheduleEnd,
+            ),
+          );
+        }
+      }
+
+      // Backend exige os 2 payment methods (pix + bank_account) —
+      // a page valida antes de disparar o evento.
+      final paymentMethods = <AdminPaymentMethod>[
+        AdminPaymentMethod(
+          type: 'pix',
+          pixKeyType: event.pixKeyType,
+          pixKey: event.pixKey,
+        ),
+        AdminPaymentMethod(
+          type: 'bank_account',
+          bankCode: event.bankCode,
+          bankName: event.bankName,
+          agency: event.agency,
+          accountNumber: event.accountNumber,
+          accountType: event.accountType,
+          holderName: event.accountHolder,
+          fiscalNumber: event.bankFiscalNumber,
+        ),
+      ];
+
       final producer = AdminProducer(
         id: DateTime.now().millisecondsSinceEpoch.toString(),
         name: event.name,
         email: event.email,
-        location: '${event.city}, ${event.state}',
+        phone: event.phone,
         address: '${event.address}, ${event.city}, ${event.state}',
         createdAt: DateTime.now(),
         updatedAt: DateTime.now(),
         active: true,
+        fiscalNumber: event.fiscalNumber,
+        fiscalNumberType: event.fiscalNumberType,
+        farmName: event.farmName,
+        description: event.description,
+        producerAddress: AdminAddress(
+          street: event.address,
+          number: event.number,
+          city: event.city,
+          state: event.state,
+          zipCode: event.cep.replaceAll(RegExp(r'\D'), ''),
+          neighborhood: (event.neighborhood?.isNotEmpty ?? false)
+              ? event.neighborhood
+              : null,
+        ),
+        paymentMethods: paymentMethods,
+        availability: selectedDays.isNotEmpty ? selectedDays : null,
       );
       await _createProducer(producer, event.password);
       emit(const AdminProducerFormSuccess());
-    } catch (e) {
-      emit(AdminProducerFormFailure(e.toString()));
+    } on ApiException catch (e) {
+      emit(AdminProducerFormFailure(e.message));
     }
   }
 }

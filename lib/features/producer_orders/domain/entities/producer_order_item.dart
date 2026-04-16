@@ -20,5 +20,13 @@ class ProducerOrderItem extends Equatable {
   final String unityType;
 
   @override
-  List<Object?> get props => [productId, name, imageUrl, unitPrice, totalPrice, quantity, unityType];
+  List<Object?> get props => [
+    productId,
+    name,
+    imageUrl,
+    unitPrice,
+    totalPrice,
+    quantity,
+    unityType,
+  ];
 }

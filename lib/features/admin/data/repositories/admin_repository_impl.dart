@@ -1,6 +1,7 @@
 import 'package:injectable/injectable.dart';
 import 'package:ragro_mobile/features/admin/data/datasources/admin_remote_datasource.dart';
 import 'package:ragro_mobile/features/admin/domain/entities/admin_producer.dart';
+import 'package:ragro_mobile/features/admin/domain/entities/admin_producer_summary.dart';
 import 'package:ragro_mobile/features/admin/domain/repositories/admin_repository.dart';
 
 @LazySingleton(as: AdminRepository)
@@ -10,7 +11,7 @@ class AdminRepositoryImpl implements AdminRepository {
   final AdminRemoteDataSource _dataSource;
 
   @override
-  Future<List<AdminProducer>> getProducers() =>
+  Future<List<AdminProducerSummary>> getProducers() =>
       _dataSource.getProducers();
 
   @override
@@ -18,10 +19,17 @@ class AdminRepositoryImpl implements AdminRepository {
       _dataSource.createProducer(producer, password);
 
   @override
+  Future<AdminProducer> getProducerById(String id) =>
+      _dataSource.getProducerById(id);
+
+  @override
+  Future<void> updateProducer(AdminProducer producer) =>
+      _dataSource.updateProducer(producer);
+
+  @override
   Future<void> deactivateProducer(String id) =>
       _dataSource.deactivateProducer(id);
 
   @override
-  Future<void> activateProducer(String id) =>
-      _dataSource.activateProducer(id);
+  Future<void> activateProducer(String id) => _dataSource.activateProducer(id);
 }

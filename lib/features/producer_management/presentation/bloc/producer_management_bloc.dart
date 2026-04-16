@@ -8,7 +8,7 @@ import 'package:ragro_mobile/features/producer_management/presentation/bloc/prod
 class ProducerManagementBloc
     extends Bloc<ProducerManagementEvent, ProducerManagementState> {
   ProducerManagementBloc(this._getDashboard)
-      : super(const ProducerManagementInitial()) {
+    : super(const ProducerManagementInitial()) {
     on<ProducerManagementStarted>(_onStarted);
     on<ProducerManagementRefreshed>(_onRefreshed);
   }
@@ -23,7 +23,7 @@ class ProducerManagementBloc
     try {
       final dashboard = await _getDashboard();
       emit(ProducerManagementLoaded(dashboard));
-    } catch (e) {
+    } on Exception catch (e) {
       emit(ProducerManagementFailure(e.toString()));
     }
   }
@@ -36,7 +36,7 @@ class ProducerManagementBloc
     try {
       final dashboard = await _getDashboard();
       emit(ProducerManagementLoaded(dashboard));
-    } catch (e) {
+    } on Exception catch (e) {
       emit(ProducerManagementFailure(e.toString()));
     }
   }

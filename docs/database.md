@@ -1,6 +1,19 @@
-# 🌱 RAGRO — Database Documentation
+# RAGRO — Database Documentation
 
-> PostgreSQL 15+ · 21 tables · 2 triggers
+> PostgreSQL 16 · 21 tables · 2 triggers
+
+> **Note — Schema Sync**: This document is the **design reference** for the database. The runtime schema is defined in `data/schema.sql`. If any field documented here is missing from `schema.sql`, it means the migration has not been applied yet. Known pending migrations are listed below.
+
+### Pending Schema Additions
+
+The following fields are documented here but **not yet present** in `data/schema.sql`:
+
+| Table | Column | Type | Status |
+|-------|--------|------|--------|
+| `farmers` | `story` | `text` | Pending — producer narrative for the profile page |
+| `cart_items` | `price_snapshot` | `decimal(10,2)` | Pending — price at the time the item was added |
+
+These must be added to `data/schema.sql` before the corresponding features can be implemented.
 
 ---
 
@@ -29,7 +42,7 @@ erDiagram
         varchar phone
         varchar type
         boolean active
-        text cognito_sub
+        text auth_sub
         timestamptz created_at
         timestamptz updated_at
     }
@@ -280,11 +293,11 @@ Base authentication table shared across all user types.
 | `phone` | varchar(20) | ❌ | Contact phone number |
 | `type` | varchar(20) | ✅ | User role: `farmer` \| `customer` \| `admin` |
 | `active` | boolean | ✅ | `false` = account disabled, prevents system access |
-| `cognito_sub` | text | ✅ | Unique identifier from AWS Cognito. Links the JWT token to the database record |
+| `auth_sub` | text | ✅ | Unique identifier from Keycloak. Links the JWT token to the database record |
 | `created_at` | timestamptz | ✅ | Record creation timestamp |
 | `updated_at` | timestamptz | ✅ | Last update timestamp |
 
-> **Note:** The `cognito_sub` acts as the bridge between the authentication system (AWS Cognito) and the database. When the user logs in, the backend reads the `sub` from the JWT token and fetches the corresponding record using `WHERE cognito_sub = ?`.
+> **Note:** The `auth_sub` acts as the bridge between the authentication system (Keycloak) and the database. When the user logs in, the backend reads the `sub` from the JWT token and fetches the corresponding record using `WHERE auth_sub = ?`.
 
 ---
 

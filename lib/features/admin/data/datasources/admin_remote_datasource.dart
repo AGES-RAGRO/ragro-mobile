@@ -1,151 +1,128 @@
+import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart';
+import 'package:ragro_mobile/core/network/api_client.dart';
+import 'package:ragro_mobile/core/network/api_endpoints.dart';
+import 'package:ragro_mobile/core/network/api_exception.dart';
+import 'package:ragro_mobile/features/admin/data/models/admin_producer_model.dart';
+import 'package:ragro_mobile/features/admin/data/models/admin_producer_summary_model.dart';
 import 'package:ragro_mobile/features/admin/domain/entities/admin_producer.dart';
+import 'package:ragro_mobile/features/admin/domain/entities/admin_producer_summary.dart';
 
 @lazySingleton
 class AdminRemoteDataSource {
-  static final _baseDate = DateTime(2026, 3, 24);
+  const AdminRemoteDataSource(this._apiClient);
+  final ApiClient _apiClient;
 
-  static final List<AdminProducer> _mockProducers = [
-    AdminProducer(
-      id: 'ap001',
-      name: 'Ricardo Oliveira',
-      email: 'ricardo.oliveira@ragro.com.br',
-      location: 'Porto Alegre, RS',
-      address: 'Rua das Flores, 123, Porto Alegre, RS',
-      createdAt: _baseDate,
-      updatedAt: _baseDate,
-      active: true,
-    ),
-    AdminProducer(
-      id: 'ap002',
-      name: 'Matheus Silva',
-      email: 'matheus.silva@ragro.com.br',
-      location: 'Porto Alegre, RS',
-      address: 'Av. Independência, 456, Porto Alegre, RS',
-      createdAt: _baseDate,
-      updatedAt: _baseDate,
-      active: true,
-    ),
-    AdminProducer(
-      id: 'ap003',
-      name: 'Giovana Duarte',
-      email: 'giovana.duarte@ragro.com.br',
-      location: 'Porto Alegre, RS',
-      address: 'Rua Osvaldo Aranha, 789, Porto Alegre, RS',
-      createdAt: _baseDate,
-      updatedAt: _baseDate,
-      active: true,
-    ),
-    AdminProducer(
-      id: 'ap004',
-      name: 'Antônio Madeira',
-      email: 'antonio.madeira@ragro.com.br',
-      location: 'Porto Alegre, RS',
-      address: 'Rua 24 de Outubro, 200, Porto Alegre, RS',
-      createdAt: _baseDate,
-      updatedAt: _baseDate,
-      active: true,
-    ),
-  ];
-
-  /// Gets all producers for admin management.
-  ///
-  /// === REAL IMPLEMENTATION (uncomment when backend is ready) ===
-  ///
-  /// Future<List<AdminProducer>> getProducers() async {
-  ///   try {
-  ///     final response = await _apiClient.dio.get<Map<String, dynamic>>(
-  ///       ApiEndpoints.adminProducers,
-  ///     );
-  ///     return (response.data!['data'] as List)
-  ///         .map((e) => AdminProducer.fromJson(e as Map<String, dynamic>))
-  ///         .toList();
-  ///   } on DioException catch (e) {
-  ///     throw e.error as ApiException? ?? const UnknownApiException();
-  ///   }
-  /// }
-  ///
-  /// === END REAL IMPLEMENTATION ===
-  ///
-  /// MOCK TEMPORÁRIO — remover quando backend estiver conectado:
-  Future<List<AdminProducer>> getProducers() async {
-    await Future.delayed(const Duration(milliseconds: 400));
-    return List.from(_mockProducers);
-  }
-
-  /// Creates a new producer account.
-  ///
-  /// === REAL IMPLEMENTATION (uncomment when backend is ready) ===
-  ///
-  /// Future<void> createProducer(AdminProducer producer, String password) async {
-  ///   try {
-  ///     await _apiClient.dio.post<void>(
-  ///       ApiEndpoints.adminProducers,
-  ///       data: {
-  ///         ...producer.toJson(),
-  ///         'password': password,
-  ///       },
-  ///     );
-  ///   } on DioException catch (e) {
-  ///     throw e.error as ApiException? ?? const UnknownApiException();
-  ///   }
-  /// }
-  ///
-  /// === END REAL IMPLEMENTATION ===
-  ///
-  /// MOCK TEMPORÁRIO — remover quando backend estiver conectado:
-  Future<void> createProducer(AdminProducer producer, String password) async {
-    await Future.delayed(const Duration(milliseconds: 400));
-    _mockProducers.add(producer);
-  }
-
-  /// Deactivates a producer account.
-  ///
-  /// === REAL IMPLEMENTATION (uncomment when backend is ready) ===
-  ///
-  /// Future<void> deactivateProducer(String id) async {
-  ///   try {
-  ///     await _apiClient.dio.patch<void>(
-  ///       '${ApiEndpoints.adminProducer(id)}/deactivate',
-  ///     );
-  ///   } on DioException catch (e) {
-  ///     throw e.error as ApiException? ?? const UnknownApiException();
-  ///   }
-  /// }
-  ///
-  /// === END REAL IMPLEMENTATION ===
-  ///
-  /// MOCK TEMPORÁRIO — remover quando backend estiver conectado:
-  Future<void> deactivateProducer(String id) async {
-    await Future.delayed(const Duration(milliseconds: 300));
-    final idx = _mockProducers.indexWhere((p) => p.id == id);
-    if (idx >= 0) {
-      _mockProducers[idx] = _mockProducers[idx].copyWith(active: false);
+  Future<List<AdminProducerSummary>> getProducers() async {
+    try {
+      final response = await _apiClient.dio.get<Map<String, dynamic>>(
+        ApiEndpoints.adminProducers,
+      );
+      final content = (response.data?['content'] as List<dynamic>?) ?? [];
+      return content
+          .map(
+            (e) =>
+                AdminProducerSummaryModel.fromJson(e as Map<String, dynamic>),
+          )
+          .toList();
+    } on DioException catch (e) {
+      throw e.error as ApiException? ?? const UnknownApiException();
     }
   }
 
-  /// Activates a previously deactivated producer account.
-  ///
-  /// === REAL IMPLEMENTATION (uncomment when backend is ready) ===
-  ///
-  /// Future<void> activateProducer(String id) async {
-  ///   try {
-  ///     await _apiClient.dio.patch<void>(
-  ///       '${ApiEndpoints.adminProducer(id)}/activate',
-  ///     );
-  ///   } on DioException catch (e) {
-  ///     throw e.error as ApiException? ?? const UnknownApiException();
-  ///   }
-  /// }
-  ///
-  /// === END REAL IMPLEMENTATION ===
-  ///
-  /// MOCK TEMPORÁRIO — remover quando backend estiver conectado:
+  Future<AdminProducer> getProducerById(String id) async {
+    try {
+      final response = await _apiClient.dio.get<Map<String, dynamic>>(
+        ApiEndpoints.adminProducer(id),
+      );
+      return AdminProducerModel.fromJson(response.data!);
+    } on DioException catch (e) {
+      throw e.error as ApiException? ?? const UnknownApiException();
+    }
+  }
+
+  Future<void> createProducer(AdminProducer producer, String password) async {
+    final address = producer.producerAddress;
+    if (address == null) {
+      throw const UnknownApiException('Endereço obrigatório para cadastro');
+    }
+    final paymentMethods = producer.paymentMethods ?? [];
+    if (paymentMethods.isEmpty) {
+      throw const UnknownApiException(
+        'Ao menos um método de pagamento é obrigatório',
+      );
+    }
+    try {
+      await _apiClient.dio.post<void>(
+        ApiEndpoints.adminProducers,
+        data: {
+          'name': producer.name,
+          'email': producer.email,
+          'phone': producer.phone,
+          'password': password,
+          'fiscalNumber': producer.fiscalNumber,
+          'fiscalNumberType': producer.fiscalNumberType,
+          'farmName': producer.farmName,
+          'description': producer.description,
+          'address': address.toJson(),
+          'paymentMethods': paymentMethods.map((pm) => pm.toJson()).toList(),
+          if (producer.availability != null &&
+              producer.availability!.isNotEmpty)
+            'availability': producer.availability!
+                .map((a) => a.toJson())
+                .toList(),
+        },
+      );
+    } on DioException catch (e) {
+      throw e.error as ApiException? ?? const UnknownApiException();
+    }
+  }
+
+  Future<void> updateProducer(AdminProducer producer) async {
+    try {
+      final address = producer.producerAddress;
+      await _apiClient.dio.put<void>(
+        ApiEndpoints.adminProducer(producer.id),
+        data: {
+          'name': producer.name,
+          'phone': producer.phone,
+          'farmName': producer.farmName,
+          'description': producer.description,
+          if (address != null) 'address': address.toJson(),
+          if (producer.paymentMethods != null &&
+              producer.paymentMethods!.isNotEmpty)
+            'paymentMethods': producer.paymentMethods!
+                .map((pm) => pm.toJson())
+                .toList(),
+          if (producer.availability != null &&
+              producer.availability!.isNotEmpty)
+            'availability': producer.availability!
+                .map((a) => a.toJson())
+                .toList(),
+        },
+      );
+    } on DioException catch (e) {
+      throw e.error as ApiException? ?? const UnknownApiException();
+    }
+  }
+
+  Future<void> deactivateProducer(String id) async {
+    try {
+      await _apiClient.dio.patch<void>(
+        '${ApiEndpoints.adminProducer(id)}/deactivate',
+      );
+    } on DioException catch (e) {
+      throw e.error as ApiException? ?? const UnknownApiException();
+    }
+  }
+
   Future<void> activateProducer(String id) async {
-    await Future.delayed(const Duration(milliseconds: 300));
-    final idx = _mockProducers.indexWhere((p) => p.id == id);
-    if (idx >= 0) {
-      _mockProducers[idx] = _mockProducers[idx].copyWith(active: true);
+    try {
+      await _apiClient.dio.patch<void>(
+        '${ApiEndpoints.adminProducer(id)}/activate',
+      );
+    } on DioException catch (e) {
+      throw e.error as ApiException? ?? const UnknownApiException();
     }
   }
 }

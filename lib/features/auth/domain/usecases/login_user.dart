@@ -10,6 +10,5 @@ class LoginUser {
   Future<({User user, String token})> call({
     required String email,
     required String password,
-  }) =>
-      _repository.loginUser(email: email, password: password);
+  }) => _repository.loginUser(email: email, password: password);
 }

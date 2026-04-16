@@ -18,44 +18,12 @@ class PublicProducerModel extends PublicProducer {
     required super.products,
     required super.availability,
     required super.memberSince,
+    super.fiscalNumber,
+    super.producerAddress,
+    super.paymentMethods,
   });
 
-  factory PublicProducerModel.fromJson(Map<String, dynamic> json) {
-    final user = json['user'] as Map<String, dynamic>? ?? json;
-    return PublicProducerModel(
-      id: json['id'] as String,
-      name: user['name'] as String? ?? '',
-      farmName: json['farm_name'] as String? ?? '',
-      location: json['location'] as String? ?? '',
-      description: json['description'] as String? ?? '',
-      story: json['story'] as String? ?? '',
-      avatarUrl: json['avatar_s3'] as String? ?? '',
-      coverUrl: json['display_photo_s3'] as String? ?? '',
-      averageRating: (json['average_rating'] as num?)?.toDouble() ?? 0.0,
-      totalReviews: json['total_reviews'] as int? ?? 0,
-      totalOrders: json['total_orders'] as int? ?? 0,
-      phone: user['phone'] as String? ?? '',
-      products: ((json['products'] as List?)?.map(
-                (p) => HomeProductModel.fromJson(p as Map<String, dynamic>),
-              ) ??
-              [])
-          .toList(),
-      availability: ((json['availability'] as List?)?.map(
-                (a) => AvailabilitySlot(
-                  weekday: a['weekday'] as int,
-                  opensAt: a['opens_at'] as String,
-                  closesAt: a['closes_at'] as String,
-                ),
-              ) ??
-              [])
-          .toList(),
-      memberSince: json['created_at'] != null
-          ? DateTime.parse(json['created_at'] as String)
-          : DateTime(2016),
-    );
-  }
-
-  static PublicProducerModel mock(String id) {
+  factory PublicProducerModel.mock(String id) {
     return PublicProducerModel(
       id: id,
       name: 'João Nascimento',
@@ -79,7 +47,121 @@ class PublicProducerModel extends PublicProducer {
         AvailabilitySlot(weekday: 5, opensAt: '14:00', closesAt: '18:30'),
         AvailabilitySlot(weekday: 6, opensAt: '14:00', closesAt: '18:30'),
       ],
-      memberSince: DateTime(2017, 3, 1),
+      memberSince: DateTime(2017, 3),
     );
+  }
+
+  factory PublicProducerModel.fromJson(Map<String, dynamic> json) {
+    // Alinhado com ProducerGetResponse do backend (EPIC 1 — Jackson camelCase).
+    // Dual-parse mantém fallback snake_case para payloads legados/mocks.
+    // products e availability NÃO vêm neste endpoint — virão de queries separadas
+    // (GET /products?producerId=..., e endpoint de availability quando exposto).
+    final address = json['address'] as Map<String, dynamic>?;
+    final location = _deriveLocation(json, address);
+
+    ProducerAddress? producerAddress;
+    if (address != null) {
+      producerAddress = ProducerAddress(
+        street: address['street'] as String? ?? '',
+        number: address['number'] as String? ?? '',
+        city: address['city'] as String? ?? '',
+        state: address['state'] as String? ?? '',
+        zipCode: address['zipCode'] as String? ?? '',
+        complement: address['complement'] as String?,
+        neighborhood: address['neighborhood'] as String?,
+        latitude: (address['latitude'] as num?)?.toDouble(),
+        longitude: (address['longitude'] as num?)?.toDouble(),
+      );
+    }
+
+    final memberSinceRaw =
+        json['memberSince'] as String? ?? json['created_at'] as String?;
+
+    return PublicProducerModel(
+      id: json['id'] as String? ?? '',
+      name: json['name'] as String? ?? '',
+      farmName:
+          json['farmName'] as String? ?? json['farm_name'] as String? ?? '',
+      location: location,
+      description: json['description'] as String? ?? '',
+      story: json['story'] as String? ?? '',
+      avatarUrl:
+          json['avatarS3'] as String? ?? json['avatar_s3'] as String? ?? '',
+      coverUrl:
+          json['displayPhotoS3'] as String? ??
+          json['display_photo_s3'] as String? ??
+          '',
+      averageRating:
+          (json['averageRating'] as num?)?.toDouble() ??
+          (json['average_rating'] as num?)?.toDouble() ??
+          0.0,
+      totalReviews:
+          json['totalReviews'] as int? ?? json['total_reviews'] as int? ?? 0,
+      totalOrders:
+          json['totalOrders'] as int? ?? json['total_orders'] as int? ?? 0,
+      phone: json['phone'] as String? ?? '',
+      products: _parseProducts(json['products']),
+      availability: _parseAvailability(json['availability']),
+      memberSince: memberSinceRaw != null
+          ? DateTime.parse(memberSinceRaw)
+          : DateTime(2016),
+      fiscalNumber: json['fiscalNumber'] as String?,
+      producerAddress: producerAddress,
+      paymentMethods: _parsePaymentMethods(json['paymentMethods']),
+    );
+  }
+
+  static String _deriveLocation(
+    Map<String, dynamic> json,
+    Map<String, dynamic>? address,
+  ) {
+    if (address != null) {
+      final city = (address['city'] as String?)?.trim() ?? '';
+      final state = (address['state'] as String?)?.trim() ?? '';
+      if (city.isNotEmpty && state.isNotEmpty) return '$city, $state';
+      if (city.isNotEmpty) return city;
+      if (state.isNotEmpty) return state;
+    }
+    return (json['location'] as String?) ?? '';
+  }
+
+  static List<HomeProductModel> _parseProducts(dynamic raw) {
+    if (raw is! List) return const [];
+    return raw
+        .map((p) => HomeProductModel.fromJson(p as Map<String, dynamic>))
+        .toList();
+  }
+
+  static List<AvailabilitySlot> _parseAvailability(dynamic raw) {
+    if (raw is! List) return const [];
+    return raw.map((a) {
+      final slot = a as Map<String, dynamic>;
+      return AvailabilitySlot(
+        weekday: slot['weekday'] as int,
+        opensAt:
+            slot['opensAt'] as String? ?? slot['opens_at'] as String? ?? '',
+        closesAt:
+            slot['closesAt'] as String? ?? slot['closes_at'] as String? ?? '',
+      );
+    }).toList();
+  }
+
+  static List<ProducerPaymentMethod>? _parsePaymentMethods(dynamic raw) {
+    if (raw is! List) return null;
+    return raw.map((pm) {
+      final json = pm as Map<String, dynamic>;
+      return ProducerPaymentMethod(
+        type: json['type'] as String? ?? '',
+        pixKeyType: json['pixKeyType'] as String?,
+        pixKey: json['pixKey'] as String?,
+        bankCode: json['bankCode'] as String?,
+        bankName: json['bankName'] as String?,
+        agency: json['agency'] as String?,
+        accountNumber: json['accountNumber'] as String?,
+        accountType: json['accountType'] as String?,
+        holderName: json['holderName'] as String?,
+        fiscalNumber: json['fiscalNumber'] as String?,
+      );
+    }).toList();
   }
 }

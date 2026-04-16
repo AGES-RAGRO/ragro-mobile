@@ -26,39 +26,38 @@ void main() {
     id: '1',
     name: 'João',
     email: 'j@t.com',
-    type: UserType.consumer,
+    type: UserType.customer,
     active: true,
   );
 
   blocTest<LoginBloc, LoginState>(
     'emits [Loading, Success] on successful login',
     build: () {
-      when(() => mockLoginUser(
-            email: any(named: 'email'),
-            password: any(named: 'password'),
-          )).thenAnswer((_) async => (user: tUser, token: 'tok'));
+      when(
+        () => mockLoginUser(
+          email: any(named: 'email'),
+          password: any(named: 'password'),
+        ),
+      ).thenAnswer((_) async => (user: tUser, token: 'tok'));
       return bloc;
     },
-    act: (b) => b.add(const LoginSubmitted(
-      email: 'j@t.com',
-      password: '123',
-    )),
+    act: (b) => b.add(const LoginSubmitted(email: 'j@t.com', password: '123')),
     expect: () => [const LoginLoading(), const LoginSuccess(tUser)],
   );
 
   blocTest<LoginBloc, LoginState>(
     'emits [Loading, Failure] on UnauthorizedException',
     build: () {
-      when(() => mockLoginUser(
-            email: any(named: 'email'),
-            password: any(named: 'password'),
-          )).thenThrow(const UnauthorizedException());
+      when(
+        () => mockLoginUser(
+          email: any(named: 'email'),
+          password: any(named: 'password'),
+        ),
+      ).thenThrow(const UnauthorizedException());
       return bloc;
     },
-    act: (b) => b.add(const LoginSubmitted(
-      email: 'j@t.com',
-      password: 'wrong',
-    )),
+    act: (b) =>
+        b.add(const LoginSubmitted(email: 'j@t.com', password: 'wrong')),
     expect: () => [
       const LoginLoading(),
       const LoginFailure('Credenciais inválidas'),

@@ -20,8 +20,9 @@ class ProductFormPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => getIt<ProductFormBloc>()
-        ..add(ProductFormStarted(productId: productId)),
+      create: (_) =>
+          getIt<ProductFormBloc>()
+            ..add(ProductFormStarted(productId: productId)),
       child: _ProductFormView(isEditMode: productId != null),
     );
   }
@@ -59,8 +60,7 @@ class _ProductFormViewState extends State<_ProductFormView> {
     if (state.product != null) {
       _nameController.text = state.product!.name;
       _descriptionController.text = state.product!.description;
-      _priceController.text =
-          state.product!.price.toStringAsFixed(2);
+      _priceController.text = state.product!.price.toStringAsFixed(2);
       _selectedUnit = state.product!.unit;
       _stockCount = state.product!.stock;
     }
@@ -81,14 +81,14 @@ class _ProductFormViewState extends State<_ProductFormView> {
     }
     final price = double.tryParse(priceText) ?? 0.0;
     context.read<ProductFormBloc>().add(
-          ProductFormSaved(
-            name: name,
-            description: description,
-            price: price,
-            unit: _selectedUnit,
-            stock: _stockCount,
-          ),
-        );
+      ProductFormSaved(
+        name: name,
+        description: description,
+        price: price,
+        unit: _selectedUnit,
+        stock: _stockCount,
+      ),
+    );
   }
 
   @override
@@ -99,9 +99,11 @@ class _ProductFormViewState extends State<_ProductFormView> {
         if (state is ProductFormSuccess) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(widget.isEditMode
-                  ? 'Produto atualizado com sucesso!'
-                  : 'Produto criado com sucesso!'),
+              content: Text(
+                widget.isEditMode
+                    ? 'Produto atualizado com sucesso!'
+                    : 'Produto criado com sucesso!',
+              ),
               backgroundColor: AppColors.darkGreen,
             ),
           );
@@ -147,7 +149,7 @@ class _ProductFormViewState extends State<_ProductFormView> {
                   width: double.infinity,
                   height: 210,
                   decoration: BoxDecoration(
-                    color: AppColors.darkGreen.withOpacity(0.06),
+                    color: AppColors.darkGreen.withValues(alpha: 0.06),
                     borderRadius: BorderRadius.circular(16),
                   ),
                   child: Stack(
@@ -164,22 +166,26 @@ class _ProductFormViewState extends State<_ProductFormView> {
                           onTap: () {
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
-                                content:
-                                    Text('Seleção de imagem em breve...'),
+                                content: Text('Seleção de imagem em breve...'),
                               ),
                             );
                           },
                           child: Container(
                             padding: const EdgeInsets.symmetric(
-                                horizontal: 16, vertical: 8),
+                              horizontal: 16,
+                              vertical: 8,
+                            ),
                             decoration: BoxDecoration(
                               color: AppColors.darkGreen,
                               borderRadius: BorderRadius.circular(24),
                             ),
                             child: const Row(
                               children: [
-                                Icon(Icons.camera_alt_outlined,
-                                    size: 16, color: AppColors.white),
+                                Icon(
+                                  Icons.camera_alt_outlined,
+                                  size: 16,
+                                  color: AppColors.white,
+                                ),
                                 SizedBox(width: 6),
                                 Text(
                                   'Alterar Foto',
@@ -202,7 +208,7 @@ class _ProductFormViewState extends State<_ProductFormView> {
                 const SizedBox(height: 24),
 
                 // Nome
-                _FieldLabel('Nome do Produto'),
+                const _FieldLabel('Nome do Produto'),
                 const SizedBox(height: 8),
                 _TextField(
                   controller: _nameController,
@@ -213,7 +219,7 @@ class _ProductFormViewState extends State<_ProductFormView> {
                 const SizedBox(height: 16),
 
                 // Descrição
-                _FieldLabel('Descrição do Produto'),
+                const _FieldLabel('Descrição do Produto'),
                 const SizedBox(height: 8),
                 _TextField(
                   controller: _descriptionController,
@@ -232,13 +238,14 @@ class _ProductFormViewState extends State<_ProductFormView> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          _FieldLabel('Preço (R\$)'),
+                          const _FieldLabel(r'Preço (R$)'),
                           const SizedBox(height: 8),
                           _TextField(
                             controller: _priceController,
                             hint: '0,00',
                             keyboardType: const TextInputType.numberWithOptions(
-                                decimal: true),
+                              decimal: true,
+                            ),
                             enabled: !isLoading,
                           ),
                         ],
@@ -250,32 +257,33 @@ class _ProductFormViewState extends State<_ProductFormView> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          _FieldLabel('Unidade'),
+                          const _FieldLabel('Unidade'),
                           const SizedBox(height: 8),
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 12),
                             decoration: BoxDecoration(
                               color: AppColors.inputBackground,
                               borderRadius: BorderRadius.circular(12),
-                              border: Border.all(
-                                  color: AppColors.inputBorder),
+                              border: Border.all(color: AppColors.inputBorder),
                             ),
                             child: DropdownButton<String>(
                               value: _selectedUnit,
                               isExpanded: true,
                               underline: const SizedBox.shrink(),
                               items: _units
-                                  .map((u) => DropdownMenuItem(
-                                        value: u,
-                                        child: Text(
-                                          u,
-                                          style: const TextStyle(
-                                            fontFamily: 'Manrope',
-                                            fontSize: 15,
-                                            color: AppColors.black,
-                                          ),
+                                  .map(
+                                    (u) => DropdownMenuItem(
+                                      value: u,
+                                      child: Text(
+                                        u,
+                                        style: const TextStyle(
+                                          fontFamily: 'Manrope',
+                                          fontSize: 15,
+                                          color: AppColors.black,
                                         ),
-                                      ))
+                                      ),
+                                    ),
+                                  )
                                   .toList(),
                               onChanged: isLoading
                                   ? null
@@ -295,7 +303,7 @@ class _ProductFormViewState extends State<_ProductFormView> {
                 const SizedBox(height: 16),
 
                 // Estoque
-                _FieldLabel('Quantidade em Estoque'),
+                const _FieldLabel('Quantidade em Estoque'),
                 const SizedBox(height: 8),
                 _StockStepper(
                   value: _stockCount,
@@ -314,10 +322,12 @@ class _ProductFormViewState extends State<_ProductFormView> {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.darkGreen,
                       foregroundColor: AppColors.white,
-                      disabledBackgroundColor:
-                          AppColors.darkGreen.withOpacity(0.5),
+                      disabledBackgroundColor: AppColors.darkGreen.withValues(
+                        alpha: 0.5,
+                      ),
                       shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(24)),
+                        borderRadius: BorderRadius.circular(24),
+                      ),
                       padding: const EdgeInsets.symmetric(vertical: 16),
                     ),
                     child: isLoading
@@ -399,8 +409,10 @@ class _TextField extends StatelessWidget {
         ),
         filled: true,
         fillColor: AppColors.inputBackground,
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 14,
+        ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: AppColors.inputBorder),
@@ -467,8 +479,7 @@ class _StockStepper extends StatelessWidget {
             ),
           ),
           GestureDetector(
-            onTap:
-                onChanged != null ? () => onChanged!(value + 1) : null,
+            onTap: onChanged != null ? () => onChanged!(value + 1) : null,
             child: Container(
               padding: const EdgeInsets.all(4),
               child: const Icon(

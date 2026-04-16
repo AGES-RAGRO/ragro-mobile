@@ -9,11 +9,8 @@ import 'package:ragro_mobile/features/inventory/presentation/bloc/product_form_s
 
 @injectable
 class ProductFormBloc extends Bloc<ProductFormEvent, ProductFormState> {
-  ProductFormBloc(
-    this._getProducts,
-    this._createProduct,
-    this._updateProduct,
-  ) : super(const ProductFormInitial()) {
+  ProductFormBloc(this._getProducts, this._createProduct, this._updateProduct)
+    : super(const ProductFormInitial()) {
     on<ProductFormStarted>(_onStarted);
     on<ProductFormSaved>(_onSaved);
   }
@@ -41,7 +38,7 @@ class ProductFormBloc extends Bloc<ProductFormEvent, ProductFormState> {
         orElse: () => throw Exception('Produto não encontrado'),
       );
       emit(ProductFormReady(product: product));
-    } catch (e) {
+    } on Exception catch (e) {
       emit(ProductFormFailure(e.toString()));
     }
   }
@@ -84,7 +81,7 @@ class ProductFormBloc extends Bloc<ProductFormEvent, ProductFormState> {
         await _updateProduct(updated);
       }
       emit(const ProductFormSuccess());
-    } catch (e) {
+    } on Exception catch (e) {
       emit(ProductFormFailure(e.toString()));
     }
   }

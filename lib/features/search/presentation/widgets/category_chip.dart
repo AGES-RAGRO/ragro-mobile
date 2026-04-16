@@ -3,10 +3,10 @@ import 'package:ragro_mobile/core/theme/app_colors.dart';
 
 class CategoryChip extends StatelessWidget {
   const CategoryChip({
-    super.key,
     required this.label,
     required this.isSelected,
     required this.onTap,
+    super.key,
   });
 
   final String label;
@@ -23,9 +23,7 @@ class CategoryChip extends StatelessWidget {
         decoration: BoxDecoration(
           color: isSelected ? AppColors.darkGreen : const Color(0xFFF1F5F9),
           borderRadius: BorderRadius.circular(24),
-          border: isSelected
-              ? null
-              : Border.all(color: AppColors.black),
+          border: isSelected ? null : Border.all(color: AppColors.black),
           boxShadow: isSelected
               ? [
                   const BoxShadow(

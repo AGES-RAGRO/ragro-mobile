@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:ragro_mobile/core/theme/app_colors.dart';
 import 'package:ragro_mobile/core/theme/app_text_styles.dart';
 
 /// Shared logo widget used across all auth screens.
-/// Displays "ragro" in large bold darkGreen and the tagline below.
 class RagroLogo extends StatelessWidget {
   const RagroLogo({super.key});
 
@@ -12,15 +12,12 @@ class RagroLogo extends StatelessWidget {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Text(
-          'ragro',
-          style: AppTextStyles.largeTitle.copyWith(
-            fontSize: 56,
-            fontWeight: FontWeight.w700,
-            color: AppColors.darkGreen,
-          ),
+        SvgPicture.asset(
+          'assets/images/logo_ragro.svg',
+          height: 300,
+          fit: BoxFit.contain,
         ),
-        const SizedBox(height: 4),
+        const SizedBox(height: 8),
         Text(
           'Do campo à mesa',
           style: AppTextStyles.body.copyWith(

@@ -3,10 +3,10 @@ import 'package:ragro_mobile/core/theme/app_colors.dart';
 
 class ProducerStatsRow extends StatelessWidget {
   const ProducerStatsRow({
-    super.key,
     required this.productCount,
     required this.rating,
     required this.yearsOnPlatform,
+    super.key,
   });
 
   final int productCount;

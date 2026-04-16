@@ -13,10 +13,38 @@ class OrdersRemoteDatasource {
       farmAvatarUrl: '',
       ownerName: 'Manoel Silva',
       items: const [
-        OrderItem(productId: 'prod1', name: 'Tomate', imageUrl: '', quantity: 1, unityType: 'un', totalPrice: 12.90),
-        OrderItem(productId: 'prod2', name: 'Bananas', imageUrl: '', quantity: 3, unityType: 'kg', totalPrice: 18.00),
-        OrderItem(productId: 'prod3', name: 'Maçã', imageUrl: '', quantity: 1, unityType: 'kg', totalPrice: 9.00),
-        OrderItem(productId: 'prod4', name: 'Alface Crespa', imageUrl: '', quantity: 1, unityType: 'un', totalPrice: 4.50),
+        OrderItem(
+          productId: 'prod1',
+          name: 'Tomate',
+          imageUrl: '',
+          quantity: 1,
+          unityType: 'un',
+          totalPrice: 12.90,
+        ),
+        OrderItem(
+          productId: 'prod2',
+          name: 'Bananas',
+          imageUrl: '',
+          quantity: 3,
+          unityType: 'kg',
+          totalPrice: 18,
+        ),
+        OrderItem(
+          productId: 'prod3',
+          name: 'Maçã',
+          imageUrl: '',
+          quantity: 1,
+          unityType: 'kg',
+          totalPrice: 9,
+        ),
+        OrderItem(
+          productId: 'prod4',
+          name: 'Alface Crespa',
+          imageUrl: '',
+          quantity: 1,
+          unityType: 'un',
+          totalPrice: 4.50,
+        ),
       ],
       totalAmount: 145.90,
       status: OrderStatus.pending,
@@ -42,9 +70,30 @@ class OrdersRemoteDatasource {
       farmAvatarUrl: '',
       ownerName: 'Manoel Silva',
       items: const [
-        OrderItem(productId: 'prod1', name: 'Tomate', imageUrl: '', quantity: 1, unityType: 'un', totalPrice: 12.90),
-        OrderItem(productId: 'prod2', name: 'Bananas', imageUrl: '', quantity: 3, unityType: 'kg', totalPrice: 18.00),
-        OrderItem(productId: 'prod3', name: 'Maçã', imageUrl: '', quantity: 1, unityType: 'kg', totalPrice: 9.00),
+        OrderItem(
+          productId: 'prod1',
+          name: 'Tomate',
+          imageUrl: '',
+          quantity: 1,
+          unityType: 'un',
+          totalPrice: 12.90,
+        ),
+        OrderItem(
+          productId: 'prod2',
+          name: 'Bananas',
+          imageUrl: '',
+          quantity: 3,
+          unityType: 'kg',
+          totalPrice: 18,
+        ),
+        OrderItem(
+          productId: 'prod3',
+          name: 'Maçã',
+          imageUrl: '',
+          quantity: 1,
+          unityType: 'kg',
+          totalPrice: 9,
+        ),
       ],
       totalAmount: 145.90,
       status: OrderStatus.accepted,
@@ -70,8 +119,22 @@ class OrdersRemoteDatasource {
       farmAvatarUrl: '',
       ownerName: 'Manoel Silva',
       items: const [
-        OrderItem(productId: 'prod1', name: 'Tomate', imageUrl: '', quantity: 1, unityType: 'un', totalPrice: 12.90),
-        OrderItem(productId: 'prod5', name: 'Maçã', imageUrl: '', quantity: 1, unityType: 'kg', totalPrice: 9.00),
+        OrderItem(
+          productId: 'prod1',
+          name: 'Tomate',
+          imageUrl: '',
+          quantity: 1,
+          unityType: 'un',
+          totalPrice: 12.90,
+        ),
+        OrderItem(
+          productId: 'prod5',
+          name: 'Maçã',
+          imageUrl: '',
+          quantity: 1,
+          unityType: 'kg',
+          totalPrice: 9,
+        ),
       ],
       totalAmount: 145.90,
       status: OrderStatus.delivered,
@@ -97,7 +160,14 @@ class OrdersRemoteDatasource {
       farmAvatarUrl: '',
       ownerName: 'Manoel Silva',
       items: const [
-        OrderItem(productId: 'prod2', name: 'Bananas', imageUrl: '', quantity: 3, unityType: 'kg', totalPrice: 18.00),
+        OrderItem(
+          productId: 'prod2',
+          name: 'Bananas',
+          imageUrl: '',
+          quantity: 3,
+          unityType: 'kg',
+          totalPrice: 18,
+        ),
       ],
       totalAmount: 145.90,
       status: OrderStatus.cancelled,
@@ -122,16 +192,16 @@ class OrdersRemoteDatasource {
   ///
   /// === REAL IMPLEMENTATION (uncomment when backend is ready) ===
   ///
-  /// Future<List<Order>> getOrders({OrderStatus? status}) async {
+  /// Future`<List<Order>>` getOrders({OrderStatus? status}) async {
   ///   try {
-  ///     final response = await _apiClient.dio.get<Map<String, dynamic>>(
+  ///     final response = await _apiClient.dio.get`<Map<String, dynamic>>`(
   ///       ApiEndpoints.orders,
   ///       queryParameters: {
   ///         if (status != null) 'status': status.name,
   ///       },
   ///     );
   ///     return (response.data!['data'] as List)
-  ///         .map((e) => Order.fromJson(e as Map<String, dynamic>))
+  ///         .map((e) => Order.fromJson(e as `Map<String, dynamic>`))
   ///         .toList();
   ///   } on DioException catch (e) {
   ///     throw e.error as ApiException? ?? const UnknownApiException();
@@ -151,9 +221,9 @@ class OrdersRemoteDatasource {
   ///
   /// === REAL IMPLEMENTATION (uncomment when backend is ready) ===
   ///
-  /// Future<Order> getOrderById(String id) async {
+  /// Future`<Order>` getOrderById(String id) async {
   ///   try {
-  ///     final response = await _apiClient.dio.get<Map<String, dynamic>>(
+  ///     final response = await _apiClient.dio.get`<Map<String, dynamic>>`(
   ///       ApiEndpoints.order(id),
   ///     );
   ///     return Order.fromJson(response.data!);
@@ -167,16 +237,19 @@ class OrdersRemoteDatasource {
   /// MOCK TEMPORÁRIO — remover quando backend estiver conectado:
   Future<Order> getOrderById(String id) async {
     await Future<void>.delayed(const Duration(milliseconds: 400));
-    return _mockOrders.firstWhere((o) => o.id == id, orElse: () => _mockOrders.first);
+    return _mockOrders.firstWhere(
+      (o) => o.id == id,
+      orElse: () => _mockOrders.first,
+    );
   }
 
   /// Confirms an order from cart (POST /orders).
   ///
   /// === REAL IMPLEMENTATION (uncomment when backend is ready) ===
   ///
-  /// Future<Order> confirmOrder(String cartId) async {
+  /// Future`<Order>` confirmOrder(String cartId) async {
   ///   try {
-  ///     final response = await _apiClient.dio.post<Map<String, dynamic>>(
+  ///     final response = await _apiClient.dio.post`<Map<String, dynamic>>`(
   ///       ApiEndpoints.orders,
   ///       data: {'cart_id': cartId},
   ///     );
@@ -198,9 +271,9 @@ class OrdersRemoteDatasource {
   ///
   /// === REAL IMPLEMENTATION (uncomment when backend is ready) ===
   ///
-  /// Future<void> rateProducer(String orderId, int rating) async {
+  /// Future`<void>` rateProducer(String orderId, int rating) async {
   ///   try {
-  ///     await _apiClient.dio.post<void>(
+  ///     await _apiClient.dio.post`<void>`(
   ///       ApiEndpoints.orderRating(orderId),
   ///       data: {'rating': rating},
   ///     );

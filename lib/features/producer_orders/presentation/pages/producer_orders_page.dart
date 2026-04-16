@@ -20,8 +20,9 @@ class ProducerOrdersPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => getIt<ProducerOrdersBloc>()
-        ..add(const ProducerOrdersStarted(ProducerOrderStatus.pending)),
+      create: (_) =>
+          getIt<ProducerOrdersBloc>()
+            ..add(const ProducerOrdersStarted(ProducerOrderStatus.pending)),
       child: const _ProducerOrdersView(),
     );
   }
@@ -40,8 +41,18 @@ class _ProducerOrdersView extends StatelessWidget {
   String get _todayLabel {
     final now = DateTime.now();
     final months = [
-      'janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho',
-      'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro',
+      'janeiro',
+      'fevereiro',
+      'março',
+      'abril',
+      'maio',
+      'junho',
+      'julho',
+      'agosto',
+      'setembro',
+      'outubro',
+      'novembro',
+      'dezembro',
     ];
     return 'Hoje, ${now.day} de ${months[now.month - 1]}';
   }
@@ -87,8 +98,8 @@ class _ProducerOrdersView extends StatelessWidget {
                 final activeTab = state is ProducerOrdersLoading
                     ? state.activeTab
                     : state is ProducerOrdersLoaded
-                        ? state.activeTab
-                        : ProducerOrderStatus.pending;
+                    ? state.activeTab
+                    : ProducerOrderStatus.pending;
                 return SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
                   padding: const EdgeInsets.only(left: 16),
@@ -96,9 +107,9 @@ class _ProducerOrdersView extends StatelessWidget {
                     children: _tabs.map((tab) {
                       final isActive = activeTab == tab.$1;
                       return GestureDetector(
-                        onTap: () => context
-                            .read<ProducerOrdersBloc>()
-                            .add(ProducerOrdersTabChanged(tab.$1)),
+                        onTap: () => context.read<ProducerOrdersBloc>().add(
+                          ProducerOrdersTabChanged(tab.$1),
+                        ),
                         child: Container(
                           padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
                           decoration: BoxDecoration(
@@ -115,8 +126,9 @@ class _ProducerOrdersView extends StatelessWidget {
                             tab.$2,
                             style: TextStyle(
                               fontFamily: 'Manrope',
-                              fontWeight:
-                                  isActive ? FontWeight.w700 : FontWeight.w500,
+                              fontWeight: isActive
+                                  ? FontWeight.w700
+                                  : FontWeight.w500,
                               fontSize: 14,
                               color: isActive
                                   ? AppColors.darkGreen
@@ -138,7 +150,8 @@ class _ProducerOrdersView extends StatelessWidget {
                   if (state is ProducerOrdersLoading) {
                     return const Center(
                       child: CircularProgressIndicator(
-                          color: AppColors.darkGreen),
+                        color: AppColors.darkGreen,
+                      ),
                     );
                   }
                   if (state is ProducerOrdersFailure) {
@@ -170,8 +183,7 @@ class _ProducerOrdersView extends StatelessWidget {
                       ),
                     );
                   }
-                  final newCount =
-                      state.orders.where((o) => o.isNew).length;
+                  final newCount = state.orders.where((o) => o.isNew).length;
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -179,8 +191,7 @@ class _ProducerOrdersView extends StatelessWidget {
                         Padding(
                           padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
                           child: GestureDetector(
-                            onTap: () =>
-                                context.push('/producer/home/route'),
+                            onTap: () => context.push('/producer/home/route'),
                             child: Container(
                               height: 44,
                               decoration: BoxDecoration(
@@ -233,20 +244,23 @@ class _ProducerOrdersView extends StatelessWidget {
                             final order = state.orders[index];
                             return ProducerOrderCard(
                               order: order,
-                              onDetailTap: () => context
-                                  .push('/producer/home/orders/${order.id}'),
+                              onDetailTap: () => context.push(
+                                '/producer/home/orders/${order.id}',
+                              ),
                               onActionTap: () {
                                 if (order.status ==
                                         ProducerOrderStatus.delivered ||
                                     order.status ==
                                         ProducerOrderStatus.cancelled) {
                                   context.push(
-                                      '/producer/home/orders/${order.id}');
+                                    '/producer/home/orders/${order.id}',
+                                  );
                                   return;
                                 }
                                 // Quick action via detail BLoC
                                 context.push(
-                                    '/producer/home/orders/${order.id}');
+                                  '/producer/home/orders/${order.id}',
+                                );
                               },
                             );
                           },

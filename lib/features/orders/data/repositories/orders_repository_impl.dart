@@ -10,7 +10,8 @@ class OrdersRepositoryImpl implements OrdersRepository {
   final OrdersRemoteDatasource _datasource;
 
   @override
-  Future<List<Order>> getOrders({OrderStatus? status}) => _datasource.getOrders(status: status);
+  Future<List<Order>> getOrders({OrderStatus? status}) =>
+      _datasource.getOrders(status: status);
 
   @override
   Future<Order> getOrderById(String id) => _datasource.getOrderById(id);
@@ -19,5 +20,6 @@ class OrdersRepositoryImpl implements OrdersRepository {
   Future<Order> confirmOrder(String cartId) => _datasource.confirmOrder(cartId);
 
   @override
-  Future<void> rateProducer(String orderId, int rating) => _datasource.rateProducer(orderId, rating);
+  Future<void> rateProducer(String orderId, int rating) =>
+      _datasource.rateProducer(orderId, rating);
 }

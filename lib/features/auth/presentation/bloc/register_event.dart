@@ -11,6 +11,7 @@ class RegisterSubmitted extends RegisterEvent {
     required this.name,
     required this.phone,
     required this.email,
+    required this.fiscalNumber,
     required this.password,
     required this.zipCode,
     required this.street,
@@ -18,11 +19,13 @@ class RegisterSubmitted extends RegisterEvent {
     required this.city,
     required this.state,
     this.complement,
+    this.neighborhood,
   });
 
   final String name;
   final String phone;
   final String email;
+  final String fiscalNumber;
   final String password;
   final String zipCode;
   final String street;
@@ -30,17 +33,21 @@ class RegisterSubmitted extends RegisterEvent {
   final String city;
   final String state;
   final String? complement;
+  final String? neighborhood;
 
   @override
   List<Object?> get props => [
-        name,
-        phone,
-        email,
-        password,
-        zipCode,
-        street,
-        number,
-        city,
-        state,
-      ];
+    name,
+    phone,
+    email,
+    fiscalNumber,
+    password,
+    zipCode,
+    street,
+    number,
+    city,
+    state,
+    complement,
+    neighborhood,
+  ];
 }

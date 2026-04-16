@@ -9,7 +9,7 @@ import 'package:ragro_mobile/features/inventory/presentation/bloc/inventory_stat
 @injectable
 class InventoryBloc extends Bloc<InventoryEvent, InventoryState> {
   InventoryBloc(this._getProducts, this._deleteProduct)
-      : super(const InventoryInitial()) {
+    : super(const InventoryInitial()) {
     on<InventoryStarted>(_onStarted);
     on<InventoryFilterChanged>(_onFilterChanged);
     on<InventoryProductDeleted>(_onProductDeleted);
@@ -30,7 +30,7 @@ class InventoryBloc extends Bloc<InventoryEvent, InventoryState> {
       _allProducts = await _getProducts();
       _activeFilter = 'all';
       emit(_buildLoaded());
-    } catch (e) {
+    } on Exception catch (e) {
       emit(InventoryFailure(e.toString()));
     }
   }
@@ -51,7 +51,7 @@ class InventoryBloc extends Bloc<InventoryEvent, InventoryState> {
       await _deleteProduct(event.productId);
       _allProducts.removeWhere((p) => p.id == event.productId);
       emit(_buildLoaded());
-    } catch (e) {
+    } on Exception catch (e) {
       emit(InventoryFailure(e.toString()));
     }
   }
@@ -64,7 +64,7 @@ class InventoryBloc extends Bloc<InventoryEvent, InventoryState> {
     try {
       _allProducts = await _getProducts();
       emit(_buildLoaded());
-    } catch (e) {
+    } on Exception catch (e) {
       emit(InventoryFailure(e.toString()));
     }
   }
@@ -76,8 +76,10 @@ class InventoryBloc extends Bloc<InventoryEvent, InventoryState> {
         _allProducts.where((p) => !p.active || p.stock == 0).toList(),
       _ => List<InventoryProduct>.from(_allProducts),
     };
-    final totalValue =
-        _allProducts.fold(0.0, (sum, p) => sum + p.price * p.stock);
+    final totalValue = _allProducts.fold<double>(
+      0,
+      (sum, p) => sum + p.price * p.stock,
+    );
     return InventoryLoaded(
       products: filtered,
       activeFilter: _activeFilter,

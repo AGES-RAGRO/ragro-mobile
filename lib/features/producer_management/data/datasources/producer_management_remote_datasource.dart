@@ -1,40 +1,56 @@
+import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart';
+import 'package:ragro_mobile/core/di/injection.dart';
+import 'package:ragro_mobile/core/network/api_client.dart';
+import 'package:ragro_mobile/core/network/api_endpoints.dart';
+import 'package:ragro_mobile/core/network/api_exception.dart';
+import 'package:ragro_mobile/features/auth/data/datasources/auth_local_datasource.dart';
 import 'package:ragro_mobile/features/producer_management/domain/entities/producer_dashboard.dart';
 
 @lazySingleton
 class ProducerManagementRemoteDataSource {
+  final ApiClient _apiClient = getIt<ApiClient>();
+  final AuthLocalDataSource _authLocal = getIt<AuthLocalDataSource>();
+
   /// Gets dashboard data for the authenticated producer.
-  ///
-  /// === REAL IMPLEMENTATION (uncomment when backend is ready) ===
-  ///
-  /// Future<ProducerDashboard> getDashboard() async {
-  ///   try {
-  ///     final response = await _apiClient.dio.get<Map<String, dynamic>>(
-  ///       ApiEndpoints.producerDashboard,
-  ///     );
-  ///     return ProducerDashboard.fromJson(response.data!);
-  ///   } on DioException catch (e) {
-  ///     throw e.error as ApiException? ?? const UnknownApiException();
-  ///   }
-  /// }
-  ///
-  /// === END REAL IMPLEMENTATION ===
-  ///
-  /// MOCK TEMPORÁRIO — remover quando backend estiver conectado:
   Future<ProducerDashboard> getDashboard() async {
-    await Future.delayed(const Duration(milliseconds: 400));
-    return const ProducerDashboard(
-      producerName: 'João Silva',
-      producerTitle: 'Produtor Orgânico Certificado',
-      avatarUrl: '',
-      totalSales: 42850.0,
-      salesGrowthPercent: 18.5,
-      totalOrders: 128,
-      ordersGrowthPercent: 12.0,
-      stockPercentage: 85.0,
-      stockChangePercent: -2.0,
-      weeklyChartData: [3200, 4100, 2800, 5600, 4800, 3900, 2200],
-      currentMonth: 'Março/26',
-    );
+    final producerId = _authLocal.getUserId();
+    if (producerId == null || producerId.isEmpty) {
+      throw const UnauthorizedException(
+        'Sessão expirada. Faça login novamente.',
+      );
+    }
+
+    try {
+      final response = await _apiClient.dio.get<Map<String, dynamic>>(
+        ApiEndpoints.producer(producerId),
+      );
+
+      final data = response.data ?? const <String, dynamic>{};
+      final farmName =
+          (data['farmName'] as String? ?? data['farm_name'] as String? ?? '')
+              .trim();
+
+      return ProducerDashboard(
+        producerName: (data['name'] as String? ?? '').trim(),
+        producerTitle: farmName.isNotEmpty ? farmName : 'Produtor',
+        avatarUrl:
+            data['avatarS3'] as String? ?? data['avatar_s3'] as String? ?? '',
+        coverUrl:
+            data['displayPhotoS3'] as String? ??
+            data['display_photo_s3'] as String? ??
+            '',
+        totalSales: 0,
+        salesGrowthPercent: 0,
+        totalOrders: (data['totalOrders'] as num?)?.toInt() ?? 0,
+        ordersGrowthPercent: 0,
+        stockPercentage: 0,
+        stockChangePercent: 0,
+        weeklyChartData: const [0, 0, 0, 0, 0, 0, 0],
+        currentMonth: 'Atual',
+      );
+    } on DioException catch (e) {
+      throw e.error as ApiException? ?? const UnknownApiException();
+    }
   }
 }

@@ -1,7 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 import 'package:ragro_mobile/core/network/api_exception.dart';
-import 'package:ragro_mobile/features/auth/domain/usecases/register_consumer.dart';
+import 'package:ragro_mobile/features/auth/domain/usecases/register_customer.dart';
 import 'package:ragro_mobile/features/auth/presentation/bloc/register_event.dart';
 import 'package:ragro_mobile/features/auth/presentation/bloc/register_state.dart';
 
@@ -11,7 +11,7 @@ class RegisterBloc extends Bloc<RegisterEvent, RegisterState> {
     on<RegisterSubmitted>(_onSubmitted);
   }
 
-  final RegisterConsumer _register;
+  final RegisterCustomer _register;
 
   Future<void> _onSubmitted(
     RegisterSubmitted event,
@@ -23,6 +23,7 @@ class RegisterBloc extends Bloc<RegisterEvent, RegisterState> {
         name: event.name,
         phone: event.phone,
         email: event.email,
+        fiscalNumber: event.fiscalNumber,
         password: event.password,
         zipCode: event.zipCode,
         street: event.street,
@@ -30,10 +31,25 @@ class RegisterBloc extends Bloc<RegisterEvent, RegisterState> {
         city: event.city,
         state: event.state,
         complement: event.complement,
+        neighborhood: event.neighborhood,
       );
       emit(RegisterSuccess(user));
+    } on ConflictException catch (e) {
+      emit(RegisterFailure(_mapConflictMessage(e.message)));
     } on ApiException catch (e) {
       emit(RegisterFailure(e.message));
     }
+  }
+
+  // Traduz mensagens do backend (EN) para o usuário final (PT-BR).
+  String _mapConflictMessage(String raw) {
+    final lower = raw.toLowerCase();
+    if (lower.contains('e-mail') || lower.contains('email')) {
+      return 'Este e-mail já está cadastrado.';
+    }
+    if (lower.contains('fiscal')) {
+      return 'Este CPF já está cadastrado.';
+    }
+    return 'Cadastro já existente.';
   }
 }

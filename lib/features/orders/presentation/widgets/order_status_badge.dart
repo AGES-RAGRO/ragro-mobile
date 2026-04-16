@@ -3,16 +3,16 @@ import 'package:ragro_mobile/core/theme/app_colors.dart';
 import 'package:ragro_mobile/features/orders/domain/entities/order_status.dart';
 
 class OrderStatusBadge extends StatelessWidget {
-  const OrderStatusBadge({super.key, required this.status});
+  const OrderStatusBadge({required this.status, super.key});
 
   final OrderStatus status;
 
   Color get _backgroundColor => switch (status) {
-        OrderStatus.pending => const Color(0xFFFFB413),
-        OrderStatus.accepted => AppColors.lightGreen,
-        OrderStatus.delivered => const Color(0xFF3B82F6),
-        OrderStatus.cancelled => AppColors.red,
-      };
+    OrderStatus.pending => const Color(0xFFFFB413),
+    OrderStatus.accepted => AppColors.lightGreen,
+    OrderStatus.delivered => const Color(0xFF3B82F6),
+    OrderStatus.cancelled => AppColors.red,
+  };
 
   @override
   Widget build(BuildContext context) {
@@ -26,7 +26,11 @@ class OrderStatusBadge extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           if (status != OrderStatus.cancelled) ...[
-            const Icon(Icons.check_circle_outline, color: Colors.white, size: 12),
+            const Icon(
+              Icons.check_circle_outline,
+              color: Colors.white,
+              size: 12,
+            ),
             const SizedBox(width: 4),
           ],
           Text(

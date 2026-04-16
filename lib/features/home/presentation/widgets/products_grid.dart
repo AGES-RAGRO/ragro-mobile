@@ -5,10 +5,10 @@ import 'package:ragro_mobile/features/home/presentation/widgets/home_product_car
 
 class ProductsGrid extends StatelessWidget {
   const ProductsGrid({
-    super.key,
     required this.products,
     required this.onProductTap,
     required this.onAddToCart,
+    super.key,
   });
 
   final List<HomeProduct> products;
