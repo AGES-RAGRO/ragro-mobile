@@ -13,6 +13,7 @@ import 'package:ragro_mobile/features/producer_profile/presentation/bloc/produce
 import 'package:ragro_mobile/features/producer_profile/presentation/bloc/producer_profile_event.dart';
 import 'package:ragro_mobile/features/producer_profile/presentation/bloc/producer_profile_state.dart';
 import 'package:ragro_mobile/features/producer_profile/presentation/widgets/producer_stats_row.dart';
+import 'package:ragro_mobile/features/producer_profile/presentation/widgets/review_card.dart';
 
 class ProducerPublicProfilePage extends StatelessWidget {
   const ProducerPublicProfilePage({required this.producerId, super.key});
@@ -223,6 +224,60 @@ class _ProducerPublicProfileView extends StatelessWidget {
                                   onAddToCart: () {},
                                 ),
                               ),
+                              const SizedBox(height: 40),
+                              // Reviews section header
+                              const Align(
+                                alignment: Alignment.centerLeft,
+                                child: Text(
+                                  'Avaliações Recentes',
+                                  style: TextStyle(
+                                    fontFamily: 'Figtree',
+                                    fontWeight: FontWeight.w700,
+                                    fontSize: 22,
+                                    color: AppColors.black,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 16),
+                              // Reviews list or empty state
+                              if ((producer.reviews ?? const []).isEmpty)
+                                Center(
+                                  child: Padding(
+                                    padding:
+                                        const EdgeInsets.symmetric(vertical: 24),
+                                    child: Column(
+                                      children: [
+                                        Icon(
+                                          Icons.rate_review_outlined,
+                                          size: 48,
+                                          color: AppColors.darkGreen
+                                              .withValues(alpha: 0.3),
+                                        ),
+                                        const SizedBox(height: 12),
+                                        Text(
+                                          'Nenhuma avaliação ainda',
+                                          style: TextStyle(
+                                            fontFamily: 'Figtree',
+                                            fontWeight: FontWeight.w500,
+                                            fontSize: 16,
+                                            color: AppColors.darkGreen
+                                                .withValues(alpha: 0.6),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                )
+                              else
+                                ListView.builder(
+                                  shrinkWrap: true,
+                                  physics: const NeverScrollableScrollPhysics(),
+                                  itemCount: (producer.reviews ?? const []).length,
+                                  itemBuilder: (_, i) => ReviewCard(
+                                    review: (producer.reviews ?? const [])[i],
+                                  ),
+                                ),
+                              const SizedBox(height: 24),
                             ],
                           ),
                         ),

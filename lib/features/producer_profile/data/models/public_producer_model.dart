@@ -1,4 +1,5 @@
 import 'package:ragro_mobile/features/home/data/models/home_product_model.dart';
+import 'package:ragro_mobile/features/producer_profile/data/models/review_model.dart';
 import 'package:ragro_mobile/features/producer_profile/domain/entities/public_producer.dart';
 
 class PublicProducerModel extends PublicProducer {
@@ -21,6 +22,7 @@ class PublicProducerModel extends PublicProducer {
     super.fiscalNumber,
     super.producerAddress,
     super.paymentMethods,
+    super.reviews,
   });
 
   factory PublicProducerModel.mock(String id) {
@@ -48,6 +50,32 @@ class PublicProducerModel extends PublicProducer {
         AvailabilitySlot(weekday: 6, opensAt: '14:00', closesAt: '18:30'),
       ],
       memberSince: DateTime(2017, 3),
+      reviews: [
+        ReviewModel(
+          id: '1',
+          authorName: 'Maria Silva',
+          rating: 5.0,
+          comment: 'Produtos frescos e de excelente qualidade! Recomendo!',
+          createdAt: DateTime.now().subtract(const Duration(days: 10)),
+          authorAvatarUrl: null,
+        ),
+        ReviewModel(
+          id: '2',
+          authorName: 'Pedro Oliveira',
+          rating: 4.5,
+          comment: 'Ótimo atendimento e produtos bem embalados.',
+          createdAt: DateTime.now().subtract(const Duration(days: 25)),
+          authorAvatarUrl: null,
+        ),
+        ReviewModel(
+          id: '3',
+          authorName: 'Ana Costa',
+          rating: 5.0,
+          comment: 'Entrega rápida e produtos no ponto!',
+          createdAt: DateTime.now().subtract(const Duration(days: 45)),
+          authorAvatarUrl: null,
+        ),
+      ],
     );
   }
 
@@ -102,6 +130,7 @@ class PublicProducerModel extends PublicProducer {
       phone: json['phone'] as String? ?? '',
       products: _parseProducts(json['products']),
       availability: _parseAvailability(json['availability']),
+      reviews: _parseReviews(json['reviews']),
       memberSince: memberSinceRaw != null
           ? DateTime.parse(memberSinceRaw)
           : DateTime(2016),
@@ -163,5 +192,12 @@ class PublicProducerModel extends PublicProducer {
         fiscalNumber: json['fiscalNumber'] as String?,
       );
     }).toList();
+  }
+
+  static List<ReviewModel> _parseReviews(dynamic raw) {
+    if (raw is! List) return const [];
+    return raw
+        .map((r) => ReviewModel.fromJson(r as Map<String, dynamic>))
+        .toList();
   }
 }

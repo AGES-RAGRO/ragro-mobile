@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:ragro_mobile/features/home/domain/entities/home_product.dart';
+import 'package:ragro_mobile/features/producer_profile/domain/entities/review.dart';
 
 class AvailabilitySlot extends Equatable {
   const AvailabilitySlot({
@@ -103,6 +104,7 @@ class PublicProducer extends Equatable {
     this.fiscalNumber,
     this.producerAddress,
     this.paymentMethods,
+    this.reviews,
   });
 
   final String id;
@@ -120,11 +122,12 @@ class PublicProducer extends Equatable {
   final List<HomeProduct> products;
   final List<AvailabilitySlot> availability;
   final DateTime memberSince;
-  
+
   // Private fields for profile editing
   final String? fiscalNumber;
   final ProducerAddress? producerAddress;
   final List<ProducerPaymentMethod>? paymentMethods;
+  final List<Review>? reviews;
 
   int get yearsOnPlatform {
     return DateTime.now().difference(memberSince).inDays ~/ 365;
