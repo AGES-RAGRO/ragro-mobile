@@ -22,6 +22,21 @@ class AuthAuthenticated extends AuthState {
   List<Object?> get props => [user];
 }
 
+class AuthPasswordResetInProgress extends AuthAuthenticated {
+  const AuthPasswordResetInProgress(super.user);
+}
+
+class AuthPasswordResetSuccess extends AuthAuthenticated {
+  const AuthPasswordResetSuccess(super.user);
+}
+
+class AuthPasswordResetFailure extends AuthAuthenticated {
+  const AuthPasswordResetFailure(super.user, this.message);
+  final String message;
+  @override
+  List<Object?> get props => [user, message];
+}
+
 class AuthUnauthenticated extends AuthState {
   const AuthUnauthenticated();
 }

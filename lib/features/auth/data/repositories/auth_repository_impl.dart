@@ -86,6 +86,11 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
+  Future<void> requestPasswordReset() {
+    return _remote.requestPasswordReset();
+  }
+
+  @override
   Future<User?> getCurrentUser() async {
     // DEMO_MODE: bypass auth — used for Playwright visual testing only.
     // Run with: flutter run -d chrome --dart-define=DEMO_MODE=true

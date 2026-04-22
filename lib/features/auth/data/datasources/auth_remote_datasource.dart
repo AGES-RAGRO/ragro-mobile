@@ -154,4 +154,13 @@ class AuthRemoteDataSource {
       throw e.error as ApiException? ?? const UnknownApiException();
     }
   }
+
+  /// Solicita redefinição de senha via e-mail — POST /auth/password/reset-email (204 No Content).
+  Future<void> requestPasswordReset() async {
+    try {
+      await _apiClient.dio.post(ApiEndpoints.resetPasswordEmail);
+    } on DioException catch (e) {
+      throw e.error as ApiException? ?? const UnknownApiException();
+    }
+  }
 }

@@ -23,5 +23,7 @@ abstract class AuthRepository {
 
   Future<void> logout();
 
+  Future<void> requestPasswordReset();
+
   Future<User?> getCurrentUser();
 }

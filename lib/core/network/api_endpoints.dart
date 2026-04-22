@@ -29,6 +29,7 @@ abstract final class ApiEndpoints {
   static String get authConfig => '$_base/auth/config';
   static String get authSession => '$_base/auth/session';
   static String get registerCustomer => '$_base/auth/register/customer';
+  static String get resetPasswordEmail => '$_base/auth/password/reset-email';
 
   // Customers
   static String get customers => '$_base/customers';
