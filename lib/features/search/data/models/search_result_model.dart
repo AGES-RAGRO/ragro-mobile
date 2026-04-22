@@ -42,4 +42,21 @@ class SearchResultModel extends SearchResult {
       ),
     ];
   }
+
+  factory SearchResultModel.fromJson(Map<String, dynamic> json) {
+    final type = json['type'] == 'producer'
+        ? SearchResultType.producer
+        : SearchResultType.product;
+
+    return SearchResultModel(
+      id: json['id'] as String,
+      type: type,
+      name: json['name'] as String,
+      subtitle: json['subtitle'] as String? ?? '',
+      imageUrl: json['image_url'] as String? ?? '',
+      price: (json['price'] as num?)?.toDouble(),
+      rating: (json['rating'] as num?)?.toDouble(),
+      category: json['category'] as String?,
+    );
+  }
 }
