@@ -170,6 +170,22 @@ class _ProducerPublicProfileView extends StatelessWidget {
                                 ),
                               ),
                               const SizedBox(height: 16),
+                              // Descrição 
+                              if (producer.description.isNotEmpty)
+                                Padding(
+                                  padding: const EdgeInsets.only(bottom: 16),
+                                  child: Text(
+                                    producer.description,
+                                    style: const TextStyle(
+                                      fontFamily: 'Figtree',
+                                      fontWeight: FontWeight.w500,
+                                      fontSize: 14,
+                                      color: Color(0xFF475569),
+                                      height: 1.5,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
                               // Story
                               Text(
                                 producer.story,
