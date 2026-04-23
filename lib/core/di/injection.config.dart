@@ -100,6 +100,8 @@ import 'package:ragro_mobile/features/home/domain/repositories/home_repository.d
     as _i285;
 import 'package:ragro_mobile/features/home/domain/usecases/get_home_data.dart'
     as _i159;
+import 'package:ragro_mobile/features/home/domain/usecases/get_producers.dart'
+    as _i298;
 import 'package:ragro_mobile/features/home/presentation/bloc/home_bloc.dart'
     as _i151;
 import 'package:ragro_mobile/features/inventory/data/datasources/inventory_remote_datasource.dart'
@@ -216,8 +218,6 @@ import 'package:ragro_mobile/features/search/domain/usecases/search_producers_an
     as _i894;
 import 'package:ragro_mobile/features/search/presentation/bloc/search_bloc.dart'
     as _i856;
-import 'package:ragro_mobile/features/home/domain/usecases/get_producers.dart'
-    as _i2000;
 import 'package:shared_preferences/shared_preferences.dart' as _i460;
 
 extension GetItInjectableX on _i174.GetIt {
@@ -252,6 +252,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i608.ProducerOrdersRemoteDataSource>(
       () => _i608.ProducerOrdersRemoteDataSource(),
     );
+    gh.lazySingleton<_i127.ProductDetailRemoteDataSource>(
+      () => const _i127.ProductDetailRemoteDataSource(),
+    );
     gh.lazySingleton<_i165.OrdersRepository>(
       () => _i962.OrdersRepositoryImpl(gh<_i384.OrdersRemoteDatasource>()),
     );
@@ -272,6 +275,11 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i20.GetProducts>(
       () => _i20.GetProducts(gh<_i414.ProductRepository>()),
+    );
+    gh.lazySingleton<_i818.ProductDetailRepository>(
+      () => _i43.ProductDetailRepositoryImpl(
+        gh<_i127.ProductDetailRemoteDataSource>(),
+      ),
     );
     gh.lazySingleton<_i570.ProducerManagementRepository>(
       () => _i715.ProducerManagementRepositoryImpl(
@@ -304,6 +312,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i209.AuthLocalDataSource>(
       () => _i209.AuthLocalDataSource(gh<_i460.SharedPreferences>()),
     );
+    gh.lazySingleton<_i680.GetProductDetail>(
+      () => _i680.GetProductDetail(gh<_i818.ProductDetailRepository>()),
+    );
     gh.factory<_i463.CheckoutBloc>(
       () => _i463.CheckoutBloc(gh<_i680.ConfirmOrder>()),
     );
@@ -325,6 +336,9 @@ extension GetItInjectableX on _i174.GetIt {
       ),
     );
     gh.factory<_i226.OrdersBloc>(() => _i226.OrdersBloc(gh<_i52.GetOrders>()));
+    gh.factory<_i740.ProductDetailBloc>(
+      () => _i740.ProductDetailBloc(gh<_i680.GetProductDetail>()),
+    );
     gh.factory<_i1.ProducerOrdersBloc>(
       () => _i1.ProducerOrdersBloc(gh<_i935.GetProducerOrders>()),
     );
@@ -380,11 +394,8 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i889.ProducerProfileRemoteDataSource>(
       () => _i889.ProducerProfileRemoteDataSource(gh<_i873.ApiClient>()),
     );
-    gh.lazySingleton<_i127.ProductDetailRemoteDataSource>(
-      () => _i127.ProductDetailRemoteDataSource(),
-    );
     gh.lazySingleton<_i987.SearchRemoteDataSource>(
-      () => _i987.SearchRemoteDataSource(),
+      () => _i987.SearchRemoteDataSource(gh<_i873.ApiClient>()),
     );
     gh.factory<_i767.ProducerManagementBloc>(
       () => _i767.ProducerManagementBloc(gh<_i805.GetProducerDashboard>()),
@@ -397,11 +408,6 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i1038.UpdateProducerOrderStatus>(),
       ),
     );
-    gh.lazySingleton<_i818.ProductDetailRepository>(
-      () => _i43.ProductDetailRepositoryImpl(
-        gh<_i127.ProductDetailRemoteDataSource>(),
-      ),
-    );
     gh.lazySingleton<_i43.AuthRepository>(
       () => _i579.AuthRepositoryImpl(
         gh<_i201.AuthRemoteDataSource>(),
@@ -411,9 +417,6 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i38.SearchRepository>(
       () => _i563.SearchRepositoryImpl(gh<_i987.SearchRemoteDataSource>()),
-    );
-    gh.lazySingleton<_i680.GetProductDetail>(
-      () => _i680.GetProductDetail(gh<_i818.ProductDetailRepository>()),
     );
     gh.lazySingleton<_i846.GetCurrentUser>(
       () => _i846.GetCurrentUser(gh<_i43.AuthRepository>()),
@@ -432,9 +435,6 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i252.GetInventoryProducts>(),
         gh<_i481.DeleteInventoryProduct>(),
       ),
-    );
-    gh.factory<_i740.ProductDetailBloc>(
-      () => _i740.ProductDetailBloc(gh<_i680.GetProductDetail>()),
     );
     gh.lazySingleton<_i759.AdminRepository>(
       () => _i780.AdminRepositoryImpl(gh<_i16.AdminRemoteDataSource>()),
@@ -491,8 +491,8 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i159.GetHomeData>(
       () => _i159.GetHomeData(gh<_i285.HomeRepository>()),
     );
-    gh.lazySingleton<_i2000.GetProducers>(
-      () => _i2000.GetProducers(gh<_i285.HomeRepository>()),
+    gh.lazySingleton<_i298.GetProducers>(
+      () => _i298.GetProducers(gh<_i285.HomeRepository>()),
     );
     gh.lazySingleton<_i626.GetCustomerProfile>(
       () => _i626.GetCustomerProfile(gh<_i788.CustomerProfileRepository>()),
@@ -501,13 +501,12 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i436.UpdateCustomerProfile(gh<_i788.CustomerProfileRepository>()),
     );
     gh.factory<_i713.LoginBloc>(() => _i713.LoginBloc(gh<_i1047.LoginUser>()));
+    gh.factory<_i151.HomeBloc>(
+      () => _i151.HomeBloc(gh<_i159.GetHomeData>(), gh<_i298.GetProducers>()),
+    );
     gh.factory<_i856.SearchBloc>(
       () => _i856.SearchBloc(gh<_i894.SearchProducersAndProducts>()),
     );
-    gh.factory<_i151.HomeBloc>(() => _i151.HomeBloc(
-          gh<_i159.GetHomeData>(),
-          gh<_i2000.GetProducers>(),
-        ));
     gh.factory<_i914.AdminEditProducerBloc>(
       () => _i914.AdminEditProducerBloc(
         gh<_i852.GetAdminProducerById>(),
