@@ -34,8 +34,10 @@ import 'package:ragro_mobile/features/producer_orders/presentation/pages/route_c
 import 'package:ragro_mobile/features/producer_profile/presentation/pages/producer_public_profile_page.dart';
 import 'package:ragro_mobile/features/product_detail/presentation/pages/product_detail_page.dart';
 import 'package:ragro_mobile/features/search/presentation/pages/search_page.dart';
+import 'package:ragro_mobile/features/search/presentation/pages/search_result_page.dart';
 import 'package:ragro_mobile/shared/widgets/customer_shell.dart';
 import 'package:ragro_mobile/shared/widgets/producer_shell.dart';
+
 
 @lazySingleton
 class AppRouter {
@@ -154,6 +156,14 @@ class AppRouter {
                 GoRoute(
                   path: '/customer/search',
                   builder: (_, __) => const SearchPage(),
+                  routes: [
+                    GoRoute(
+                      path: 'results',
+                      builder: (_, state) => SearchResultsPage(
+                        query: state.extra as String,
+                      ),
+                    )
+                  ]
                 ),
               ],
             ),
