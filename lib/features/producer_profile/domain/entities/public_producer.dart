@@ -96,14 +96,13 @@ class PublicProducer extends Equatable {
     required this.coverUrl,
     required this.averageRating,
     required this.totalReviews,
-    required this.totalOrders,
     required this.phone,
-    required this.products,
     required this.availability,
     required this.memberSince,
-    this.fiscalNumber,
+    this.photoUrl,
     this.producerAddress,
     this.paymentMethods,
+    this.products,
     this.reviews,
   });
 
@@ -117,16 +116,17 @@ class PublicProducer extends Equatable {
   final String coverUrl;
   final double averageRating;
   final int totalReviews;
-  final int totalOrders;
   final String phone;
-  final List<HomeProduct> products;
   final List<AvailabilitySlot> availability;
   final DateTime memberSince;
 
-  // Private fields for profile editing
-  final String? fiscalNumber;
+  /// Optional: from ProducerPublicProfileResponse
+  final String? photoUrl;
+
+  /// Optional: fetched from separate endpoints or profile editing
   final ProducerAddress? producerAddress;
   final List<ProducerPaymentMethod>? paymentMethods;
+  final List<HomeProduct>? products;
   final List<Review>? reviews;
 
   int get yearsOnPlatform {
@@ -134,5 +134,5 @@ class PublicProducer extends Equatable {
   }
 
   @override
-  List<Object?> get props => [id, farmName, averageRating, products.length, fiscalNumber, producerAddress, paymentMethods];
+  List<Object?> get props => [id, farmName, averageRating, phone, memberSince];
 }

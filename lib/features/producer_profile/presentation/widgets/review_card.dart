@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:ragro_mobile/core/theme/app_colors.dart';
 import 'package:ragro_mobile/features/producer_profile/domain/entities/review.dart';
-import 'package:intl/intl.dart';
 
 class ReviewCard extends StatelessWidget {
   const ReviewCard({required this.review, super.key});
@@ -104,7 +104,7 @@ class ReviewCard extends StatelessWidget {
               Row(
                 children: [
                   const Icon(
-                    Icons.star_filled,
+                    Icons.star_rate,
                     size: 16,
                     color: Color(0xFFFBB040),
                   ),

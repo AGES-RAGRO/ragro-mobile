@@ -201,45 +201,48 @@ class _ProducerPublicProfileView extends StatelessWidget {
                               const SizedBox(height: 24),
                               // Stats
                               ProducerStatsRow(
-                                productCount: producer.products.length,
+                                productCount: producer.products?.length ?? 0,
                                 rating: producer.averageRating,
                                 yearsOnPlatform: producer.yearsOnPlatform,
                               ),
                               const SizedBox(height: 32),
                               // Products section header
-                              const Align(
-                                alignment: Alignment.centerLeft,
-                                child: Text(
-                                  'Produtos',
-                                  style: TextStyle(
-                                    fontFamily: 'Figtree',
-                                    fontWeight: FontWeight.w700,
-                                    fontSize: 22,
-                                    color: AppColors.black,
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(height: 16),
-                              // Products grid
-                              GridView.builder(
-                                shrinkWrap: true,
-                                physics: const NeverScrollableScrollPhysics(),
-                                gridDelegate:
-                                    const SliverGridDelegateWithFixedCrossAxisCount(
-                                      crossAxisCount: 2,
-                                      crossAxisSpacing: 12,
-                                      mainAxisSpacing: 12,
-                                      childAspectRatio: 0.55,
+                              if ((producer.products ?? const []).isNotEmpty)
+                                const Align(
+                                  alignment: Alignment.centerLeft,
+                                  child: Text(
+                                    'Produtos',
+                                    style: TextStyle(
+                                      fontFamily: 'Figtree',
+                                      fontWeight: FontWeight.w700,
+                                      fontSize: 22,
+                                      color: AppColors.black,
                                     ),
-                                itemCount: producer.products.length,
-                                itemBuilder: (_, i) => HomeProductCard(
-                                  product: producer.products[i],
-                                  onTap: () => context.push(
-                                    '/customer/home/product/${producer.products[i].id}',
                                   ),
-                                  onAddToCart: () {},
                                 ),
-                              ),
+                              if ((producer.products ?? const []).isNotEmpty)
+                                const SizedBox(height: 16),
+                              // Products grid
+                              if ((producer.products ?? const []).isNotEmpty)
+                                GridView.builder(
+                                  shrinkWrap: true,
+                                  physics: const NeverScrollableScrollPhysics(),
+                                  gridDelegate:
+                                      const SliverGridDelegateWithFixedCrossAxisCount(
+                                        crossAxisCount: 2,
+                                        crossAxisSpacing: 12,
+                                        mainAxisSpacing: 12,
+                                        childAspectRatio: 0.55,
+                                      ),
+                                  itemCount: (producer.products ?? const []).length,
+                                  itemBuilder: (_, i) => HomeProductCard(
+                                    product: (producer.products ?? const [])[i],
+                                    onTap: () => context.push(
+                                      '/customer/home/product/${(producer.products ?? const [])[i].id}',
+                                    ),
+                                    onAddToCart: () {},
+                                  ),
+                                ),
                               const SizedBox(height: 40),
                               // Reviews section header
                               const Align(
