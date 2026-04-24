@@ -19,7 +19,7 @@ class SearchRemoteDataSource {
       final response = await _apiClient.dio.get<dynamic>(
         ApiEndpoints.producers,
         queryParameters: {
-          'search': query,
+          'name': query,
           if (category != null && category.isNotEmpty) 'category': category,
         },
       );

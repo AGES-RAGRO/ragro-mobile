@@ -52,13 +52,11 @@ class SearchResultModel extends SearchResult {
     return SearchResultModel(
       id: json['id'] as String,
       type: SearchResultType.producer,
-      name: json['farmName'] as String? ?? json['farm_name'] as String? ?? '',
-      subtitle:
-          json['userName'] as String? ?? json['user']?['name'] as String? ?? '',
-      imageUrl:
-          json['avatarS3'] as String? ?? json['avatar_s3'] as String? ?? '',
-      rating: (json['averageRating'] as num?)?.toDouble(),
-      reviewCount: json['totalReviews'] as int?,
+      name: json['owner_name'] as String? ?? '',
+      subtitle: json['farm_name'] as String? ?? '',
+      imageUrl: json['avatar_s3'] as String? ?? '',
+      rating: (json['average_rating'] as num?)?.toDouble(),
+      reviewCount: null,
       price: null,
       category: null,
       distance: null,

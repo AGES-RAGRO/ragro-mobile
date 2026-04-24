@@ -167,23 +167,25 @@ class _SearchResultsViewState extends State<_SearchResultsView> {
           ),
         ),
         SizedBox(
-          height: 40,
-          child: ListView.separated(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            itemCount: _filters.length,
-            separatorBuilder: (_, __) => const SizedBox(width: 8),
-            itemBuilder: (_, i) {
-              final filter = _filters[i];
-              return CategoryChip(
-                label: filter,
-                isSelected: _selectedFilter == filter,
-                onTap: () => setState(() {
-                  _selectedFilter =
-                      _selectedFilter == filter ? null : filter;
-                }),
+          width: double.infinity,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: _filters.map((filter) {
+              final isLast = filter == _filters.last;
+              return Row(
+                children: [
+                  CategoryChip(
+                    label: filter,
+                    isSelected: _selectedFilter == filter,
+                    onTap: () => setState(() {
+                      _selectedFilter =
+                          _selectedFilter == filter ? null : filter;
+                    }),
+                  ),
+                  if (!isLast) const SizedBox(width: 12),
+                ],
               );
-            },
+            }).toList(),
           ),
         ),
         const SizedBox(height: 8),
