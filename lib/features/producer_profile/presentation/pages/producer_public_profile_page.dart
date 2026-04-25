@@ -10,6 +10,7 @@ import 'package:ragro_mobile/core/di/injection.dart';
 import 'package:ragro_mobile/core/theme/app_colors.dart';
 import 'package:ragro_mobile/features/home/presentation/widgets/home_product_card.dart';
 import 'package:ragro_mobile/features/producer_profile/presentation/bloc/producer_profile_bloc.dart';
+import 'package:ragro_mobile/features/producer_profile/presentation/widgets/availability_section.dart';
 import 'package:ragro_mobile/features/producer_profile/presentation/bloc/producer_profile_event.dart';
 import 'package:ragro_mobile/features/producer_profile/presentation/bloc/producer_profile_state.dart';
 import 'package:ragro_mobile/features/producer_profile/presentation/widgets/producer_stats_row.dart';
@@ -144,7 +145,9 @@ class _ProducerPublicProfileView extends StatelessWidget {
                               SizedBox(
                                 width: double.infinity,
                                 child: ElevatedButton.icon(
-                                  onPressed: () {},
+                                  onPressed: () {
+                                    debugPrint('Telefone do produtor: ${producer.phone}');
+                                  },
                                   icon: const Icon(
                                     Icons.phone_outlined,
                                     color: AppColors.white,
@@ -170,7 +173,7 @@ class _ProducerPublicProfileView extends StatelessWidget {
                                 ),
                               ),
                               const SizedBox(height: 16),
-                              // Descrição 
+                              // Descrição
                               if (producer.description.isNotEmpty)
                                 Padding(
                                   padding: const EdgeInsets.only(bottom: 16),
@@ -198,7 +201,12 @@ class _ProducerPublicProfileView extends StatelessWidget {
                                 ),
                                 textAlign: TextAlign.center,
                               ),
-                              const SizedBox(height: 24),
+                              const SizedBox(height: 32),
+                              // Availability section
+                              AvailabilitySection(
+                                availability: producer.availability,
+                              ),
+                              const SizedBox(height: 32),
                               // Stats
                               ProducerStatsRow(
                                 productCount: producer.products?.length ?? 0,
