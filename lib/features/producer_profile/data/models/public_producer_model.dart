@@ -1,4 +1,3 @@
-import 'package:ragro_mobile/features/home/data/models/home_product_model.dart';
 import 'package:ragro_mobile/features/producer_profile/domain/entities/public_producer.dart';
 
 class PublicProducerModel extends PublicProducer {
@@ -18,11 +17,9 @@ class PublicProducerModel extends PublicProducer {
     required super.memberSince,
     super.photoUrl,
     super.producerAddress,
+    super.products,
   });
 
-  /// Parses ProducerPublicProfileResponse from backend
-  /// Aligns with: GET /producers/{id}/profile
-  /// @PreAuthorize("hasRole('CUSTOMER')")
   factory PublicProducerModel.fromJson(Map<String, dynamic> json) {
     final address = json['address'] as Map<String, dynamic>?;
     final location = _deriveLocation(json, address);
@@ -62,6 +59,7 @@ class PublicProducerModel extends PublicProducer {
           : DateTime(2016),
       photoUrl: json['photoUrl'] as String?,
       producerAddress: producerAddress,
+      products: const [],
     );
   }
 
