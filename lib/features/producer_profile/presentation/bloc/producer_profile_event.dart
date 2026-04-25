@@ -39,15 +39,15 @@ class ProducerProfileUpdateSubmitted extends ProducerProfileEvent {
 
   @override
   List<Object?> get props => [
-        producerId,
-        name,
-        story,
-        phone,
-        farmName,
-        address,
-        paymentMethods,
-        availability,
-      ];
+    producerId,
+    name,
+    story,
+    phone,
+    farmName,
+    address,
+    paymentMethods,
+    availability,
+  ];
 }
 
 class ProducerAvatarPicked extends ProducerProfileEvent {

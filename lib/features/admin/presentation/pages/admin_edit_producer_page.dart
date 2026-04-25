@@ -180,10 +180,16 @@ class _AdminEditProducerViewState extends State<_AdminEditProducerView> {
     _nameController.text = producer.name;
     _phoneController.text = _applyMask(producer.phone, PhoneInputFormatter());
     _emailController.text = producer.email;
-    _cpfCnpjController.text = _applyMask(producer.fiscalNumber, FiscalNumberInputFormatter());
+    _cpfCnpjController.text = _applyMask(
+      producer.fiscalNumber,
+      FiscalNumberInputFormatter(),
+    );
     _farmNameController.text = producer.farmName;
     _descriptionController.text = producer.description;
-    _cepController.text = _applyMask(producer.producerAddress?.zipCode ?? '', CepInputFormatter());
+    _cepController.text = _applyMask(
+      producer.producerAddress?.zipCode ?? '',
+      CepInputFormatter(),
+    );
     _addressController.text = producer.producerAddress?.street ?? '';
     _numberController.text = producer.producerAddress?.number ?? '';
     _neighborhoodController.text = producer.producerAddress?.neighborhood ?? '';
@@ -197,9 +203,15 @@ class _AdminEditProducerViewState extends State<_AdminEditProducerView> {
     if (pix != null) {
       _pixKeyType = pix.pixKeyType;
       if (_pixKeyType == 'cpf' || _pixKeyType == 'cnpj') {
-        _pixKeyController.text = _applyMask(pix.pixKey ?? '', FiscalNumberInputFormatter());
+        _pixKeyController.text = _applyMask(
+          pix.pixKey ?? '',
+          FiscalNumberInputFormatter(),
+        );
       } else if (_pixKeyType == 'phone') {
-        _pixKeyController.text = _applyMask(pix.pixKey ?? '', PhoneInputFormatter());
+        _pixKeyController.text = _applyMask(
+          pix.pixKey ?? '',
+          PhoneInputFormatter(),
+        );
       } else {
         _pixKeyController.text = pix.pixKey ?? '';
       }
@@ -213,9 +225,15 @@ class _AdminEditProducerViewState extends State<_AdminEditProducerView> {
       _bankNameController.text = bank.bankName ?? '';
       _bankCodeController.text = bank.bankCode ?? '';
       _agencyController.text = bank.agency ?? '';
-      _accountController.text = _applyMask(bank.accountNumber ?? '', BankAccountInputFormatter());
+      _accountController.text = _applyMask(
+        bank.accountNumber ?? '',
+        BankAccountInputFormatter(),
+      );
       _holderController.text = bank.holderName ?? '';
-      _bankFiscalController.text = _applyMask(bank.fiscalNumber ?? '', FiscalNumberInputFormatter());
+      _bankFiscalController.text = _applyMask(
+        bank.fiscalNumber ?? '',
+        FiscalNumberInputFormatter(),
+      );
     }
 
     // Pre-fill horário

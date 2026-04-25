@@ -4,11 +4,7 @@ import 'package:ragro_mobile/features/search/domain/entities/search_result.dart'
 import 'package:ragro_mobile/features/search/presentation/widgets/search_result_tile.dart';
 
 class ProducerTile extends StatelessWidget {
-  const ProducerTile({
-    required this.result,
-    required this.onTap,
-    super.key,
-  });
+  const ProducerTile({required this.result, required this.onTap, super.key});
 
   final SearchResult result;
   final VoidCallback onTap;
@@ -23,7 +19,9 @@ class ProducerTile extends StatelessWidget {
         decoration: BoxDecoration(
           color: AppColors.lightGreen.withValues(alpha: 0.05),
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: AppColors.lightGreen.withValues(alpha: 0.3)),
+          border: Border.all(
+            color: AppColors.lightGreen.withValues(alpha: 0.3),
+          ),
           boxShadow: const [
             BoxShadow(
               color: Color(0x08000000),
@@ -83,7 +81,7 @@ class ProducerTile extends StatelessWidget {
                       Text(
                         result.distance != null
                             ? '${result.distance!.toStringAsFixed(1)} km de você'
-                            : '0.5 km de você', //TODO: Ajustar para pegar distância real quando tiver
+                            : '0.5 km de você', // TODO(codex): usar distância real quando disponível.
                         style: const TextStyle(
                           fontFamily: 'Manrope',
                           fontSize: 12,

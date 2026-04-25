@@ -28,11 +28,7 @@ void main() {
           'zipCode': '90010120',
         },
         'availability': [
-          {
-            'weekday': 1,
-            'opensAt': '14:00',
-            'closesAt': '18:30',
-          }
+          {'weekday': 1, 'opensAt': '14:00', 'closesAt': '18:30'},
         ],
       };
 
@@ -94,10 +90,7 @@ void main() {
         'averageRating': 4.5,
         'totalReviews': 50,
         'memberSince': '2019-06-01',
-        'address': {
-          'city': 'Canela',
-          'state': 'RS',
-        },
+        'address': {'city': 'Canela', 'state': 'RS'},
       };
 
       final model = PublicProducerModel.fromJson(json);
@@ -109,7 +102,7 @@ void main() {
       expect(model.photoUrl, 'https://s3.example.com/photo.jpg');
       expect(model.averageRating, 4.5);
       expect(model.totalReviews, 50);
-      expect(model.memberSince, DateTime(2019, 6, 1));
+      expect(model.memberSince, DateTime(2019, 6));
       expect(model.location, 'Canela, RS');
     });
   });

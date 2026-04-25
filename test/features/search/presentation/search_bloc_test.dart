@@ -25,7 +25,7 @@ void main() {
     name: 'Farmer Test',
     subtitle: 'Sítio Boa Vista',
     imageUrl: '',
-    rating: 0.0,
+    rating: 0,
   );
 
   setUp(() {
@@ -55,7 +55,7 @@ void main() {
       'emite [SearchLoading, SearchLoaded] quando busca retorna resultados',
       build: () {
         when(
-          () => mockRepository.search(query: 'Farmer', category: null),
+          () => mockRepository.search(query: 'Farmer'),
         ).thenAnswer((_) async => [tProducer]);
         return bloc;
       },
@@ -65,8 +65,7 @@ void main() {
         const SearchLoaded(results: [tProducer], query: 'Farmer'),
       ],
       verify: (_) {
-        verify(() => mockRepository.search(query: 'Farmer', category: null))
-            .called(1);
+        verify(() => mockRepository.search(query: 'Farmer')).called(1);
       },
     );
 
@@ -74,7 +73,7 @@ void main() {
       'emite [SearchLoading, SearchLoaded] com lista vazia quando não há resultados',
       build: () {
         when(
-          () => mockRepository.search(query: 'xyzabc', category: null),
+          () => mockRepository.search(query: 'xyzabc'),
         ).thenAnswer((_) async => []);
         return bloc;
       },
@@ -89,22 +88,19 @@ void main() {
       'emite [SearchLoading, SearchFailure] quando ocorre ApiException',
       build: () {
         when(
-          () => mockRepository.search(query: 'erro', category: null),
+          () => mockRepository.search(query: 'erro'),
         ).thenThrow(const UnknownApiException());
         return bloc;
       },
       act: (b) => b.add(const SearchQueryChanged('erro')),
-      expect: () => [
-        const SearchLoading(),
-        isA<SearchFailure>(),
-      ],
+      expect: () => [const SearchLoading(), isA<SearchFailure>()],
     );
 
     blocTest<SearchBloc, SearchState>(
       'emite [SearchLoading, SearchFailure] quando ocorre Exception genérica',
       build: () {
         when(
-          () => mockRepository.search(query: 'erro', category: null),
+          () => mockRepository.search(query: 'erro'),
         ).thenThrow(Exception('erro genérico'));
         return bloc;
       },
@@ -121,7 +117,7 @@ void main() {
       'não emite estados ao trocar categoria',
       build: () => bloc,
       act: (b) => b.add(const SearchCategoryChanged('Horta')),
-      expect: () => [],
+      expect: () => <SearchState>[],
     );
 
     blocTest<SearchBloc, SearchState>(
@@ -152,7 +148,7 @@ void main() {
       'busca sem categoria quando categoria é Tudo',
       build: () {
         when(
-          () => mockRepository.search(query: 'tomate', category: null),
+          () => mockRepository.search(query: 'tomate'),
         ).thenAnswer((_) async => [tProducer]);
         return bloc;
       },
@@ -166,9 +162,7 @@ void main() {
         const SearchLoaded(results: [tProducer], query: 'tomate'),
       ],
       verify: (_) {
-        verify(
-          () => mockRepository.search(query: 'tomate', category: null),
-        ).called(1);
+        verify(() => mockRepository.search(query: 'tomate')).called(1);
       },
     );
   });
@@ -189,7 +183,7 @@ void main() {
       build: () => bloc,
       seed: () => const SearchLoading(),
       act: (b) => b.add(const SearchRecentItemRemoved('tomate')),
-      expect: () => [],
+      expect: () => <SearchState>[],
     );
   });
 }

@@ -56,11 +56,6 @@ class SearchResultModel extends SearchResult {
       subtitle: json['farm_name'] as String? ?? '',
       imageUrl: json['avatar_s3'] as String? ?? '',
       rating: (json['average_rating'] as num?)?.toDouble(),
-      reviewCount: null,
-      price: null,
-      category: null,
-      distance: null,
-      unit: null,
     );
   }
 }

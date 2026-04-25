@@ -143,9 +143,7 @@ class _SearchViewState extends State<_SearchView> {
                           label: _categories[i],
                           isSelected: _selectedCategory == _categories[i],
                           onTap: () {
-                            setState(
-                              () => _selectedCategory = _categories[i],
-                            );
+                            setState(() => _selectedCategory = _categories[i]);
                           },
                         ),
                       ),
@@ -255,10 +253,7 @@ class _SearchViewState extends State<_SearchView> {
                               SearchRecentItemRemoved(q),
                             ),
                           ),
-                          const Divider(
-                            color: Color(0xFFF1F5F9),
-                            height: 1,
-                          ),
+                          const Divider(color: Color(0xFFF1F5F9), height: 1),
                         ],
                       ),
                     ),

@@ -10,9 +10,9 @@ import 'package:ragro_mobile/core/di/injection.dart';
 import 'package:ragro_mobile/core/theme/app_colors.dart';
 import 'package:ragro_mobile/features/home/presentation/widgets/home_product_card.dart';
 import 'package:ragro_mobile/features/producer_profile/presentation/bloc/producer_profile_bloc.dart';
-import 'package:ragro_mobile/features/producer_profile/presentation/widgets/availability_section.dart';
 import 'package:ragro_mobile/features/producer_profile/presentation/bloc/producer_profile_event.dart';
 import 'package:ragro_mobile/features/producer_profile/presentation/bloc/producer_profile_state.dart';
+import 'package:ragro_mobile/features/producer_profile/presentation/widgets/availability_section.dart';
 import 'package:ragro_mobile/features/producer_profile/presentation/widgets/producer_stats_row.dart';
 import 'package:ragro_mobile/features/producer_profile/presentation/widgets/review_card.dart';
 
@@ -146,7 +146,9 @@ class _ProducerPublicProfileView extends StatelessWidget {
                                 width: double.infinity,
                                 child: ElevatedButton.icon(
                                   onPressed: () {
-                                    debugPrint('Telefone do produtor: ${producer.phone}');
+                                    debugPrint(
+                                      'Telefone do produtor: ${producer.phone}',
+                                    );
                                   },
                                   icon: const Icon(
                                     Icons.phone_outlined,
@@ -242,7 +244,8 @@ class _ProducerPublicProfileView extends StatelessWidget {
                                         mainAxisSpacing: 12,
                                         childAspectRatio: 0.55,
                                       ),
-                                  itemCount: (producer.products ?? const []).length,
+                                  itemCount:
+                                      (producer.products ?? const []).length,
                                   itemBuilder: (_, i) => HomeProductCard(
                                     product: (producer.products ?? const [])[i],
                                     onTap: () => context.push(
@@ -270,15 +273,17 @@ class _ProducerPublicProfileView extends StatelessWidget {
                               if ((producer.reviews ?? const []).isEmpty)
                                 Center(
                                   child: Padding(
-                                    padding:
-                                        const EdgeInsets.symmetric(vertical: 24),
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 24,
+                                    ),
                                     child: Column(
                                       children: [
                                         Icon(
                                           Icons.rate_review_outlined,
                                           size: 48,
-                                          color: AppColors.darkGreen
-                                              .withValues(alpha: 0.3),
+                                          color: AppColors.darkGreen.withValues(
+                                            alpha: 0.3,
+                                          ),
                                         ),
                                         const SizedBox(height: 12),
                                         Text(
@@ -299,7 +304,8 @@ class _ProducerPublicProfileView extends StatelessWidget {
                                 ListView.builder(
                                   shrinkWrap: true,
                                   physics: const NeverScrollableScrollPhysics(),
-                                  itemCount: (producer.reviews ?? const []).length,
+                                  itemCount:
+                                      (producer.reviews ?? const []).length,
                                   itemBuilder: (_, i) => ReviewCard(
                                     review: (producer.reviews ?? const [])[i],
                                   ),
