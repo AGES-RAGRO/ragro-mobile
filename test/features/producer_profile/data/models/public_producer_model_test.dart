@@ -4,36 +4,36 @@ import 'package:ragro_mobile/features/producer_profile/data/models/public_produc
 
 void main() {
   group('PublicProducerModel.fromJson', () {
-    test('parseia ProducerGetResponse real do backend (EPIC 1 camelCase)', () {
-      // Shape real retornado por GET /producers/{id} — ProducerGetResponse.java
+    test('parseia ProducerPublicProfileResponse real do backend', () {
+      // Shape real retornado por GET /producers/{id}/profile
+      // Com @PreAuthorize("hasRole('CUSTOMER')")
       final json = {
         'id': 'abc-123',
         'name': 'João Silva',
-        'email': 'joao@example.com',
         'phone': '+55 51 99999-0001',
-        'fiscalNumber': '12345678901',
-        'fiscalNumberType': 'CPF',
         'farmName': 'Fazenda Sol Nascente',
         'description': 'Orgânicos frescos',
         'story': 'Três gerações no campo',
+        'photoUrl': 'https://s3.example.com/photo.jpg',
         'avatarS3': 'https://s3.example.com/avatar.jpg',
         'displayPhotoS3': 'https://s3.example.com/cover.jpg',
         'averageRating': 4.8,
         'totalReviews': 120,
-        'totalOrders': 500,
-        'totalSalesAmount': 15000.00,
         'memberSince': '2020-03-15',
-        'active': true,
         'address': {
-          'id': 'addr-1',
           'street': 'Rua das Flores',
           'number': '123',
           'city': 'Porto Alegre',
           'state': 'RS',
           'zipCode': '90010120',
-          'isPrimary': true,
         },
-        'paymentMethods': <dynamic>[],
+        'availability': [
+          {
+            'weekday': 1,
+            'opensAt': '14:00',
+            'closesAt': '18:30',
+          }
+        ],
       };
 
       final model = PublicProducerModel.fromJson(json);
@@ -46,12 +46,11 @@ void main() {
       expect(model.coverUrl, 'https://s3.example.com/cover.jpg');
       expect(model.averageRating, 4.8);
       expect(model.totalReviews, 120);
-      expect(model.totalOrders, 500);
       expect(model.memberSince, DateTime(2020, 3, 15));
       expect(model.location, 'Porto Alegre, RS');
-      // Endpoint não retorna products nem availability — listas vazias por default.
-      expect(model.products, isEmpty);
-      expect(model.availability, isEmpty);
+      // Availability é incluído na resposta
+      expect(model.availability, isNotEmpty);
+      expect(model.availability.length, 1);
     });
 
     test('usa apenas city quando state está ausente no address', () {
@@ -81,21 +80,24 @@ void main() {
       expect(model.location, '');
     });
 
-    test('parseia resposta snake_case legada (fallback mock)', () {
+    test('parseia resposta camelCase com photoUrl opcional', () {
       final json = {
         'id': 'abc-456',
         'name': 'Maria Santos',
         'phone': '+55 51 88888-0002',
-        'farm_name': 'Fazenda Esperança',
+        'farmName': 'Fazenda Esperança',
         'description': 'Bio fresh',
         'story': 'Desde 2010',
-        'avatar_s3': 'https://s3.example.com/a.jpg',
-        'display_photo_s3': 'https://s3.example.com/c.jpg',
-        'average_rating': 4.5,
-        'total_reviews': 50,
-        'total_orders': 200,
-        'created_at': '2019-06-01',
-        'location': 'Canela, RS',
+        'avatarS3': 'https://s3.example.com/a.jpg',
+        'displayPhotoS3': 'https://s3.example.com/c.jpg',
+        'photoUrl': 'https://s3.example.com/photo.jpg',
+        'averageRating': 4.5,
+        'totalReviews': 50,
+        'memberSince': '2019-06-01',
+        'address': {
+          'city': 'Canela',
+          'state': 'RS',
+        },
       };
 
       final model = PublicProducerModel.fromJson(json);
@@ -103,8 +105,11 @@ void main() {
       expect(model.name, 'Maria Santos');
       expect(model.farmName, 'Fazenda Esperança');
       expect(model.avatarUrl, 'https://s3.example.com/a.jpg');
+      expect(model.coverUrl, 'https://s3.example.com/c.jpg');
+      expect(model.photoUrl, 'https://s3.example.com/photo.jpg');
       expect(model.averageRating, 4.5);
-      expect(model.memberSince, DateTime(2019, 6));
+      expect(model.totalReviews, 50);
+      expect(model.memberSince, DateTime(2019, 6, 1));
       expect(model.location, 'Canela, RS');
     });
   });
