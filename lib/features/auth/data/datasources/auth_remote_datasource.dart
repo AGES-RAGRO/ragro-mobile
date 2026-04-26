@@ -163,4 +163,16 @@ class AuthRemoteDataSource {
       throw e.error as ApiException? ?? const UnknownApiException();
     }
   }
+
+  /// Esqueceu a senha — POST /auth/password/forgot (204 No Content).
+  Future<void> forgotPassword(String email) async {
+    try {
+      await _apiClient.dio.post(
+        ApiEndpoints.forgotPassword,
+        data: {'email': email},
+      );
+    } on DioException catch (e) {
+      throw e.error as ApiException? ?? const UnknownApiException();
+    }
+  }
 }

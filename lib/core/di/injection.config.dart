@@ -48,6 +48,8 @@ import 'package:ragro_mobile/features/auth/data/repositories/auth_repository_imp
     as _i579;
 import 'package:ragro_mobile/features/auth/domain/repositories/auth_repository.dart'
     as _i43;
+import 'package:ragro_mobile/features/auth/domain/usecases/forgot_password.dart'
+    as _i191;
 import 'package:ragro_mobile/features/auth/domain/usecases/get_current_user.dart'
     as _i846;
 import 'package:ragro_mobile/features/auth/domain/usecases/login_user.dart'
@@ -426,6 +428,9 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i873.ApiClient>(),
       ),
     );
+    gh.lazySingleton<_i191.ForgotPassword>(
+      () => _i191.ForgotPassword(gh<_i43.AuthRepository>()),
+    );
     gh.lazySingleton<_i846.GetCurrentUser>(
       () => _i846.GetCurrentUser(gh<_i43.AuthRepository>()),
     );
@@ -485,6 +490,9 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i889.ProducerProfileRemoteDataSource>(),
       ),
     );
+    gh.factory<_i713.LoginBloc>(
+      () => _i713.LoginBloc(gh<_i1047.LoginUser>(), gh<_i191.ForgotPassword>()),
+    );
     gh.lazySingleton<_i285.HomeRepository>(
       () => _i1055.HomeRepositoryImpl(gh<_i904.HomeRemoteDataSource>()),
     );
@@ -512,7 +520,6 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i436.UpdateCustomerProfile>(
       () => _i436.UpdateCustomerProfile(gh<_i788.CustomerProfileRepository>()),
     );
-    gh.factory<_i713.LoginBloc>(() => _i713.LoginBloc(gh<_i1047.LoginUser>()));
     gh.factory<_i151.HomeBloc>(
       () => _i151.HomeBloc(gh<_i159.GetHomeData>(), gh<_i298.GetProducers>()),
     );
