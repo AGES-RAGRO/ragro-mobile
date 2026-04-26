@@ -346,9 +346,6 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i1.ProducerOrdersBloc>(
       () => _i1.ProducerOrdersBloc(gh<_i935.GetProducerOrders>()),
     );
-    gh.lazySingleton<_i894.SearchProducersAndProducts>(
-      () => _i894.SearchProducersAndProducts(gh<_i38.SearchRepository>()),
-    );
     gh.lazySingleton<_i70.AddToCart>(
       () => _i70.AddToCart(gh<_i830.CartRepository>()),
     );
@@ -425,6 +422,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i38.SearchRepository>(
       () => _i563.SearchRepositoryImpl(gh<_i987.SearchRemoteDataSource>()),
     );
+    gh.lazySingleton<_i191.ForgotPassword>(
+      () => _i191.ForgotPassword(gh<_i43.AuthRepository>()),
+    );
     gh.lazySingleton<_i846.GetCurrentUser>(
       () => _i846.GetCurrentUser(gh<_i43.AuthRepository>()),
     );
@@ -460,6 +460,9 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i192.RegisterBloc>(
       () => _i192.RegisterBloc(gh<_i948.RegisterCustomer>()),
+    );
+    gh.lazySingleton<_i894.SearchProducersAndProducts>(
+      () => _i894.SearchProducersAndProducts(gh<_i38.SearchRepository>()),
     );
     gh.lazySingleton<_i671.ActivateAdminProducer>(
       () => _i671.ActivateAdminProducer(gh<_i759.AdminRepository>()),
@@ -514,7 +517,6 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i436.UpdateCustomerProfile>(
       () => _i436.UpdateCustomerProfile(gh<_i788.CustomerProfileRepository>()),
     );
-    gh.factory<_i713.LoginBloc>(() => _i713.LoginBloc(gh<_i1047.LoginUser>()));
     gh.factory<_i151.HomeBloc>(
       () => _i151.HomeBloc(gh<_i159.GetHomeData>(), gh<_i298.GetProducers>()),
     );
