@@ -10,9 +10,11 @@ import 'package:ragro_mobile/core/di/injection.dart';
 import 'package:ragro_mobile/core/theme/app_colors.dart';
 import 'package:ragro_mobile/features/home/presentation/widgets/home_product_card.dart';
 import 'package:ragro_mobile/features/producer_profile/presentation/bloc/producer_profile_bloc.dart';
+import 'package:ragro_mobile/features/producer_profile/presentation/widgets/availability_section.dart';
 import 'package:ragro_mobile/features/producer_profile/presentation/bloc/producer_profile_event.dart';
 import 'package:ragro_mobile/features/producer_profile/presentation/bloc/producer_profile_state.dart';
 import 'package:ragro_mobile/features/producer_profile/presentation/widgets/producer_stats_row.dart';
+import 'package:ragro_mobile/features/producer_profile/presentation/widgets/review_card.dart';
 
 class ProducerPublicProfilePage extends StatelessWidget {
   const ProducerPublicProfilePage({required this.producerId, super.key});
@@ -143,7 +145,9 @@ class _ProducerPublicProfileView extends StatelessWidget {
                               SizedBox(
                                 width: double.infinity,
                                 child: ElevatedButton.icon(
-                                  onPressed: () {},
+                                  onPressed: () {
+                                    debugPrint('Telefone do produtor: ${producer.phone}');
+                                  },
                                   icon: const Icon(
                                     Icons.phone_outlined,
                                     color: AppColors.white,
@@ -169,6 +173,22 @@ class _ProducerPublicProfileView extends StatelessWidget {
                                 ),
                               ),
                               const SizedBox(height: 16),
+                              // Descrição
+                              if (producer.description.isNotEmpty)
+                                Padding(
+                                  padding: const EdgeInsets.only(bottom: 16),
+                                  child: Text(
+                                    producer.description,
+                                    style: const TextStyle(
+                                      fontFamily: 'Figtree',
+                                      fontWeight: FontWeight.w500,
+                                      fontSize: 14,
+                                      color: Color(0xFF475569),
+                                      height: 1.5,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
                               // Story
                               Text(
                                 producer.story,
@@ -181,19 +201,62 @@ class _ProducerPublicProfileView extends StatelessWidget {
                                 ),
                                 textAlign: TextAlign.center,
                               ),
-                              const SizedBox(height: 24),
+                              const SizedBox(height: 32),
+                              // Availability section
+                              AvailabilitySection(
+                                availability: producer.availability,
+                              ),
+                              const SizedBox(height: 32),
                               // Stats
                               ProducerStatsRow(
-                                productCount: producer.products.length,
+                                productCount: producer.products?.length ?? 0,
                                 rating: producer.averageRating,
                                 yearsOnPlatform: producer.yearsOnPlatform,
                               ),
                               const SizedBox(height: 32),
                               // Products section header
+                              if ((producer.products ?? const []).isNotEmpty)
+                                const Align(
+                                  alignment: Alignment.centerLeft,
+                                  child: Text(
+                                    'Produtos',
+                                    style: TextStyle(
+                                      fontFamily: 'Figtree',
+                                      fontWeight: FontWeight.w700,
+                                      fontSize: 22,
+                                      color: AppColors.black,
+                                    ),
+                                  ),
+                                ),
+                              if ((producer.products ?? const []).isNotEmpty)
+                                const SizedBox(height: 16),
+                              // Products grid
+                              if ((producer.products ?? const []).isNotEmpty)
+                                GridView.builder(
+                                  shrinkWrap: true,
+                                  physics: const NeverScrollableScrollPhysics(),
+                                  gridDelegate:
+                                      const SliverGridDelegateWithFixedCrossAxisCount(
+                                        crossAxisCount: 2,
+                                        crossAxisSpacing: 12,
+                                        mainAxisSpacing: 12,
+                                        childAspectRatio: 0.55,
+                                      ),
+                                  itemCount: (producer.products ?? const []).length,
+                                  itemBuilder: (_, i) => HomeProductCard(
+                                    product: (producer.products ?? const [])[i],
+                                    onTap: () => context.push(
+                                      '/customer/home/product/${(producer.products ?? const [])[i].id}',
+                                    ),
+                                    onAddToCart: () {},
+                                  ),
+                                ),
+                              const SizedBox(height: 40),
+                              // Reviews section header
                               const Align(
                                 alignment: Alignment.centerLeft,
                                 child: Text(
-                                  'Produtos',
+                                  'Avaliações Recentes',
                                   style: TextStyle(
                                     fontFamily: 'Figtree',
                                     fontWeight: FontWeight.w700,
@@ -203,26 +266,45 @@ class _ProducerPublicProfileView extends StatelessWidget {
                                 ),
                               ),
                               const SizedBox(height: 16),
-                              // Products grid
-                              GridView.builder(
-                                shrinkWrap: true,
-                                physics: const NeverScrollableScrollPhysics(),
-                                gridDelegate:
-                                    const SliverGridDelegateWithFixedCrossAxisCount(
-                                      crossAxisCount: 2,
-                                      crossAxisSpacing: 12,
-                                      mainAxisSpacing: 12,
-                                      childAspectRatio: 0.55,
+                              // Reviews list or empty state
+                              if ((producer.reviews ?? const []).isEmpty)
+                                Center(
+                                  child: Padding(
+                                    padding:
+                                        const EdgeInsets.symmetric(vertical: 24),
+                                    child: Column(
+                                      children: [
+                                        Icon(
+                                          Icons.rate_review_outlined,
+                                          size: 48,
+                                          color: AppColors.darkGreen
+                                              .withValues(alpha: 0.3),
+                                        ),
+                                        const SizedBox(height: 12),
+                                        Text(
+                                          'Nenhuma avaliação ainda',
+                                          style: TextStyle(
+                                            fontFamily: 'Figtree',
+                                            fontWeight: FontWeight.w500,
+                                            fontSize: 16,
+                                            color: AppColors.darkGreen
+                                                .withValues(alpha: 0.6),
+                                          ),
+                                        ),
+                                      ],
                                     ),
-                                itemCount: producer.products.length,
-                                itemBuilder: (_, i) => HomeProductCard(
-                                  product: producer.products[i],
-                                  onTap: () => context.push(
-                                    '/customer/home/product/${producer.products[i].id}',
                                   ),
-                                  onAddToCart: () {},
+                                )
+                              else
+                                ListView.builder(
+                                  shrinkWrap: true,
+                                  physics: const NeverScrollableScrollPhysics(),
+                                  itemCount: (producer.reviews ?? const []).length,
+                                  itemBuilder: (_, i) => ReviewCard(
+                                    review: (producer.reviews ?? const [])[i],
+                                  ),
                                 ),
-                              ),
+                              const SizedBox(height: 24),
                             ],
                           ),
                         ),

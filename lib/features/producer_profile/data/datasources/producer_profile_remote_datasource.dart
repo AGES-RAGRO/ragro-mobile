@@ -14,10 +14,12 @@ class ProducerProfileRemoteDataSource {
 
   final ApiClient _apiClient;
 
+  // Public profile endpoint for customers to view producer details
+  // GET /producers/{id}/profile - requires @PreAuthorize("hasRole('CUSTOMER')")
   Future<PublicProducerModel> getProducer(String producerId) async {
     try {
       final response = await _apiClient.dio.get<Map<String, dynamic>>(
-        ApiEndpoints.producer(producerId),
+        ApiEndpoints.producerPublicProfile(producerId),
       );
       return PublicProducerModel.fromJson(response.data!);
     } on DioException catch (e) {
