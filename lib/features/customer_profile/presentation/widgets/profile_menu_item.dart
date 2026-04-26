@@ -5,7 +5,7 @@ class ProfileMenuItem extends StatelessWidget {
   const ProfileMenuItem({
     required this.icon,
     required this.label,
-    required this.onTap,
+    this.onTap,
     this.iconBackgroundColor,
     this.iconColor,
     this.labelColor,
@@ -16,7 +16,7 @@ class ProfileMenuItem extends StatelessWidget {
 
   final IconData icon;
   final String label;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
   final Color? iconBackgroundColor;
   final Color? iconColor;
   final Color? labelColor;

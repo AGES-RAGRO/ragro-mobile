@@ -93,13 +93,14 @@ class _LoginFormState extends State<LoginForm> {
           if (widget.onForgotPasswordTap != null) ...[
             const SizedBox(height: 12),
             Align(
-              alignment: Alignment.centerRight,
+              alignment: Alignment.centerLeft,
               child: GestureDetector(
                 onTap: widget.onForgotPasswordTap,
                 child: Text(
                   'Esqueceu sua senha?',
                   style: AppTextStyles.caption.copyWith(
                     color: AppColors.darkGreen,
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
               ),
@@ -110,7 +111,8 @@ class _LoginFormState extends State<LoginForm> {
             builder: (context, state) {
               return AuthSubmitButton(
                 label: 'Entrar',
-                isLoading: state is LoginLoading,
+                isLoading: state is LoginLoading ||
+                    state is LoginForgotPasswordInProgress,
                 onPressed: _submit,
               );
             },

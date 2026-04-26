@@ -48,6 +48,8 @@ import 'package:ragro_mobile/features/auth/data/repositories/auth_repository_imp
     as _i579;
 import 'package:ragro_mobile/features/auth/domain/repositories/auth_repository.dart'
     as _i43;
+import 'package:ragro_mobile/features/auth/domain/usecases/forgot_password.dart'
+    as _i191;
 import 'package:ragro_mobile/features/auth/domain/usecases/get_current_user.dart'
     as _i846;
 import 'package:ragro_mobile/features/auth/domain/usecases/login_user.dart'
@@ -56,6 +58,8 @@ import 'package:ragro_mobile/features/auth/domain/usecases/logout.dart'
     as _i418;
 import 'package:ragro_mobile/features/auth/domain/usecases/register_customer.dart'
     as _i948;
+import 'package:ragro_mobile/features/auth/domain/usecases/request_password_reset.dart'
+    as _i485;
 import 'package:ragro_mobile/features/auth/presentation/bloc/auth_bloc.dart'
     as _i475;
 import 'package:ragro_mobile/features/auth/presentation/bloc/login_bloc.dart'
@@ -418,6 +422,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i38.SearchRepository>(
       () => _i563.SearchRepositoryImpl(gh<_i987.SearchRemoteDataSource>()),
     );
+    gh.lazySingleton<_i191.ForgotPassword>(
+      () => _i191.ForgotPassword(gh<_i43.AuthRepository>()),
+    );
     gh.lazySingleton<_i846.GetCurrentUser>(
       () => _i846.GetCurrentUser(gh<_i43.AuthRepository>()),
     );
@@ -429,6 +436,9 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i948.RegisterCustomer>(
       () => _i948.RegisterCustomer(gh<_i43.AuthRepository>()),
+    );
+    gh.lazySingleton<_i485.RequestPasswordReset>(
+      () => _i485.RequestPasswordReset(gh<_i43.AuthRepository>()),
     );
     gh.factory<_i205.InventoryBloc>(
       () => _i205.InventoryBloc(
@@ -477,11 +487,18 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i889.ProducerProfileRemoteDataSource>(),
       ),
     );
-    gh.lazySingleton<_i475.AuthBloc>(
-      () => _i475.AuthBloc(gh<_i846.GetCurrentUser>(), gh<_i418.Logout>()),
+    gh.factory<_i713.LoginBloc>(
+      () => _i713.LoginBloc(gh<_i1047.LoginUser>(), gh<_i191.ForgotPassword>()),
     );
     gh.lazySingleton<_i285.HomeRepository>(
       () => _i1055.HomeRepositoryImpl(gh<_i904.HomeRemoteDataSource>()),
+    );
+    gh.lazySingleton<_i475.AuthBloc>(
+      () => _i475.AuthBloc(
+        gh<_i846.GetCurrentUser>(),
+        gh<_i418.Logout>(),
+        gh<_i485.RequestPasswordReset>(),
+      ),
     );
     gh.lazySingleton<_i788.CustomerProfileRepository>(
       () => _i866.CustomerProfileRepositoryImpl(
@@ -500,7 +517,6 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i436.UpdateCustomerProfile>(
       () => _i436.UpdateCustomerProfile(gh<_i788.CustomerProfileRepository>()),
     );
-    gh.factory<_i713.LoginBloc>(() => _i713.LoginBloc(gh<_i1047.LoginUser>()));
     gh.factory<_i151.HomeBloc>(
       () => _i151.HomeBloc(gh<_i159.GetHomeData>(), gh<_i298.GetProducers>()),
     );
