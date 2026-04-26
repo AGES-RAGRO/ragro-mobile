@@ -9,6 +9,7 @@ import 'package:ragro_mobile/features/customer_profile/presentation/bloc/custome
 import 'package:ragro_mobile/features/customer_profile/presentation/bloc/customer_profile_state.dart';
 import 'package:ragro_mobile/features/customer_profile/presentation/widgets/profile_info_row.dart';
 import 'package:ragro_mobile/features/customer_profile/presentation/widgets/profile_menu_item.dart';
+import 'package:ragro_mobile/shared/widgets/app_notification.dart';
 
 class CustomerProfilePage extends StatelessWidget {
   const CustomerProfilePage({super.key});
@@ -41,22 +42,12 @@ class _CustomerProfileView extends StatelessWidget {
         BlocListener<AuthBloc, AuthState>(
           listener: (context, state) {
             if (state is AuthPasswordResetSuccess) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text(
-                    'Enviamos um e-mail para você com as instruções para definir sua nova senha. Verifique sua caixa de entrada.',
-                  ),
-                  backgroundColor: AppColors.lightGreen,
-                  duration: Duration(seconds: 5),
-                ),
+              AppNotification.showSuccess(
+                context,
+                'Enviamos um e-mail para você com as instruções para definir sua nova senha. Verifique sua caixa de entrada.',
               );
             } else if (state is AuthPasswordResetFailure) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('Erro: ${state.message}'),
-                  backgroundColor: AppColors.red,
-                ),
-              );
+              AppNotification.showError(context, 'Erro: ${state.message}');
             }
           },
         ),

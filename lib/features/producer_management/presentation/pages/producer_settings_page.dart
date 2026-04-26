@@ -10,6 +10,7 @@ import 'package:ragro_mobile/core/theme/app_colors.dart';
 import 'package:ragro_mobile/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:ragro_mobile/features/auth/presentation/bloc/auth_event.dart';
 import 'package:ragro_mobile/features/auth/presentation/bloc/auth_state.dart';
+import 'package:ragro_mobile/shared/widgets/app_notification.dart';
 
 class ProducerSettingsPage extends StatelessWidget {
   const ProducerSettingsPage({super.key});
@@ -19,22 +20,12 @@ class ProducerSettingsPage extends StatelessWidget {
     return BlocListener<AuthBloc, AuthState>(
       listener: (context, state) {
         if (state is AuthPasswordResetSuccess) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text(
-                'Enviamos um e-mail para você com as instruções para definir sua nova senha. Verifique sua caixa de entrada.',
-              ),
-              backgroundColor: AppColors.lightGreen,
-              duration: Duration(seconds: 5),
-            ),
+          AppNotification.showSuccess(
+            context,
+            'Enviamos um e-mail para você com as instruções para definir sua nova senha. Verifique sua caixa de entrada.',
           );
         } else if (state is AuthPasswordResetFailure) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Erro: ${state.message}'),
-              backgroundColor: AppColors.red,
-            ),
-          );
+          AppNotification.showError(context, 'Erro: ${state.message}');
         }
       },
       child: Scaffold(
