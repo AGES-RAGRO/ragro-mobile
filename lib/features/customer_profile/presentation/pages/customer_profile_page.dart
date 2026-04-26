@@ -4,10 +4,12 @@ import 'package:go_router/go_router.dart';
 import 'package:ragro_mobile/core/theme/app_colors.dart';
 import 'package:ragro_mobile/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:ragro_mobile/features/auth/presentation/bloc/auth_event.dart';
+import 'package:ragro_mobile/features/auth/presentation/bloc/auth_state.dart';
 import 'package:ragro_mobile/features/customer_profile/presentation/bloc/customer_profile_bloc.dart';
 import 'package:ragro_mobile/features/customer_profile/presentation/bloc/customer_profile_state.dart';
 import 'package:ragro_mobile/features/customer_profile/presentation/widgets/profile_info_row.dart';
 import 'package:ragro_mobile/features/customer_profile/presentation/widgets/profile_menu_item.dart';
+import 'package:ragro_mobile/shared/widgets/app_notification.dart';
 
 class CustomerProfilePage extends StatelessWidget {
   const CustomerProfilePage({super.key});
@@ -23,17 +25,33 @@ class _CustomerProfileView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<CustomerProfileBloc, CustomerProfileState>(
-      listener: (context, state) {
-        if (state is CustomerProfileFailure) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(state.message),
-              backgroundColor: AppColors.red,
-            ),
-          );
-        }
-      },
+    return MultiBlocListener(
+      listeners: [
+        BlocListener<CustomerProfileBloc, CustomerProfileState>(
+          listener: (context, state) {
+            if (state is CustomerProfileFailure) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(state.message),
+                  backgroundColor: AppColors.red,
+                ),
+              );
+            }
+          },
+        ),
+        BlocListener<AuthBloc, AuthState>(
+          listener: (context, state) {
+            if (state is AuthPasswordResetSuccess) {
+              AppNotification.showSuccess(
+                context,
+                'Enviamos um e-mail para você com as instruções para definir sua nova senha. Verifique sua caixa de entrada.',
+              );
+            } else if (state is AuthPasswordResetFailure) {
+              AppNotification.showError(context, 'Erro: ${state.message}');
+            }
+          },
+        ),
+      ],
       child: Scaffold(
         backgroundColor: AppColors.white,
         body: SafeArea(
@@ -130,6 +148,28 @@ class _CustomerProfileView extends StatelessWidget {
                       icon: Icons.edit_outlined,
                       label: 'Editar perfil',
                       onTap: () => context.push('/customer/profile/edit'),
+                    ),
+                    const SizedBox(height: 16),
+                    BlocBuilder<AuthBloc, AuthState>(
+                      builder: (context, authState) {
+                        final isLoading =
+                            authState is AuthPasswordResetInProgress;
+                        return ProfileMenuItem(
+                          icon:
+                              isLoading
+                                  ? Icons.hourglass_empty
+                                  : Icons.lock_outline,
+                          label: isLoading ? 'Solicitando...' : 'Alterar senha',
+                          onTap:
+                              isLoading
+                                  ? null
+                                  : () {
+                                    context.read<AuthBloc>().add(
+                                      const AuthPasswordResetRequested(),
+                                    );
+                                  },
+                        );
+                      },
                     ),
                     const SizedBox(height: 16),
                     ProfileMenuItem(

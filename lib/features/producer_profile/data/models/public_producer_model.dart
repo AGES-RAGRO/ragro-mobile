@@ -1,4 +1,3 @@
-import 'package:ragro_mobile/features/home/data/models/home_product_model.dart';
 import 'package:ragro_mobile/features/producer_profile/domain/entities/public_producer.dart';
 
 class PublicProducerModel extends PublicProducer {
