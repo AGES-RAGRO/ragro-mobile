@@ -8,7 +8,8 @@ import 'package:ragro_mobile/features/auth/presentation/bloc/login_state.dart';
 
 @injectable
 class LoginBloc extends Bloc<LoginEvent, LoginState> {
-  LoginBloc(this._loginUser, this._forgotPassword) : super(const LoginInitial()) {
+  LoginBloc(this._loginUser, this._forgotPassword)
+    : super(const LoginInitial()) {
     on<LoginSubmitted>(_onSubmitted);
     on<LoginForgotPasswordRequested>(_onForgotPasswordRequested);
   }

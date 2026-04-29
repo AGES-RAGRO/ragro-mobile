@@ -111,7 +111,8 @@ class _LoginFormState extends State<LoginForm> {
             builder: (context, state) {
               return AuthSubmitButton(
                 label: 'Entrar',
-                isLoading: state is LoginLoading ||
+                isLoading:
+                    state is LoginLoading ||
                     state is LoginForgotPasswordInProgress,
                 onPressed: _submit,
               );
