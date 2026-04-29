@@ -16,7 +16,7 @@ class SearchRemoteDataSource {
     String? category,
   }) async {
     try {
-      final response = await _apiClient.dio.get<dynamic>(
+      final response = await _apiClient.dio.get<Object?>(
         ApiEndpoints.producers,
         queryParameters: {
           'name': query,
@@ -27,10 +27,14 @@ class SearchRemoteDataSource {
       final data = response.data;
       if (data == null) throw const UnknownApiException();
 
-      final list = data is List ? data : (data['content'] as List);
+      final list = switch (data) {
+        final List<Object?> values => values,
+        final Map<String, dynamic> map => map['content'] as List<Object?>,
+        _ => throw const UnknownApiException(),
+      };
 
       return list
-          .map((e) => SearchResultModel.fromJson(e as Map<String, dynamic>))
+          .map((e) => SearchResultModel.fromJson(e! as Map<String, dynamic>))
           .toList();
     } on DioException catch (e) {
       throw e.error as ApiException? ?? const UnknownApiException();

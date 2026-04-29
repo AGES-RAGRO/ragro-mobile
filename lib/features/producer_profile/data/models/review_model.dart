@@ -16,7 +16,8 @@ class ReviewModel extends Review {
 
     return ReviewModel(
       id: json['id'] as String? ?? '',
-      authorName: json['authorName'] as String? ??
+      authorName:
+          json['authorName'] as String? ??
           json['author_name'] as String? ??
           'Anônimo',
       rating: (json['rating'] as num?)?.toDouble() ?? 0.0,
@@ -31,11 +32,11 @@ class ReviewModel extends Review {
   }
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'authorName': authorName,
-        'rating': rating,
-        'comment': comment,
-        'createdAt': createdAt.toIso8601String(),
-        'authorAvatarUrl': authorAvatarUrl,
-      };
+    'id': id,
+    'authorName': authorName,
+    'rating': rating,
+    'comment': comment,
+    'createdAt': createdAt.toIso8601String(),
+    'authorAvatarUrl': authorAvatarUrl,
+  };
 }

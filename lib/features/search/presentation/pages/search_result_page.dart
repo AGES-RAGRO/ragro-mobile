@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ragro_mobile/core/di/injection.dart';
 import 'package:ragro_mobile/core/theme/app_colors.dart';
-import 'package:ragro_mobile/features/search/presentation/widgets/category_chip.dart';
 import 'package:ragro_mobile/features/search/domain/entities/search_result.dart';
 import 'package:ragro_mobile/features/search/presentation/bloc/search_bloc.dart';
 import 'package:ragro_mobile/features/search/presentation/bloc/search_event.dart';
 import 'package:ragro_mobile/features/search/presentation/bloc/search_state.dart';
+import 'package:ragro_mobile/features/search/presentation/widgets/category_chip.dart';
 import 'package:ragro_mobile/features/search/presentation/widgets/search_result_tile.dart';
 
 class SearchResultsPage extends StatelessWidget {
@@ -120,22 +120,23 @@ class _SearchResultsViewState extends State<_SearchResultsView> {
             return switch (state) {
               SearchIdle() => const SizedBox.shrink(),
               SearchLoading() => const Center(
-                  child: CircularProgressIndicator(color: AppColors.darkGreen),
-                ),
-              SearchLoaded(:final results) => results.isEmpty
-                  ? const Center(
-                      child: Text(
-                        'Nenhum resultado encontrado.',
-                        style: TextStyle(color: AppColors.placeholder),
-                      ),
-                    )
-                  : _buildTabs(results),
+                child: CircularProgressIndicator(color: AppColors.darkGreen),
+              ),
+              SearchLoaded(:final results) =>
+                results.isEmpty
+                    ? const Center(
+                        child: Text(
+                          'Nenhum resultado encontrado.',
+                          style: TextStyle(color: AppColors.placeholder),
+                        ),
+                      )
+                    : _buildTabs(results),
               SearchFailure(:final message) => Center(
-                  child: Text(
-                    message,
-                    style: const TextStyle(color: AppColors.placeholder),
-                  ),
+                child: Text(
+                  message,
+                  style: const TextStyle(color: AppColors.placeholder),
                 ),
+              ),
             };
           },
         ),
@@ -178,8 +179,9 @@ class _SearchResultsViewState extends State<_SearchResultsView> {
                     label: filter,
                     isSelected: _selectedFilter == filter,
                     onTap: () => setState(() {
-                      _selectedFilter =
-                          _selectedFilter == filter ? null : filter;
+                      _selectedFilter = _selectedFilter == filter
+                          ? null
+                          : filter;
                     }),
                   ),
                   if (!isLast) const SizedBox(width: 12),
@@ -221,7 +223,7 @@ class _SearchResultsViewState extends State<_SearchResultsView> {
       itemBuilder: (_, i) => SearchResultTile(
         result: items[i],
         onTap: () {
-          // TODO: navegar para detalhe
+          // TODO(codex): navegar para detalhe.
         },
       ),
     );

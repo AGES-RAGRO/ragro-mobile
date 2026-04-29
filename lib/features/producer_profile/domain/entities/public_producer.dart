@@ -41,7 +41,17 @@ class ProducerAddress extends Equatable {
   final double? longitude;
 
   @override
-  List<Object?> get props => [street, number, city, state, zipCode, complement, neighborhood, latitude, longitude];
+  List<Object?> get props => [
+    street,
+    number,
+    city,
+    state,
+    zipCode,
+    complement,
+    neighborhood,
+    latitude,
+    longitude,
+  ];
 }
 
 class ProducerPaymentMethod extends Equatable {
@@ -71,17 +81,17 @@ class ProducerPaymentMethod extends Equatable {
 
   @override
   List<Object?> get props => [
-        type,
-        pixKeyType,
-        pixKey,
-        bankCode,
-        bankName,
-        agency,
-        accountNumber,
-        accountType,
-        holderName,
-        fiscalNumber,
-      ];
+    type,
+    pixKeyType,
+    pixKey,
+    bankCode,
+    bankName,
+    agency,
+    accountNumber,
+    accountType,
+    holderName,
+    fiscalNumber,
+  ];
 }
 
 class PublicProducer extends Equatable {
@@ -120,10 +130,7 @@ class PublicProducer extends Equatable {
   final List<AvailabilitySlot> availability;
   final DateTime memberSince;
 
-  /// Optional: from ProducerPublicProfileResponse
   final String? photoUrl;
-
-  /// Optional: fetched from separate endpoints or profile editing
   final ProducerAddress? producerAddress;
   final List<ProducerPaymentMethod>? paymentMethods;
   final List<HomeProduct>? products;
@@ -134,5 +141,24 @@ class PublicProducer extends Equatable {
   }
 
   @override
-  List<Object?> get props => [id, farmName, averageRating, phone, memberSince];
+  List<Object?> get props => [
+    id,
+    name,
+    farmName,
+    location,
+    description,
+    story,
+    avatarUrl,
+    coverUrl,
+    averageRating,
+    totalReviews,
+    phone,
+    availability,
+    memberSince,
+    photoUrl,
+    producerAddress,
+    paymentMethods,
+    products,
+    reviews,
+  ];
 }

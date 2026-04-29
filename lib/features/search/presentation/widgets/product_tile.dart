@@ -3,11 +3,7 @@ import 'package:ragro_mobile/core/theme/app_colors.dart';
 import 'package:ragro_mobile/features/search/domain/entities/search_result.dart';
 
 class ProductTile extends StatelessWidget {
-  const ProductTile({
-    required this.result,
-    required this.onTap,
-    super.key,
-  });
+  const ProductTile({required this.result, required this.onTap, super.key});
 
   final SearchResult result;
   final VoidCallback onTap;
@@ -74,7 +70,6 @@ class ProductTile extends StatelessWidget {
                   ),
                   const SizedBox(height: 6),
                   Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       Text(
                         'R\$ ${result.price!.toStringAsFixed(2).replaceAll('.', ',')}',
@@ -95,7 +90,7 @@ class ProductTile extends StatelessWidget {
                           ),
                         ),
                       const Spacer(),
-                      _CartButton(),
+                      const _CartButton(),
                     ],
                   ),
                 ],
@@ -128,16 +123,11 @@ class _ProductImage extends StatelessWidget {
               child: Image.network(
                 imageUrl,
                 fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) => const Icon(
-                  Icons.eco_outlined,
-                  color: AppColors.darkGreen,
-                ),
+                errorBuilder: (_, __, ___) =>
+                    const Icon(Icons.eco_outlined, color: AppColors.darkGreen),
               ),
             )
-          : const Icon(
-              Icons.eco_outlined,
-              color: AppColors.darkGreen,
-            ),
+          : const Icon(Icons.eco_outlined, color: AppColors.darkGreen),
     );
   }
 }

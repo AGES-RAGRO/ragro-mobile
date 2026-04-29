@@ -1,4 +1,3 @@
-// lib/core/network/api_endpoints.dart
 abstract final class ApiEndpoints {
   static const String _defaultBase = 'http://localhost:8080';
 
@@ -40,7 +39,9 @@ abstract final class ApiEndpoints {
   static String get producers => '$_base/producers';
   static String get recommendations => '$_base/recommendations';
   static String producer(String id) => '$_base/producers/$id';
-  static String producerPublicProfile(String id) => '$_base/producers/$id/profile';
+  static String producerPublicProfile(String id) =>
+      '$_base/producers/$id/profile';
+  static String producerProducts(String id) => '$_base/producers/$id/products';
   static String producerAvatar(String id) => '$_base/producers/$id/avatar';
   static String producerCover(String id) => '$_base/producers/$id/cover';
 

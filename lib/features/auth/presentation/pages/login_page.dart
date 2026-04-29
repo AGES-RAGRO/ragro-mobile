@@ -56,7 +56,8 @@ class LoginPage extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 24),
               child: ConstrainedBox(
                 constraints: BoxConstraints(
-                  minHeight: MediaQuery.of(context).size.height -
+                  minHeight:
+                      MediaQuery.of(context).size.height -
                       MediaQuery.of(context).padding.top -
                       MediaQuery.of(context).padding.bottom,
                 ),
@@ -65,11 +66,8 @@ class LoginPage extends StatelessWidget {
                     children: [
                       const Spacer(flex: 3),
                       const RagroLogo(),
-                      const Spacer(flex: 1),
-                      LoginForm(
-                        onRegisterTap: () => context.push('/register'),
-                        onForgotPasswordTap: () => _showForgotPasswordModal(context),
-                      ),
+                      const Spacer(),
+                      LoginForm(onRegisterTap: () => context.push('/register')),
                       const Spacer(),
                     ],
                   ),
