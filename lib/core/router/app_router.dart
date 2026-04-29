@@ -38,7 +38,6 @@ import 'package:ragro_mobile/features/search/presentation/pages/search_result_pa
 import 'package:ragro_mobile/shared/widgets/customer_shell.dart';
 import 'package:ragro_mobile/shared/widgets/producer_shell.dart';
 
-
 @lazySingleton
 class AppRouter {
   AppRouter(this._authBloc) {
@@ -159,11 +158,15 @@ class AppRouter {
                   routes: [
                     GoRoute(
                       path: 'results',
-                      builder: (_, state) => SearchResultsPage(
-                        query: state.extra as String,
-                      ),
-                    )
-                  ]
+                      builder: (_, state) {
+                        final params = state.extra! as SearchRouteParams;
+                        return SearchResultsPage(
+                          query: params.query,
+                          category: params.category,
+                        );
+                      },
+                    ),
+                  ],
                 ),
               ],
             ),

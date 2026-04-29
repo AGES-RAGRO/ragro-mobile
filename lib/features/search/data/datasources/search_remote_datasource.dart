@@ -17,9 +17,9 @@ class SearchRemoteDataSource {
   }) async {
     try {
       final response = await _apiClient.dio.get<dynamic>(
-        ApiEndpoints.producers,
+        ApiEndpoints.search,
         queryParameters: {
-          'name': query,
+          'query': query,
           if (category != null && category.isNotEmpty) 'category': category,
         },
       );
@@ -27,21 +27,13 @@ class SearchRemoteDataSource {
       final data = response.data;
       if (data == null) throw const UnknownApiException();
 
-      final list = data is List ? data : (data['content'] as List);
+      if (data is! List) throw const UnknownApiException();
 
-      return list
+      return data
           .map((e) => SearchResultModel.fromJson(e as Map<String, dynamic>))
           .toList();
     } on DioException catch (e) {
       throw e.error as ApiException? ?? const UnknownApiException();
     }
   }
-
-  // Future<List<SearchResultModel>> search({
-  //   required String query,
-  //   String? category,
-  // }) async {
-  //   await Future<void>.delayed(const Duration(milliseconds: 500));
-  //   return SearchResultModel.mocks(query);
-  // }
 }

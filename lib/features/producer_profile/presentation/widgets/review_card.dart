@@ -37,10 +37,7 @@ class ReviewCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.white,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: const Color(0xFFE2E8F0),
-          width: 1,
-        ),
+        border: Border.all(color: const Color(0xFFE2E8F0)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -56,7 +53,9 @@ class ReviewCard extends StatelessWidget {
                     // Avatar
                     CircleAvatar(
                       radius: 20,
-                      backgroundColor: AppColors.mintGreen.withValues(alpha: 0.3),
+                      backgroundColor: AppColors.mintGreen.withValues(
+                        alpha: 0.3,
+                      ),
                       backgroundImage: review.authorAvatarUrl != null
                           ? NetworkImage(review.authorAvatarUrl!)
                           : null,

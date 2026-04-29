@@ -5,6 +5,7 @@ import 'package:ragro_mobile/core/di/injection.dart';
 import 'package:ragro_mobile/core/theme/app_colors.dart';
 import 'package:ragro_mobile/features/search/presentation/bloc/search_bloc.dart';
 import 'package:ragro_mobile/features/search/presentation/bloc/search_event.dart';
+import 'package:ragro_mobile/features/search/presentation/pages/search_result_page.dart';
 import 'package:ragro_mobile/features/search/presentation/widgets/category_chip.dart';
 
 class SearchPage extends StatelessWidget {
@@ -29,7 +30,19 @@ class _SearchView extends StatefulWidget {
 class _SearchViewState extends State<_SearchView> {
   final _controller = TextEditingController();
   String _selectedCategory = 'Tudo';
-  final _categories = ['Tudo', 'Frutas', 'Verduras', 'Legumes', 'Ovos'];
+  final _categories = const [
+    'Tudo',
+    'Frutas',
+    'Verduras',
+    'Legumes',
+    'Laticínios',
+    'Ovos',
+    'Grãos e Cereais',
+    'Carnes',
+    'Mel e Derivados',
+    'Processados Artesanais',
+    'Plantas e Mudas',
+  ];
   final _recentSearches = ['Tomate cereja orgânico', 'Queijo colonial'];
 
   @override
@@ -40,7 +53,13 @@ class _SearchViewState extends State<_SearchView> {
 
   void _goToResults(BuildContext context, String query) {
     if (query.trim().isEmpty) return;
-    context.push('/customer/search/results', extra: query);
+    context.push(
+      '/customer/search/results',
+      extra: SearchRouteParams(
+        query: query.trim(),
+        category: _selectedCategory == 'Tudo' ? null : _selectedCategory,
+      ),
+    );
   }
 
   @override
@@ -143,9 +162,7 @@ class _SearchViewState extends State<_SearchView> {
                           label: _categories[i],
                           isSelected: _selectedCategory == _categories[i],
                           onTap: () {
-                            setState(
-                              () => _selectedCategory = _categories[i],
-                            );
+                            setState(() => _selectedCategory = _categories[i]);
                           },
                         ),
                       ),
@@ -255,10 +272,7 @@ class _SearchViewState extends State<_SearchView> {
                               SearchRecentItemRemoved(q),
                             ),
                           ),
-                          const Divider(
-                            color: Color(0xFFF1F5F9),
-                            height: 1,
-                          ),
+                          const Divider(color: Color(0xFFF1F5F9), height: 1),
                         ],
                       ),
                     ),

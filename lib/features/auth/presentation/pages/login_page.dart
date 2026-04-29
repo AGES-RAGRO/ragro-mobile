@@ -12,7 +12,6 @@ import 'package:ragro_mobile/core/theme/app_text_styles.dart';
 import 'package:ragro_mobile/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:ragro_mobile/features/auth/presentation/bloc/auth_event.dart';
 import 'package:ragro_mobile/features/auth/presentation/bloc/login_bloc.dart';
-
 import 'package:ragro_mobile/features/auth/presentation/bloc/login_event.dart';
 import 'package:ragro_mobile/features/auth/presentation/bloc/login_state.dart';
 import 'package:ragro_mobile/features/auth/presentation/widgets/auth_submit_button.dart';
@@ -51,32 +50,34 @@ class LoginPage extends StatelessWidget {
         child: Builder(
           builder: (context) => Scaffold(
             backgroundColor: AppColors.white,
-          body: SafeArea(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
-              child: ConstrainedBox(
-                constraints: BoxConstraints(
-                  minHeight: MediaQuery.of(context).size.height -
-                      MediaQuery.of(context).padding.top -
-                      MediaQuery.of(context).padding.bottom,
-                ),
-                child: IntrinsicHeight(
-                  child: Column(
-                    children: [
-                      const Spacer(flex: 3),
-                      const RagroLogo(),
-                      const Spacer(flex: 1),
-                      LoginForm(
-                        onRegisterTap: () => context.push('/register'),
-                        onForgotPasswordTap: () => _showForgotPasswordModal(context),
-                      ),
-                      const Spacer(),
-                    ],
+            body: SafeArea(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(
+                    minHeight:
+                        MediaQuery.of(context).size.height -
+                        MediaQuery.of(context).padding.top -
+                        MediaQuery.of(context).padding.bottom,
+                  ),
+                  child: IntrinsicHeight(
+                    child: Column(
+                      children: [
+                        const Spacer(flex: 3),
+                        const RagroLogo(),
+                        const Spacer(),
+                        LoginForm(
+                          onRegisterTap: () => context.push('/register'),
+                          onForgotPasswordTap: () =>
+                              _showForgotPasswordModal(context),
+                        ),
+                        const Spacer(),
+                      ],
+                    ),
                   ),
                 ),
               ),
             ),
-          ),
           ),
         ),
       ),
@@ -88,7 +89,7 @@ class LoginPage extends StatelessWidget {
     final formKey = GlobalKey<FormState>();
     final loginBloc = context.read<LoginBloc>();
 
-    showModalBottomSheet(
+    showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
@@ -136,7 +137,7 @@ class LoginPage extends StatelessWidget {
                       Text(
                         'Informe seu e-mail cadastrado e enviaremos um link para você definir uma nova senha.',
                         style: AppTextStyles.body.copyWith(
-                          color: AppColors.black.withOpacity(0.7),
+                          color: AppColors.black.withValues(alpha: 0.7),
                         ),
                       ),
                       const SizedBox(height: 24),
@@ -146,10 +147,15 @@ class LoginPage extends StatelessWidget {
                         controller: emailController,
                         keyboardType: TextInputType.emailAddress,
                         validator: (v) {
-                          if (v == null || v.isEmpty) return 'E-mail obrigatório';
-                          final emailRegex =
-                              RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$');
-                          if (!emailRegex.hasMatch(v)) return 'E-mail inválido';
+                          if (v == null || v.isEmpty) {
+                            return 'E-mail obrigatório';
+                          }
+                          final emailRegex = RegExp(
+                            r'^[^@\s]+@[^@\s]+\.[^@\s]+$',
+                          );
+                          if (!emailRegex.hasMatch(v)) {
+                            return 'E-mail inválido';
+                          }
                           return null;
                         },
                       ),

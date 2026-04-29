@@ -62,7 +62,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
           isFetchingMoreProducers: false,
         ),
       );
-    } catch (_) {
+    } on Exception {
       emit(currentState.copyWith(isFetchingMoreProducers: false));
     }
   }
