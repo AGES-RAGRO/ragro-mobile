@@ -152,7 +152,7 @@ class BankAccountInputFormatter extends TextInputFormatter {
   ) {
     final digits = _digits(newValue.text, max: 7);
     if (digits.isEmpty) return TextEditingValue.empty;
-    
+
     final formatted = _formatAccount(digits);
     return TextEditingValue(
       text: formatted,

@@ -18,5 +18,12 @@ class Review extends Equatable {
   final String? authorAvatarUrl;
 
   @override
-  List<Object?> get props => [id, authorName, rating, comment, createdAt, authorAvatarUrl];
+  List<Object?> get props => [
+    id,
+    authorName,
+    rating,
+    comment,
+    createdAt,
+    authorAvatarUrl,
+  ];
 }

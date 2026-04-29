@@ -187,7 +187,6 @@ class _ProducerEditProfileViewState extends State<_ProducerEditProfileView> {
     _phoneController.text = _applyMask(producer.phone, PhoneInputFormatter());
     _farmNameController.text = producer.farmName;
 
-    // Address
     if (producer.producerAddress != null) {
       final addr = producer.producerAddress!;
       _cepController.text = _applyMask(addr.zipCode, CepInputFormatter());
@@ -248,7 +247,9 @@ class _ProducerEditProfileViewState extends State<_ProducerEditProfileView> {
       }
       for (final slot in producer.availability) {
         final uiIndex = slot.weekday == 0 ? 6 : slot.weekday - 1;
-        if (uiIndex >= 0 && uiIndex < 7) _weekdays[uiIndex] = true;
+        if (uiIndex >= 0 && uiIndex < 7) {
+          _weekdays[uiIndex] = true;
+        }
       }
     } else {
       _scheduleStartController.text = '08:00';
@@ -261,7 +262,6 @@ class _ProducerEditProfileViewState extends State<_ProducerEditProfileView> {
   void _submit() {
     if (!(_formKey.currentState?.validate() ?? false)) return;
 
-    // Address
     Map<String, dynamic>? addressPayload;
     if (_addressController.text.trim().isNotEmpty) {
       addressPayload = {
