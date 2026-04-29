@@ -155,19 +155,17 @@ class _CustomerProfileView extends StatelessWidget {
                         final isLoading =
                             authState is AuthPasswordResetInProgress;
                         return ProfileMenuItem(
-                          icon:
-                              isLoading
-                                  ? Icons.hourglass_empty
-                                  : Icons.lock_outline,
+                          icon: isLoading
+                              ? Icons.hourglass_empty
+                              : Icons.lock_outline,
                           label: isLoading ? 'Solicitando...' : 'Alterar senha',
-                          onTap:
-                              isLoading
-                                  ? null
-                                  : () {
-                                    context.read<AuthBloc>().add(
-                                      const AuthPasswordResetRequested(),
-                                    );
-                                  },
+                          onTap: isLoading
+                              ? null
+                              : () {
+                                  context.read<AuthBloc>().add(
+                                    const AuthPasswordResetRequested(),
+                                  );
+                                },
                         );
                       },
                     ),

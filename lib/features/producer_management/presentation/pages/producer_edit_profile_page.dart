@@ -617,7 +617,9 @@ class _ProducerEditProfileViewState extends State<_ProducerEditProfileView> {
                           prefixIcon: Icons.person_outline,
                           validator: (value) {
                             final trimmed = value?.trim() ?? '';
-                            if (trimmed.isEmpty) return 'Informe seu nome';
+                            if (trimmed.isEmpty) {
+                              return 'Informe seu nome';
+                            }
                             if (trimmed.length < 3) {
                               return 'Nome deve ter ao menos 3 caracteres';
                             }
@@ -638,7 +640,9 @@ class _ProducerEditProfileViewState extends State<_ProducerEditProfileView> {
                               RegExp(r'\D'),
                               '',
                             );
-                            if (digits.isEmpty) return 'Informe um telefone';
+                            if (digits.isEmpty) {
+                              return 'Informe um telefone';
+                            }
                             if (digits.length < 10) {
                               return 'Telefone deve ter ao menos 10 dígitos';
                             }
@@ -689,7 +693,9 @@ class _ProducerEditProfileViewState extends State<_ProducerEditProfileView> {
                           keyboardType: TextInputType.number,
                           inputFormatters: [CepInputFormatter()],
                           validator: (value) {
-                            if (value == null || value.isEmpty) return null;
+                            if (value == null || value.isEmpty) {
+                              return null;
+                            }
                             final digits = _digitsOnly(value);
                             if (digits.length != 8) {
                               return 'CEP deve ter 8 dígitos';

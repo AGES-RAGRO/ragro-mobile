@@ -46,12 +46,6 @@ class CategoryChip extends StatelessWidget {
                 color: isSelected ? AppColors.white : const Color(0xFF334155),
               ),
             ),
-            const SizedBox(width: 4),
-            Icon(
-              Icons.keyboard_arrow_down,
-              size: 18,
-              color: isSelected ? AppColors.white : const Color(0xFF334155),
-            ),
           ],
         ),
       ),

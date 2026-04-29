@@ -158,7 +158,7 @@ class AuthRemoteDataSource {
   /// Solicita redefinição de senha via e-mail — POST /auth/password/reset-email (204 No Content).
   Future<void> requestPasswordReset() async {
     try {
-      await _apiClient.dio.post(ApiEndpoints.resetPasswordEmail);
+      await _apiClient.dio.post<void>(ApiEndpoints.resetPasswordEmail);
     } on DioException catch (e) {
       throw e.error as ApiException? ?? const UnknownApiException();
     }
@@ -167,7 +167,7 @@ class AuthRemoteDataSource {
   /// Esqueceu a senha — POST /auth/password/forgot (204 No Content).
   Future<void> forgotPassword(String email) async {
     try {
-      await _apiClient.dio.post(
+      await _apiClient.dio.post<void>(
         ApiEndpoints.forgotPassword,
         data: {'email': email},
       );

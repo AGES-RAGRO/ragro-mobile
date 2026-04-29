@@ -158,8 +158,13 @@ class AppRouter {
                   routes: [
                     GoRoute(
                       path: 'results',
-                      builder: (_, state) =>
-                          SearchResultsPage(query: state.extra! as String),
+                      builder: (_, state) {
+                        final params = state.extra! as SearchRouteParams;
+                        return SearchResultsPage(
+                          query: params.query,
+                          category: params.category,
+                        );
+                      },
                     ),
                   ],
                 ),

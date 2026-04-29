@@ -1,4 +1,5 @@
 import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:ragro_mobile/core/theme/app_colors.dart';
 
@@ -20,14 +21,11 @@ class AppNotification {
     late OverlayEntry entry;
 
     entry = OverlayEntry(
-      builder:
-          (context) => _NotificationWidget(
-            message: message,
-            isError: isError,
-            onDismiss: () {
-              entry.remove();
-            },
-          ),
+      builder: (context) => _NotificationWidget(
+        message: message,
+        isError: isError,
+        onDismiss: entry.remove,
+      ),
     );
 
     overlay.insert(entry);
@@ -70,12 +68,10 @@ class _NotificationWidgetState extends State<_NotificationWidget>
 
     _controller.forward();
 
-    _timer = Timer(const Duration(seconds: 4), () {
-      _hide();
-    });
+    _timer = Timer(const Duration(seconds: 4), _hide);
   }
 
-  void _hide() async {
+  Future<void> _hide() async {
     if (!mounted) return;
     await _controller.reverse();
     widget.onDismiss();
@@ -113,7 +109,7 @@ class _NotificationWidgetState extends State<_NotificationWidget>
                 borderRadius: BorderRadius.circular(16),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.15),
+                    color: Colors.black.withValues(alpha: 0.15),
                     blurRadius: 10,
                     offset: const Offset(0, 4),
                   ),
@@ -122,7 +118,9 @@ class _NotificationWidgetState extends State<_NotificationWidget>
               child: Row(
                 children: [
                   Icon(
-                    widget.isError ? Icons.error_outline : Icons.check_circle_outline,
+                    widget.isError
+                        ? Icons.error_outline
+                        : Icons.check_circle_outline,
                     color: Colors.white,
                     size: 24,
                   ),

@@ -78,11 +78,10 @@ void main() {
     },
     seed: () => const AuthAuthenticated(tUser),
     act: (b) => b.add(const AuthPasswordResetRequested()),
-    expect:
-        () => [
-          const AuthPasswordResetInProgress(tUser),
-          const AuthPasswordResetSuccess(tUser),
-        ],
+    expect: () => [
+      const AuthPasswordResetInProgress(tUser),
+      const AuthPasswordResetSuccess(tUser),
+    ],
   );
 
   blocTest<AuthBloc, AuthState>(
@@ -95,10 +94,9 @@ void main() {
     },
     seed: () => const AuthAuthenticated(tUser),
     act: (b) => b.add(const AuthPasswordResetRequested()),
-    expect:
-        () => [
-          const AuthPasswordResetInProgress(tUser),
-          const AuthPasswordResetFailure(tUser, 'Exception: Erro ao enviar e-mail'),
-        ],
+    expect: () => [
+      const AuthPasswordResetInProgress(tUser),
+      const AuthPasswordResetFailure(tUser, 'Exception: Erro ao enviar e-mail'),
+    ],
   );
 }
