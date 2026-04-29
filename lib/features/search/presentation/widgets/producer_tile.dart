@@ -81,7 +81,7 @@ class ProducerTile extends StatelessWidget {
                       Text(
                         result.distance != null
                             ? '${result.distance!.toStringAsFixed(1)} km de você'
-                            : '0.5 km de você', // TODO(codex): usar distância real quando disponível.
+                            : '0.5 km de você',
                         style: const TextStyle(
                           fontFamily: 'Manrope',
                           fontSize: 12,

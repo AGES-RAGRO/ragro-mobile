@@ -66,7 +66,7 @@ class AvailabilitySection extends StatelessWidget {
       children: [
         const SizedBox(height: 4),
         LayoutBuilder(
-          builder: (context, constraints) {
+          builder: (context, _) {
             return Row(
               children: shownWeekdays.map((weekday) {
                 final matches = availability.where((s) => s.weekday == weekday);
@@ -104,7 +104,9 @@ class AvailabilitySection extends StatelessWidget {
                         height: 12,
                         decoration: BoxDecoration(
                           color: AppColors.darkGreen.withValues(alpha: 0.25),
-                          borderRadius: BorderRadius.circular(1),
+                          borderRadius: const BorderRadius.all(
+                            Radius.circular(1),
+                          ),
                         ),
                       ),
                       const SizedBox(height: 4),

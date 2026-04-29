@@ -86,8 +86,9 @@ void main() {
     blocTest<LoginBloc, LoginState>(
       'emits [InProgress, Failure] when forgot password fails',
       build: () {
-        when(() => mockForgotPassword(any()))
-            .thenThrow(const UnknownApiException('Error'));
+        when(
+          () => mockForgotPassword(any()),
+        ).thenThrow(const UnknownApiException('Error'));
         return bloc;
       },
       act: (b) => b.add(const LoginForgotPasswordRequested('test@test.com')),

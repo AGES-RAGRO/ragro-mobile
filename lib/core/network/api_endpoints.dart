@@ -37,6 +37,7 @@ abstract final class ApiEndpoints {
 
   // Producers / Farmers
   static String get producers => '$_base/producers';
+  static String get search => '$_base/search';
   static String get recommendations => '$_base/recommendations';
   static String producer(String id) => '$_base/producers/$id';
   static String producerPublicProfile(String id) =>
