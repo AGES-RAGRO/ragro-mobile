@@ -22,7 +22,6 @@ dependencies:
   flutter_svg: ^2.0.10
   http_parser: ^4.1.2
   intl: ^0.20.0
-  http_parser: ^4.1.2
 
 dev_dependencies:
   flutter_test:
