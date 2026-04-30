@@ -21,7 +21,10 @@ class ProductDetailBloc extends Bloc<ProductDetailEvent, ProductDetailState> {
   ) async {
     emit(const ProductDetailLoading());
     try {
-      final product = await _getProduct(event.productId);
+      final product = await _getProduct(
+        event.productId,
+        producerId: event.producerId,
+      );
       emit(ProductDetailLoaded(product: product));
     } on ApiException catch (e) {
       emit(ProductDetailFailure(e.message));
