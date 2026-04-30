@@ -16,19 +16,29 @@ class ProductDetailModel extends ProductDetail {
   });
 
   factory ProductDetailModel.fromJson(Map<String, dynamic> json) {
-    final farmer = json['farmer'] as Map<String, dynamic>?;
+    final categories = json['categories'] as List<dynamic>?;
+    final photos = json['photos'] as List<dynamic>?;
+    final firstCategory = categories != null && categories.isNotEmpty
+        ? (categories.first as Map<String, dynamic>)['name'] as String? ?? ''
+        : '';
+    final firstPhotoUrl = photos != null && photos.isNotEmpty
+        ? (photos.first as Map<String, dynamic>)['url'] as String? ?? ''
+        : '';
+    final imageUrl = firstPhotoUrl.isNotEmpty
+        ? firstPhotoUrl
+        : (json['imageS3'] as String? ?? '');
     return ProductDetailModel(
       id: json['id'] as String,
       name: json['name'] as String,
       description: json['description'] as String? ?? '',
       price: (json['price'] as num).toDouble(),
-      unityType: json['unity_type'] as String? ?? 'kg',
-      category: json['category'] as String? ?? '',
-      imageUrl: json['image_s3'] as String? ?? '',
-      farmName: farmer?['farm_name'] as String? ?? '',
-      producerName: (farmer?['user'] as Map?)?['name'] as String? ?? '',
-      producerId: json['farmer_id'] as String? ?? '',
-      stockQuantity: (json['stock_quantity'] as num?)?.toDouble() ?? 0.0,
+      unityType: json['unityType'] as String? ?? 'kg',
+      category: firstCategory,
+      imageUrl: imageUrl,
+      farmName: '',
+      producerName: '',
+      producerId: json['farmerId'] as String? ?? '',
+      stockQuantity: (json['stockQuantity'] as num?)?.toDouble() ?? 0.0,
     );
   }
 

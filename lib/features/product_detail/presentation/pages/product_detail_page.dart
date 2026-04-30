@@ -16,15 +16,21 @@ import 'package:ragro_mobile/features/product_detail/presentation/bloc/product_d
 import 'package:ragro_mobile/features/product_detail/presentation/bloc/product_detail_state.dart';
 
 class ProductDetailPage extends StatelessWidget {
-  const ProductDetailPage({required this.productId, super.key});
+  const ProductDetailPage({
+    required this.productId,
+    this.producerId = '',
+    super.key,
+  });
 
   final String productId;
+  final String producerId;
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (_) =>
-          getIt<ProductDetailBloc>()..add(ProductDetailStarted(productId)),
+          getIt<ProductDetailBloc>()
+            ..add(ProductDetailStarted(productId, producerId: producerId)),
       child: const _ProductDetailView(),
     );
   }

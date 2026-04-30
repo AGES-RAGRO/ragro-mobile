@@ -71,8 +71,10 @@ class _CustomerHomeView extends StatelessWidget {
                     SliverToBoxAdapter(
                       child: ProductsGrid(
                         products: products,
-                        onProductTap: (p) =>
-                            context.push('/customer/home/product/${p.id}'),
+                        onProductTap: (p) => context.push(
+                          '/customer/home/product/${p.id}',
+                          extra: p.producerId,
+                        ),
                         onAddToCart: (_) {
                           // TODO(eduardo): navigate to cart / add to cart
                         },

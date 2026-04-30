@@ -8,11 +8,12 @@ sealed class ProductDetailEvent extends Equatable {
 }
 
 class ProductDetailStarted extends ProductDetailEvent {
-  const ProductDetailStarted(this.productId);
+  const ProductDetailStarted(this.productId, {this.producerId = ''});
   final String productId;
+  final String producerId;
 
   @override
-  List<Object?> get props => [productId];
+  List<Object?> get props => [productId, producerId];
 }
 
 class ProductDetailQuantityIncremented extends ProductDetailEvent {

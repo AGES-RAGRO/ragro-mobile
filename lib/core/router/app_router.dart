@@ -90,6 +90,7 @@ class AppRouter {
                       path: 'product/:productId',
                       builder: (context, state) => ProductDetailPage(
                         productId: state.pathParameters['productId']!,
+                        producerId: state.extra as String? ?? '',
                       ),
                     ),
                   ],

@@ -43,6 +43,8 @@ abstract final class ApiEndpoints {
   static String producerPublicProfile(String id) =>
       '$_base/producers/$id/profile';
   static String producerProducts(String id) => '$_base/producers/$id/products';
+  static String producerProduct(String producerId, String productId) =>
+      '$_base/producers/$producerId/products/$productId';
   static String producerAvatar(String id) => '$_base/producers/$id/avatar';
   static String producerCover(String id) => '$_base/producers/$id/cover';
 

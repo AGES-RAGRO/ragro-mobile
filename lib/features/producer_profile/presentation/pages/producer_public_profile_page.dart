@@ -250,6 +250,7 @@ class _ProducerPublicProfileView extends StatelessWidget {
                                     product: (producer.products ?? const [])[i],
                                     onTap: () => context.push(
                                       '/customer/home/product/${(producer.products ?? const [])[i].id}',
+                                      extra: producer.id,
                                     ),
                                     onAddToCart: () {},
                                   ),

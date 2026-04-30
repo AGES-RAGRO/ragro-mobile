@@ -10,6 +10,8 @@ class ProductDetailRepositoryImpl implements ProductDetailRepository {
   final ProductDetailRemoteDataSource _dataSource;
 
   @override
-  Future<ProductDetail> getProduct(String productId) =>
-      _dataSource.getProduct(productId);
+  Future<ProductDetail> getProduct(
+    String productId, {
+    String producerId = '',
+  }) => _dataSource.getProduct(productId, producerId: producerId);
 }

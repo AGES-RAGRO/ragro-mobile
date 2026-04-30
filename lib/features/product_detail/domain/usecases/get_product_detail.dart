@@ -8,6 +8,6 @@ class GetProductDetail {
 
   final ProductDetailRepository _repository;
 
-  Future<ProductDetail> call(String productId) =>
-      _repository.getProduct(productId);
+  Future<ProductDetail> call(String productId, {String producerId = ''}) =>
+      _repository.getProduct(productId, producerId: producerId);
 }
