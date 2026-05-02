@@ -8,7 +8,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:ragro_mobile/core/di/injection.dart';
 import 'package:ragro_mobile/core/theme/app_colors.dart';
-import 'package:ragro_mobile/features/cart/domain/entities/cart_item.dart';
 import 'package:ragro_mobile/features/cart/presentation/bloc/cart_bloc.dart';
 import 'package:ragro_mobile/features/cart/presentation/bloc/cart_event.dart';
 import 'package:ragro_mobile/features/product_detail/presentation/bloc/product_detail_bloc.dart';
@@ -296,17 +295,8 @@ class _ProductDetailView extends StatelessWidget {
                           onTap: () {
                             getIt<CartBloc>().add(
                               CartItemAdded(
-                                CartItem(
-                                  productId: product.id,
-                                  productName: product.name,
-                                  imageUrl: product.imageUrl,
-                                  unitPrice: product.price,
-                                  unityType: product.unityType,
-                                  quantity: quantity,
-                                  farmName: product.farmName,
-                                  farmLocation: '',
-                                  producerId: product.producerId,
-                                ),
+                                productId: product.id,
+                                quantity: quantity.toDouble(),
                               ),
                             );
                             context.push('/customer/cart');

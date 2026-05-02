@@ -8,6 +8,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:ragro_mobile/core/di/injection.dart';
 import 'package:ragro_mobile/core/theme/app_colors.dart';
+import 'package:ragro_mobile/features/cart/presentation/bloc/cart_bloc.dart';
+import 'package:ragro_mobile/features/cart/presentation/bloc/cart_event.dart';
 import 'package:ragro_mobile/features/home/domain/entities/producer.dart';
 import 'package:ragro_mobile/features/home/presentation/bloc/home_bloc.dart';
 import 'package:ragro_mobile/features/home/presentation/bloc/home_event.dart';
@@ -75,8 +77,11 @@ class _CustomerHomeView extends StatelessWidget {
                           '/customer/home/product/${p.id}',
                           extra: p.producerId,
                         ),
-                        onAddToCart: (_) {
-                          // TODO(eduardo): navigate to cart / add to cart
+                        onAddToCart: (product) {
+                          getIt<CartBloc>().add(
+                            CartItemAdded(productId: product.id, quantity: 1),
+                          );
+                          context.push('/customer/cart');
                         },
                       ),
                     ),

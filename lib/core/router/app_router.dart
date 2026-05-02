@@ -181,6 +181,16 @@ class AppRouter {
           builder: (_, __) => const OrderConfirmationPage(),
         ),
 
+        // Top-level producer profile (fullscreen) — used from outside the
+        // customer shell (e.g. cart). The shell-nested version at
+        // /customer/home/producer/:id keeps the bottom nav.
+        GoRoute(
+          path: '/customer/producer/:producerId',
+          builder: (context, state) => ProducerPublicProfilePage(
+            producerId: state.pathParameters['producerId']!,
+          ),
+        ),
+
         // Producer shell with 3 tabs
         StatefulShellRoute.indexedStack(
           builder: (_, __, shell) => ProducerShell(navigationShell: shell),
