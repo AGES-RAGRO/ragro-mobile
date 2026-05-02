@@ -6,5 +6,5 @@ import 'package:ragro_mobile/features/cart/domain/repositories/cart_repository.d
 class GetCart {
   const GetCart(this._repository);
   final CartRepository _repository;
-  Cart call() => _repository.getCart();
+  Future<Cart> call() => _repository.getCart();
 }

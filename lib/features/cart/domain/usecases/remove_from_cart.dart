@@ -6,5 +6,5 @@ import 'package:ragro_mobile/features/cart/domain/repositories/cart_repository.d
 class RemoveFromCart {
   const RemoveFromCart(this._repository);
   final CartRepository _repository;
-  Cart call(String productId) => _repository.removeItem(productId);
+  Future<Cart> call(String cartItemId) => _repository.removeItem(cartItemId);
 }

@@ -1,18 +1,23 @@
 // Screen: Carrinho de Compras
 // User Story: US-09 — Manage Cart
 // Epic: EPIC 3 — Shopping & Orders
-// Routes: local state (no API call for cart)
+// Routes: GET /customers/carts, DELETE /customers/carts,
+//         POST /customers/carts/items,
+//         PATCH /customers/carts/items/{cartItemId},
+//         DELETE /customers/carts/items/{cartItemId}
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:ragro_mobile/core/di/injection.dart';
 import 'package:ragro_mobile/core/theme/app_colors.dart';
+import 'package:ragro_mobile/features/cart/domain/entities/cart.dart';
 import 'package:ragro_mobile/features/cart/presentation/bloc/cart_bloc.dart';
 import 'package:ragro_mobile/features/cart/presentation/bloc/cart_event.dart';
 import 'package:ragro_mobile/features/cart/presentation/bloc/cart_state.dart';
 import 'package:ragro_mobile/features/cart/presentation/widgets/cart_item_tile.dart';
 import 'package:ragro_mobile/features/cart/presentation/widgets/producer_cart_header.dart';
+import 'package:ragro_mobile/shared/widgets/app_notification.dart';
 
 class CartPage extends StatelessWidget {
   const CartPage({super.key});
@@ -20,14 +25,76 @@ class CartPage extends StatelessWidget {
   String _formatPrice(double price) =>
       'R\$ ${price.toStringAsFixed(2).replaceAll('.', ',')}';
 
+  Cart? _cartFromState(CartState state) => switch (state) {
+    CartLoaded(:final cart) => cart,
+    CartUpdating(:final cart) => cart,
+    CartUpdateFailure(:final cart) => cart,
+    _ => null,
+  };
+
   @override
   Widget build(BuildContext context) {
     return BlocProvider.value(
       value: getIt<CartBloc>()..add(const CartStarted()),
-      child: BlocBuilder<CartBloc, CartState>(
+      child: BlocConsumer<CartBloc, CartState>(
+        listenWhen: (_, current) => current is CartUpdateFailure,
+        listener: (context, state) {
+          if (state is CartUpdateFailure) {
+            AppNotification.showError(context, state.message);
+          }
+        },
         builder: (context, state) {
-          final cart = state is CartLoaded ? state.cart : null;
+          if (state is CartLoading || state is CartInitial) {
+            return const Scaffold(
+              backgroundColor: AppColors.white,
+              body: Center(
+                child: CircularProgressIndicator(color: AppColors.darkGreen),
+              ),
+            );
+          }
+
+          if (state is CartFailure) {
+            return Scaffold(
+              backgroundColor: AppColors.white,
+              body: SafeArea(
+                child: Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(24),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(
+                          Icons.error_outline,
+                          size: 48,
+                          color: AppColors.red,
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          state.message,
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                            fontFamily: 'Manrope',
+                            fontSize: 16,
+                            color: AppColors.black,
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        TextButton(
+                          onPressed: () =>
+                              context.read<CartBloc>().add(const CartStarted()),
+                          child: const Text('Tentar novamente'),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            );
+          }
+
+          final cart = _cartFromState(state);
           final isEmpty = cart == null || cart.isEmpty;
+          final isMutating = state is CartUpdating;
 
           return Scaffold(
             backgroundColor: AppColors.white,
@@ -64,7 +131,7 @@ class CartPage extends StatelessWidget {
                         ),
                         const Spacer(),
                         GestureDetector(
-                          onTap: isEmpty
+                          onTap: isEmpty || isMutating
                               ? null
                               : () => context.read<CartBloc>().add(
                                   const CartCleared(),
@@ -111,76 +178,98 @@ class CartPage extends StatelessWidget {
                     )
                   else
                     Expanded(
-                      child: ListView(
-                        padding: const EdgeInsets.symmetric(vertical: 16),
+                      child: Stack(
                         children: [
-                          // Info banner
-                          Container(
-                            margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                            padding: const EdgeInsets.all(17),
-                            decoration: BoxDecoration(
-                              color: const Color(
-                                0xFF487ACB,
-                              ).withValues(alpha: 0.15),
-                              borderRadius: BorderRadius.circular(16),
-                              border: Border.all(
-                                color: const Color(0xFF487ACB),
-                              ),
-                            ),
-                            child: const Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Icon(
-                                  Icons.info_outline,
-                                  color: Color(0xFF487ACB),
-                                  size: 20,
+                          ListView(
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            children: [
+                              // Info banner
+                              Container(
+                                margin: const EdgeInsets.fromLTRB(
+                                  16,
+                                  0,
+                                  16,
+                                  16,
                                 ),
-                                SizedBox(width: 12),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        'Aviso de Produtor Único',
-                                        style: TextStyle(
-                                          fontFamily: 'Figtree',
-                                          fontWeight: FontWeight.w600,
-                                          fontSize: 14,
-                                          color: Color(0xFF487ACB),
-                                        ),
-                                      ),
-                                      SizedBox(height: 4),
-                                      Text(
-                                        'Para garantir o frescor e logística, você só pode comprar de um produtor por vez.',
-                                        style: TextStyle(
-                                          fontFamily: 'Manrope',
-                                          fontSize: 12,
-                                          color: Color(0xFF487ACB),
-                                        ),
-                                      ),
-                                    ],
+                                padding: const EdgeInsets.all(17),
+                                decoration: BoxDecoration(
+                                  color: const Color(
+                                    0xFF487ACB,
+                                  ).withValues(alpha: 0.15),
+                                  borderRadius: BorderRadius.circular(16),
+                                  border: Border.all(
+                                    color: const Color(0xFF487ACB),
                                   ),
                                 ),
-                              ],
-                            ),
-                          ),
+                                child: const Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Icon(
+                                      Icons.info_outline,
+                                      color: Color(0xFF487ACB),
+                                      size: 20,
+                                    ),
+                                    SizedBox(width: 12),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            'Aviso de Produtor Único',
+                                            style: TextStyle(
+                                              fontFamily: 'Figtree',
+                                              fontWeight: FontWeight.w600,
+                                              fontSize: 14,
+                                              color: Color(0xFF487ACB),
+                                            ),
+                                          ),
+                                          SizedBox(height: 4),
+                                          Text(
+                                            'Para garantir o frescor e logística, você só pode comprar de um produtor por vez.',
+                                            style: TextStyle(
+                                              fontFamily: 'Manrope',
+                                              fontSize: 12,
+                                              color: Color(0xFF487ACB),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
 
-                          // Producer header
-                          ProducerCartHeader(
-                            farmName: cart.farmName,
-                            farmLocation: cart.farmLocation,
-                            producerId: cart.producerId,
-                          ),
-                          const SizedBox(height: 16),
+                              // Producer header
+                              ProducerCartHeader(
+                                farmName: cart.farmName,
+                                producerId: cart.producerId,
+                              ),
+                              const SizedBox(height: 16),
 
-                          // Items
-                          ...cart.items.map(
-                            (item) => Padding(
-                              padding: const EdgeInsets.only(bottom: 12),
-                              child: CartItemTile(item: item),
-                            ),
+                              // Items
+                              ...cart.items.map(
+                                (item) => Padding(
+                                  padding: const EdgeInsets.only(bottom: 12),
+                                  child: CartItemTile(
+                                    item: item,
+                                    producerId: cart.producerId,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
+                          if (isMutating)
+                            const Positioned.fill(
+                              child: ColoredBox(
+                                color: Color(0x33FFFFFF),
+                                child: Center(
+                                  child: CircularProgressIndicator(
+                                    color: AppColors.darkGreen,
+                                  ),
+                                ),
+                              ),
+                            ),
                         ],
                       ),
                     ),
@@ -222,7 +311,9 @@ class CartPage extends StatelessWidget {
                           ),
                           const SizedBox(height: 16),
                           GestureDetector(
-                            onTap: () => context.push('/customer/checkout'),
+                            onTap: isMutating
+                                ? null
+                                : () => context.push('/customer/checkout'),
                             child: Container(
                               height: 56,
                               decoration: BoxDecoration(
