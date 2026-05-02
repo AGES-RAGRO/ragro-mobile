@@ -5,6 +5,7 @@ import 'package:ragro_mobile/core/theme/app_colors.dart';
 import 'package:ragro_mobile/features/cart/domain/entities/cart_item.dart';
 import 'package:ragro_mobile/features/cart/presentation/bloc/cart_bloc.dart';
 import 'package:ragro_mobile/features/cart/presentation/bloc/cart_event.dart';
+import 'package:ragro_mobile/shared/utils/unity_type_label.dart';
 
 class CartItemTile extends StatelessWidget {
   const CartItemTile({
@@ -127,7 +128,8 @@ class CartItemTile extends StatelessWidget {
                   Text(
                     item.unityType.isEmpty
                         ? _formatPrice(item.unitPrice)
-                        : '${_formatPrice(item.unitPrice)} / ${item.unityType}',
+                        : '${_formatPrice(item.unitPrice)} / '
+                              '${localizeUnityType(item.unityType)}',
                     style: const TextStyle(
                       fontFamily: 'Manrope',
                       fontSize: 12,
