@@ -13,6 +13,7 @@ import 'package:ragro_mobile/features/orders/presentation/bloc/order_detail_even
 import 'package:ragro_mobile/features/orders/presentation/bloc/order_detail_state.dart';
 import 'package:ragro_mobile/features/orders/presentation/widgets/order_item_row.dart';
 import 'package:ragro_mobile/features/orders/presentation/widgets/order_status_badge.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class OrderDetailPage extends StatelessWidget {
   const OrderDetailPage({required this.orderId, super.key});
@@ -21,6 +22,42 @@ class OrderDetailPage extends StatelessWidget {
 
   String _formatPrice(double price) =>
       'R\$ ${price.toStringAsFixed(2).replaceAll('.', ',')}';
+
+  Future<void> _openWhatsApp(BuildContext context, String phoneNumber) async {
+    try {
+      final cleanPhone = phoneNumber.replaceAll(RegExp(r'[^\d+]'), '');
+      final formattedPhone = cleanPhone.startsWith('+')
+          ? cleanPhone.replaceFirst('+', '')
+          : cleanPhone;
+      final whatsappUrl = 'https://wa.me/$formattedPhone';
+
+      if (await canLaunchUrl(Uri.parse(whatsappUrl))) {
+        await launchUrl(
+          Uri.parse(whatsappUrl),
+          mode: LaunchMode.externalApplication,
+        );
+      } else {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Não foi possível abrir o WhatsApp'),
+              duration: Duration(seconds: 2),
+            ),
+          );
+        }
+      }
+    } on Object catch (e) {
+      debugPrint('Erro ao abrir WhatsApp: $e');
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Erro: $e'),
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -279,14 +316,7 @@ class OrderDetailPage extends StatelessWidget {
                     right: 27,
                     bottom: 16,
                     child: GestureDetector(
-                      onTap: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Abrindo WhatsApp...'),
-                            backgroundColor: Color(0xFF25D366),
-                          ),
-                        );
-                      },
+                      onTap: () => _openWhatsApp(context, order.producerPhone),
                       child: Container(
                         height: 52,
                         decoration: BoxDecoration(

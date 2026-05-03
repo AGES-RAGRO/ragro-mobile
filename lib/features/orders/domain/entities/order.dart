@@ -45,6 +45,7 @@ class Order extends Equatable {
   const Order({
     required this.id,
     required this.producerId,
+    required this.producerPhone,
     required this.farmName,
     required this.farmAvatarUrl,
     required this.ownerName,
@@ -58,6 +59,7 @@ class Order extends Equatable {
 
   final String id;
   final String producerId;
+  final String producerPhone;
   final String farmName;
   final String farmAvatarUrl;
   final String ownerName;
@@ -81,6 +83,7 @@ class Order extends Equatable {
   List<Object?> get props => [
     id,
     producerId,
+    producerPhone,
     farmName,
     farmAvatarUrl,
     ownerName,

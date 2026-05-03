@@ -9,6 +9,7 @@ class OrdersRemoteDatasource {
     Order(
       id: '4829',
       producerId: 'p1',
+      producerPhone: '+5511998765432',
       farmName: 'Fazenda Sol Nascente',
       farmAvatarUrl: '',
       ownerName: 'Manoel Silva',
@@ -66,6 +67,7 @@ class OrdersRemoteDatasource {
     Order(
       id: '4828',
       producerId: 'p1',
+      producerPhone: '+5511998765432',
       farmName: 'Fazenda Sol Nascente',
       farmAvatarUrl: '',
       ownerName: 'Manoel Silva',
@@ -115,6 +117,7 @@ class OrdersRemoteDatasource {
     Order(
       id: '4827',
       producerId: 'p1',
+      producerPhone: '+5511998765432',
       farmName: 'Fazenda Sol Nascente',
       farmAvatarUrl: '',
       ownerName: 'Manoel Silva',
@@ -156,6 +159,7 @@ class OrdersRemoteDatasource {
     Order(
       id: '4826',
       producerId: 'p1',
+      producerPhone: '+5511998765432',
       farmName: 'Fazenda Sol Nascente',
       farmAvatarUrl: '',
       ownerName: 'Manoel Silva',

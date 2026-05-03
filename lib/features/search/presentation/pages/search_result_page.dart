@@ -3,6 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:ragro_mobile/core/di/injection.dart';
 import 'package:ragro_mobile/core/theme/app_colors.dart';
+import 'package:ragro_mobile/features/cart/presentation/bloc/cart_bloc.dart';
+import 'package:ragro_mobile/features/cart/presentation/bloc/cart_event.dart';
 import 'package:ragro_mobile/features/search/domain/entities/search_result.dart';
 import 'package:ragro_mobile/features/search/presentation/bloc/search_bloc.dart';
 import 'package:ragro_mobile/features/search/presentation/bloc/search_event.dart';
@@ -249,6 +251,9 @@ class _SearchResultsViewState extends State<_SearchResultsView> {
             (result) => SearchResultTile(
               result: result,
               onTap: () => _onResultTap(result),
+              onAddToCart: result.type == SearchResultType.product
+                  ? () => _onAddToCart(result)
+                  : null,
             ),
           ),
         ],
@@ -286,17 +291,57 @@ class _SearchResultsViewState extends State<_SearchResultsView> {
       itemBuilder: (_, i) => SearchResultTile(
         result: items[i],
         onTap: () => _onResultTap(items[i]),
+        onAddToCart: items[i].type == SearchResultType.product
+            ? () => _onAddToCart(items[i])
+            : null,
       ),
     );
   }
 
   void _onResultTap(SearchResult result) {
     if (result.type == SearchResultType.product) {
-      context.push('/customer/home/product/${result.id}');
+      final producerId = _resolveProducerId(result);
+      if (producerId == null) {
+        _showNavigationError(
+          'Nao foi possivel abrir este produto. Tente novamente em instantes.',
+        );
+        return;
+      }
+
+      context.push(
+        '/customer/home/product/${result.id}',
+        extra: producerId,
+      );
       return;
     }
 
-    context.push('/customer/home/producer/${result.id}');
+    final producerId = _resolveProducerId(result) ?? result.id;
+    context.push('/customer/home/producer/$producerId');
+  }
+
+  void _onAddToCart(SearchResult result) {
+    if (result.type != SearchResultType.product) return;
+    getIt<CartBloc>().add(CartItemAdded(productId: result.id, quantity: 1));
+    context.push('/customer/cart');
+  }
+
+  String? _resolveProducerId(SearchResult result) {
+    final producerId = result.producerId?.trim();
+    if (producerId == null || producerId.isEmpty) {
+      return null;
+    }
+    return producerId;
+  }
+
+  void _showNavigationError(String message) {
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: Text(message),
+          backgroundColor: AppColors.darkGreen,
+        ),
+      );
   }
 
   List<SearchResult> _applySorts(List<SearchResult> source) {
