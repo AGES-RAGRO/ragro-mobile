@@ -66,8 +66,8 @@ import 'package:ragro_mobile/features/auth/presentation/bloc/login_bloc.dart'
     as _i713;
 import 'package:ragro_mobile/features/auth/presentation/bloc/register_bloc.dart'
     as _i192;
-import 'package:ragro_mobile/features/cart/data/datasources/cart_local_datasource.dart'
-    as _i488;
+import 'package:ragro_mobile/features/cart/data/datasources/cart_remote_datasource.dart'
+    as _i58;
 import 'package:ragro_mobile/features/cart/data/repositories/cart_repository_impl.dart'
     as _i939;
 import 'package:ragro_mobile/features/cart/domain/repositories/cart_repository.dart'
@@ -238,9 +238,6 @@ extension GetItInjectableX on _i174.GetIt {
       preResolve: true,
     );
     gh.lazySingleton<_i361.Dio>(() => networkModule.dio);
-    gh.lazySingleton<_i488.CartLocalDatasource>(
-      () => _i488.CartLocalDatasource(),
-    );
     gh.lazySingleton<_i870.InventoryRemoteDataSource>(
       () => _i870.InventoryRemoteDataSource(),
     );
@@ -258,9 +255,6 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i165.OrdersRepository>(
       () => _i962.OrdersRepositoryImpl(gh<_i384.OrdersRemoteDatasource>()),
-    );
-    gh.lazySingleton<_i830.CartRepository>(
-      () => _i939.CartRepositoryImpl(gh<_i488.CartLocalDatasource>()),
     );
     gh.lazySingleton<_i276.InventoryRepository>(
       () =>
@@ -332,21 +326,6 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i1.ProducerOrdersBloc>(
       () => _i1.ProducerOrdersBloc(gh<_i935.GetProducerOrders>()),
     );
-    gh.lazySingleton<_i70.AddToCart>(
-      () => _i70.AddToCart(gh<_i830.CartRepository>()),
-    );
-    gh.lazySingleton<_i992.ClearCart>(
-      () => _i992.ClearCart(gh<_i830.CartRepository>()),
-    );
-    gh.lazySingleton<_i535.GetCart>(
-      () => _i535.GetCart(gh<_i830.CartRepository>()),
-    );
-    gh.lazySingleton<_i808.RemoveFromCart>(
-      () => _i808.RemoveFromCart(gh<_i830.CartRepository>()),
-    );
-    gh.lazySingleton<_i456.UpdateCartItemQuantity>(
-      () => _i456.UpdateCartItemQuantity(gh<_i830.CartRepository>()),
-    );
     gh.factory<_i432.RateProducerBloc>(
       () => _i432.RateProducerBloc(gh<_i907.RateProducer>()),
     );
@@ -374,6 +353,9 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i201.AuthRemoteDataSource>(
       () => _i201.AuthRemoteDataSource(gh<_i873.ApiClient>()),
+    );
+    gh.lazySingleton<_i58.CartRemoteDataSource>(
+      () => _i58.CartRemoteDataSource(gh<_i873.ApiClient>()),
     );
     gh.lazySingleton<_i666.CustomerProfileRemoteDataSource>(
       () => _i666.CustomerProfileRemoteDataSource(gh<_i873.ApiClient>()),
@@ -413,6 +395,9 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i873.ApiClient>(),
       ),
     );
+    gh.lazySingleton<_i830.CartRepository>(
+      () => _i939.CartRepositoryImpl(gh<_i58.CartRemoteDataSource>()),
+    );
     gh.lazySingleton<_i38.SearchRepository>(
       () => _i563.SearchRepositoryImpl(gh<_i987.SearchRemoteDataSource>()),
     );
@@ -449,20 +434,26 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i759.AdminRepository>(
       () => _i780.AdminRepositoryImpl(gh<_i16.AdminRemoteDataSource>()),
     );
-    gh.lazySingleton<_i841.CartBloc>(
-      () => _i841.CartBloc(
-        gh<_i535.GetCart>(),
-        gh<_i70.AddToCart>(),
-        gh<_i456.UpdateCartItemQuantity>(),
-        gh<_i808.RemoveFromCart>(),
-        gh<_i992.ClearCart>(),
-      ),
-    );
     gh.factory<_i192.RegisterBloc>(
       () => _i192.RegisterBloc(gh<_i948.RegisterCustomer>()),
     );
     gh.lazySingleton<_i894.SearchProducersAndProducts>(
       () => _i894.SearchProducersAndProducts(gh<_i38.SearchRepository>()),
+    );
+    gh.lazySingleton<_i70.AddToCart>(
+      () => _i70.AddToCart(gh<_i830.CartRepository>()),
+    );
+    gh.lazySingleton<_i992.ClearCart>(
+      () => _i992.ClearCart(gh<_i830.CartRepository>()),
+    );
+    gh.lazySingleton<_i535.GetCart>(
+      () => _i535.GetCart(gh<_i830.CartRepository>()),
+    );
+    gh.lazySingleton<_i808.RemoveFromCart>(
+      () => _i808.RemoveFromCart(gh<_i830.CartRepository>()),
+    );
+    gh.lazySingleton<_i456.UpdateCartItemQuantity>(
+      () => _i456.UpdateCartItemQuantity(gh<_i830.CartRepository>()),
     );
     gh.lazySingleton<_i671.ActivateAdminProducer>(
       () => _i671.ActivateAdminProducer(gh<_i759.AdminRepository>()),
@@ -553,6 +544,15 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i846.AdminProducerFormBloc>(
       () => _i846.AdminProducerFormBloc(gh<_i321.CreateAdminProducer>()),
+    );
+    gh.lazySingleton<_i841.CartBloc>(
+      () => _i841.CartBloc(
+        gh<_i535.GetCart>(),
+        gh<_i70.AddToCart>(),
+        gh<_i456.UpdateCartItemQuantity>(),
+        gh<_i808.RemoveFromCart>(),
+        gh<_i992.ClearCart>(),
+      ),
     );
     gh.factory<_i526.CustomerProfileBloc>(
       () => _i526.CustomerProfileBloc(

@@ -9,6 +9,7 @@ class SearchResult extends Equatable {
     required this.name,
     required this.subtitle,
     required this.imageUrl,
+    this.producerId,
     this.price,
     this.rating,
     this.reviewCount,
@@ -22,6 +23,7 @@ class SearchResult extends Equatable {
   final String name;
   final String subtitle;
   final String imageUrl;
+  final String? producerId;
   final double? price;
   final double? rating;
   final int? reviewCount;
@@ -36,6 +38,7 @@ class SearchResult extends Equatable {
     name,
     subtitle,
     imageUrl,
+    producerId,
     price,
     rating,
     reviewCount,
