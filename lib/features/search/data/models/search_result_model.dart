@@ -18,9 +18,21 @@ class SearchResultModel extends SearchResult {
 
   factory SearchResultModel.fromJson(Map<String, dynamic> json) {
     final type = _parseType(json['type'] as String?);
+    final id = switch (type) {
+      SearchResultType.product =>
+        json['productId'] as String? ??
+            json['product_id'] as String? ??
+            json['id'] as String? ??
+            '',
+      SearchResultType.producer =>
+        json['producerId'] as String? ??
+            json['producer_id'] as String? ??
+            json['id'] as String? ??
+            '',
+    };
 
     return SearchResultModel(
-      id: json['id'] as String,
+      id: id,
       type: type,
       name: json['name'] as String? ?? '',
       subtitle: json['subtitle'] as String? ?? '',

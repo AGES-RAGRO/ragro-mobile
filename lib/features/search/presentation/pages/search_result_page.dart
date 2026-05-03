@@ -300,20 +300,48 @@ class _SearchResultsViewState extends State<_SearchResultsView> {
 
   void _onResultTap(SearchResult result) {
     if (result.type == SearchResultType.product) {
+      final producerId = _resolveProducerId(result);
+      if (producerId == null) {
+        _showNavigationError(
+          'Nao foi possivel abrir este produto. Tente novamente em instantes.',
+        );
+        return;
+      }
+
       context.push(
         '/customer/home/product/${result.id}',
-        extra: result.producerId ?? '',
+        extra: producerId,
       );
       return;
     }
 
-    context.push('/customer/home/producer/${result.id}');
+    final producerId = _resolveProducerId(result) ?? result.id;
+    context.push('/customer/home/producer/$producerId');
   }
 
   void _onAddToCart(SearchResult result) {
     if (result.type != SearchResultType.product) return;
     getIt<CartBloc>().add(CartItemAdded(productId: result.id, quantity: 1));
     context.push('/customer/cart');
+  }
+
+  String? _resolveProducerId(SearchResult result) {
+    final producerId = result.producerId?.trim();
+    if (producerId == null || producerId.isEmpty) {
+      return null;
+    }
+    return producerId;
+  }
+
+  void _showNavigationError(String message) {
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: Text(message),
+          backgroundColor: AppColors.darkGreen,
+        ),
+      );
   }
 
   List<SearchResult> _applySorts(List<SearchResult> source) {

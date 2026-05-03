@@ -16,9 +16,10 @@ class ProductDetailRemoteDataSource {
     String producerId = '',
   }) async {
     try {
-      final response = await _apiClient.dio.get<Map<String, dynamic>>(
-        ApiEndpoints.producerProduct(producerId, productId),
-      );
+      final endpoint = producerId.isNotEmpty
+          ? ApiEndpoints.producerProduct(producerId, productId)
+          : ApiEndpoints.product(productId);
+      final response = await _apiClient.dio.get<Map<String, dynamic>>(endpoint);
       return ProductDetailModel.fromJson(response.data!);
     } on DioException catch (e) {
       throw e.error as ApiException? ?? const UnknownApiException();
