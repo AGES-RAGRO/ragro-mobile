@@ -8,6 +8,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:ragro_mobile/core/di/injection.dart';
 import 'package:ragro_mobile/core/theme/app_colors.dart';
+import 'package:ragro_mobile/features/cart/presentation/bloc/cart_bloc.dart';
+import 'package:ragro_mobile/features/cart/presentation/bloc/cart_event.dart';
 import 'package:ragro_mobile/features/home/presentation/widgets/home_product_card.dart';
 import 'package:ragro_mobile/features/producer_profile/presentation/bloc/producer_profile_bloc.dart';
 import 'package:ragro_mobile/features/producer_profile/presentation/bloc/producer_profile_event.dart';
@@ -89,9 +91,7 @@ class _ProducerPublicProfileView extends StatelessWidget {
                               right: 0,
                               child: SizedBox(
                                 height: 160,
-                                child: _CoverPhoto(
-                                  coverUrl: producer.coverUrl,
-                                ),
+                                child: _CoverPhoto(coverUrl: producer.coverUrl),
                               ),
                             ),
                             Positioned(
@@ -262,14 +262,26 @@ class _ProducerPublicProfileView extends StatelessWidget {
                                     ),
                                 itemCount:
                                     (producer.products ?? const []).length,
-                                itemBuilder: (_, i) => HomeProductCard(
-                                  product: (producer.products ?? const [])[i],
-                                  onTap: () => context.push(
-                                    '/customer/home/product/${(producer.products ?? const [])[i].id}',
-                                    extra: producer.id,
-                                  ),
-                                  onAddToCart: () {},
-                                ),
+                                itemBuilder: (_, i) {
+                                  final product =
+                                      (producer.products ?? const [])[i];
+                                  return HomeProductCard(
+                                    product: product,
+                                    onTap: () => context.push(
+                                      '/customer/home/product/${product.id}',
+                                      extra: producer.id,
+                                    ),
+                                    onAddToCart: () {
+                                      getIt<CartBloc>().add(
+                                        CartItemAdded(
+                                          productId: product.id,
+                                          quantity: 1,
+                                        ),
+                                      );
+                                      context.push('/customer/cart');
+                                    },
+                                  );
+                                },
                               ),
                             const SizedBox(height: 40),
                             // Reviews section header

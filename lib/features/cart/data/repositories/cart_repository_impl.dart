@@ -1,27 +1,31 @@
 import 'package:injectable/injectable.dart';
-import 'package:ragro_mobile/features/cart/data/datasources/cart_local_datasource.dart';
+import 'package:ragro_mobile/features/cart/data/datasources/cart_remote_datasource.dart';
 import 'package:ragro_mobile/features/cart/domain/entities/cart.dart';
-import 'package:ragro_mobile/features/cart/domain/entities/cart_item.dart';
 import 'package:ragro_mobile/features/cart/domain/repositories/cart_repository.dart';
 
 @LazySingleton(as: CartRepository)
 class CartRepositoryImpl implements CartRepository {
-  const CartRepositoryImpl(this._datasource);
-  final CartLocalDatasource _datasource;
+  const CartRepositoryImpl(this._dataSource);
+
+  final CartRemoteDataSource _dataSource;
 
   @override
-  Cart getCart() => _datasource.getCart();
+  Future<Cart> getCart() => _dataSource.getCart();
 
   @override
-  Cart addItem(CartItem item) => _datasource.addItem(item);
+  Future<Cart> addItem({required String productId, required double quantity}) =>
+      _dataSource.addItem(productId: productId, quantity: quantity);
 
   @override
-  Cart updateQuantity(String productId, int quantity) =>
-      _datasource.updateQuantity(productId, quantity);
+  Future<Cart> updateQuantity({
+    required String cartItemId,
+    required double quantity,
+  }) => _dataSource.updateQuantity(cartItemId: cartItemId, quantity: quantity);
 
   @override
-  Cart removeItem(String productId) => _datasource.removeItem(productId);
+  Future<Cart> removeItem(String cartItemId) =>
+      _dataSource.removeItem(cartItemId);
 
   @override
-  Cart clear() => _datasource.clear();
+  Future<Cart> clear() => _dataSource.clear();
 }
