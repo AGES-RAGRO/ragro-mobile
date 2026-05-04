@@ -130,12 +130,8 @@ class _CustomerRegisterViewState extends State<_CustomerRegisterView> {
         number: _numberController.text.trim(),
         city: _cityController.text.trim(),
         state: _selectedState!,
-        complement: _complementController.text.trim().isEmpty
-            ? null
-            : _complementController.text.trim(),
-        neighborhood: _neighborhoodController.text.trim().isEmpty
-            ? null
-            : _neighborhoodController.text.trim(),
+        complement: _complementController.text.trim(),
+        neighborhood: _neighborhoodController.text.trim(),
       ),
     );
   }
@@ -301,15 +297,27 @@ class _CustomerRegisterViewState extends State<_CustomerRegisterView> {
                 ),
                 const SizedBox(height: 16),
                 AuthTextField(
-                  label: 'Complemento (opcional)',
+                  label: 'Complemento',
                   icon: Icons.apartment_outlined,
                   controller: _complementController,
+                  validator: (v) {
+                    if (v == null || v.trim().isEmpty) {
+                      return 'Informe o complemento';
+                    }
+                    return null;
+                  },
                 ),
                 const SizedBox(height: 16),
                 AuthTextField(
-                  label: 'Bairro (opcional)',
+                  label: 'Bairro',
                   icon: Icons.signpost_outlined,
                   controller: _neighborhoodController,
+                  validator: (v) {
+                    if (v == null || v.trim().isEmpty) {
+                      return 'Informe o bairro';
+                    }
+                    return null;
+                  },
                 ),
                 const SizedBox(height: 16),
                 Row(
