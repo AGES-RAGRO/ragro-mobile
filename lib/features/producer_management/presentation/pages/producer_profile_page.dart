@@ -136,6 +136,9 @@ class _ProducerProfileView extends StatelessWidget {
                             backgroundImage: dashboard.avatarUrl.isNotEmpty
                                 ? NetworkImage(dashboard.avatarUrl)
                                 : null,
+                            onBackgroundImageError: dashboard.avatarUrl.isNotEmpty
+                                ? (_, __) {}
+                                : null,
                             child: dashboard.avatarUrl.isEmpty
                                 ? Text(
                                     dashboard.producerName.isNotEmpty

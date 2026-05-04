@@ -49,12 +49,10 @@ class ProducerManagementRemoteDataSource {
       return ProducerDashboard(
         producerName: (data['name'] as String? ?? '').trim(),
         producerTitle: farmName.isNotEmpty ? farmName : 'Produtor',
-        avatarUrl:
-            data['avatarS3'] as String? ?? data['avatar_s3'] as String? ?? '',
-        coverUrl:
-            data['displayPhotoS3'] as String? ??
-            data['display_photo_s3'] as String? ??
-            '',
+        avatarUrl: ApiEndpoints.resolveMediaUrl(
+            data['avatarS3'] as String? ?? data['avatar_s3'] as String? ?? ''),
+        coverUrl: ApiEndpoints.resolveMediaUrl(
+            data['displayPhotoS3'] as String? ?? data['display_photo_s3'] as String? ?? ''),
         totalSales: 0,
         salesGrowthPercent: 0,
         totalOrders: (data['totalOrders'] as num?)?.toInt() ?? 0,

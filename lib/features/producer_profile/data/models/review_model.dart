@@ -1,3 +1,4 @@
+import 'package:ragro_mobile/core/network/api_endpoints.dart';
 import 'package:ragro_mobile/features/producer_profile/domain/entities/review.dart';
 
 class ReviewModel extends Review {
@@ -25,9 +26,11 @@ class ReviewModel extends Review {
       createdAt: createdAtRaw != null
           ? DateTime.parse(createdAtRaw)
           : DateTime.now(),
-      authorAvatarUrl:
-          json['authorAvatarUrl'] as String? ??
-          json['author_avatar_url'] as String?,
+      authorAvatarUrl: () {
+        final raw = json['authorAvatarUrl'] as String? ?? json['author_avatar_url'] as String?;
+        if (raw == null || raw.isEmpty) return null;
+        return ApiEndpoints.resolveMediaUrl(raw);
+      }(),
     );
   }
 

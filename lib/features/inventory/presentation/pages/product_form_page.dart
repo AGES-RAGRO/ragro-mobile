@@ -3,10 +3,13 @@
 // Epic: EPIC 4 — Producer Features
 // Routes: POST /products | PUT /products/:id
 
+import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:ragro_mobile/core/di/injection.dart';
 import 'package:ragro_mobile/core/formatters/input_masks.dart';
@@ -43,11 +46,15 @@ class _ProductFormViewState extends State<_ProductFormView> {
   final _nameController = TextEditingController();
   final _descriptionController = TextEditingController();
   final _priceController = TextEditingController();
-  String _selectedUnit = 'kg';
-  int _stockCount = 0;
+  String _selectedUnit = 'un';
+  double _stockCount = 0;
   bool _initialized = false;
+  XFile? _pickedPhoto;
+  String? _existingImageUrl;
+  List<int> _selectedCategoryIds = [];
+  List<Map<String, dynamic>> _availableCategories = [];
 
-  static const _units = ['kg', 'un', 'maço', 'pacote'];
+  static const _units = ['kg', 'g', 'un', 'maço', 'pacote', 'box', 'liter', 'ml', 'dozen'];
 
   @override
   void dispose() {
@@ -71,6 +78,45 @@ class _ProductFormViewState extends State<_ProductFormView> {
       _priceController.text = format.format(state.product!.price).trim();
       _selectedUnit = state.product!.unit;
       _stockCount = state.product!.stock;
+      _existingImageUrl = state.product!.imageUrl;
+      _selectedCategoryIds = List.of(state.product!.categoryIds);
+    }
+    _availableCategories = state.availableCategories;
+  }
+
+  Future<void> _pickImage() async {
+    final picker = ImagePicker();
+    final source = await showModalBottomSheet<ImageSource>(
+      context: context,
+      builder: (context) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.camera_alt),
+              title: const Text('Câmera'),
+              onTap: () => Navigator.pop(context, ImageSource.camera),
+            ),
+            ListTile(
+              leading: const Icon(Icons.photo_library),
+              title: const Text('Galeria'),
+              onTap: () => Navigator.pop(context, ImageSource.gallery),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    if (source != null) {
+      final file = await picker.pickImage(
+        source: source,
+        maxWidth: 1024,
+        maxHeight: 1024,
+        imageQuality: 85,
+      );
+      if (file != null) {
+        setState(() => _pickedPhoto = file);
+      }
     }
   }
 
@@ -98,6 +144,8 @@ class _ProductFormViewState extends State<_ProductFormView> {
         price: price,
         unit: _selectedUnit,
         stock: _stockCount,
+        categoryIds: _selectedCategoryIds,
+        photo: _pickedPhoto,
       ),
     );
   }
@@ -166,21 +214,52 @@ class _ProductFormViewState extends State<_ProductFormView> {
                   child: Stack(
                     alignment: Alignment.center,
                     children: [
-                      const Icon(
-                        Icons.eco_outlined,
-                        size: 64,
-                        color: AppColors.darkGreen,
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(16),
+                        child: _pickedPhoto != null
+                            ? Image(
+                                image: kIsWeb
+                                    ? NetworkImage(_pickedPhoto!.path)
+                                    : FileImage(File(_pickedPhoto!.path))
+                                        as ImageProvider,
+                                width: double.infinity,
+                                height: 210,
+                                fit: BoxFit.cover,
+                                errorBuilder: (_, __, ___) => const Center(
+                                  child: Icon(
+                                    Icons.eco_outlined,
+                                    size: 64,
+                                    color: AppColors.darkGreen,
+                                  ),
+                                ),
+                              )
+                            : (_existingImageUrl != null &&
+                                    _existingImageUrl!.isNotEmpty)
+                                ? Image.network(
+                                    _existingImageUrl!,
+                                    width: double.infinity,
+                                    height: 210,
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (_, __, ___) => const Center(
+                                      child: Icon(
+                                        Icons.eco_outlined,
+                                        size: 64,
+                                        color: AppColors.darkGreen,
+                                      ),
+                                    ),
+                                  )
+                                : const Center(
+                                    child: Icon(
+                                      Icons.eco_outlined,
+                                      size: 64,
+                                      color: AppColors.darkGreen,
+                                    ),
+                                  ),
                       ),
                       Positioned(
                         bottom: 12,
                         child: GestureDetector(
-                          onTap: () {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Seleção de imagem em breve...'),
-                              ),
-                            );
-                          },
+                          onTap: isLoading ? null : _pickImage,
                           child: Container(
                             padding: const EdgeInsets.symmetric(
                               horizontal: 16,
@@ -189,6 +268,13 @@ class _ProductFormViewState extends State<_ProductFormView> {
                             decoration: BoxDecoration(
                               color: AppColors.darkGreen,
                               borderRadius: BorderRadius.circular(24),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withValues(alpha: 0.2),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
                             ),
                             child: const Row(
                               children: [
@@ -324,6 +410,57 @@ class _ProductFormViewState extends State<_ProductFormView> {
                       : (val) => setState(() => _stockCount = val),
                 ),
 
+                if (_availableCategories.isNotEmpty) ...[
+                  const SizedBox(height: 16),
+                  const _FieldLabel('Categorias'),
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 4,
+                    children: _availableCategories.map((cat) {
+                      final id = cat['id'] as int;
+                      final name = (cat['name'] as String?) ?? '';
+                      final selected = _selectedCategoryIds.contains(id);
+                      return FilterChip(
+                        label: Text(
+                          name,
+                          style: TextStyle(
+                            fontFamily: 'Manrope',
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                            color: selected ? AppColors.white : AppColors.darkGreen,
+                          ),
+                        ),
+                        selected: selected,
+                        onSelected: isLoading
+                            ? null
+                            : (checked) {
+                                setState(() {
+                                  if (checked) {
+                                    _selectedCategoryIds.add(id);
+                                  } else {
+                                    _selectedCategoryIds.remove(id);
+                                  }
+                                });
+                              },
+                        selectedColor: AppColors.darkGreen,
+                        backgroundColor: AppColors.darkGreen.withValues(alpha: 0.08),
+                        checkmarkColor: AppColors.white,
+                        side: BorderSide(
+                          color: selected
+                              ? AppColors.darkGreen
+                              : AppColors.darkGreen.withValues(alpha: 0.4),
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        showCheckmark: false,
+                        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                      );
+                    }).toList(),
+                  ),
+                ],
+
                 const SizedBox(height: 32),
 
                 // Save button
@@ -453,8 +590,8 @@ class _TextField extends StatelessWidget {
 class _StockStepper extends StatelessWidget {
   const _StockStepper({required this.value, required this.onChanged});
 
-  final int value;
-  final ValueChanged<int>? onChanged;
+  final double value;
+  final ValueChanged<double>? onChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -483,7 +620,9 @@ class _StockStepper extends StatelessWidget {
           Expanded(
             child: Center(
               child: Text(
-                '$value',
+                value % 1 == 0
+                    ? value.toInt().toString()
+                    : value.toStringAsFixed(2),
                 style: const TextStyle(
                   fontFamily: 'Figtree',
                   fontWeight: FontWeight.w700,
