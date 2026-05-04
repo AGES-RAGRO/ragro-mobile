@@ -16,6 +16,7 @@ import 'package:ragro_mobile/core/di/network_module.dart' as _i1002;
 import 'package:ragro_mobile/core/di/shared_preferences_module.dart' as _i55;
 import 'package:ragro_mobile/core/network/api_client.dart' as _i873;
 import 'package:ragro_mobile/core/router/app_router.dart' as _i419;
+import 'package:ragro_mobile/core/services/cep_service.dart' as _i305;
 import 'package:ragro_mobile/features/admin/data/datasources/admin_remote_datasource.dart'
     as _i16;
 import 'package:ragro_mobile/features/admin/data/repositories/admin_repository_impl.dart'
@@ -238,6 +239,7 @@ extension GetItInjectableX on _i174.GetIt {
       preResolve: true,
     );
     gh.lazySingleton<_i361.Dio>(() => networkModule.dio);
+    gh.lazySingleton<_i305.CepService>(() => _i305.CepService());
     gh.lazySingleton<_i870.InventoryRemoteDataSource>(
       () => _i870.InventoryRemoteDataSource(),
     );

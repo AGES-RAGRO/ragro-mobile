@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:ragro_mobile/core/di/injection.dart';
+import 'package:ragro_mobile/core/services/cep_service.dart';
 import 'package:ragro_mobile/core/theme/app_colors.dart';
 import 'package:ragro_mobile/features/customer_profile/presentation/bloc/customer_profile_bloc.dart';
 import 'package:ragro_mobile/features/customer_profile/presentation/bloc/customer_profile_event.dart';
@@ -42,6 +44,7 @@ class _CustomerEditProfilePageState extends State<CustomerEditProfilePage> {
     _neighborhoodController = TextEditingController();
     _cityController = TextEditingController();
     _stateController = TextEditingController();
+    _zipCodeController.addListener(_onZipCodeChanged);
 
     _hydrateControllers(context.read<CustomerProfileBloc>().state);
   }
@@ -404,6 +407,25 @@ class _CustomerEditProfilePageState extends State<CustomerEditProfilePage> {
         ),
       ],
     );
+  }
+
+  void _onZipCodeChanged() {
+    final cep = _zipCodeController.text.replaceAll(RegExp(r'\D'), '');
+    if (cep.length == 8) {
+      _lookupZipCode(cep);
+    }
+  }
+
+  Future<void> _lookupZipCode(String cep) async {
+    final address = await getIt<CepService>().fetchAddress(cep);
+    if (address != null && mounted) {
+      setState(() {
+        _streetController.text = address.street;
+        _neighborhoodController.text = address.neighborhood;
+        _cityController.text = address.city;
+        _stateController.text = address.state;
+      });
+    }
   }
 
   String? _requiredValidator(String? value) {
