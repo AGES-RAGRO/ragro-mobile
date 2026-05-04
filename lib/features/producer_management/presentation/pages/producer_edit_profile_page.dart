@@ -70,7 +70,7 @@ class ProducerEditProfilePage extends StatelessWidget {
     }
     return BlocProvider<ProducerProfileBloc>(
       create: (_) =>
-          getIt<ProducerProfileBloc>()..add(ProducerProfileStarted(producerId)),
+          getIt<ProducerProfileBloc>()..add(ProducerProfileStarted(producerId, isOwnerView: true)),
       child: _ProducerEditProfileView(producerId: producerId),
     );
   }

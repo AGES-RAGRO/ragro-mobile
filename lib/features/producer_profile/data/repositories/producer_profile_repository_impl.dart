@@ -16,6 +16,10 @@ class ProducerProfileRepositoryImpl implements ProducerProfileRepository {
       _dataSource.getProducer(producerId);
 
   @override
+  Future<PublicProducer> getOwnProfile(String producerId) =>
+      _dataSource.getOwnProfile(producerId);
+
+  @override
   Future<void> updateProducer({
     required String producerId,
     required String name,

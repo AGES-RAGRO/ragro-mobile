@@ -17,6 +17,7 @@ class PublicProducerModel extends PublicProducer {
     required super.memberSince,
     super.photoUrl,
     super.producerAddress,
+    super.paymentMethods,
     super.products,
   });
 
@@ -59,6 +60,7 @@ class PublicProducerModel extends PublicProducer {
           : DateTime(2016),
       photoUrl: json['photoUrl'] as String?,
       producerAddress: producerAddress,
+      paymentMethods: _parsePaymentMethods(json['paymentMethods']),
       products: const [],
     );
   }
@@ -85,6 +87,25 @@ class PublicProducerModel extends PublicProducer {
         weekday: slot['weekday'] as int,
         opensAt: slot['opensAt'] as String? ?? '',
         closesAt: slot['closesAt'] as String? ?? '',
+      );
+    }).toList();
+  }
+
+  static List<ProducerPaymentMethod>? _parsePaymentMethods(dynamic raw) {
+    if (raw is! List) return null;
+    return raw.map((p) {
+      final pm = p as Map<String, dynamic>;
+      return ProducerPaymentMethod(
+        type: pm['type'] as String? ?? '',
+        pixKeyType: pm['pixKeyType'] as String?,
+        pixKey: pm['pixKey'] as String?,
+        bankCode: pm['bankCode'] as String?,
+        bankName: pm['bankName'] as String?,
+        agency: pm['agency'] as String?,
+        accountNumber: pm['accountNumber'] as String?,
+        accountType: pm['accountType'] as String?,
+        holderName: pm['holderName'] as String?,
+        fiscalNumber: pm['fiscalNumber'] as String?,
       );
     }).toList();
   }
