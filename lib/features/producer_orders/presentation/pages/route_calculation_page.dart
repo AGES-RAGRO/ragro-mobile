@@ -1,262 +1,408 @@
 // Screen: Cálculo de Rota
 // User Story: US-33 / US-34 — View Today's Deliveries / View Delivery Route
 // Epic: EPIC 9 — Logistics and Routing
-// Routes: GET /orders/today (delivery route based on today's in-delivery orders)
-// TODO(dev): Integrate Google Maps SDK for real route visualization
+
+import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:maplibre_gl/maplibre_gl.dart';
+import 'package:ragro_mobile/core/di/injection.dart';
 import 'package:ragro_mobile/core/theme/app_colors.dart';
+import 'package:ragro_mobile/features/producer_orders/domain/entities/delivery_route.dart';
+import 'package:ragro_mobile/features/producer_orders/presentation/bloc/route_bloc.dart';
+import 'package:ragro_mobile/features/producer_orders/presentation/bloc/route_event.dart';
+import 'package:ragro_mobile/features/producer_orders/presentation/bloc/route_state.dart';
+import 'package:url_launcher/url_launcher.dart';
+
+// Configure via --dart-define=MAPTILER_KEY=your_key_here
+const _mapTilerKey = String.fromEnvironment(
+  'MAPTILER_KEY',
+  defaultValue: 'YOUR_MAPTILER_KEY',
+);
+const _mapStyleUrl =
+    'https://api.maptiler.com/maps/streets-v2/style.json?key=$_mapTilerKey';
 
 class RouteCalculationPage extends StatelessWidget {
   const RouteCalculationPage({super.key});
 
   @override
   Widget build(BuildContext context) {
+    return BlocProvider(
+      create: (_) => getIt<RouteBloc>()..add(const RouteLoadStarted()),
+      child: const _RouteCalculationView(),
+    );
+  }
+}
+
+class _RouteCalculationView extends StatefulWidget {
+  const _RouteCalculationView();
+
+  @override
+  State<_RouteCalculationView> createState() => _RouteCalculationViewState();
+}
+
+class _RouteCalculationViewState extends State<_RouteCalculationView> {
+  Future<void> _openNavigation(DeliveryRoute route) async {
+    if (route.stops.isEmpty) return;
+
+    final last = route.stops.last;
+    final waypoints = route.stops
+        .sublist(0, route.stops.length - 1)
+        .map((s) => '${s.latitude},${s.longitude}')
+        .join('|');
+
+    final wazeUri = Uri.parse(
+      'waze://?ll=${last.latitude},${last.longitude}&navigate=yes',
+    );
+
+    final mapsUri = Uri.parse(
+      'https://maps.google.com/maps/dir/?api=1'
+      '&destination=${last.latitude},${last.longitude}'
+      '${waypoints.isNotEmpty ? '&waypoints=$waypoints' : ''}'
+      '&travelmode=driving',
+    );
+
+    if (await canLaunchUrl(wazeUri)) {
+      await launchUrl(wazeUri);
+    } else {
+      await launchUrl(mapsUri, mode: LaunchMode.externalApplication);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.white,
-      body: Stack(
-        children: [
-          CustomScrollView(
-            slivers: [
-              // App bar
-              SliverAppBar(
-                backgroundColor: AppColors.white,
-                leading: GestureDetector(
-                  onTap: () => context.pop(),
-                  child: const Icon(Icons.arrow_back, color: AppColors.black),
-                ),
-                title: const Text(
-                  'Rota Calculada',
-                  style: TextStyle(
-                    fontFamily: 'Figtree',
-                    fontWeight: FontWeight.w700,
-                    fontSize: 18,
-                    color: AppColors.darkGreen,
+      body: BlocBuilder<RouteBloc, RouteState>(
+        builder: (context, state) {
+          return Stack(
+            children: [
+              CustomScrollView(
+                slivers: [
+                  SliverAppBar(
+                    backgroundColor: AppColors.white,
+                    leading: GestureDetector(
+                      onTap: () => context.pop(),
+                      child: const Icon(Icons.arrow_back,
+                          color: AppColors.black),
+                    ),
+                    title: const Text(
+                      'Rota Calculada',
+                      style: TextStyle(
+                        fontFamily: 'Figtree',
+                        fontWeight: FontWeight.w700,
+                        fontSize: 18,
+                        color: AppColors.darkGreen,
+                      ),
+                    ),
+                    centerTitle: true,
+                    pinned: true,
+                    elevation: 0,
+                    bottom: PreferredSize(
+                      preferredSize: const Size.fromHeight(1),
+                      child: Container(
+                          color: const Color(0x1A2E5729), height: 1),
+                    ),
+                  ),
+                  SliverToBoxAdapter(
+                    child: switch (state) {
+                      RouteLoading() => const _LoadingBody(),
+                      RouteError(:final message) => _ErrorBody(message),
+                      RouteLoaded(:final route) when route == null =>
+                        const _EmptyBody(),
+                      RouteLoaded(:final route) =>
+                        _RouteBody(route: route!, onNavigate: _openNavigation),
+                      _ => const _LoadingBody(),
+                    },
+                  ),
+                ],
+              ),
+              if (state is RouteLoaded && state.route != null)
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  child: _NavButton(
+                    onTap: () => _openNavigation(state.route!),
                   ),
                 ),
-                centerTitle: true,
-                pinned: true,
-                elevation: 0,
-                bottom: PreferredSize(
-                  preferredSize: const Size.fromHeight(1),
-                  child: Container(color: const Color(0x1A2E5729), height: 1),
+            ],
+          );
+        },
+      ),
+    );
+  }
+}
+
+class _RouteBody extends StatelessWidget {
+  const _RouteBody({required this.route, required this.onNavigate});
+
+  final DeliveryRoute route;
+  final Future<void> Function(DeliveryRoute) onNavigate;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 20, 16, 100),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: _RouteStatCard(
+                  label: 'Duração',
+                  value: route.formattedDuration,
+                  icon: Icons.access_time_outlined,
                 ),
               ),
-
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 20, 16, 100),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Stats cards row
-                      const Row(
-                        children: [
-                          Expanded(
-                            child: _RouteStatCard(
-                              label: 'Duração',
-                              value: '40 min',
-                              icon: Icons.access_time_outlined,
-                            ),
-                          ),
-                          SizedBox(width: 12),
-                          Expanded(
-                            child: _RouteStatCard(
-                              label: 'Distância Total',
-                              value: '10.2km',
-                              icon: Icons.route_outlined,
-                            ),
-                          ),
-                        ],
-                      ),
-
-                      const SizedBox(height: 16),
-
-                      // Optimization description
-                      Container(
-                        padding: const EdgeInsets.all(14),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFF0FBF4),
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: AppColors.darkGreen.withValues(alpha: 0.15),
-                          ),
-                        ),
-                        child: const Row(
-                          children: [
-                            Icon(
-                              Icons.auto_awesome_outlined,
-                              size: 18,
-                              color: AppColors.darkGreen,
-                            ),
-                            SizedBox(width: 10),
-                            Expanded(
-                              child: Text(
-                                'Rota otimizada para menor tempo de entrega considerando o trânsito atual.',
-                                style: TextStyle(
-                                  fontFamily: 'Manrope',
-                                  fontSize: 13,
-                                  color: AppColors.darkGreen,
-                                  height: 1.5,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-
-                      const SizedBox(height: 20),
-
-                      // Map placeholder
-                      // TODO(dev): Replace with Google Maps widget when Maps SDK is integrated
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(16),
-                        child: Container(
-                          height: 128,
-                          width: double.infinity,
-                          color: const Color(0xFF1A432C),
-                          child: Stack(
-                            children: [
-                              // Map grid lines (decorative)
-                              CustomPaint(
-                                size: const Size(double.infinity, 128),
-                                painter: _MapGridPainter(),
-                              ),
-                              // Center pin
-                              const Center(
-                                child: Icon(
-                                  Icons.map_outlined,
-                                  size: 40,
-                                  color: Colors.white38,
-                                ),
-                              ),
-                              // Bottom label
-                              Positioned(
-                                bottom: 8,
-                                left: 0,
-                                right: 0,
-                                child: Center(
-                                  child: Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 12,
-                                      vertical: 4,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: Colors.black45,
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                    child: const Text(
-                                      'Mapa indisponível — integração em breve',
-                                      style: TextStyle(
-                                        fontFamily: 'Manrope',
-                                        fontSize: 11,
-                                        color: Colors.white70,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-
-                      const SizedBox(height: 24),
-
-                      // Delivery sequence header
-                      const Text(
-                        'Sequência de Entregas',
-                        style: TextStyle(
-                          fontFamily: 'Figtree',
-                          fontWeight: FontWeight.w700,
-                          fontSize: 18,
-                          color: AppColors.black,
-                        ),
-                      ),
-
-                      const SizedBox(height: 12),
-
-                      // Delivery stops
-                      // TODO(dev): Replace with real stops from /orders/today response
-                      const _DeliveryStop(
-                        stopNumber: 1,
-                        placeName: 'Mercado Central',
-                        street: 'Rua dos Andradas, 1234',
-                        cityStateZip: 'Porto Alegre – RS, 90020-005',
-                      ),
-                      const SizedBox(height: 10),
-                      const _DeliveryStop(
-                        stopNumber: 2,
-                        placeName: 'Condomínio Verde',
-                        street: 'Av. Ipiranga, 6681',
-                        cityStateZip: 'Porto Alegre – RS, 90619-900',
-                      ),
-                      const SizedBox(height: 10),
-                      const _DeliveryStop(
-                        stopNumber: 3,
-                        placeName: 'Casa da Ana',
-                        street: 'Rua Comendador Coruja, 320',
-                        cityStateZip: 'Porto Alegre – RS, 90570-030',
-                      ),
-                    ],
-                  ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _RouteStatCard(
+                  label: 'Distância Total',
+                  value: route.formattedDistance,
+                  icon: Icons.route_outlined,
                 ),
               ),
             ],
           ),
-
-          // Sticky bottom button
-          Positioned(
-            left: 0,
-            right: 0,
-            bottom: 0,
-            child: Container(
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.97),
-                border: const Border(top: BorderSide(color: Color(0x1A2E5729))),
-              ),
-              child: GestureDetector(
-                onTap: () {
-                  // TODO(dev): Open Google Maps or in-app navigation when Maps SDK is integrated
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Navegação por mapa disponível em breve'),
+          const SizedBox(height: 16),
+          Container(
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: const Color(0xFFF0FBF4),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                  color: AppColors.darkGreen.withValues(alpha: 0.15)),
+            ),
+            child: const Row(
+              children: [
+                Icon(Icons.auto_awesome_outlined,
+                    size: 18, color: AppColors.darkGreen),
+                SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    'Rota otimizada para menor tempo de entrega.',
+                    style: TextStyle(
+                      fontFamily: 'Manrope',
+                      fontSize: 13,
+                      color: AppColors.darkGreen,
+                      height: 1.5,
                     ),
-                  );
-                },
-                child: Container(
-                  height: 54,
-                  decoration: BoxDecoration(
-                    color: AppColors.darkGreen,
-                    borderRadius: BorderRadius.circular(27),
-                  ),
-                  child: const Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.navigation_outlined,
-                        color: AppColors.white,
-                        size: 20,
-                      ),
-                      SizedBox(width: 8),
-                      Text(
-                        'Visualizar Melhor Rota',
-                        style: TextStyle(
-                          fontFamily: 'Figtree',
-                          fontWeight: FontWeight.w700,
-                          fontSize: 16,
-                          color: AppColors.white,
-                        ),
-                      ),
-                    ],
                   ),
                 ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 20),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(16),
+            child: SizedBox(
+              height: 240,
+              child: MaplibreMap(
+                styleString: _mapStyleUrl,
+                initialCameraPosition: route.stops.isNotEmpty
+                    ? CameraPosition(
+                        target: LatLng(
+                          route.stops.first.latitude,
+                          route.stops.first.longitude,
+                        ),
+                        zoom: 13,
+                      )
+                    : const CameraPosition(
+                        target: LatLng(-30.0346, -51.2165),
+                        zoom: 12,
+                      ),
+                onMapCreated: (controller) {
+                  final coords = route.geometryCoordinates;
+                  if (coords.isNotEmpty) {
+                    final geoJson = jsonEncode({
+                      'type': 'FeatureCollection',
+                      'features': [
+                        {
+                          'type': 'Feature',
+                          'geometry': {
+                            'type': 'LineString',
+                            'coordinates': coords,
+                          },
+                          'properties': {},
+                        }
+                      ],
+                    });
+                    controller
+                        .addSource(
+                            'route-source',
+                            GeojsonSourceProperties(data: geoJson))
+                        .then((_) => controller.addLineLayer(
+                              'route-source',
+                              'route-layer',
+                              LineLayerProperties(
+                                lineColor: '#1A432C',
+                                lineWidth: 4.5,
+                                lineCap: 'round',
+                                lineJoin: 'round',
+                              ),
+                            ));
+                  }
+                },
+                trackCameraPosition: false,
               ),
             ),
           ),
+          const SizedBox(height: 24),
+          const Text(
+            'Sequência de Entregas',
+            style: TextStyle(
+              fontFamily: 'Figtree',
+              fontWeight: FontWeight.w700,
+              fontSize: 18,
+              color: AppColors.black,
+            ),
+          ),
+          const SizedBox(height: 12),
+          ...route.stops.map((stop) => Padding(
+                padding: const EdgeInsets.only(bottom: 10),
+                child: _DeliveryStop(stop: stop),
+              )),
         ],
+      ),
+    );
+  }
+}
+
+class _LoadingBody extends StatelessWidget {
+  const _LoadingBody();
+
+  @override
+  Widget build(BuildContext context) {
+    return const SizedBox(
+      height: 400,
+      child: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            CircularProgressIndicator(color: AppColors.darkGreen),
+            SizedBox(height: 16),
+            Text(
+              'Calculando rota...',
+              style: TextStyle(
+                fontFamily: 'Manrope',
+                fontSize: 14,
+                color: AppColors.placeholder,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _EmptyBody extends StatelessWidget {
+  const _EmptyBody();
+
+  @override
+  Widget build(BuildContext context) {
+    return const SizedBox(
+      height: 400,
+      child: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.local_shipping_outlined,
+                size: 48, color: AppColors.placeholder),
+            SizedBox(height: 16),
+            Text(
+              'Nenhuma entrega em andamento hoje.',
+              style: TextStyle(
+                fontFamily: 'Manrope',
+                fontSize: 14,
+                color: AppColors.placeholder,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ErrorBody extends StatelessWidget {
+  const _ErrorBody(this.message);
+
+  final String message;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 400,
+      child: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.error_outline,
+                  size: 48, color: AppColors.placeholder),
+              const SizedBox(height: 16),
+              Text(
+                'Não foi possível carregar a rota.\n$message',
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontFamily: 'Manrope',
+                  fontSize: 13,
+                  color: AppColors.placeholder,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _NavButton extends StatelessWidget {
+  const _NavButton({required this.onTap});
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.97),
+        border: const Border(top: BorderSide(color: Color(0x1A2E5729))),
+      ),
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          height: 54,
+          decoration: BoxDecoration(
+            color: AppColors.darkGreen,
+            borderRadius: BorderRadius.circular(27),
+          ),
+          child: const Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.navigation_outlined,
+                  color: AppColors.white, size: 20),
+              SizedBox(width: 8),
+              Text(
+                'Visualizar no Maps / Waze',
+                style: TextStyle(
+                  fontFamily: 'Figtree',
+                  fontWeight: FontWeight.w700,
+                  fontSize: 16,
+                  color: AppColors.white,
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -318,17 +464,9 @@ class _RouteStatCard extends StatelessWidget {
 }
 
 class _DeliveryStop extends StatelessWidget {
-  const _DeliveryStop({
-    required this.stopNumber,
-    required this.placeName,
-    required this.street,
-    required this.cityStateZip,
-  });
+  const _DeliveryStop({required this.stop});
 
-  final int stopNumber;
-  final String placeName;
-  final String street;
-  final String cityStateZip;
+  final RouteStop stop;
 
   @override
   Widget build(BuildContext context) {
@@ -341,7 +479,6 @@ class _DeliveryStop extends StatelessWidget {
       ),
       child: Row(
         children: [
-          // Stop number badge
           Container(
             width: 36,
             height: 36,
@@ -351,7 +488,7 @@ class _DeliveryStop extends StatelessWidget {
             ),
             child: Center(
               child: Text(
-                '$stopNumber',
+                '${stop.stopOrder}',
                 style: const TextStyle(
                   fontFamily: 'Figtree',
                   fontWeight: FontWeight.w700,
@@ -363,65 +500,20 @@ class _DeliveryStop extends StatelessWidget {
           ),
           const SizedBox(width: 12),
           Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  placeName,
-                  style: const TextStyle(
-                    fontFamily: 'Figtree',
-                    fontWeight: FontWeight.w700,
-                    fontSize: 14,
-                    color: AppColors.black,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  street,
-                  style: const TextStyle(
-                    fontFamily: 'Manrope',
-                    fontSize: 13,
-                    color: AppColors.placeholder,
-                  ),
-                ),
-                Text(
-                  cityStateZip,
-                  style: const TextStyle(
-                    fontFamily: 'Manrope',
-                    fontSize: 12,
-                    color: AppColors.placeholder,
-                  ),
-                ),
-              ],
+            child: Text(
+              stop.formattedAddress,
+              style: const TextStyle(
+                fontFamily: 'Manrope',
+                fontSize: 13,
+                color: AppColors.placeholder,
+                height: 1.4,
+              ),
             ),
           ),
-          const Icon(
-            Icons.location_on_outlined,
-            color: AppColors.darkGreen,
-            size: 18,
-          ),
+          const Icon(Icons.location_on_outlined,
+              color: AppColors.darkGreen, size: 18),
         ],
       ),
     );
   }
-}
-
-class _MapGridPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = Colors.white.withValues(alpha: 0.05)
-      ..strokeWidth = 1;
-
-    const spacing = 24.0;
-    for (double x = 0; x < size.width; x += spacing) {
-      canvas.drawLine(Offset(x, 0), Offset(x, size.height), paint);
-    }
-    for (double y = 0; y < size.height; y += spacing) {
-      canvas.drawLine(Offset(0, y), Offset(size.width, y), paint);
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

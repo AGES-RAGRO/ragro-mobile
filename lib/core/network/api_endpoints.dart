@@ -81,6 +81,9 @@ abstract final class ApiEndpoints {
   // Producer management
   static String get producerDashboard => '$_base/producers/me/dashboard';
 
+  // Routes
+  static String get routesToday => '$_base/routes/today';
+
   // Producer orders
   static String get producerOrders => '$_base/orders/producer';
   static String get producerOrdersToday => '$_base/orders/today';
