@@ -133,6 +133,8 @@ import 'package:ragro_mobile/features/inventory/domain/usecases/register_stock_e
     as _i736;
 import 'package:ragro_mobile/features/inventory/domain/usecases/update_inventory_product.dart'
     as _i626;
+import 'package:ragro_mobile/features/inventory/domain/usecases/upload_product_photo.dart'
+    as _i279;
 import 'package:ragro_mobile/features/inventory/presentation/bloc/inventory_bloc.dart'
     as _i205;
 import 'package:ragro_mobile/features/inventory/presentation/bloc/product_form_bloc.dart'
@@ -365,12 +367,8 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i626.UpdateInventoryProduct>(
       () => _i626.UpdateInventoryProduct(gh<_i276.InventoryRepository>()),
     );
-    gh.factory<_i760.ProductFormBloc>(
-      () => _i760.ProductFormBloc(
-        gh<_i252.GetInventoryProducts>(),
-        gh<_i291.CreateInventoryProduct>(),
-        gh<_i626.UpdateInventoryProduct>(),
-      ),
+    gh.lazySingleton<_i279.UploadProductPhoto>(
+      () => _i279.UploadProductPhoto(gh<_i276.InventoryRepository>()),
     );
     gh.lazySingleton<_i16.AdminRemoteDataSource>(
       () => _i16.AdminRemoteDataSource(gh<_i873.ApiClient>()),
@@ -454,6 +452,14 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i485.RequestPasswordReset>(
       () => _i485.RequestPasswordReset(gh<_i43.AuthRepository>()),
+    );
+    gh.factory<_i760.ProductFormBloc>(
+      () => _i760.ProductFormBloc(
+        gh<_i252.GetInventoryProducts>(),
+        gh<_i291.CreateInventoryProduct>(),
+        gh<_i626.UpdateInventoryProduct>(),
+        gh<_i279.UploadProductPhoto>(),
+      ),
     );
     gh.factory<_i205.InventoryBloc>(
       () => _i205.InventoryBloc(

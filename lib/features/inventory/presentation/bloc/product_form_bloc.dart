@@ -4,13 +4,18 @@ import 'package:ragro_mobile/features/inventory/domain/entities/inventory_produc
 import 'package:ragro_mobile/features/inventory/domain/usecases/create_inventory_product.dart';
 import 'package:ragro_mobile/features/inventory/domain/usecases/get_inventory_products.dart';
 import 'package:ragro_mobile/features/inventory/domain/usecases/update_inventory_product.dart';
+import 'package:ragro_mobile/features/inventory/domain/usecases/upload_product_photo.dart';
 import 'package:ragro_mobile/features/inventory/presentation/bloc/product_form_event.dart';
 import 'package:ragro_mobile/features/inventory/presentation/bloc/product_form_state.dart';
 
 @injectable
 class ProductFormBloc extends Bloc<ProductFormEvent, ProductFormState> {
-  ProductFormBloc(this._getProducts, this._createProduct, this._updateProduct)
-    : super(const ProductFormInitial()) {
+  ProductFormBloc(
+    this._getProducts,
+    this._createProduct,
+    this._updateProduct,
+    this._uploadPhoto,
+  ) : super(const ProductFormInitial()) {
     on<ProductFormStarted>(_onStarted);
     on<ProductFormSaved>(_onSaved);
   }
@@ -18,6 +23,7 @@ class ProductFormBloc extends Bloc<ProductFormEvent, ProductFormState> {
   final GetInventoryProducts _getProducts;
   final CreateInventoryProduct _createProduct;
   final UpdateInventoryProduct _updateProduct;
+  final UploadProductPhoto _uploadPhoto;
 
   String? _currentProductId;
 
@@ -62,7 +68,10 @@ class ProductFormBloc extends Bloc<ProductFormEvent, ProductFormState> {
           stock: event.stock,
           active: event.stock > 0,
         );
-        await _createProduct(newProduct);
+        final created = await _createProduct(newProduct);
+        if (event.photo != null) {
+          await _uploadPhoto(created.id, event.photo!);
+        }
       } else {
         // Edit mode — fetch current and update
         final products = await _getProducts();
@@ -79,6 +88,9 @@ class ProductFormBloc extends Bloc<ProductFormEvent, ProductFormState> {
           active: event.stock > 0,
         );
         await _updateProduct(updated);
+        if (event.photo != null) {
+          await _uploadPhoto(existing.id, event.photo!);
+        }
       }
       emit(const ProductFormSuccess());
     } on Exception catch (e) {

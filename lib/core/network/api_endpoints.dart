@@ -67,6 +67,8 @@ abstract final class ApiEndpoints {
   static String get producerInventory => '$_base/producers/products';
   static String producerInventoryItem(String id) =>
       '$_base/producers/products/$id';
+  static String producerProductPhoto(String id) =>
+      '$_base/producers/products/$id/photo';
 
   // Stock movements
   static String get stockExit => '$_base/producers/stock/exit';

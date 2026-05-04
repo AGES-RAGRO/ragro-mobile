@@ -48,12 +48,20 @@ class InventoryProductCard extends StatelessWidget {
             decoration: BoxDecoration(
               color: AppColors.darkGreen.withValues(alpha: 0.06),
               borderRadius: BorderRadius.circular(16),
+              image: product.imageUrl.isNotEmpty
+                  ? DecorationImage(
+                      image: NetworkImage(product.imageUrl),
+                      fit: BoxFit.cover,
+                    )
+                  : null,
             ),
-            child: const Icon(
-              Icons.eco_outlined,
-              size: 40,
-              color: AppColors.darkGreen,
-            ),
+            child: product.imageUrl.isEmpty
+                ? const Icon(
+                    Icons.eco_outlined,
+                    size: 40,
+                    color: AppColors.darkGreen,
+                  )
+                : null,
           ),
           const SizedBox(width: 12),
 
@@ -110,7 +118,7 @@ class InventoryProductCard extends StatelessWidget {
 
                 // Stock
                 Text(
-                  '${product.stock} ${product.unit} em estoque',
+                  '${product.stock % 1 == 0 ? product.stock.toInt() : product.stock.toStringAsFixed(2)} ${product.unit} em estoque',
                   style: const TextStyle(
                     fontFamily: 'Manrope',
                     fontSize: 13,

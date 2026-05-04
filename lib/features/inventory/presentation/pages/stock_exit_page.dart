@@ -13,12 +13,14 @@ class StockExitPage extends StatelessWidget {
     required this.productId,
     required this.productName,
     required this.unit,
+    required this.currentStock,
     super.key,
   });
 
   final String productId;
   final String productName;
   final String unit;
+  final double currentStock;
 
   @override
   Widget build(BuildContext context) {
@@ -28,6 +30,7 @@ class StockExitPage extends StatelessWidget {
         productId: productId,
         productName: productName,
         unit: unit,
+        currentStock: currentStock,
       ),
     );
   }
@@ -38,11 +41,13 @@ class _StockExitView extends StatefulWidget {
     required this.productId,
     required this.productName,
     required this.unit,
+    required this.currentStock,
   });
 
   final String productId;
   final String productName;
   final String unit;
+  final double currentStock;
 
   @override
   State<_StockExitView> createState() => _StockExitViewState();
@@ -56,7 +61,6 @@ class _StockExitViewState extends State<_StockExitView> {
   static const _reasons = [
     ('LOSS', 'Perda'),
     ('DISPOSAL', 'Descarte'),
-    ('MANUAL_ENTRY', 'Ajuste Manual'),
   ];
 
   @override
@@ -73,6 +77,15 @@ class _StockExitViewState extends State<_StockExitView> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Informe uma quantidade válida.'),
+          backgroundColor: AppColors.red,
+        ),
+      );
+      return;
+    }
+    if (qty > widget.currentStock) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Quantidade superior ao saldo em estoque.'),
           backgroundColor: AppColors.red,
         ),
       );
@@ -161,14 +174,28 @@ class _StockExitViewState extends State<_StockExitView> {
                         ),
                         const SizedBox(width: 12),
                         Expanded(
-                          child: Text(
-                            widget.productName,
-                            style: const TextStyle(
-                              fontFamily: 'Figtree',
-                              fontWeight: FontWeight.w700,
-                              fontSize: 16,
-                              color: AppColors.darkGreen,
-                            ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                widget.productName,
+                                style: const TextStyle(
+                                  fontFamily: 'Figtree',
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 16,
+                                  color: AppColors.darkGreen,
+                                ),
+                              ),
+                              Text(
+                                'Saldo atual: ${widget.currentStock % 1 == 0 ? widget.currentStock.toInt() : widget.currentStock.toStringAsFixed(2)} ${widget.unit}',
+                                style: TextStyle(
+                                  fontFamily: 'Manrope',
+                                  fontSize: 13,
+                                  color:
+                                      AppColors.darkGreen.withValues(alpha: 0.8),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ],

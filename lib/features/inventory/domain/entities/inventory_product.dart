@@ -20,7 +20,7 @@ class InventoryProduct extends Equatable {
   final String imageUrl;
   final double price;
   final String unit;
-  final int stock;
+  final double stock;
   final bool active;
 
   factory InventoryProduct.fromJson(Map<String, dynamic> json) =>
@@ -32,8 +32,7 @@ class InventoryProduct extends Equatable {
         imageUrl: (json['imageS3'] as String?) ?? '',
         price: (json['price'] as num?)?.toDouble() ?? 0.0,
         unit: (json['unityType'] as String?) ?? 'un',
-        stock:
-            ((json['stockQuantity'] as num?)?.toDouble() ?? 0.0).round(),
+        stock: (json['stockQuantity'] as num?)?.toDouble() ?? 0.0,
         active: (json['active'] as bool?) ?? true,
       );
 
@@ -55,7 +54,7 @@ class InventoryProduct extends Equatable {
     String? imageUrl,
     double? price,
     String? unit,
-    int? stock,
+    double? stock,
     bool? active,
   }) {
     return InventoryProduct(

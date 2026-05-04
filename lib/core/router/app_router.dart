@@ -240,9 +240,10 @@ class AppRouter {
                             state.extra as Map<String, dynamic>? ?? {};
                         return StockExitPage(
                           productId: state.pathParameters['productId']!,
-                          productName:
-                              extra['productName'] as String? ?? '',
+                          productName: extra['productName'] as String? ?? '',
                           unit: extra['unit'] as String? ?? 'un',
+                          currentStock:
+                              (extra['currentStock'] as num?)?.toDouble() ?? 0.0,
                         );
                       },
                     ),

@@ -1,9 +1,11 @@
 import 'package:dio/dio.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:injectable/injectable.dart';
 import 'package:ragro_mobile/core/di/injection.dart';
 import 'package:ragro_mobile/core/network/api_client.dart';
 import 'package:ragro_mobile/core/network/api_endpoints.dart';
 import 'package:ragro_mobile/core/network/api_exception.dart';
+import 'package:ragro_mobile/core/utils/multipart_file_builder.dart';
 import 'package:ragro_mobile/features/inventory/domain/entities/inventory_product.dart';
 
 @lazySingleton
@@ -28,23 +30,25 @@ class InventoryRemoteDataSource {
     }
   }
 
-  Future<void> createProduct(InventoryProduct product) async {
+  Future<InventoryProduct> createProduct(InventoryProduct product) async {
     try {
-      await _apiClient.dio.post<void>(
+      final response = await _apiClient.dio.post<Map<String, dynamic>>(
         ApiEndpoints.producerInventory,
         data: product.toJson(),
       );
+      return InventoryProduct.fromJson(response.data!);
     } on DioException catch (e) {
       throw e.error as ApiException? ?? const UnknownApiException();
     }
   }
 
-  Future<void> updateProduct(InventoryProduct product) async {
+  Future<InventoryProduct> updateProduct(InventoryProduct product) async {
     try {
-      await _apiClient.dio.put<void>(
+      final response = await _apiClient.dio.put<Map<String, dynamic>>(
         ApiEndpoints.producerInventoryItem(product.id),
         data: product.toJson(),
       );
+      return InventoryProduct.fromJson(response.data!);
     } on DioException catch (e) {
       throw e.error as ApiException? ?? const UnknownApiException();
     }
@@ -55,6 +59,21 @@ class InventoryRemoteDataSource {
       await _apiClient.dio.delete<void>(
         ApiEndpoints.producerInventoryItem(id),
       );
+    } on DioException catch (e) {
+      throw e.error as ApiException? ?? const UnknownApiException();
+    }
+  }
+
+  Future<InventoryProduct> uploadProductPhoto(String productId, XFile file) async {
+    try {
+      final formData = FormData.fromMap({
+        'file': await multipartFromXFile(file),
+      });
+      final response = await _apiClient.dio.post<Map<String, dynamic>>(
+        ApiEndpoints.producerProductPhoto(productId),
+        data: formData,
+      );
+      return InventoryProduct.fromJson(response.data!);
     } on DioException catch (e) {
       throw e.error as ApiException? ?? const UnknownApiException();
     }

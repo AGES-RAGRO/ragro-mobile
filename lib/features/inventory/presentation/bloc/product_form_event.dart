@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:image_picker/image_picker.dart';
 
 sealed class ProductFormEvent extends Equatable {
   const ProductFormEvent();
@@ -20,14 +21,23 @@ class ProductFormSaved extends ProductFormEvent {
     required this.price,
     required this.unit,
     required this.stock,
+    this.photo,
   });
 
   final String name;
   final String description;
   final double price;
   final String unit;
-  final int stock;
+  final double stock;
+  final XFile? photo;
 
   @override
-  List<Object?> get props => [name, description, price, unit, stock];
+  List<Object?> get props => [name, description, price, unit, stock, photo];
+}
+
+class ProductFormPhotoPicked extends ProductFormEvent {
+  const ProductFormPhotoPicked(this.photo);
+  final XFile photo;
+  @override
+  List<Object?> get props => [photo];
 }
