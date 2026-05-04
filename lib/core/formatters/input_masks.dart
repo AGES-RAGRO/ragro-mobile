@@ -1,4 +1,5 @@
 import 'package:flutter/services.dart';
+import 'package:intl/intl.dart';
 
 // Máscaras dinâmicas para campos de entrada. Aplicadas via `inputFormatters`
 // para autoformatar enquanto o usuário digita, mantendo apenas dígitos no
@@ -163,5 +164,40 @@ class BankAccountInputFormatter extends TextInputFormatter {
   String _formatAccount(String digits) {
     if (digits.length <= 1) return digits;
     return '${digits.substring(0, digits.length - 1)}-${digits.substring(digits.length - 1)}';
+  }
+}
+
+class CurrencyInputFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    if (newValue.text.isEmpty) {
+      return newValue.copyWith(text: '');
+    }
+
+    String digitsOnly = newValue.text.replaceAll(RegExp(r'[^\d]'), '');
+    if (digitsOnly.isEmpty) {
+      return const TextEditingValue(
+        text: '0,00',
+        selection: TextSelection.collapsed(offset: 4),
+      );
+    }
+
+    double value = double.parse(digitsOnly) / 100;
+    
+    final format = NumberFormat.currency(
+      locale: 'pt_BR',
+      symbol: '',
+      decimalDigits: 2,
+    );
+    
+    String formatted = format.format(value).trim();
+    
+    return TextEditingValue(
+      text: formatted,
+      selection: TextSelection.collapsed(offset: formatted.length),
+    );
   }
 }
