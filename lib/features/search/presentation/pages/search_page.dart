@@ -88,7 +88,6 @@ class _SearchViewState extends State<_SearchView> {
               Padding(
                 padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
                 child: Container(
-                  height: 56,
                   decoration: BoxDecoration(
                     color: const Color(0xFFF1F5F9),
                     borderRadius: BorderRadius.circular(24),
@@ -100,36 +99,31 @@ class _SearchViewState extends State<_SearchView> {
                       ),
                     ],
                   ),
-                  child: Row(
-                    children: [
-                      const SizedBox(width: 16),
-                      const Icon(
+                  child: TextField(
+                    controller: _controller,
+                    textInputAction: TextInputAction.search,
+                    onSubmitted: (q) => _goToResults(context, q),
+                    style: const TextStyle(
+                      fontFamily: 'Figtree',
+                      fontSize: 16,
+                      color: AppColors.black,
+                    ),
+                    decoration: const InputDecoration(
+                      hintText: 'O que você procura hoje?',
+                      hintStyle: TextStyle(
+                        color: Color(0xFF64748B),
+                        fontSize: 16,
+                      ),
+                      prefixIcon: Icon(
                         Icons.search,
                         color: AppColors.placeholder,
                         size: 20,
                       ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: TextField(
-                          controller: _controller,
-                          textInputAction: TextInputAction.search,
-                          onSubmitted: (q) => _goToResults(context, q),
-                          style: const TextStyle(
-                            fontFamily: 'Figtree',
-                            fontSize: 16,
-                            color: AppColors.black,
-                          ),
-                          decoration: const InputDecoration(
-                            hintText: 'O que você procura hoje?',
-                            hintStyle: TextStyle(
-                              color: Color(0xFF64748B),
-                              fontSize: 16,
-                            ),
-                            border: InputBorder.none,
-                          ),
-                        ),
+                      border: InputBorder.none,
+                      contentPadding: EdgeInsets.symmetric(
+                        vertical: 18,
                       ),
-                    ],
+                    ),
                   ),
                 ),
               ),
