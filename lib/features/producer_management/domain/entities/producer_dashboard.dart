@@ -1,5 +1,20 @@
 import 'package:equatable/equatable.dart';
 
+class DashboardAvailabilitySlot extends Equatable {
+  const DashboardAvailabilitySlot({
+    required this.weekday,
+    required this.opensAt,
+    required this.closesAt,
+  });
+
+  final int weekday; // 0=Sun, 1=Mon ... 6=Sat
+  final String opensAt;
+  final String closesAt;
+
+  @override
+  List<Object?> get props => [weekday, opensAt, closesAt];
+}
+
 class ProducerDashboard extends Equatable {
   const ProducerDashboard({
     required this.producerName,
@@ -14,6 +29,7 @@ class ProducerDashboard extends Equatable {
     required this.stockChangePercent,
     required this.weeklyChartData,
     required this.currentMonth,
+    required this.availability,
   });
 
   final String producerName;
@@ -28,6 +44,7 @@ class ProducerDashboard extends Equatable {
   final double stockChangePercent;
   final List<double> weeklyChartData; // 7 values: S,T,Q,Q,S,S,D
   final String currentMonth;
+  final List<DashboardAvailabilitySlot> availability;
 
   @override
   List<Object?> get props => [
@@ -43,5 +60,6 @@ class ProducerDashboard extends Equatable {
     stockChangePercent,
     weeklyChartData,
     currentMonth,
+    availability,
   ];
 }
