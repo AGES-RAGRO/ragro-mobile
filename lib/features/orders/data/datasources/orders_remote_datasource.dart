@@ -78,13 +78,12 @@ class OrdersRemoteDatasource {
     }
   }
 
-  Future<OrderDetail> cancelCustomerOrder(String id) async {
+  Future<void> cancelCustomerOrder(String id, {required String reason, String? details}) async {
     try {
-      final response = await _apiClient.dio.patch<Map<String, dynamic>>(
-        ApiEndpoints.customerOrderCancel(id),
+      await _apiClient.dio.patch<void>(
+        ApiEndpoints.orderCancel(id),
+        data: {'reason': reason, if (details != null) 'details': details},
       );
-
-      return OrderDetailModel.fromJson(response.data!);
     } on DioException catch (e) {
       throw e.error as ApiException? ?? const UnknownApiException();
     }
@@ -170,6 +169,7 @@ class OrdersRemoteDatasource {
     return switch (status) {
       OrderStatus.accepted => 'confirmed',
       OrderStatus.pending => 'pending',
+      OrderStatus.inDelivery => 'in_delivery',
       OrderStatus.delivered => 'delivered',
       OrderStatus.cancelled => 'cancelled',
     };

@@ -14,6 +14,7 @@ import 'package:ragro_mobile/features/producer_orders/presentation/bloc/producer
 import 'package:ragro_mobile/features/producer_orders/presentation/bloc/producer_orders_event.dart';
 import 'package:ragro_mobile/features/producer_orders/presentation/bloc/producer_orders_state.dart';
 import 'package:ragro_mobile/features/producer_orders/presentation/widgets/producer_order_card.dart';
+import 'package:ragro_mobile/shared/widgets/cancel_order_dialog.dart';
 
 class ProducerOrdersPage extends StatelessWidget {
   const ProducerOrdersPage({super.key});
@@ -361,26 +362,11 @@ class _ProducerOrdersView extends StatelessWidget {
   }
 
   Future<void> _confirmCancel(BuildContext context, String orderId) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: const Text('Recusar pedido'),
-        content: const Text('Tem certeza que deseja recusar este pedido?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: const Text('Voltar'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: const Text('Recusar pedido'),
-          ),
-        ],
-      ),
-    );
-
-    if ((confirmed ?? false) && context.mounted) {
-      context.read<ProducerOrdersBloc>().add(ProducerOrderCancelled(orderId));
+    final result = await CancelOrderDialog.showForProducer(context);
+    if (result != null && context.mounted) {
+      context.read<ProducerOrdersBloc>().add(
+        ProducerOrderCancelled(orderId, reason: result.reason, details: result.details),
+      );
     }
   }
 

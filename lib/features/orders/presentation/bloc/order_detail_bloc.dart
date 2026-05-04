@@ -1,5 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
+import 'package:ragro_mobile/features/orders/domain/entities/order_detail.dart';
 import 'package:ragro_mobile/features/orders/domain/usecases/cancel_customer_order.dart';
 import 'package:ragro_mobile/features/orders/domain/usecases/confirm_customer_delivery.dart';
 import 'package:ragro_mobile/features/orders/domain/usecases/get_customer_order_by_id.dart';
@@ -43,16 +44,30 @@ class OrderDetailBloc extends Bloc<OrderDetailEvent, OrderDetailState> {
     if (current is! OrderDetailLoaded) return;
     emit(OrderDetailUpdating(current.order));
     try {
-      final order = await _cancelOrder(event.orderId);
+      await _cancelOrder(event.orderId, reason: event.reason, details: event.details);
+      final cancelled = current.order.copyWith(
+        status: 'CANCELLED',
+        actions: const OrderDetailActions(
+          canConfirmDelivery: false,
+          canCancel: false,
+          canContactProducer: false,
+        ),
+      );
       emit(
         OrderDetailActionSuccess(
-          order: order,
+          order: cancelled,
           message: 'Pedido cancelado com sucesso.',
         ),
       );
-      emit(OrderDetailLoaded(order));
+      emit(OrderDetailLoaded(cancelled));
     } on Exception catch (e) {
-      emit(OrderDetailFailure(e.toString()));
+      emit(
+        OrderDetailActionFailure(
+          order: current.order,
+          message: e.toString(),
+        ),
+      );
+      emit(OrderDetailLoaded(current.order));
     }
   }
 

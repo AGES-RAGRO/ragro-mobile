@@ -13,6 +13,7 @@ import 'package:ragro_mobile/features/orders/domain/entities/order_detail.dart';
 import 'package:ragro_mobile/features/orders/presentation/bloc/order_detail_bloc.dart';
 import 'package:ragro_mobile/features/orders/presentation/bloc/order_detail_event.dart';
 import 'package:ragro_mobile/features/orders/presentation/bloc/order_detail_state.dart';
+import 'package:ragro_mobile/shared/widgets/cancel_order_dialog.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class OrderDetailPage extends StatelessWidget {
@@ -31,6 +32,14 @@ class OrderDetailPage extends StatelessWidget {
               SnackBar(
                 content: Text(state.message),
                 backgroundColor: AppColors.darkGreen,
+              ),
+            );
+          }
+          if (state is OrderDetailActionFailure) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(state.message),
+                backgroundColor: AppColors.red,
               ),
             );
           }
@@ -53,6 +62,9 @@ class OrderDetailPage extends StatelessWidget {
               isUpdating: true,
             ),
             OrderDetailActionSuccess(:final order) => _OrderDetailView(
+              order: order,
+            ),
+            OrderDetailActionFailure(:final order) => _OrderDetailView(
               order: order,
             ),
           };
@@ -804,26 +816,11 @@ class _ActionFooter extends StatelessWidget {
   }
 
   Future<void> _confirmCancel(BuildContext context) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: const Text('Cancelar pedido'),
-        content: const Text('Tem certeza que deseja cancelar este pedido?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: const Text('Voltar'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: const Text('Cancelar pedido'),
-          ),
-        ],
-      ),
-    );
-
-    if ((confirmed ?? false) && context.mounted) {
-      context.read<OrderDetailBloc>().add(OrderDetailCancelled(order.id));
+    final result = await CancelOrderDialog.showForCustomer(context);
+    if (result != null && context.mounted) {
+      context.read<OrderDetailBloc>().add(
+        OrderDetailCancelled(order.id, reason: result.reason, details: result.details),
+      );
     }
   }
 

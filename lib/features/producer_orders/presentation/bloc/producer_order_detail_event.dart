@@ -24,10 +24,12 @@ class ProducerOrderDetailConfirmed extends ProducerOrderDetailEvent {
 }
 
 class ProducerOrderDetailRefused extends ProducerOrderDetailEvent {
-  const ProducerOrderDetailRefused(this.orderId);
+  const ProducerOrderDetailRefused(this.orderId, {required this.reason, this.details});
   final String orderId;
+  final String reason;
+  final String? details;
   @override
-  List<Object?> get props => [orderId];
+  List<Object?> get props => [orderId, reason, details];
 }
 
 class ProducerOrderDetailStatusUpdated extends ProducerOrderDetailEvent {

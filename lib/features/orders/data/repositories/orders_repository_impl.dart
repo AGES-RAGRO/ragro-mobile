@@ -28,8 +28,8 @@ class OrdersRepositoryImpl implements OrdersRepository {
   Future<Order> cancelOrder(String id) => _datasource.cancelOrder(id);
 
   @override
-  Future<OrderDetail> cancelCustomerOrder(String id) =>
-      _datasource.cancelCustomerOrder(id);
+  Future<void> cancelCustomerOrder(String id, {required String reason, String? details}) =>
+      _datasource.cancelCustomerOrder(id, reason: reason, details: details);
 
   @override
   Future<OrderDetail> confirmCustomerDelivery(String id) =>

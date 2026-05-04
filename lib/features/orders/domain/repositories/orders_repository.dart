@@ -8,7 +8,7 @@ abstract class OrdersRepository {
   Future<OrderDetail> getCustomerOrderById(String id);
   Future<Order> createOrderFromCart();
   Future<Order> cancelOrder(String id);
-  Future<OrderDetail> cancelCustomerOrder(String id);
+  Future<void> cancelCustomerOrder(String id, {required String reason, String? details});
   Future<OrderDetail> confirmCustomerDelivery(String id);
   Future<Order> updateStatus(String id, OrderStatus status);
   Future<Order> confirmOrder(String id);

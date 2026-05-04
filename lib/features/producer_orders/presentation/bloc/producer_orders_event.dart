@@ -35,12 +35,14 @@ class ProducerOrderAccepted extends ProducerOrdersEvent {
 }
 
 class ProducerOrderCancelled extends ProducerOrdersEvent {
-  const ProducerOrderCancelled(this.orderId);
+  const ProducerOrderCancelled(this.orderId, {required this.reason, this.details});
 
   final String orderId;
+  final String reason;
+  final String? details;
 
   @override
-  List<Object?> get props => [orderId];
+  List<Object?> get props => [orderId, reason, details];
 }
 
 class ProducerOrderLocallyRefused extends ProducerOrdersEvent {

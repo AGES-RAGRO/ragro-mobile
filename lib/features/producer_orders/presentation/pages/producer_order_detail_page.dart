@@ -15,6 +15,7 @@ import 'package:ragro_mobile/features/producer_orders/domain/entities/producer_o
 import 'package:ragro_mobile/features/producer_orders/presentation/bloc/producer_order_detail_bloc.dart';
 import 'package:ragro_mobile/features/producer_orders/presentation/bloc/producer_order_detail_event.dart';
 import 'package:ragro_mobile/features/producer_orders/presentation/bloc/producer_order_detail_state.dart';
+import 'package:ragro_mobile/shared/widgets/cancel_order_dialog.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class ProducerOrderDetailPage extends StatelessWidget {
@@ -640,7 +641,7 @@ class _ActionFooter extends StatelessWidget {
             ),
           ],
         ),
-      if (order.status == ProducerOrderStatus.accepted)
+      if (order.status == ProducerOrderStatus.accepted) ...[
         _ActionButton(
           label: 'Iniciar Entrega',
           icon: Icons.local_shipping_outlined,
@@ -654,6 +655,13 @@ class _ActionFooter extends StatelessWidget {
                   ),
                 ),
         ),
+        _ActionButton(
+          label: 'Cancelar Pedido',
+          icon: Icons.cancel_outlined,
+          color: AppColors.red,
+          onTap: isProcessing ? null : () => _confirmCancel(context),
+        ),
+      ],
       if (order.status == ProducerOrderStatus.inDelivery)
         _ActionButton(
           label: 'Confirmar Entrega',
@@ -707,27 +715,10 @@ class _ActionFooter extends StatelessWidget {
   }
 
   Future<void> _confirmCancel(BuildContext context) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: const Text('Cancelar pedido'),
-        content: const Text('Tem certeza que deseja cancelar este pedido?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: const Text('Voltar'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: const Text('Cancelar pedido'),
-          ),
-        ],
-      ),
-    );
-
-    if ((confirmed ?? false) && context.mounted) {
+    final result = await CancelOrderDialog.showForProducer(context);
+    if (result != null && context.mounted) {
       context.read<ProducerOrderDetailBloc>().add(
-        ProducerOrderDetailRefused(order.id),
+        ProducerOrderDetailRefused(order.id, reason: result.reason, details: result.details),
       );
     }
   }

@@ -39,6 +39,14 @@ class OrderDetailActionSuccess extends OrderDetailState {
   List<Object?> get props => [order, message];
 }
 
+class OrderDetailActionFailure extends OrderDetailState {
+  const OrderDetailActionFailure({required this.order, required this.message});
+  final OrderDetail order;
+  final String message;
+  @override
+  List<Object?> get props => [order, message];
+}
+
 class OrderDetailFailure extends OrderDetailState {
   const OrderDetailFailure(this.message);
   final String message;

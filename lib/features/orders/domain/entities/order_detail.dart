@@ -163,11 +163,12 @@ class OrderDetail extends Equatable {
   }
 
   bool get isPending => _normalizedStatus == 'PENDING';
+  bool get isAccepted => _normalizedStatus == 'CONFIRMED';
   bool get isInDelivery => _normalizedStatus == 'IN_DELIVERY';
 
   bool get canConfirmDelivery => actions?.canConfirmDelivery ?? isInDelivery;
 
-  bool get canCancel => actions?.canCancel ?? isPending;
+  bool get canCancel => actions?.canCancel ?? (isPending || isAccepted);
 
   bool get canContactProducer =>
       actions?.canContactProducer ??
@@ -186,6 +187,29 @@ class OrderDetail extends Equatable {
   }
 
   String get _normalizedStatus => status.trim().toUpperCase();
+
+  OrderDetail copyWith({
+    String? status,
+    String? statusLabel,
+    OrderDetailActions? actions,
+  }) {
+    return OrderDetail(
+      id: id,
+      orderNumber: orderNumber,
+      status: status ?? this.status,
+      statusLabel: statusLabel ?? this.statusLabel,
+      createdAt: createdAt,
+      producerId: producerId,
+      producerName: producerName,
+      producerPhone: producerPhone,
+      producerPicture: producerPicture,
+      items: items,
+      totalAmount: totalAmount,
+      deliveryAddress: deliveryAddress,
+      actions: actions ?? this.actions,
+      bankInfo: bankInfo,
+    );
+  }
 
   @override
   List<Object?> get props => [

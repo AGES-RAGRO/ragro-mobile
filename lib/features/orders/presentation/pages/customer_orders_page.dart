@@ -32,6 +32,7 @@ class _OrdersView extends StatelessWidget {
   static const _tabs = [
     (OrderStatus.pending, 'Pendentes'),
     (OrderStatus.accepted, 'Aceitos'),
+    (OrderStatus.inDelivery, 'A caminho'),
     (OrderStatus.delivered, 'Entregues'),
     (OrderStatus.cancelled, 'Cancelados'),
   ];

@@ -94,7 +94,7 @@ class ProducerOrdersBloc
 
     emit(ProducerOrdersLoading(_activeTab));
     try {
-      await _refuseProducerOrder(event.orderId);
+      await _refuseProducerOrder(event.orderId, reason: event.reason, details: event.details);
       final updated = currentOrders
           .map(
             (o) => o.id == event.orderId

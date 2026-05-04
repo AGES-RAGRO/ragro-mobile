@@ -72,7 +72,7 @@ class ProducerOrderDetailBloc
     if (current is! ProducerOrderDetailLoaded) return;
     emit(ProducerOrderDetailRefusing(current.order));
     try {
-      await _refuseOrder(event.orderId);
+      await _refuseOrder(event.orderId, reason: event.reason, details: event.details);
       final updated = current.order.copyWith(
         status: ProducerOrderStatus.cancelled,
       );

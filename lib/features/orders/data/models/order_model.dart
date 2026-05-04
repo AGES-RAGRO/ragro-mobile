@@ -6,6 +6,7 @@ class OrderModel extends Order {
   const OrderModel({
     required super.id,
     required super.producerId,
+    required super.producerPhone,
     required super.farmName,
     required super.farmAvatarUrl,
     required super.ownerName,
@@ -35,6 +36,10 @@ class OrderModel extends Order {
 
     return OrderModel(
       id: json['id'] as String? ?? '',
+      producerPhone:
+          json['producerPhone'] as String? ??
+          json['phone'] as String? ??
+          '',
       producerId:
           json['producerId'] as String? ??
           json['farmerId'] as String? ??
@@ -72,6 +77,7 @@ class OrderModel extends Order {
   static OrderStatus _parseStatus(String? status) {
     return switch (status?.toLowerCase()) {
       'confirmed' || 'accepted' => OrderStatus.accepted,
+      'in_delivery' || 'indelivery' => OrderStatus.inDelivery,
       'delivered' => OrderStatus.delivered,
       'cancelled' || 'canceled' => OrderStatus.cancelled,
       _ => OrderStatus.pending,

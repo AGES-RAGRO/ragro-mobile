@@ -48,11 +48,11 @@ class ProducerOrdersRemoteDataSource {
     }
   }
 
-  Future<void> refuseOrder(String id) async {
+  Future<void> refuseOrder(String id, {required String reason, String? details}) async {
     try {
       await _apiClient.dio.patch<void>(
-        ApiEndpoints.producerOrderStatus(id),
-        data: {'status': 'CANCELLED'},
+        ApiEndpoints.producerOrderCancel(id),
+        data: {'reason': reason, if (details != null) 'details': details},
       );
     } on DioException catch (e) {
       throw e.error as ApiException? ?? const UnknownApiException();
