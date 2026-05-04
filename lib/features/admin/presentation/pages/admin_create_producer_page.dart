@@ -9,6 +9,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:ragro_mobile/core/di/injection.dart';
 import 'package:ragro_mobile/core/formatters/input_masks.dart';
+import 'package:ragro_mobile/core/services/cep_service.dart';
 import 'package:ragro_mobile/core/theme/app_colors.dart';
 import 'package:ragro_mobile/core/validators/cnpj_validator.dart';
 import 'package:ragro_mobile/core/validators/cpf_validator.dart';
@@ -93,7 +94,7 @@ class _AdminCreateProducerViewState extends State<_AdminCreateProducerView> {
   final _numberController = TextEditingController();
   final _neighborhoodController = TextEditingController();
   final _cityController = TextEditingController();
-  String? _selectedState;
+  final _stateController = TextEditingController();
 
   // ── Horário ────────────────────────────────────────────────────────────
   final _scheduleStartController = TextEditingController(text: '08:00');
@@ -113,6 +114,12 @@ class _AdminCreateProducerViewState extends State<_AdminCreateProducerView> {
   final _bankFiscalController = TextEditingController();
 
   bool _termsAccepted = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _cepController.addListener(_onCepChanged);
+  }
 
   static const _weekdayLabels = [
     'Seg',
@@ -140,6 +147,25 @@ class _AdminCreateProducerViewState extends State<_AdminCreateProducerView> {
     }
   }
 
+  void _onCepChanged() {
+    final cep = _digitsOnly(_cepController.text);
+    if (cep.length == 8) {
+      _lookupCep(cep);
+    }
+  }
+
+  Future<void> _lookupCep(String cep) async {
+    final address = await getIt<CepService>().fetchAddress(cep);
+    if (address != null && mounted) {
+      setState(() {
+        _addressController.text = address.street;
+        _neighborhoodController.text = address.neighborhood;
+        _cityController.text = address.city;
+        _stateController.text = address.state;
+      });
+    }
+  }
+
   @override
   void dispose() {
     _nameController.dispose();
@@ -154,6 +180,7 @@ class _AdminCreateProducerViewState extends State<_AdminCreateProducerView> {
     _numberController.dispose();
     _neighborhoodController.dispose();
     _cityController.dispose();
+    _stateController.dispose();
     _scheduleStartController.dispose();
     _scheduleEndController.dispose();
     _pixKeyController.dispose();
@@ -233,7 +260,7 @@ class _AdminCreateProducerViewState extends State<_AdminCreateProducerView> {
             ? _neighborhoodController.text.trim()
             : null,
         city: _cityController.text.trim(),
-        state: _selectedState ?? '',
+        state: _stateController.text.trim(),
         fiscalNumber: cleanFiscal,
         fiscalNumberType: fiscalType,
         farmName: _farmNameController.text.trim(),
@@ -568,11 +595,19 @@ class _AdminCreateProducerViewState extends State<_AdminCreateProducerView> {
                           children: [
                             const _FieldLabel('Estado'),
                             const SizedBox(height: 8),
-                            _UfAutocomplete(
-                              initialValue: _selectedState,
-                              onSelected: (uf) =>
-                                  setState(() => _selectedState = uf),
-                              enabled: !isLoading,
+                            _TextField(
+                              controller: _stateController,
+                              hint: 'UF',
+                              inputFormatters: [
+                                LengthLimitingTextInputFormatter(2),
+                                _UppercaseFormatter(),
+                              ],
+                              validator: (v) {
+                                if ((v ?? '').trim().isEmpty) {
+                                  return 'UF';
+                                }
+                                return null;
+                              },
                             ),
                           ],
                         ),
@@ -1080,6 +1115,7 @@ class _TextField extends StatelessWidget {
 
 class _UfAutocomplete extends StatelessWidget {
   const _UfAutocomplete({
+    super.key,
     required this.initialValue,
     required this.onSelected,
     this.enabled = true,
