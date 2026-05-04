@@ -203,6 +203,7 @@ class _CustomerEditProfilePageState extends State<CustomerEditProfilePage> {
                           controller: _complementController,
                           icon: Icons.apartment_outlined,
                           hint: 'Apto 42',
+                          validator: _requiredValidator,
                         ),
                         const SizedBox(height: 24),
                         _buildField(
@@ -210,6 +211,7 @@ class _CustomerEditProfilePageState extends State<CustomerEditProfilePage> {
                           controller: _neighborhoodController,
                           icon: Icons.location_city_outlined,
                           hint: 'Centro',
+                          validator: _requiredValidator,
                         ),
                         const SizedBox(height: 24),
                         _buildField(
@@ -423,12 +425,8 @@ class _CustomerEditProfilePageState extends State<CustomerEditProfilePage> {
         city: _cityController.text.trim(),
         state: _stateController.text.trim().toUpperCase(),
         zipCode: _zipCodeController.text.trim(),
-        complement: _complementController.text.trim().isEmpty
-            ? null
-            : _complementController.text.trim(),
-        neighborhood: _neighborhoodController.text.trim().isEmpty
-            ? null
-            : _neighborhoodController.text.trim(),
+        complement: _complementController.text.trim(),
+        neighborhood: _neighborhoodController.text.trim(),
       ),
     );
   }
