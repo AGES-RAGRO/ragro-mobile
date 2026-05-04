@@ -52,8 +52,8 @@ class ProductFormBloc extends Bloc<ProductFormEvent, ProductFormState> {
       if (_currentProductId == null) {
         // Create mode
         final newProduct = InventoryProduct(
-          id: DateTime.now().millisecondsSinceEpoch.toString(),
-          producerId: 'prod001',
+          id: '',
+          producerId: '',
           name: event.name,
           description: event.description,
           imageUrl: '',

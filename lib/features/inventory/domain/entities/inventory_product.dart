@@ -23,6 +23,30 @@ class InventoryProduct extends Equatable {
   final int stock;
   final bool active;
 
+  factory InventoryProduct.fromJson(Map<String, dynamic> json) =>
+      InventoryProduct(
+        id: (json['id'] as String?) ?? '',
+        producerId: (json['farmerId'] as String?) ?? '',
+        name: (json['name'] as String?) ?? '',
+        description: (json['description'] as String?) ?? '',
+        imageUrl: (json['imageS3'] as String?) ?? '',
+        price: (json['price'] as num?)?.toDouble() ?? 0.0,
+        unit: (json['unityType'] as String?) ?? 'un',
+        stock:
+            ((json['stockQuantity'] as num?)?.toDouble() ?? 0.0).round(),
+        active: (json['active'] as bool?) ?? true,
+      );
+
+  Map<String, dynamic> toJson() => {
+    'name': name,
+    'description': description,
+    'price': price,
+    'unityType': unit,
+    'stockQuantity': stock,
+    if (imageUrl.isNotEmpty) 'imageS3': imageUrl,
+    'active': active,
+  };
+
   InventoryProduct copyWith({
     String? id,
     String? producerId,

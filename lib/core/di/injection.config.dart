@@ -111,22 +111,36 @@ import 'package:ragro_mobile/features/home/presentation/bloc/home_bloc.dart'
     as _i151;
 import 'package:ragro_mobile/features/inventory/data/datasources/inventory_remote_datasource.dart'
     as _i870;
+import 'package:ragro_mobile/features/inventory/data/datasources/stock_movement_remote_datasource.dart'
+    as _i456;
 import 'package:ragro_mobile/features/inventory/data/repositories/inventory_repository_impl.dart'
     as _i601;
+import 'package:ragro_mobile/features/inventory/data/repositories/stock_movement_repository_impl.dart'
+    as _i619;
 import 'package:ragro_mobile/features/inventory/domain/repositories/inventory_repository.dart'
     as _i276;
+import 'package:ragro_mobile/features/inventory/domain/repositories/stock_movement_repository.dart'
+    as _i1067;
 import 'package:ragro_mobile/features/inventory/domain/usecases/create_inventory_product.dart'
     as _i291;
 import 'package:ragro_mobile/features/inventory/domain/usecases/delete_inventory_product.dart'
     as _i481;
 import 'package:ragro_mobile/features/inventory/domain/usecases/get_inventory_products.dart'
     as _i252;
+import 'package:ragro_mobile/features/inventory/domain/usecases/get_product_movements.dart'
+    as _i240;
+import 'package:ragro_mobile/features/inventory/domain/usecases/register_stock_exit.dart'
+    as _i736;
 import 'package:ragro_mobile/features/inventory/domain/usecases/update_inventory_product.dart'
     as _i626;
 import 'package:ragro_mobile/features/inventory/presentation/bloc/inventory_bloc.dart'
     as _i205;
 import 'package:ragro_mobile/features/inventory/presentation/bloc/product_form_bloc.dart'
     as _i760;
+import 'package:ragro_mobile/features/inventory/presentation/bloc/stock_exit_bloc.dart'
+    as _i567;
+import 'package:ragro_mobile/features/inventory/presentation/bloc/stock_movements_bloc.dart'
+    as _i67;
 import 'package:ragro_mobile/features/learning/data/datasources/product_mock_datasource.dart'
     as _i368;
 import 'package:ragro_mobile/features/learning/data/repositories/product_repository_impl.dart'
@@ -243,6 +257,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i870.InventoryRemoteDataSource>(
       () => _i870.InventoryRemoteDataSource(),
     );
+    gh.lazySingleton<_i456.StockMovementRemoteDataSource>(
+      () => _i456.StockMovementRemoteDataSource(),
+    );
     gh.lazySingleton<_i368.ProductMockDataSource>(
       () => _i368.ProductMockDataSource(),
     );
@@ -303,6 +320,11 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i209.AuthLocalDataSource>(
       () => _i209.AuthLocalDataSource(gh<_i460.SharedPreferences>()),
+    );
+    gh.lazySingleton<_i1067.StockMovementRepository>(
+      () => _i619.StockMovementRepositoryImpl(
+        gh<_i456.StockMovementRemoteDataSource>(),
+      ),
     );
     gh.factory<_i463.CheckoutBloc>(
       () => _i463.CheckoutBloc(gh<_i680.ConfirmOrder>()),
@@ -390,6 +412,12 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i127.ProductDetailRemoteDataSource>(),
       ),
     );
+    gh.lazySingleton<_i240.GetProductMovements>(
+      () => _i240.GetProductMovements(gh<_i1067.StockMovementRepository>()),
+    );
+    gh.lazySingleton<_i736.RegisterStockExit>(
+      () => _i736.RegisterStockExit(gh<_i1067.StockMovementRepository>()),
+    );
     gh.lazySingleton<_i43.AuthRepository>(
       () => _i579.AuthRepositoryImpl(
         gh<_i201.AuthRemoteDataSource>(),
@@ -405,6 +433,9 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i680.GetProductDetail>(
       () => _i680.GetProductDetail(gh<_i818.ProductDetailRepository>()),
+    );
+    gh.factory<_i67.StockMovementsBloc>(
+      () => _i67.StockMovementsBloc(gh<_i240.GetProductMovements>()),
     );
     gh.lazySingleton<_i191.ForgotPassword>(
       () => _i191.ForgotPassword(gh<_i43.AuthRepository>()),
@@ -482,6 +513,9 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i713.LoginBloc>(
       () => _i713.LoginBloc(gh<_i1047.LoginUser>(), gh<_i191.ForgotPassword>()),
+    );
+    gh.factory<_i567.StockExitBloc>(
+      () => _i567.StockExitBloc(gh<_i736.RegisterStockExit>()),
     );
     gh.lazySingleton<_i285.HomeRepository>(
       () => _i1055.HomeRepositoryImpl(gh<_i904.HomeRemoteDataSource>()),

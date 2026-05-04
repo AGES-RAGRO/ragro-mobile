@@ -6,12 +6,16 @@ class InventoryProductCard extends StatelessWidget {
   const InventoryProductCard({
     required this.product,
     required this.onEditTap,
+    required this.onExitTap,
+    required this.onHistoryTap,
     required this.onDeleteTap,
     super.key,
   });
 
   final InventoryProduct product;
   final VoidCallback onEditTap;
+  final VoidCallback onExitTap;
+  final VoidCallback onHistoryTap;
   final VoidCallback onDeleteTap;
 
   String _formatPrice(double price) =>
@@ -130,75 +134,33 @@ class InventoryProductCard extends StatelessWidget {
                 const SizedBox(height: 10),
 
                 // Action buttons
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
+                Wrap(
+                  spacing: 6,
+                  runSpacing: 6,
                   children: [
-                    // Edit
-                    GestureDetector(
+                    _ActionChip(
+                      label: 'Editar',
+                      icon: Icons.edit_outlined,
+                      color: AppColors.lightGreen,
                       onTap: onEditTap,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 6,
-                        ),
-                        decoration: BoxDecoration(
-                          color: AppColors.lightGreen.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: const Row(
-                          children: [
-                            Icon(
-                              Icons.edit_outlined,
-                              size: 14,
-                              color: AppColors.lightGreen,
-                            ),
-                            SizedBox(width: 4),
-                            Text(
-                              'Editar',
-                              style: TextStyle(
-                                fontFamily: 'Manrope',
-                                fontWeight: FontWeight.w600,
-                                fontSize: 13,
-                                color: AppColors.lightGreen,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
                     ),
-                    const SizedBox(width: 8),
-                    // Delete
-                    GestureDetector(
+                    _ActionChip(
+                      label: 'Saída',
+                      icon: Icons.remove_circle_outline,
+                      color: AppColors.red,
+                      onTap: onExitTap,
+                    ),
+                    _ActionChip(
+                      label: 'Histórico',
+                      icon: Icons.history,
+                      color: AppColors.placeholder,
+                      onTap: onHistoryTap,
+                    ),
+                    _ActionChip(
+                      label: 'Excluir',
+                      icon: Icons.delete_outline,
+                      color: AppColors.red,
                       onTap: onDeleteTap,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 6,
-                        ),
-                        decoration: BoxDecoration(
-                          color: AppColors.red.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: const Row(
-                          children: [
-                            Icon(
-                              Icons.delete_outline,
-                              size: 14,
-                              color: AppColors.red,
-                            ),
-                            SizedBox(width: 4),
-                            Text(
-                              'Excluir',
-                              style: TextStyle(
-                                fontFamily: 'Manrope',
-                                fontWeight: FontWeight.w600,
-                                fontSize: 13,
-                                color: AppColors.red,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
                     ),
                   ],
                 ),
@@ -206,6 +168,50 @@ class InventoryProductCard extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _ActionChip extends StatelessWidget {
+  const _ActionChip({
+    required this.label,
+    required this.icon,
+    required this.color,
+    required this.onTap,
+  });
+
+  final String label;
+  final IconData icon;
+  final Color color;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        decoration: BoxDecoration(
+          color: color.withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 13, color: color),
+            const SizedBox(width: 4),
+            Text(
+              label,
+              style: TextStyle(
+                fontFamily: 'Manrope',
+                fontWeight: FontWeight.w600,
+                fontSize: 12,
+                color: color,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

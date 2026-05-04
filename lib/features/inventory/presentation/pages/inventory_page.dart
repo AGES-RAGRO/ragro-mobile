@@ -64,7 +64,15 @@ class _InventoryView extends StatelessWidget {
                       ),
                       if (state is InventoryLoaded)
                         GestureDetector(
-                          onTap: () => context.push('/producer/stock/new'),
+                          onTap: () => context
+                              .push('/producer/stock/new')
+                              .then((_) {
+                            if (context.mounted) {
+                              context
+                                  .read<InventoryBloc>()
+                                  .add(const InventoryRefreshed());
+                            }
+                          }),
                           child: Container(
                             padding: const EdgeInsets.symmetric(
                               horizontal: 16,
@@ -228,8 +236,35 @@ class _InventoryView extends StatelessWidget {
                               final product = state.products[index];
                               return InventoryProductCard(
                                 product: product,
-                                onEditTap: () => context.push(
+                                onEditTap: () => context
+                                    .push(
                                   '/producer/stock/${product.id}/edit',
+                                )
+                                    .then((_) {
+                                  if (context.mounted) {
+                                    context.read<InventoryBloc>().add(
+                                      const InventoryRefreshed(),
+                                    );
+                                  }
+                                }),
+                                onExitTap: () => context
+                                    .push(
+                                  '/producer/stock/${product.id}/exit',
+                                  extra: {
+                                    'productName': product.name,
+                                    'unit': product.unit,
+                                  },
+                                )
+                                    .then((result) {
+                                  if (result == true && context.mounted) {
+                                    context.read<InventoryBloc>().add(
+                                      const InventoryRefreshed(),
+                                    );
+                                  }
+                                }),
+                                onHistoryTap: () => context.push(
+                                  '/producer/stock/${product.id}/history',
+                                  extra: {'productName': product.name},
                                 ),
                                 onDeleteTap: () => _confirmDelete(
                                   context,
