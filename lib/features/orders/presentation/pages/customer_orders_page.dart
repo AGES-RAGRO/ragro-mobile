@@ -30,8 +30,8 @@ class _OrdersView extends StatelessWidget {
   const _OrdersView();
 
   static const _tabs = [
-    (OrderStatus.accepted, 'Aceitos'),
     (OrderStatus.pending, 'Pendentes'),
+    (OrderStatus.accepted, 'Aceitos'),
     (OrderStatus.delivered, 'Entregues'),
     (OrderStatus.cancelled, 'Cancelados'),
   ];
@@ -119,10 +119,35 @@ class _OrdersView extends StatelessWidget {
                     );
                   }
                   if (state is OrdersFailure) {
-                    return Center(child: Text(state.message));
+                    return Center(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            state.message,
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                              fontFamily: 'Manrope',
+                              fontSize: 14,
+                              color: AppColors.placeholder,
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          TextButton(
+                            onPressed: () => context.read<OrdersBloc>().add(
+                              const OrdersStarted(OrderStatus.pending),
+                            ),
+                            child: const Text('Tentar novamente'),
+                          ),
+                        ],
+                      ),
+                    );
                   }
                   if (state is! OrdersLoaded) return const SizedBox.shrink();
-                  if (state.orders.isEmpty) {
+                  final orders = state.orders
+                      .where((order) => order.status == state.activeTab)
+                      .toList();
+                  if (orders.isEmpty) {
                     return Center(
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
@@ -147,10 +172,10 @@ class _OrdersView extends StatelessWidget {
                   }
                   return ListView.separated(
                     padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                    itemCount: state.orders.length,
+                    itemCount: orders.length,
                     separatorBuilder: (_, __) => const SizedBox(height: 13),
                     itemBuilder: (context, index) =>
-                        OrderCard(order: state.orders[index]),
+                        OrderCard(order: orders[index]),
                   );
                 },
               ),

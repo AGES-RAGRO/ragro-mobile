@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:ragro_mobile/features/producer_orders/domain/entities/producer_order.dart';
 import 'package:ragro_mobile/features/producer_orders/domain/entities/producer_order_status.dart';
 
 sealed class ProducerOrderDetailEvent extends Equatable {
@@ -8,10 +9,11 @@ sealed class ProducerOrderDetailEvent extends Equatable {
 }
 
 class ProducerOrderDetailStarted extends ProducerOrderDetailEvent {
-  const ProducerOrderDetailStarted(this.orderId);
+  const ProducerOrderDetailStarted(this.orderId, {this.initialOrder});
   final String orderId;
+  final ProducerOrder? initialOrder;
   @override
-  List<Object?> get props => [orderId];
+  List<Object?> get props => [orderId, initialOrder];
 }
 
 class ProducerOrderDetailConfirmed extends ProducerOrderDetailEvent {

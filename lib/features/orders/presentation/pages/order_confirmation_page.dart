@@ -8,13 +8,13 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:ragro_mobile/core/di/injection.dart';
 import 'package:ragro_mobile/core/theme/app_colors.dart';
+import 'package:ragro_mobile/features/cart/domain/entities/cart.dart';
+import 'package:ragro_mobile/features/cart/domain/entities/cart_item.dart';
 import 'package:ragro_mobile/features/cart/presentation/bloc/cart_bloc.dart';
 import 'package:ragro_mobile/features/cart/presentation/bloc/cart_event.dart';
-import 'package:ragro_mobile/features/orders/domain/entities/order.dart';
 import 'package:ragro_mobile/features/orders/presentation/bloc/checkout_bloc.dart';
 import 'package:ragro_mobile/features/orders/presentation/bloc/checkout_event.dart';
 import 'package:ragro_mobile/features/orders/presentation/bloc/checkout_state.dart';
-import 'package:ragro_mobile/features/orders/presentation/widgets/order_item_row.dart';
 
 class OrderConfirmationPage extends StatelessWidget {
   const OrderConfirmationPage({super.key});
@@ -26,10 +26,17 @@ class OrderConfirmationPage extends StatelessWidget {
       child: BlocListener<CheckoutBloc, CheckoutState>(
         listener: (context, state) {
           if (state is CheckoutSuccess) {
-            // Clear the cart after confirming
-            getIt<CartBloc>().add(const CartCleared());
-            // Navigate to order detail
+            getIt<CartBloc>().add(const CartOrderPlaced());
             context.go('/customer/orders/${state.order.id}');
+          }
+          if (state is CheckoutFailure) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(_friendlyError(state.message)),
+                backgroundColor: AppColors.red,
+                behavior: SnackBarBehavior.floating,
+              ),
+            );
           }
         },
         child: BlocBuilder<CheckoutBloc, CheckoutState>(
@@ -41,29 +48,88 @@ class OrderConfirmationPage extends StatelessWidget {
                 ),
               );
             }
-            if (state is CheckoutFailure) {
-              return Scaffold(body: Center(child: Text(state.message)));
-            }
-            if (state is! CheckoutReady && state is! CheckoutSuccess) {
-              return const Scaffold();
+
+            final cart = switch (state) {
+              CheckoutReady(:final cart) => cart,
+              CheckoutConfirming(:final cart) => cart,
+              CheckoutFailure(:final cart) => cart,
+              _ => null,
+            };
+
+            if (cart == null) {
+              return Scaffold(
+                backgroundColor: AppColors.white,
+                body: SafeArea(
+                  child: Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(24),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(
+                            Icons.shopping_cart_outlined,
+                            size: 56,
+                            color: AppColors.placeholder,
+                          ),
+                          const SizedBox(height: 16),
+                          const Text(
+                            'Não foi possível carregar o carrinho.',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontFamily: 'Manrope',
+                              fontSize: 16,
+                              color: AppColors.black,
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          ElevatedButton(
+                            onPressed: () => context
+                                .read<CheckoutBloc>()
+                                .add(const CheckoutStarted('cart')),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.darkGreen,
+                              foregroundColor: AppColors.white,
+                            ),
+                            child: const Text('Tentar novamente'),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              );
             }
 
-            final order = state is CheckoutReady
-                ? state.order
-                : (state as CheckoutSuccess).order;
-
-            return _CheckoutView(order: order);
+            return _CheckoutView(
+              cart: cart,
+              isConfirming: state is CheckoutConfirming,
+            );
           },
         ),
       ),
     );
   }
+
+  static String _friendlyError(String message) {
+    final lower = message.toLowerCase();
+    if (lower.contains('400') || lower.contains('invalid')) {
+      return 'Pedido inválido. Verifique seu carrinho e tente novamente.';
+    }
+    if (lower.contains('401') || lower.contains('unauthorized')) {
+      return 'Sessão expirada. Faça login novamente.';
+    }
+    if (lower.contains('404') || lower.contains('notfound')) {
+      return 'Carrinho não encontrado.';
+    }
+    return 'Não foi possível confirmar o pedido. Tente novamente.';
+  }
 }
 
 class _CheckoutView extends StatelessWidget {
-  const _CheckoutView({required this.order});
+  const _CheckoutView({required this.cart, this.isConfirming = false});
 
-  final Order order;
+  final Cart cart;
+  final bool isConfirming;
 
   String _formatPrice(double price) =>
       'R\$ ${price.toStringAsFixed(2).replaceAll('.', ',')}';
@@ -171,7 +237,7 @@ class _CheckoutView extends StatelessWidget {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                      order.deliveryAddress.fullAddress,
+                                      cart.farmName,
                                       style: const TextStyle(
                                         fontFamily: 'Manrope',
                                         fontWeight: FontWeight.w700,
@@ -180,7 +246,7 @@ class _CheckoutView extends StatelessWidget {
                                       ),
                                     ),
                                     Text(
-                                      order.deliveryAddress.cityStateZip,
+                                      'Endereço será confirmado pelo cadastro',
                                       style: const TextStyle(
                                         fontFamily: 'Manrope',
                                         fontSize: 14,
@@ -261,7 +327,7 @@ class _CheckoutView extends StatelessWidget {
                                 borderRadius: BorderRadius.circular(9999),
                               ),
                               child: Text(
-                                '${order.items.length} Itens',
+                                '${cart.items.length} Itens',
                                 style: const TextStyle(
                                   fontFamily: 'Manrope',
                                   fontWeight: FontWeight.w700,
@@ -274,7 +340,7 @@ class _CheckoutView extends StatelessWidget {
                           ],
                         ),
                         const SizedBox(height: 16),
-                        ...order.items.map((item) => OrderItemRow(item: item)),
+                        ...cart.items.map((item) => _CartItemRow(item: item)),
                       ],
                     ),
                   ),
@@ -332,7 +398,9 @@ class _CheckoutView extends StatelessWidget {
                                           ),
                                         ),
                                         Text(
-                                          order.bankInfo.bank,
+                                          cart.bankName.isNotEmpty
+                                              ? cart.bankName
+                                              : '-',
                                           style: const TextStyle(
                                             fontFamily: 'Manrope',
                                             fontWeight: FontWeight.w700,
@@ -364,7 +432,9 @@ class _CheckoutView extends StatelessWidget {
                                           ),
                                         ),
                                         Text(
-                                          order.bankInfo.agency,
+                                          cart.bankAgency.isNotEmpty
+                                              ? cart.bankAgency
+                                              : '-',
                                           style: const TextStyle(
                                             fontFamily: 'Manrope',
                                             fontWeight: FontWeight.w700,
@@ -390,7 +460,9 @@ class _CheckoutView extends StatelessWidget {
                                           ),
                                         ),
                                         Text(
-                                          order.bankInfo.account,
+                                          cart.bankAccount.isNotEmpty
+                                              ? cart.bankAccount
+                                              : '-',
                                           style: const TextStyle(
                                             fontFamily: 'Manrope',
                                             fontWeight: FontWeight.w700,
@@ -431,7 +503,9 @@ class _CheckoutView extends StatelessWidget {
                                           ),
                                         ),
                                         Text(
-                                          order.bankInfo.pixKey,
+                                          cart.bankPixKey.isNotEmpty
+                                              ? cart.bankPixKey
+                                              : 'Disponível nos detalhes do pedido',
                                           style: const TextStyle(
                                             fontFamily: 'Manrope',
                                             fontWeight: FontWeight.w700,
@@ -543,7 +617,7 @@ class _CheckoutView extends StatelessWidget {
                         ),
                       ),
                       Text(
-                        _formatPrice(order.totalAmount),
+                        _formatPrice(cart.totalAmount),
                         style: const TextStyle(
                           fontFamily: 'Manrope',
                           fontSize: 14,
@@ -591,7 +665,7 @@ class _CheckoutView extends StatelessWidget {
                         ),
                       ),
                       Text(
-                        _formatPrice(order.totalAmount),
+                        _formatPrice(cart.totalAmount),
                         style: const TextStyle(
                           fontFamily: 'Manrope',
                           fontWeight: FontWeight.w700,
@@ -603,50 +677,47 @@ class _CheckoutView extends StatelessWidget {
                   ),
                   const SizedBox(height: 16),
                   // Confirm button
-                  BlocBuilder<CheckoutBloc, CheckoutState>(
-                    builder: (context, state) {
-                      final isLoading = state is CheckoutLoading;
-                      return GestureDetector(
-                        onTap: isLoading
-                            ? null
-                            : () => context.read<CheckoutBloc>().add(
-                                const CheckoutConfirmed('cart'),
-                              ),
-                        child: Container(
-                          height: 56,
-                          decoration: BoxDecoration(
-                            color: AppColors.darkGreen,
-                            borderRadius: BorderRadius.circular(24),
+                  GestureDetector(
+                    onTap: isConfirming
+                        ? null
+                        : () => context.read<CheckoutBloc>().add(
+                            const CheckoutConfirmed('cart'),
                           ),
-                          child: Center(
-                            child: isLoading
-                                ? const CircularProgressIndicator(
-                                    color: AppColors.white,
-                                  )
-                                : const Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Text(
-                                        'Confirmar Pedido',
-                                        style: TextStyle(
-                                          fontFamily: 'Manrope',
-                                          fontWeight: FontWeight.w700,
-                                          fontSize: 16,
-                                          color: AppColors.white,
-                                        ),
-                                      ),
-                                      SizedBox(width: 8),
-                                      Icon(
-                                        Icons.check_circle_outline,
-                                        color: AppColors.white,
-                                        size: 20,
-                                      ),
-                                    ],
+                    child: Container(
+                      height: 56,
+                      decoration: BoxDecoration(
+                        color: isConfirming
+                            ? AppColors.darkGreen.withValues(alpha: 0.7)
+                            : AppColors.darkGreen,
+                        borderRadius: BorderRadius.circular(24),
+                      ),
+                      child: Center(
+                        child: isConfirming
+                            ? const CircularProgressIndicator(
+                                color: AppColors.white,
+                              )
+                            : const Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    'Confirmar Pedido',
+                                    style: TextStyle(
+                                      fontFamily: 'Manrope',
+                                      fontWeight: FontWeight.w700,
+                                      fontSize: 16,
+                                      color: AppColors.white,
+                                    ),
                                   ),
-                          ),
-                        ),
-                      );
-                    },
+                                  SizedBox(width: 8),
+                                  Icon(
+                                    Icons.check_circle_outline,
+                                    color: AppColors.white,
+                                    size: 20,
+                                  ),
+                                ],
+                              ),
+                      ),
+                    ),
                   ),
                   const SizedBox(height: 8),
                   const Text(
@@ -663,6 +734,77 @@ class _CheckoutView extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _CartItemRow extends StatelessWidget {
+  const _CartItemRow({required this.item});
+
+  final CartItem item;
+
+  String _formatPrice(double price) =>
+      'R\$ ${price.toStringAsFixed(2).replaceAll('.', ',')}';
+
+  String _formatQuantity(double quantity) {
+    if (quantity % 1 == 0) return quantity.toInt().toString();
+    return quantity.toStringAsFixed(2).replaceAll('.', ',');
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Row(
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(16),
+            child: Container(
+              width: 64,
+              height: 64,
+              color: AppColors.lightGreen.withValues(alpha: 0.05),
+              child: item.imageUrl.isNotEmpty
+                  ? Image.network(item.imageUrl, fit: BoxFit.cover)
+                  : const Icon(Icons.eco, color: AppColors.lightGreen),
+            ),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  item.productName,
+                  style: const TextStyle(
+                    fontFamily: 'Manrope',
+                    fontWeight: FontWeight.w700,
+                    fontSize: 14,
+                    color: AppColors.black,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Qtd: ${_formatQuantity(item.quantity)}${item.unityType}',
+                  style: const TextStyle(
+                    fontFamily: 'Manrope',
+                    fontSize: 14,
+                    color: AppColors.placeholder,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Text(
+            _formatPrice(item.subtotal),
+            style: const TextStyle(
+              fontFamily: 'Manrope',
+              fontWeight: FontWeight.w700,
+              fontSize: 14,
+              color: AppColors.black,
+            ),
+          ),
+        ],
       ),
     );
   }

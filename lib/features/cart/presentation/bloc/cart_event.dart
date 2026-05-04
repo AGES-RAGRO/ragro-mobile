@@ -39,3 +39,7 @@ class CartItemRemoved extends CartEvent {
 class CartCleared extends CartEvent {
   const CartCleared();
 }
+
+class CartOrderPlaced extends CartEvent {
+  const CartOrderPlaced();
+}

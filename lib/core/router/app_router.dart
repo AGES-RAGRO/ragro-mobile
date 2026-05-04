@@ -28,6 +28,7 @@ import 'package:ragro_mobile/features/orders/presentation/pages/rate_producer_pa
 import 'package:ragro_mobile/features/producer_management/presentation/pages/producer_edit_profile_page.dart';
 import 'package:ragro_mobile/features/producer_management/presentation/pages/producer_profile_page.dart';
 import 'package:ragro_mobile/features/producer_management/presentation/pages/producer_settings_page.dart';
+import 'package:ragro_mobile/features/producer_orders/domain/entities/producer_order.dart';
 import 'package:ragro_mobile/features/producer_orders/presentation/pages/producer_order_detail_page.dart';
 import 'package:ragro_mobile/features/producer_orders/presentation/pages/producer_orders_page.dart';
 import 'package:ragro_mobile/features/producer_orders/presentation/pages/route_calculation_page.dart';
@@ -205,6 +206,7 @@ class AppRouter {
                       path: 'orders/:orderId',
                       builder: (context, state) => ProducerOrderDetailPage(
                         orderId: state.pathParameters['orderId']!,
+                        initialOrder: state.extra as ProducerOrder?,
                       ),
                     ),
                     GoRoute(

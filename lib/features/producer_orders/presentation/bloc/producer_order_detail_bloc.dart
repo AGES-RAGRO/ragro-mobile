@@ -1,5 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
+import 'package:ragro_mobile/features/producer_orders/domain/entities/producer_order_status.dart';
 import 'package:ragro_mobile/features/producer_orders/domain/usecases/confirm_producer_order.dart';
 import 'package:ragro_mobile/features/producer_orders/domain/usecases/get_producer_order_detail.dart';
 import 'package:ragro_mobile/features/producer_orders/domain/usecases/refuse_producer_order.dart';
@@ -31,6 +32,10 @@ class ProducerOrderDetailBloc
     ProducerOrderDetailStarted event,
     Emitter<ProducerOrderDetailState> emit,
   ) async {
+    if (event.initialOrder != null) {
+      emit(ProducerOrderDetailLoaded(event.initialOrder!));
+      return;
+    }
     emit(const ProducerOrderDetailLoading());
     try {
       final order = await _getDetail(event.orderId);
@@ -49,7 +54,9 @@ class ProducerOrderDetailBloc
     emit(ProducerOrderDetailConfirming(current.order));
     try {
       await _confirmOrder(event.orderId);
-      final updated = await _getDetail(event.orderId);
+      final updated = current.order.copyWith(
+        status: ProducerOrderStatus.accepted,
+      );
       emit(ProducerOrderDetailSuccess(order: updated, action: 'confirmed'));
       emit(ProducerOrderDetailLoaded(updated));
     } on Exception catch (e) {
@@ -66,7 +73,9 @@ class ProducerOrderDetailBloc
     emit(ProducerOrderDetailRefusing(current.order));
     try {
       await _refuseOrder(event.orderId);
-      final updated = await _getDetail(event.orderId);
+      final updated = current.order.copyWith(
+        status: ProducerOrderStatus.cancelled,
+      );
       emit(ProducerOrderDetailSuccess(order: updated, action: 'refused'));
       emit(ProducerOrderDetailLoaded(updated));
     } on Exception catch (e) {
@@ -83,7 +92,7 @@ class ProducerOrderDetailBloc
     emit(ProducerOrderDetailUpdatingStatus(current.order));
     try {
       await _updateStatus(event.orderId, event.status);
-      final updated = await _getDetail(event.orderId);
+      final updated = current.order.copyWith(status: event.status);
       emit(
         ProducerOrderDetailSuccess(order: updated, action: 'status_updated'),
       );

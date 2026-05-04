@@ -8,6 +8,10 @@ class CartModel extends Cart {
     required super.farmName,
     required super.items,
     required super.totalAmount,
+    super.bankName,
+    super.bankAgency,
+    super.bankAccount,
+    super.bankPixKey,
   });
 
   const CartModel.empty()
@@ -24,12 +28,26 @@ class CartModel extends Cart {
         .whereType<Map<String, dynamic>>()
         .toList();
 
+    final producer =
+        json['producer'] as Map<String, dynamic>? ??
+        json['farmer'] as Map<String, dynamic>?;
+    final bankJson =
+        json['bankInfo'] as Map<String, dynamic>? ??
+        producer?['bankInfo'] as Map<String, dynamic>? ??
+        const <String, dynamic>{};
+
     return CartModel(
       id: json['id'] as String? ?? '',
-      producerId: json['farmerId'] as String? ?? '',
+      producerId:
+          json['farmerId'] as String? ?? json['producerId'] as String? ?? '',
       farmName: json['farmName'] as String? ?? '',
       items: itemsJson.map(CartItemModel.fromJson).toList(),
       totalAmount: (json['totalAmount'] as num?)?.toDouble() ?? 0.0,
+      bankName: bankJson['bank'] as String? ?? '',
+      bankAgency: bankJson['agency'] as String? ?? '',
+      bankAccount: bankJson['account'] as String? ?? '',
+      bankPixKey:
+          bankJson['pixKey'] as String? ?? bankJson['pix_key'] as String? ?? '',
     );
   }
 }

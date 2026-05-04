@@ -50,7 +50,17 @@ abstract final class ApiEndpoints {
 
   // Orders
   static String get orders => '$_base/orders';
+  static String get consumerOrders => '$_base/orders/consumer';
   static String order(String id) => '$_base/orders/$id';
+  static String customerOrder(String id) => '$_base/orders/customer/$id';
+  static String customerOrderCancel(String id) =>
+      '$_base/orders/customer/$id/cancel';
+  static String customerOrderConfirmDelivery(String id) =>
+      '$_base/orders/customer/$id/confirm-delivery';
+  static String orderCancel(String id) => '$_base/orders/$id/cancel';
+  static String orderStatus(String id) => '$_base/orders/$id/status';
+  static String orderConfirm(String id) => '$_base/orders/$id/confirm';
+  static String orderRepeat(String id) => '$_base/orders/$id/repeat';
   static String orderRating(String id) => '$_base/orders/$id/rating';
 
   // Customer cart
@@ -68,10 +78,11 @@ abstract final class ApiEndpoints {
 
   // Producer orders
   static String get producerOrders => '$_base/orders/producer';
+  static String producerOrder(String id) => '$_base/orders/producer/$id';
   static String get producerOrdersToday => '$_base/orders/today';
-  static String producerOrderConfirm(String id) => '$_base/orders/$id/confirm';
-  static String producerOrderStatus(String id) => '$_base/orders/$id/status';
-  static String producerOrderCancel(String id) => '$_base/orders/$id/cancel';
+  static String producerOrderConfirm(String id) => orderConfirm(id);
+  static String producerOrderStatus(String id) => orderStatus(id);
+  static String producerOrderCancel(String id) => orderCancel(id);
 
   // Admin
   static String get adminProducers => '$_base/admin/producers';
