@@ -6,6 +6,7 @@ class InventoryProductCard extends StatelessWidget {
   const InventoryProductCard({
     required this.product,
     required this.onEditTap,
+    required this.onEntryTap,
     required this.onExitTap,
     required this.onHistoryTap,
     required this.onDeleteTap,
@@ -14,6 +15,7 @@ class InventoryProductCard extends StatelessWidget {
 
   final InventoryProduct product;
   final VoidCallback onEditTap;
+  final VoidCallback onEntryTap;
   final VoidCallback onExitTap;
   final VoidCallback onHistoryTap;
   final VoidCallback onDeleteTap;
@@ -48,20 +50,31 @@ class InventoryProductCard extends StatelessWidget {
             decoration: BoxDecoration(
               color: AppColors.darkGreen.withValues(alpha: 0.06),
               borderRadius: BorderRadius.circular(16),
-              image: product.imageUrl.isNotEmpty
-                  ? DecorationImage(
-                      image: NetworkImage(product.imageUrl),
-                      fit: BoxFit.cover,
-                    )
-                  : null,
             ),
-            child: product.imageUrl.isEmpty
-                ? const Icon(
-                    Icons.eco_outlined,
-                    size: 40,
-                    color: AppColors.darkGreen,
-                  )
-                : null,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(16),
+              child: product.imageUrl.isNotEmpty
+                  ? Image.network(
+                      product.imageUrl,
+                      width: 96,
+                      height: 96,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) => const Center(
+                        child: Icon(
+                          Icons.eco_outlined,
+                          size: 40,
+                          color: AppColors.darkGreen,
+                        ),
+                      ),
+                    )
+                  : const Center(
+                      child: Icon(
+                        Icons.eco_outlined,
+                        size: 40,
+                        color: AppColors.darkGreen,
+                      ),
+                    ),
+            ),
           ),
           const SizedBox(width: 12),
 
@@ -151,6 +164,12 @@ class InventoryProductCard extends StatelessWidget {
                       icon: Icons.edit_outlined,
                       color: AppColors.lightGreen,
                       onTap: onEditTap,
+                    ),
+                    _ActionChip(
+                      label: 'Entrada',
+                      icon: Icons.add_circle_outline,
+                      color: AppColors.darkGreen,
+                      onTap: onEntryTap,
                     ),
                     _ActionChip(
                       label: 'Saída',

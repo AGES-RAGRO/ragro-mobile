@@ -51,6 +51,8 @@ class _ProductFormViewState extends State<_ProductFormView> {
   bool _initialized = false;
   XFile? _pickedPhoto;
   String? _existingImageUrl;
+  List<int> _selectedCategoryIds = [];
+  List<Map<String, dynamic>> _availableCategories = [];
 
   static const _units = ['kg', 'g', 'un', 'maço', 'pacote', 'box', 'liter', 'ml', 'dozen'];
 
@@ -77,7 +79,9 @@ class _ProductFormViewState extends State<_ProductFormView> {
       _selectedUnit = state.product!.unit;
       _stockCount = state.product!.stock;
       _existingImageUrl = state.product!.imageUrl;
+      _selectedCategoryIds = List.of(state.product!.categoryIds);
     }
+    _availableCategories = state.availableCategories;
   }
 
   Future<void> _pickImage() async {
@@ -140,6 +144,7 @@ class _ProductFormViewState extends State<_ProductFormView> {
         price: price,
         unit: _selectedUnit,
         stock: _stockCount,
+        categoryIds: _selectedCategoryIds,
         photo: _pickedPhoto,
       ),
     );
@@ -205,32 +210,52 @@ class _ProductFormViewState extends State<_ProductFormView> {
                   decoration: BoxDecoration(
                     color: AppColors.darkGreen.withValues(alpha: 0.06),
                     borderRadius: BorderRadius.circular(16),
-                    image: _pickedPhoto != null
-                        ? DecorationImage(
-                            image: kIsWeb
-                                ? NetworkImage(_pickedPhoto!.path)
-                                : FileImage(File(_pickedPhoto!.path)) as ImageProvider,
-                            fit: BoxFit.cover,
-                          )
-                        : (_existingImageUrl != null &&
-                                _existingImageUrl!.isNotEmpty)
-                            ? DecorationImage(
-                                image: NetworkImage(_existingImageUrl!),
-                                fit: BoxFit.cover,
-                              )
-                            : null,
                   ),
                   child: Stack(
                     alignment: Alignment.center,
                     children: [
-                      if (_pickedPhoto == null &&
-                          (_existingImageUrl == null ||
-                              _existingImageUrl!.isEmpty))
-                        const Icon(
-                          Icons.eco_outlined,
-                          size: 64,
-                          color: AppColors.darkGreen,
-                        ),
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(16),
+                        child: _pickedPhoto != null
+                            ? Image(
+                                image: kIsWeb
+                                    ? NetworkImage(_pickedPhoto!.path)
+                                    : FileImage(File(_pickedPhoto!.path))
+                                        as ImageProvider,
+                                width: double.infinity,
+                                height: 210,
+                                fit: BoxFit.cover,
+                                errorBuilder: (_, __, ___) => const Center(
+                                  child: Icon(
+                                    Icons.eco_outlined,
+                                    size: 64,
+                                    color: AppColors.darkGreen,
+                                  ),
+                                ),
+                              )
+                            : (_existingImageUrl != null &&
+                                    _existingImageUrl!.isNotEmpty)
+                                ? Image.network(
+                                    _existingImageUrl!,
+                                    width: double.infinity,
+                                    height: 210,
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (_, __, ___) => const Center(
+                                      child: Icon(
+                                        Icons.eco_outlined,
+                                        size: 64,
+                                        color: AppColors.darkGreen,
+                                      ),
+                                    ),
+                                  )
+                                : const Center(
+                                    child: Icon(
+                                      Icons.eco_outlined,
+                                      size: 64,
+                                      color: AppColors.darkGreen,
+                                    ),
+                                  ),
+                      ),
                       Positioned(
                         bottom: 12,
                         child: GestureDetector(
@@ -384,6 +409,57 @@ class _ProductFormViewState extends State<_ProductFormView> {
                       ? null
                       : (val) => setState(() => _stockCount = val),
                 ),
+
+                if (_availableCategories.isNotEmpty) ...[
+                  const SizedBox(height: 16),
+                  const _FieldLabel('Categorias'),
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 4,
+                    children: _availableCategories.map((cat) {
+                      final id = cat['id'] as int;
+                      final name = (cat['name'] as String?) ?? '';
+                      final selected = _selectedCategoryIds.contains(id);
+                      return FilterChip(
+                        label: Text(
+                          name,
+                          style: TextStyle(
+                            fontFamily: 'Manrope',
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                            color: selected ? AppColors.white : AppColors.darkGreen,
+                          ),
+                        ),
+                        selected: selected,
+                        onSelected: isLoading
+                            ? null
+                            : (checked) {
+                                setState(() {
+                                  if (checked) {
+                                    _selectedCategoryIds.add(id);
+                                  } else {
+                                    _selectedCategoryIds.remove(id);
+                                  }
+                                });
+                              },
+                        selectedColor: AppColors.darkGreen,
+                        backgroundColor: AppColors.darkGreen.withValues(alpha: 0.08),
+                        checkmarkColor: AppColors.white,
+                        side: BorderSide(
+                          color: selected
+                              ? AppColors.darkGreen
+                              : AppColors.darkGreen.withValues(alpha: 0.4),
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        showCheckmark: false,
+                        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                      );
+                    }).toList(),
+                  ),
+                ],
 
                 const SizedBox(height: 32),
 

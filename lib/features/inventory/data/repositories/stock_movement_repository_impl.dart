@@ -23,6 +23,17 @@ class StockMovementRepositoryImpl implements StockMovementRepository {
   );
 
   @override
+  Future<StockMovement> registerEntry({
+    required String productId,
+    required double quantity,
+    String? notes,
+  }) => _dataSource.registerEntry(
+    productId: productId,
+    quantity: quantity,
+    notes: notes,
+  );
+
+  @override
   Future<List<StockMovement>> getProductMovements(
     String productId, {
     int page = 0,

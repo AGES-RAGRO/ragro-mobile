@@ -129,6 +129,8 @@ import 'package:ragro_mobile/features/inventory/domain/usecases/get_inventory_pr
     as _i252;
 import 'package:ragro_mobile/features/inventory/domain/usecases/get_product_movements.dart'
     as _i240;
+import 'package:ragro_mobile/features/inventory/domain/usecases/register_stock_entry.dart'
+    as _i835;
 import 'package:ragro_mobile/features/inventory/domain/usecases/register_stock_exit.dart'
     as _i736;
 import 'package:ragro_mobile/features/inventory/domain/usecases/update_inventory_product.dart'
@@ -139,6 +141,8 @@ import 'package:ragro_mobile/features/inventory/presentation/bloc/inventory_bloc
     as _i205;
 import 'package:ragro_mobile/features/inventory/presentation/bloc/product_form_bloc.dart'
     as _i760;
+import 'package:ragro_mobile/features/inventory/presentation/bloc/stock_entry_bloc.dart'
+    as _i44;
 import 'package:ragro_mobile/features/inventory/presentation/bloc/stock_exit_bloc.dart'
     as _i567;
 import 'package:ragro_mobile/features/inventory/presentation/bloc/stock_movements_bloc.dart'
@@ -413,6 +417,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i240.GetProductMovements>(
       () => _i240.GetProductMovements(gh<_i1067.StockMovementRepository>()),
     );
+    gh.lazySingleton<_i835.RegisterStockEntry>(
+      () => _i835.RegisterStockEntry(gh<_i1067.StockMovementRepository>()),
+    );
     gh.lazySingleton<_i736.RegisterStockExit>(
       () => _i736.RegisterStockExit(gh<_i1067.StockMovementRepository>()),
     );
@@ -425,6 +432,18 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i830.CartRepository>(
       () => _i939.CartRepositoryImpl(gh<_i58.CartRemoteDataSource>()),
+    );
+    gh.factory<_i760.ProductFormBloc>(
+      () => _i760.ProductFormBloc(
+        gh<_i252.GetInventoryProducts>(),
+        gh<_i291.CreateInventoryProduct>(),
+        gh<_i626.UpdateInventoryProduct>(),
+        gh<_i279.UploadProductPhoto>(),
+        gh<_i870.InventoryRemoteDataSource>(),
+      ),
+    );
+    gh.factory<_i44.StockEntryBloc>(
+      () => _i44.StockEntryBloc(gh<_i835.RegisterStockEntry>()),
     );
     gh.lazySingleton<_i38.SearchRepository>(
       () => _i563.SearchRepositoryImpl(gh<_i987.SearchRemoteDataSource>()),
@@ -452,14 +471,6 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i485.RequestPasswordReset>(
       () => _i485.RequestPasswordReset(gh<_i43.AuthRepository>()),
-    );
-    gh.factory<_i760.ProductFormBloc>(
-      () => _i760.ProductFormBloc(
-        gh<_i252.GetInventoryProducts>(),
-        gh<_i291.CreateInventoryProduct>(),
-        gh<_i626.UpdateInventoryProduct>(),
-        gh<_i279.UploadProductPhoto>(),
-      ),
     );
     gh.factory<_i205.InventoryBloc>(
       () => _i205.InventoryBloc(

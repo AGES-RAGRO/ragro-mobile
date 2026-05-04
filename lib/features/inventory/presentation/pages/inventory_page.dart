@@ -247,6 +247,21 @@ class _InventoryView extends StatelessWidget {
                                     );
                                   }
                                 }),
+                                onEntryTap: () => context
+                                    .push(
+                                  '/producer/stock/${product.id}/entry',
+                                  extra: {
+                                    'productName': product.name,
+                                    'unit': product.unit,
+                                  },
+                                )
+                                    .then((result) {
+                                  if (result == true && context.mounted) {
+                                    context.read<InventoryBloc>().add(
+                                      const InventoryRefreshed(),
+                                    );
+                                  }
+                                }),
                                 onExitTap: () => context
                                     .push(
                                   '/producer/stock/${product.id}/exit',

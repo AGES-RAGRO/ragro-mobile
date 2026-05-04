@@ -21,6 +21,7 @@ class ProductFormSaved extends ProductFormEvent {
     required this.price,
     required this.unit,
     required this.stock,
+    required this.categoryIds,
     this.photo,
   });
 
@@ -29,10 +30,11 @@ class ProductFormSaved extends ProductFormEvent {
   final double price;
   final String unit;
   final double stock;
+  final List<int> categoryIds;
   final XFile? photo;
 
   @override
-  List<Object?> get props => [name, description, price, unit, stock, photo];
+  List<Object?> get props => [name, description, price, unit, stock, categoryIds, photo];
 }
 
 class ProductFormPhotoPicked extends ProductFormEvent {

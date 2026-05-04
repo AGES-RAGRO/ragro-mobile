@@ -21,6 +21,7 @@ import 'package:ragro_mobile/features/customer_profile/presentation/pages/custom
 import 'package:ragro_mobile/features/home/presentation/pages/customer_home_page.dart';
 import 'package:ragro_mobile/features/inventory/presentation/pages/inventory_page.dart';
 import 'package:ragro_mobile/features/inventory/presentation/pages/product_form_page.dart';
+import 'package:ragro_mobile/features/inventory/presentation/pages/stock_entry_page.dart';
 import 'package:ragro_mobile/features/inventory/presentation/pages/stock_exit_page.dart';
 import 'package:ragro_mobile/features/inventory/presentation/pages/stock_movements_page.dart';
 import 'package:ragro_mobile/features/orders/presentation/pages/customer_orders_page.dart';
@@ -232,6 +233,19 @@ class AppRouter {
                       builder: (context, state) => ProductFormPage(
                         productId: state.pathParameters['productId'],
                       ),
+                    ),
+                    GoRoute(
+                      path: ':productId/entry',
+                      builder: (context, state) {
+                        final extra =
+                            state.extra as Map<String, dynamic>? ?? {};
+                        return StockEntryPage(
+                          productId: state.pathParameters['productId']!,
+                          productName:
+                              extra['productName'] as String? ?? '',
+                          unit: extra['unit'] as String? ?? 'un',
+                        );
+                      },
                     ),
                     GoRoute(
                       path: ':productId/exit',

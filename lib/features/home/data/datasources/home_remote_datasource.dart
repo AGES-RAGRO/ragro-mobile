@@ -30,9 +30,44 @@ class HomeRemoteDataSource {
     }
   }
 
-  /// Gets recommended products for the home screen.
+  /// Gets recommended products by loading products from the first active producers.
   Future<List<HomeProductModel>> getRecommendedProducts() async {
-    await Future<void>.delayed(const Duration(milliseconds: 600));
-    return HomeProductModel.mocks();
+    try {
+      final producersResp = await _apiClient.dio.get<Map<String, dynamic>>(
+        ApiEndpoints.producers,
+        queryParameters: {'page': 0, 'size': 4},
+      );
+      final paged = PaginatedResponse.fromJson(
+        producersResp.data!,
+        ProducerModel.fromJson,
+      );
+
+      final products = <HomeProductModel>[];
+      for (final producer in paged.content) {
+        final resp = await _apiClient.dio.get<dynamic>(
+          ApiEndpoints.producerProducts(producer.id),
+        );
+        final raw = resp.data;
+        final list = raw is List
+            ? raw.cast<Map<String, dynamic>>()
+            : ((raw as Map<String, dynamic>?))?['content']
+                  as List<dynamic>? ??
+              [];
+        products.addAll(
+          list
+              .cast<Map<String, dynamic>>()
+              .map(
+                (json) => HomeProductModel.fromJson(
+                  json,
+                  fallbackFarmName: producer.name,
+                ),
+              ),
+        );
+        if (products.length >= 8) break;
+      }
+      return products.take(8).toList();
+    } on DioException catch (e) {
+      throw e.error as ApiException? ?? const UnknownApiException();
+    }
   }
 }

@@ -59,6 +59,9 @@ class ReviewCard extends StatelessWidget {
                       backgroundImage: review.authorAvatarUrl != null
                           ? NetworkImage(review.authorAvatarUrl!)
                           : null,
+                      onBackgroundImageError: review.authorAvatarUrl != null
+                          ? (_, __) {}
+                          : null,
                       child: review.authorAvatarUrl == null
                           ? const Icon(
                               Icons.person,

@@ -1,3 +1,4 @@
+import 'package:ragro_mobile/core/network/api_endpoints.dart';
 import 'package:ragro_mobile/features/producer_profile/domain/entities/public_producer.dart';
 
 class PublicProducerModel extends PublicProducer {
@@ -49,8 +50,8 @@ class PublicProducerModel extends PublicProducer {
       location: location,
       description: json['description'] as String? ?? '',
       story: json['story'] as String? ?? '',
-      avatarUrl: json['avatarS3'] as String? ?? '',
-      coverUrl: json['displayPhotoS3'] as String? ?? '',
+      avatarUrl: ApiEndpoints.resolveMediaUrl(json['avatarS3'] as String? ?? ''),
+      coverUrl: ApiEndpoints.resolveMediaUrl(json['displayPhotoS3'] as String? ?? ''),
       averageRating: (json['averageRating'] as num?)?.toDouble() ?? 0.0,
       totalReviews: json['totalReviews'] as int? ?? 0,
       phone: json['phone'] as String? ?? '',
@@ -58,7 +59,11 @@ class PublicProducerModel extends PublicProducer {
       memberSince: memberSinceRaw != null
           ? DateTime.parse(memberSinceRaw)
           : DateTime(2016),
-      photoUrl: json['photoUrl'] as String?,
+      photoUrl: () {
+        final raw = json['photoUrl'] as String?;
+        if (raw == null || raw.isEmpty) return null;
+        return ApiEndpoints.resolveMediaUrl(raw);
+      }(),
       producerAddress: producerAddress,
       paymentMethods: _parsePaymentMethods(json['paymentMethods']),
       products: const [],

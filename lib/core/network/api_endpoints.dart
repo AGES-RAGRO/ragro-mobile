@@ -69,9 +69,12 @@ abstract final class ApiEndpoints {
       '$_base/producers/products/$id';
   static String producerProductPhoto(String id) =>
       '$_base/producers/products/$id/photo';
+  static String get producerProductCategories =>
+      '$_base/producers/products/categories';
 
   // Stock movements
   static String get stockExit => '$_base/producers/stock/exit';
+  static String get stockEntry => '$_base/producers/stock/entry';
   static String stockProductMovements(String id) =>
       '$_base/producers/stock/$id/movements';
 
@@ -88,4 +91,19 @@ abstract final class ApiEndpoints {
   // Admin
   static String get adminProducers => '$_base/admin/producers';
   static String adminProducer(String id) => '$_base/admin/producers/$id';
+
+  /// Rewrites a media URL that came from the backend (e.g. MinIO public URL).
+  /// In dev, the backend stores `http://localhost:9000/...` but the device
+  /// cannot reach `localhost` on the host machine — it needs the same host
+  /// that the API uses (e.g. `10.0.2.2` for an Android emulator).
+  static String resolveMediaUrl(String url) {
+    if (url.isEmpty) return url;
+    final mediaUri = Uri.tryParse(url);
+    if (mediaUri == null) return url;
+    const devHosts = {'localhost', '127.0.0.1', '10.0.2.2'};
+    if (!devHosts.contains(mediaUri.host)) return url;
+    final apiUri = Uri.tryParse(_base);
+    if (apiUri == null) return url;
+    return mediaUri.replace(host: apiUri.host).toString();
+  }
 }

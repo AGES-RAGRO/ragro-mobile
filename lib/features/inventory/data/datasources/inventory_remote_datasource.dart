@@ -64,6 +64,17 @@ class InventoryRemoteDataSource {
     }
   }
 
+  Future<List<Map<String, dynamic>>> getCategories() async {
+    try {
+      final response = await _apiClient.dio.get<List<dynamic>>(
+        ApiEndpoints.producerProductCategories,
+      );
+      return (response.data ?? []).cast<Map<String, dynamic>>();
+    } on DioException catch (e) {
+      throw e.error as ApiException? ?? const UnknownApiException();
+    }
+  }
+
   Future<InventoryProduct> uploadProductPhoto(String productId, XFile file) async {
     try {
       final formData = FormData.fromMap({

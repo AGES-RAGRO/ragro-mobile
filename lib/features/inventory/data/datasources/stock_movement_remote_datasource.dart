@@ -32,6 +32,26 @@ class StockMovementRemoteDataSource {
     }
   }
 
+  Future<StockMovement> registerEntry({
+    required String productId,
+    required double quantity,
+    String? notes,
+  }) async {
+    try {
+      final response = await _apiClient.dio.post<Map<String, dynamic>>(
+        ApiEndpoints.stockEntry,
+        data: {
+          'productId': productId,
+          'quantity': quantity,
+          if (notes != null && notes.isNotEmpty) 'notes': notes,
+        },
+      );
+      return StockMovement.fromJson(response.data!);
+    } on DioException catch (e) {
+      throw e.error as ApiException? ?? const UnknownApiException();
+    }
+  }
+
   Future<List<StockMovement>> getProductMovements(
     String productId, {
     int page = 0,

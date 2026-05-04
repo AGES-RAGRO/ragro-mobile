@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:ragro_mobile/core/network/api_endpoints.dart';
 
 class InventoryProduct extends Equatable {
   const InventoryProduct({
@@ -11,6 +12,7 @@ class InventoryProduct extends Equatable {
     required this.unit,
     required this.stock,
     required this.active,
+    this.categoryIds = const [],
   });
 
   final String id;
@@ -22,6 +24,7 @@ class InventoryProduct extends Equatable {
   final String unit;
   final double stock;
   final bool active;
+  final List<int> categoryIds;
 
   factory InventoryProduct.fromJson(Map<String, dynamic> json) =>
       InventoryProduct(
@@ -29,11 +32,15 @@ class InventoryProduct extends Equatable {
         producerId: (json['farmerId'] as String?) ?? '',
         name: (json['name'] as String?) ?? '',
         description: (json['description'] as String?) ?? '',
-        imageUrl: (json['imageS3'] as String?) ?? '',
+        imageUrl: ApiEndpoints.resolveMediaUrl((json['imageS3'] as String?) ?? ''),
         price: (json['price'] as num?)?.toDouble() ?? 0.0,
         unit: (json['unityType'] as String?) ?? 'un',
         stock: (json['stockQuantity'] as num?)?.toDouble() ?? 0.0,
         active: (json['active'] as bool?) ?? true,
+        categoryIds: (json['categories'] as List<dynamic>? ?? [])
+            .cast<Map<String, dynamic>>()
+            .map((c) => c['id'] as int)
+            .toList(),
       );
 
   Map<String, dynamic> toJson() => {
@@ -44,6 +51,7 @@ class InventoryProduct extends Equatable {
     'stockQuantity': stock,
     if (imageUrl.isNotEmpty) 'imageS3': imageUrl,
     'active': active,
+    if (categoryIds.isNotEmpty) 'categoryIds': categoryIds,
   };
 
   InventoryProduct copyWith({
@@ -56,6 +64,7 @@ class InventoryProduct extends Equatable {
     String? unit,
     double? stock,
     bool? active,
+    List<int>? categoryIds,
   }) {
     return InventoryProduct(
       id: id ?? this.id,
@@ -67,6 +76,7 @@ class InventoryProduct extends Equatable {
       unit: unit ?? this.unit,
       stock: stock ?? this.stock,
       active: active ?? this.active,
+      categoryIds: categoryIds ?? this.categoryIds,
     );
   }
 
