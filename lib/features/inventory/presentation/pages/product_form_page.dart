@@ -4,9 +4,12 @@
 // Routes: POST /products | PUT /products/:id
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 import 'package:ragro_mobile/core/di/injection.dart';
+import 'package:ragro_mobile/core/formatters/input_masks.dart';
 import 'package:ragro_mobile/core/theme/app_colors.dart';
 import 'package:ragro_mobile/features/inventory/presentation/bloc/product_form_bloc.dart';
 import 'package:ragro_mobile/features/inventory/presentation/bloc/product_form_event.dart';
@@ -60,7 +63,12 @@ class _ProductFormViewState extends State<_ProductFormView> {
     if (state.product != null) {
       _nameController.text = state.product!.name;
       _descriptionController.text = state.product!.description;
-      _priceController.text = state.product!.price.toStringAsFixed(2);
+      final format = NumberFormat.currency(
+        locale: 'pt_BR',
+        symbol: '',
+        decimalDigits: 2,
+      );
+      _priceController.text = format.format(state.product!.price).trim();
       _selectedUnit = state.product!.unit;
       _stockCount = state.product!.stock;
     }
@@ -69,7 +77,10 @@ class _ProductFormViewState extends State<_ProductFormView> {
   void _submit() {
     final name = _nameController.text.trim();
     final description = _descriptionController.text.trim();
-    final priceText = _priceController.text.trim().replaceAll(',', '.');
+    final priceText = _priceController.text
+        .trim()
+        .replaceAll('.', '')
+        .replaceAll(',', '.');
     if (name.isEmpty || priceText.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -247,6 +258,7 @@ class _ProductFormViewState extends State<_ProductFormView> {
                               decimal: true,
                             ),
                             enabled: !isLoading,
+                            inputFormatters: [CurrencyInputFormatter()],
                           ),
                         ],
                       ),
@@ -385,6 +397,7 @@ class _TextField extends StatelessWidget {
     this.maxLines = 1,
     this.keyboardType = TextInputType.text,
     this.enabled = true,
+    this.inputFormatters,
   });
 
   final TextEditingController controller;
@@ -392,6 +405,7 @@ class _TextField extends StatelessWidget {
   final int maxLines;
   final TextInputType keyboardType;
   final bool enabled;
+  final List<TextInputFormatter>? inputFormatters;
 
   @override
   Widget build(BuildContext context) {
@@ -400,6 +414,7 @@ class _TextField extends StatelessWidget {
       maxLines: maxLines,
       keyboardType: keyboardType,
       enabled: enabled,
+      inputFormatters: inputFormatters,
       decoration: InputDecoration(
         hintText: hint,
         hintStyle: const TextStyle(
