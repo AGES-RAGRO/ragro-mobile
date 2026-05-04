@@ -19,6 +19,10 @@ class DeactivatedAccountException extends ApiException {
   ]);
 }
 
+class ForbiddenException extends ApiException {
+  const ForbiddenException([super.message = 'Sem permissão para esta ação']);
+}
+
 class NotFoundException extends ApiException {
   const NotFoundException([super.message = 'Recurso não encontrado']);
 }

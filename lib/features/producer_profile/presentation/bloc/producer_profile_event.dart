@@ -9,11 +9,12 @@ sealed class ProducerProfileEvent extends Equatable {
 }
 
 class ProducerProfileStarted extends ProducerProfileEvent {
-  const ProducerProfileStarted(this.producerId);
+  const ProducerProfileStarted(this.producerId, {this.isOwnerView = false});
   final String producerId;
+  final bool isOwnerView;
 
   @override
-  List<Object?> get props => [producerId];
+  List<Object?> get props => [producerId, isOwnerView];
 }
 
 class ProducerProfileUpdateSubmitted extends ProducerProfileEvent {

@@ -58,6 +58,17 @@ class ProducerProfileRemoteDataSource {
     }
   }
 
+  Future<PublicProducerModel> getOwnProfile(String producerId) async {
+    try {
+      final response = await _apiClient.dio.get<Map<String, dynamic>>(
+        ApiEndpoints.producer(producerId),
+      );
+      return PublicProducerModel.fromJson(response.data!);
+    } on DioException catch (e) {
+      throw e.error as ApiException? ?? const UnknownApiException();
+    }
+  }
+
   Future<void> updateProducer(
     String producerId,
     ProducerUpdateRequest request,
