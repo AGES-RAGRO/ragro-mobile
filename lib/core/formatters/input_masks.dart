@@ -54,6 +54,19 @@ class PhoneInputFormatter extends TextInputFormatter {
     }
     return buffer.toString();
   }
+
+  static String apply(String value) {
+    final digits = value.replaceAll(RegExp(r'\D'), '');
+    final clean = digits.length > 11 ? digits.substring(0, 11) : digits;
+    if (clean.isEmpty) return '';
+    final buffer = StringBuffer('(');
+    for (var i = 0; i < clean.length; i++) {
+      if (i == 2) buffer.write(') ');
+      if (i == 7) buffer.write('-');
+      buffer.write(clean[i]);
+    }
+    return buffer.toString();
+  }
 }
 
 class CepInputFormatter extends TextInputFormatter {
@@ -63,13 +76,20 @@ class CepInputFormatter extends TextInputFormatter {
     TextEditingValue newValue,
   ) {
     final digits = _digits(newValue.text, max: 8);
-    final formatted = digits.length > 5
-        ? '${digits.substring(0, 5)}-${digits.substring(5)}'
-        : digits;
+    final formatted = apply(digits);
     return TextEditingValue(
       text: formatted,
       selection: TextSelection.collapsed(offset: formatted.length),
     );
+  }
+
+  static String apply(String value) {
+    final digits = value.replaceAll(RegExp(r'\D'), '');
+    final clean = digits.length > 8 ? digits.substring(0, 8) : digits;
+    if (clean.length > 5) {
+      return '${clean.substring(0, 5)}-${clean.substring(5)}';
+    }
+    return clean;
   }
 }
 
