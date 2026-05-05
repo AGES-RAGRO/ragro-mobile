@@ -21,7 +21,7 @@ class ProducerProfileUpdateSubmitted extends ProducerProfileEvent {
   const ProducerProfileUpdateSubmitted({
     required this.producerId,
     required this.name,
-    required this.story,
+    required this.description,
     required this.phone,
     required this.farmName,
     this.address,
@@ -31,7 +31,7 @@ class ProducerProfileUpdateSubmitted extends ProducerProfileEvent {
 
   final String producerId;
   final String name;
-  final String story;
+  final String description;
   final String phone;
   final String farmName;
   final Map<String, dynamic>? address;
@@ -42,7 +42,7 @@ class ProducerProfileUpdateSubmitted extends ProducerProfileEvent {
   List<Object?> get props => [
     producerId,
     name,
-    story,
+    description,
     phone,
     farmName,
     address,

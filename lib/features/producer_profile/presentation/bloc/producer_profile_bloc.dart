@@ -34,7 +34,10 @@ class ProducerProfileBloc
   ) async {
     emit(const ProducerProfileLoading());
     try {
-      final producer = await _getProducer(event.producerId, isOwner: event.isOwnerView);
+      final producer = await _getProducer(
+        event.producerId,
+        isOwner: event.isOwnerView,
+      );
       emit(ProducerProfileLoaded(producer));
     } on ApiException catch (e) {
       emit(ProducerProfileFailure(e.message));
@@ -54,7 +57,7 @@ class ProducerProfileBloc
       await _updateProducer(
         producerId: event.producerId,
         name: event.name,
-        story: event.story,
+        description: event.description,
         phone: event.phone,
         farmName: event.farmName,
         address: event.address,
