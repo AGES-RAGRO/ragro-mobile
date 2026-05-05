@@ -637,3 +637,4 @@ extension GetItInjectableX on _i174.GetIt {
 class _$SharedPreferencesModule extends _i55.SharedPreferencesModule {}
 
 class _$NetworkModule extends _i1002.NetworkModule {}
+
