@@ -2,12 +2,14 @@ import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:ragro_mobile/core/network/api_exception.dart';
+import 'package:ragro_mobile/features/search/data/datasources/search_local_datasource.dart';
 import 'package:ragro_mobile/features/search/domain/entities/search_result.dart';
 import 'package:ragro_mobile/features/search/domain/repositories/search_repository.dart';
 import 'package:ragro_mobile/features/search/domain/usecases/search_producers_and_products.dart';
 import 'package:ragro_mobile/features/search/presentation/bloc/search_bloc.dart';
 import 'package:ragro_mobile/features/search/presentation/bloc/search_event.dart';
 import 'package:ragro_mobile/features/search/presentation/bloc/search_state.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class MockSearchRepository extends Mock implements SearchRepository {}
 
@@ -28,10 +30,12 @@ void main() {
     rating: 0,
   );
 
-  setUp(() {
+  setUp(() async {
+    SharedPreferences.setMockInitialValues({});
+    final prefs = await SharedPreferences.getInstance();
     mockRepository = MockSearchRepository();
     usecase = SearchProducersAndProducts(mockRepository);
-    bloc = SearchBloc(usecase);
+    bloc = SearchBloc(usecase, SearchLocalDataSource(prefs));
   });
 
   tearDown(() => bloc.close());
