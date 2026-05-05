@@ -42,7 +42,7 @@ void main() {
   const tUpdateEvent = ProducerProfileUpdateSubmitted(
     producerId: 'me',
     name: 'João Silva',
-    story: 'Produtor orgânico há 10 anos.',
+    description: 'Produtor orgânico há 10 anos.',
     phone: '(51) 99999-0001',
     farmName: 'Fazenda Sol Nascente',
   );
@@ -55,7 +55,7 @@ void main() {
           () => mockUpdateProducer(
             producerId: any(named: 'producerId'),
             name: any(named: 'name'),
-            story: any(named: 'story'),
+            description: any(named: 'description'),
             phone: any(named: 'phone'),
             farmName: any(named: 'farmName'),
           ),
@@ -72,7 +72,7 @@ void main() {
           () => mockUpdateProducer(
             producerId: 'me',
             name: 'João Silva',
-            story: 'Produtor orgânico há 10 anos.',
+            description: 'Produtor orgânico há 10 anos.',
             phone: '(51) 99999-0001',
             farmName: 'Fazenda Sol Nascente',
           ),
@@ -87,7 +87,7 @@ void main() {
           () => mockUpdateProducer(
             producerId: any(named: 'producerId'),
             name: any(named: 'name'),
-            story: any(named: 'story'),
+            description: any(named: 'description'),
             phone: any(named: 'phone'),
             farmName: any(named: 'farmName'),
           ),

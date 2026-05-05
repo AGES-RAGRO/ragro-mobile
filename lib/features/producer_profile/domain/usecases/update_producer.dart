@@ -10,7 +10,7 @@ class UpdateProducer {
   Future<void> call({
     required String producerId,
     required String name,
-    required String story,
+    required String description,
     required String phone,
     required String farmName,
     Map<String, dynamic>? address,
@@ -19,7 +19,7 @@ class UpdateProducer {
   }) => _repository.updateProducer(
     producerId: producerId,
     name: name,
-    story: story,
+    description: description,
     phone: phone,
     farmName: farmName,
     address: address,

@@ -27,36 +27,6 @@ const _pixKeyTypeLabels = {
   'random': 'Chave aleatória',
 };
 
-const List<String> _brazilianStates = [
-  'AC',
-  'AL',
-  'AP',
-  'AM',
-  'BA',
-  'CE',
-  'DF',
-  'ES',
-  'GO',
-  'MA',
-  'MT',
-  'MS',
-  'MG',
-  'PA',
-  'PB',
-  'PR',
-  'PE',
-  'PI',
-  'RJ',
-  'RN',
-  'RS',
-  'RO',
-  'RR',
-  'SC',
-  'SP',
-  'SE',
-  'TO',
-];
-
 class ProducerEditProfilePage extends StatelessWidget {
   const ProducerEditProfilePage({super.key});
 
@@ -70,7 +40,8 @@ class ProducerEditProfilePage extends StatelessWidget {
     }
     return BlocProvider<ProducerProfileBloc>(
       create: (_) =>
-          getIt<ProducerProfileBloc>()..add(ProducerProfileStarted(producerId, isOwnerView: true)),
+          getIt<ProducerProfileBloc>()
+            ..add(ProducerProfileStarted(producerId, isOwnerView: true)),
       child: _ProducerEditProfileView(producerId: producerId),
     );
   }
@@ -210,7 +181,7 @@ class _ProducerEditProfileViewState extends State<_ProducerEditProfileView> {
     final producer = state.producer;
 
     _nameController.text = producer.name;
-    _bioController.text = producer.story;
+    _bioController.text = producer.description;
     _phoneController.text = _applyMask(producer.phone, PhoneInputFormatter());
     _farmNameController.text = producer.farmName;
 
@@ -367,7 +338,7 @@ class _ProducerEditProfileViewState extends State<_ProducerEditProfileView> {
       ProducerProfileUpdateSubmitted(
         producerId: widget.producerId,
         name: _nameController.text,
-        story: _bioController.text,
+        description: _bioController.text,
         phone: _digitsOnly(_phoneController.text),
         farmName: _farmNameController.text,
         address: addressPayload,
@@ -1290,77 +1261,4 @@ class _UppercaseFormatter extends TextInputFormatter {
     TextEditingValue oldValue,
     TextEditingValue newValue,
   ) => newValue.copyWith(text: newValue.text.toUpperCase());
-}
-
-class _UfAutocomplete extends StatelessWidget {
-  const _UfAutocomplete({
-    super.key,
-    required this.onSelected,
-    this.initialValue,
-  });
-  final String? initialValue;
-  final ValueChanged<String> onSelected;
-
-  @override
-  Widget build(BuildContext context) {
-    return Autocomplete<String>(
-      initialValue: TextEditingValue(text: initialValue ?? ''),
-      optionsBuilder: (v) {
-        if (v.text.isEmpty) return _brazilianStates;
-        return _brazilianStates.where(
-          (s) => s.toLowerCase().contains(v.text.toLowerCase()),
-        );
-      },
-      onSelected: onSelected,
-      fieldViewBuilder: (ctx, controller, node, onFieldSubmitted) {
-        return TextFormField(
-          controller: controller,
-          focusNode: node,
-          inputFormatters: [
-            LengthLimitingTextInputFormatter(2),
-            _UppercaseFormatter(),
-          ],
-          onChanged: (v) {
-            if (_brazilianStates.contains(v.toUpperCase())) {
-              onSelected(v.toUpperCase());
-            }
-          },
-          decoration: InputDecoration(
-            hintText: 'UF',
-            hintStyle: const TextStyle(
-              fontFamily: 'Manrope',
-              fontSize: 15,
-              color: AppColors.placeholder,
-            ),
-            filled: true,
-            fillColor: AppColors.inputBackground,
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: 16,
-              vertical: 14,
-            ),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: AppColors.inputBorder),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: AppColors.inputBorder),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(
-                color: AppColors.darkGreen,
-                width: 1.5,
-              ),
-            ),
-          ),
-          style: const TextStyle(
-            fontFamily: 'Manrope',
-            fontSize: 15,
-            color: AppColors.black,
-          ),
-        );
-      },
-    );
-  }
 }
