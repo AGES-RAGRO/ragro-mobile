@@ -71,6 +71,10 @@ class AuthRemoteDataSource {
       throw e.error as ApiException? ?? const UnknownApiException();
     }
 
+    // Rewrite tokenUrl host so devices/emulators can reach Keycloak
+    // (backend returns localhost which is unreachable outside the host machine).
+    final resolvedTokenUrl = ApiEndpoints.resolveMediaUrl(config.tokenUrl);
+
     // Step 2: Authenticate directly with Keycloak (form-urlencoded)
     // Uses a separate Dio instance because Keycloak expects
     // application/x-www-form-urlencoded and has a different error format.
@@ -78,7 +82,7 @@ class AuthRemoteDataSource {
     final KeycloakTokenModel keycloakToken;
     try {
       final tokenResponse = await keycloakDio.post<Map<String, dynamic>>(
-        config.tokenUrl,
+        resolvedTokenUrl,
         data: {
           'grant_type': 'password',
           'client_id': config.clientId,
@@ -105,7 +109,7 @@ class AuthRemoteDataSource {
       return LoginResponseModel(
         accessToken: keycloakToken.accessToken,
         refreshToken: keycloakToken.refreshToken,
-        tokenUrl: config.tokenUrl,
+        tokenUrl: resolvedTokenUrl,
         clientId: config.clientId,
         user: user,
       );

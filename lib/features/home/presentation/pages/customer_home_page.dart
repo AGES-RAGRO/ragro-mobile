@@ -29,8 +29,36 @@ class CustomerHomePage extends StatelessWidget {
   }
 }
 
-class _CustomerHomeView extends StatelessWidget {
+class _CustomerHomeView extends StatefulWidget {
   const _CustomerHomeView();
+
+  @override
+  State<_CustomerHomeView> createState() => _CustomerHomeViewState();
+}
+
+class _CustomerHomeViewState extends State<_CustomerHomeView> {
+  final _scrollController = ScrollController();
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_onScroll);
+  }
+
+  @override
+  void dispose() {
+    _scrollController
+      ..removeListener(_onScroll)
+      ..dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    final pos = _scrollController.position;
+    if (pos.pixels >= pos.maxScrollExtent - 300) {
+      context.read<HomeBloc>().add(const HomeLoadMoreProducts());
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -46,6 +74,7 @@ class _CustomerHomeView extends StatelessWidget {
                   context.read<HomeBloc>().add(const HomeRefreshed());
                 },
                 child: CustomScrollView(
+                  controller: _scrollController,
                   slivers: [
                     const SliverToBoxAdapter(
                       child: Padding(
@@ -73,6 +102,7 @@ class _CustomerHomeView extends StatelessWidget {
                     SliverToBoxAdapter(
                       child: ProductsGrid(
                         products: products,
+                        isLoadingMore: state.isFetchingMoreProducts,
                         onProductTap: (p) => context.push(
                           '/customer/home/product/${p.id}',
                           extra: p.producerId,
