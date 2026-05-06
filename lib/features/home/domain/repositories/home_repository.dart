@@ -7,5 +7,7 @@ abstract class HomeRepository {
     int page = 0,
     int size = 10,
   });
-  Future<List<HomeProduct>> getRecommendedProducts();
+  Future<({List<HomeProduct> products, bool hasMore})> getRecommendedProducts({
+    int producerPage = 0,
+  });
 }

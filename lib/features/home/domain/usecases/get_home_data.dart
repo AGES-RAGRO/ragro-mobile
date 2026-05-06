@@ -10,16 +10,21 @@ class GetHomeData {
 
   final HomeRepository _repository;
 
-  Future<({PaginatedResponse<Producer> producers, List<HomeProduct> products})>
+  Future<({
+    PaginatedResponse<Producer> producers,
+    List<HomeProduct> products,
+    bool hasMoreProducts,
+  })>
   call() async {
-    final results = await Future.wait([
+    final (producersResponse, productsResult) = await (
       _repository.getProducers(),
       _repository.getRecommendedProducts(),
-    ]);
+    ).wait;
 
-    final producersResponse = results[0] as PaginatedResponse<Producer>;
-    final products = results[1] as List<HomeProduct>;
-
-    return (producers: producersResponse, products: products);
+    return (
+      producers: producersResponse,
+      products: productsResult.products,
+      hasMoreProducts: productsResult.hasMore,
+    );
   }
 }

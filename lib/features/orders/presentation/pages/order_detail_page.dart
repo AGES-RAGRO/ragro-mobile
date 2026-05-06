@@ -24,35 +24,20 @@ class OrderDetailPage extends StatelessWidget {
       'R\$ ${price.toStringAsFixed(2).replaceAll('.', ',')}';
 
   Future<void> _openWhatsApp(BuildContext context, String phoneNumber) async {
-    try {
-      final cleanPhone = phoneNumber.replaceAll(RegExp(r'[^\d+]'), '');
-      final formattedPhone = cleanPhone.startsWith('+')
-          ? cleanPhone.replaceFirst('+', '')
-          : cleanPhone;
-      final whatsappUrl = 'https://wa.me/$formattedPhone';
+    final cleanPhone = phoneNumber.replaceAll(RegExp(r'[^\d+]'), '');
+    final formattedPhone = cleanPhone.startsWith('+')
+        ? cleanPhone.replaceFirst('+', '')
+        : cleanPhone;
+    final uri = Uri.parse('https://wa.me/$formattedPhone');
 
-      if (await canLaunchUrl(Uri.parse(whatsappUrl))) {
-        await launchUrl(
-          Uri.parse(whatsappUrl),
-          mode: LaunchMode.externalApplication,
-        );
-      } else {
-        if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Não foi possível abrir o WhatsApp'),
-              duration: Duration(seconds: 2),
-            ),
-          );
-        }
-      }
-    } on Object catch (e) {
-      debugPrint('Erro ao abrir WhatsApp: $e');
+    try {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    } on Object {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Erro: $e'),
-            duration: const Duration(seconds: 2),
+          const SnackBar(
+            content: Text('Não foi possível abrir o WhatsApp'),
+            duration: Duration(seconds: 2),
           ),
         );
       }

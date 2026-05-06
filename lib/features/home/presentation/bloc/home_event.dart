@@ -18,3 +18,7 @@ class HomeRefreshed extends HomeEvent {
 class HomeLoadMoreProducers extends HomeEvent {
   const HomeLoadMoreProducers();
 }
+
+class HomeLoadMoreProducts extends HomeEvent {
+  const HomeLoadMoreProducts();
+}

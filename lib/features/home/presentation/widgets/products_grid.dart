@@ -8,12 +8,14 @@ class ProductsGrid extends StatelessWidget {
     required this.products,
     required this.onProductTap,
     required this.onAddToCart,
+    this.isLoadingMore = false,
     super.key,
   });
 
   final List<HomeProduct> products;
   final void Function(HomeProduct) onProductTap;
   final void Function(HomeProduct) onAddToCart;
+  final bool isLoadingMore;
 
   @override
   Widget build(BuildContext context) {
@@ -51,6 +53,13 @@ class ProductsGrid extends StatelessWidget {
             ),
           ),
         ),
+        if (isLoadingMore)
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: 24),
+            child: Center(
+              child: CircularProgressIndicator(color: AppColors.darkGreen),
+            ),
+          ),
       ],
     );
   }
