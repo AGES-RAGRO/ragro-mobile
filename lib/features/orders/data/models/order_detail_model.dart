@@ -26,9 +26,19 @@ class OrderDetailBankInfoModel extends OrderDetailBankInfo {
 
   factory OrderDetailBankInfoModel.fromJson(Map<String, dynamic> json) {
     return OrderDetailBankInfoModel(
-      bank: json['bank'] as String? ?? '',
+      // Backend BankInfoResponse envia `bankName`. Mantém fallbacks para
+      // compatibilidade com payloads antigos / variantes snake_case.
+      bank:
+          json['bankName'] as String? ??
+          json['bank_name'] as String? ??
+          json['bank'] as String? ??
+          '',
       agency: json['agency'] as String? ?? '',
-      account: json['account'] as String? ?? '',
+      account:
+          json['account'] as String? ??
+          json['accountNumber'] as String? ??
+          json['account_number'] as String? ??
+          '',
       pixKey: json['pixKey'] as String? ?? json['pix_key'] as String? ?? '',
     );
   }
@@ -156,17 +166,21 @@ class OrderDetailModel extends OrderDetail {
           '',
       producerPhone:
           json['producerPhone'] as String? ??
+          json['producerWhatsapp'] as String? ??
           producerJson?['phone'] as String?,
       producerPicture:
           json['producerPicture'] as String? ??
           json['producerPhoto'] as String? ??
           json['producerPhotoUrl'] as String? ??
-          producerJson?['photoUrl'] as String?,
+          json['producerAvatarUrl'] as String? ??
+          producerJson?['photoUrl'] as String? ??
+          producerJson?['picture'] as String?,
       items: items,
       totalAmount:
           (json['totalAmount'] as num? ??
                   json['total'] as num? ??
                   json['totalPrice'] as num? ??
+                  json['price'] as num? ??
                   0)
               .toDouble(),
       deliveryAddress: OrderDetailAddressModel.fromJson(

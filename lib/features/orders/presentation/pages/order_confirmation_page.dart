@@ -8,10 +8,14 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:ragro_mobile/core/di/injection.dart';
 import 'package:ragro_mobile/core/theme/app_colors.dart';
+import 'package:ragro_mobile/features/auth/domain/entities/address.dart';
 import 'package:ragro_mobile/features/cart/domain/entities/cart.dart';
 import 'package:ragro_mobile/features/cart/domain/entities/cart_item.dart';
 import 'package:ragro_mobile/features/cart/presentation/bloc/cart_bloc.dart';
 import 'package:ragro_mobile/features/cart/presentation/bloc/cart_event.dart';
+import 'package:ragro_mobile/features/customer_profile/presentation/bloc/customer_profile_bloc.dart';
+import 'package:ragro_mobile/features/customer_profile/presentation/bloc/customer_profile_event.dart';
+import 'package:ragro_mobile/features/customer_profile/presentation/bloc/customer_profile_state.dart';
 import 'package:ragro_mobile/features/orders/presentation/bloc/checkout_bloc.dart';
 import 'package:ragro_mobile/features/orders/presentation/bloc/checkout_event.dart';
 import 'package:ragro_mobile/features/orders/presentation/bloc/checkout_state.dart';
@@ -21,8 +25,20 @@ class OrderConfirmationPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (_) => getIt<CheckoutBloc>()..add(const CheckoutStarted('cart')),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(
+          create: (_) =>
+              getIt<CheckoutBloc>()..add(const CheckoutStarted('cart')),
+        ),
+        // CustomerProfileBloc é factory no DI; o BlocProvider mantém uma única
+        // instância no subtree, então context.read<CustomerProfileBloc>() em
+        // callbacks (ex.: botão "Alterar") referencia o mesmo bloc do BlocBuilder.
+        BlocProvider(
+          create: (_) => getIt<CustomerProfileBloc>()
+            ..add(const CustomerProfileStarted()),
+        ),
+      ],
       child: BlocListener<CheckoutBloc, CheckoutState>(
         listener: (context, state) {
           if (state is CheckoutSuccess) {
@@ -173,133 +189,9 @@ class _CheckoutView extends StatelessWidget {
             Expanded(
               child: ListView(
                 children: [
-                  // Delivery address section
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            const Text(
-                              'Endereço de Entrega',
-                              style: TextStyle(
-                                fontFamily: 'Manrope',
-                                fontWeight: FontWeight.w700,
-                                fontSize: 18,
-                                color: AppColors.black,
-                              ),
-                            ),
-                            GestureDetector(
-                              onTap: () {},
-                              child: const Text(
-                                'Alterar',
-                                style: TextStyle(
-                                  fontFamily: 'Figtree',
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 14,
-                                  color: AppColors.darkGreen,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 16),
-                        Container(
-                          padding: const EdgeInsets.all(17),
-                          decoration: BoxDecoration(
-                            color: AppColors.lightGreen.withValues(alpha: 0.05),
-                            borderRadius: BorderRadius.circular(24),
-                            border: Border.all(
-                              color: AppColors.lightGreen.withValues(
-                                alpha: 0.1,
-                              ),
-                            ),
-                          ),
-                          child: Row(
-                            children: [
-                              Container(
-                                padding: const EdgeInsets.all(12),
-                                decoration: BoxDecoration(
-                                  color: AppColors.darkGreen,
-                                  borderRadius: BorderRadius.circular(16),
-                                ),
-                                child: const Icon(
-                                  Icons.location_on,
-                                  color: AppColors.white,
-                                  size: 20,
-                                ),
-                              ),
-                              const SizedBox(width: 16),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      cart.farmName,
-                                      style: const TextStyle(
-                                        fontFamily: 'Manrope',
-                                        fontWeight: FontWeight.w700,
-                                        fontSize: 16,
-                                        color: AppColors.black,
-                                      ),
-                                    ),
-                                    Text(
-                                      'Endereço será confirmado pelo cadastro',
-                                      style: const TextStyle(
-                                        fontFamily: 'Manrope',
-                                        fontSize: 14,
-                                        color: AppColors.black,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        // Map placeholder
-                        Container(
-                          height: 128,
-                          decoration: BoxDecoration(
-                            color: AppColors.lightGreen.withValues(alpha: 0.1),
-                            borderRadius: BorderRadius.circular(24),
-                            border: Border.all(color: AppColors.black),
-                          ),
-                          child: const Center(
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(
-                                  Icons.map_outlined,
-                                  color: AppColors.darkGreen,
-                                  size: 24,
-                                ),
-                                SizedBox(width: 8),
-                                Text(
-                                  'Mapa de Entrega',
-                                  style: TextStyle(
-                                    fontFamily: 'Manrope',
-                                    fontSize: 14,
-                                    color: AppColors.darkGreen,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  // Divider
-                  Container(height: 8, color: const Color(0xFFF6F7F6)),
-
                   // Order items summary
                   Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 24, 16, 24),
+                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -519,6 +411,81 @@ class _CheckoutView extends StatelessWidget {
                                 ],
                               ),
                             ],
+                          ),
+                        ),
+                        const SizedBox(height: 24),
+                        // Delivery address
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Text(
+                              'Endereço de Entrega',
+                              style: TextStyle(
+                                fontFamily: 'Manrope',
+                                fontWeight: FontWeight.w700,
+                                fontSize: 18,
+                                color: AppColors.black,
+                              ),
+                            ),
+                            GestureDetector(
+                              onTap: () async {
+                                final updated = await context.push<bool>(
+                                  '/customer/edit-address',
+                                );
+                                if ((updated ?? false) && context.mounted) {
+                                  // Recarrega checkout + perfil para refletir
+                                  // o endereço atualizado.
+                                  context.read<CheckoutBloc>().add(
+                                    const CheckoutStarted('cart'),
+                                  );
+                                  context.read<CustomerProfileBloc>().add(
+                                    const CustomerProfileStarted(),
+                                  );
+                                }
+                              },
+                              child: const Text(
+                                'Alterar',
+                                style: TextStyle(
+                                  fontFamily: 'Figtree',
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 14,
+                                  color: AppColors.darkGreen,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 16),
+                        const _DeliveryAddressCard(),
+                        const SizedBox(height: 16),
+                        // Map placeholder
+                        Container(
+                          height: 128,
+                          decoration: BoxDecoration(
+                            color: AppColors.lightGreen.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(24),
+                            border: Border.all(color: AppColors.black),
+                          ),
+                          child: const Center(
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  Icons.map_outlined,
+                                  color: AppColors.darkGreen,
+                                  size: 24,
+                                ),
+                                SizedBox(width: 8),
+                                Text(
+                                  'Mapa de Entrega',
+                                  style: TextStyle(
+                                    fontFamily: 'Manrope',
+                                    fontSize: 14,
+                                    color: AppColors.darkGreen,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                         const SizedBox(height: 24),
@@ -807,5 +774,139 @@ class _CartItemRow extends StatelessWidget {
         ],
       ),
     );
+  }
+}
+
+/// Card que exibe o endereço primário do customer logado.
+/// Lê do [CustomerProfileBloc] já provido pela página.
+class _DeliveryAddressCard extends StatelessWidget {
+  const _DeliveryAddressCard();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(17),
+      decoration: BoxDecoration(
+        color: AppColors.lightGreen.withValues(alpha: 0.05),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(
+          color: AppColors.lightGreen.withValues(alpha: 0.1),
+        ),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: AppColors.darkGreen,
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: const Icon(
+              Icons.location_on,
+              color: AppColors.white,
+              size: 20,
+            ),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: BlocBuilder<CustomerProfileBloc, CustomerProfileState>(
+              builder: (context, state) {
+                if (state is CustomerProfileInitial ||
+                    state is CustomerProfileLoading) {
+                  return const SizedBox(
+                    height: 40,
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: AppColors.darkGreen,
+                        ),
+                      ),
+                    ),
+                  );
+                }
+
+                final profile = switch (state) {
+                  CustomerProfileLoaded(:final profile) => profile,
+                  CustomerProfileUpdating(:final profile) => profile,
+                  CustomerProfileUpdateSuccess(:final profile) => profile,
+                  CustomerProfileUpdateFailure(:final profile) => profile,
+                  _ => null,
+                };
+
+                final address = profile?.primaryAddress;
+                if (address == null) {
+                  return const Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Você ainda não tem endereço cadastrado',
+                        style: TextStyle(
+                          fontFamily: 'Manrope',
+                          fontWeight: FontWeight.w700,
+                          fontSize: 16,
+                          color: AppColors.black,
+                        ),
+                      ),
+                      SizedBox(height: 4),
+                      Text(
+                        'Toque em Alterar para cadastrar',
+                        style: TextStyle(
+                          fontFamily: 'Manrope',
+                          fontSize: 14,
+                          color: AppColors.placeholder,
+                        ),
+                      ),
+                    ],
+                  );
+                }
+
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      _formatStreet(address),
+                      style: const TextStyle(
+                        fontFamily: 'Manrope',
+                        fontWeight: FontWeight.w700,
+                        fontSize: 16,
+                        color: AppColors.black,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      _formatLocality(address),
+                      style: const TextStyle(
+                        fontFamily: 'Manrope',
+                        fontSize: 14,
+                        color: AppColors.black,
+                      ),
+                    ),
+                  ],
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _formatStreet(Address address) {
+    final complement = (address.complement ?? '').trim();
+    final base = '${address.street}, ${address.number}';
+    return complement.isEmpty ? base : '$base - $complement';
+  }
+
+  String _formatLocality(Address address) {
+    final neighborhood = (address.neighborhood ?? '').trim();
+    final cityState = '${address.city}/${address.state}';
+    final cep = 'CEP ${address.zipCode}';
+    return neighborhood.isEmpty
+        ? '$cityState • $cep'
+        : '$neighborhood • $cityState • $cep';
   }
 }
