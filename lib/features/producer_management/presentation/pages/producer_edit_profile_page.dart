@@ -10,6 +10,7 @@ import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:ragro_mobile/core/di/injection.dart';
 import 'package:ragro_mobile/core/formatters/input_masks.dart';
+import 'package:ragro_mobile/core/services/cep_service.dart';
 import 'package:ragro_mobile/core/theme/app_colors.dart';
 import 'package:ragro_mobile/features/auth/data/datasources/auth_local_datasource.dart';
 import 'package:ragro_mobile/features/producer_profile/domain/entities/public_producer.dart';
@@ -26,36 +27,6 @@ const _pixKeyTypeLabels = {
   'random': 'Chave aleatória',
 };
 
-const List<String> _brazilianStates = [
-  'AC',
-  'AL',
-  'AP',
-  'AM',
-  'BA',
-  'CE',
-  'DF',
-  'ES',
-  'GO',
-  'MA',
-  'MT',
-  'MS',
-  'MG',
-  'PA',
-  'PB',
-  'PR',
-  'PE',
-  'PI',
-  'RJ',
-  'RN',
-  'RS',
-  'RO',
-  'RR',
-  'SC',
-  'SP',
-  'SE',
-  'TO',
-];
-
 class ProducerEditProfilePage extends StatelessWidget {
   const ProducerEditProfilePage({super.key});
 
@@ -69,7 +40,8 @@ class ProducerEditProfilePage extends StatelessWidget {
     }
     return BlocProvider<ProducerProfileBloc>(
       create: (_) =>
-          getIt<ProducerProfileBloc>()..add(ProducerProfileStarted(producerId)),
+          getIt<ProducerProfileBloc>()
+            ..add(ProducerProfileStarted(producerId, isOwnerView: true)),
       child: _ProducerEditProfileView(producerId: producerId),
     );
   }
@@ -100,7 +72,7 @@ class _ProducerEditProfileViewState extends State<_ProducerEditProfileView> {
   final _numberController = TextEditingController();
   final _neighborhoodController = TextEditingController();
   final _cityController = TextEditingController();
-  String? _selectedState;
+  final _stateController = TextEditingController();
 
   // ── Forma de Recebimento ──────────────────────────────────────────────
   String? _pixKeyType;
@@ -124,6 +96,12 @@ class _ProducerEditProfileViewState extends State<_ProducerEditProfileView> {
   bool _hydrated = false;
   bool _isPicking = false;
 
+  @override
+  void initState() {
+    super.initState();
+    _cepController.addListener(_onCepChanged);
+  }
+
   static const _weekdayLabels = [
     'Seg',
     'Ter',
@@ -141,6 +119,25 @@ class _ProducerEditProfileViewState extends State<_ProducerEditProfileView> {
     return formatter
         .formatEditUpdate(TextEditingValue.empty, TextEditingValue(text: val))
         .text;
+  }
+
+  void _onCepChanged() {
+    final cep = _digitsOnly(_cepController.text);
+    if (cep.length == 8) {
+      _lookupCep(cep);
+    }
+  }
+
+  Future<void> _lookupCep(String cep) async {
+    final address = await getIt<CepService>().fetchAddress(cep);
+    if (address != null && mounted) {
+      setState(() {
+        _addressController.text = address.street;
+        _neighborhoodController.text = address.neighborhood;
+        _cityController.text = address.city;
+        _stateController.text = address.state;
+      });
+    }
   }
 
   List<TextInputFormatter> _pixKeyFormatters() {
@@ -166,6 +163,7 @@ class _ProducerEditProfileViewState extends State<_ProducerEditProfileView> {
     _numberController.dispose();
     _neighborhoodController.dispose();
     _cityController.dispose();
+    _stateController.dispose();
     _pixKeyController.dispose();
     _bankNameController.dispose();
     _bankCodeController.dispose();
@@ -183,7 +181,7 @@ class _ProducerEditProfileViewState extends State<_ProducerEditProfileView> {
     final producer = state.producer;
 
     _nameController.text = producer.name;
-    _bioController.text = producer.story;
+    _bioController.text = producer.description;
     _phoneController.text = _applyMask(producer.phone, PhoneInputFormatter());
     _farmNameController.text = producer.farmName;
 
@@ -194,7 +192,7 @@ class _ProducerEditProfileViewState extends State<_ProducerEditProfileView> {
       _numberController.text = addr.number;
       _neighborhoodController.text = addr.neighborhood ?? '';
       _cityController.text = addr.city;
-      _selectedState = addr.state;
+      _stateController.text = addr.state;
     }
 
     // Payment Methods
@@ -268,7 +266,7 @@ class _ProducerEditProfileViewState extends State<_ProducerEditProfileView> {
         'street': _addressController.text.trim(),
         'number': _numberController.text.trim(),
         'city': _cityController.text.trim(),
-        'state': _selectedState ?? '',
+        'state': _stateController.text.trim(),
         'zipCode': _digitsOnly(_cepController.text),
         if (_neighborhoodController.text.trim().isNotEmpty)
           'neighborhood': _neighborhoodController.text.trim(),
@@ -340,7 +338,7 @@ class _ProducerEditProfileViewState extends State<_ProducerEditProfileView> {
       ProducerProfileUpdateSubmitted(
         producerId: widget.producerId,
         name: _nameController.text,
-        story: _bioController.text,
+        description: _bioController.text,
         phone: _digitsOnly(_phoneController.text),
         farmName: _farmNameController.text,
         address: addressPayload,
@@ -765,10 +763,20 @@ class _ProducerEditProfileViewState extends State<_ProducerEditProfileView> {
                                 children: [
                                   const _FieldLabel('Estado'),
                                   const SizedBox(height: 8),
-                                  _UfAutocomplete(
-                                    initialValue: _selectedState,
-                                    onSelected: (uf) =>
-                                        setState(() => _selectedState = uf),
+                                  _FormField(
+                                    controller: _stateController,
+                                    hint: 'UF',
+                                    prefixIcon: Icons.map_outlined,
+                                    inputFormatters: [
+                                      LengthLimitingTextInputFormatter(2),
+                                      _UppercaseFormatter(),
+                                    ],
+                                    validator: (v) {
+                                      if ((v ?? '').trim().isEmpty) {
+                                        return 'UF';
+                                      }
+                                      return null;
+                                    },
                                   ),
                                 ],
                               ),
@@ -1253,73 +1261,4 @@ class _UppercaseFormatter extends TextInputFormatter {
     TextEditingValue oldValue,
     TextEditingValue newValue,
   ) => newValue.copyWith(text: newValue.text.toUpperCase());
-}
-
-class _UfAutocomplete extends StatelessWidget {
-  const _UfAutocomplete({required this.onSelected, this.initialValue});
-  final String? initialValue;
-  final ValueChanged<String> onSelected;
-
-  @override
-  Widget build(BuildContext context) {
-    return Autocomplete<String>(
-      initialValue: TextEditingValue(text: initialValue ?? ''),
-      optionsBuilder: (v) {
-        if (v.text.isEmpty) return _brazilianStates;
-        return _brazilianStates.where(
-          (s) => s.toLowerCase().contains(v.text.toLowerCase()),
-        );
-      },
-      onSelected: onSelected,
-      fieldViewBuilder: (ctx, controller, node, onFieldSubmitted) {
-        return TextFormField(
-          controller: controller,
-          focusNode: node,
-          inputFormatters: [
-            LengthLimitingTextInputFormatter(2),
-            _UppercaseFormatter(),
-          ],
-          onChanged: (v) {
-            if (_brazilianStates.contains(v.toUpperCase())) {
-              onSelected(v.toUpperCase());
-            }
-          },
-          decoration: InputDecoration(
-            hintText: 'UF',
-            hintStyle: const TextStyle(
-              fontFamily: 'Manrope',
-              fontSize: 15,
-              color: AppColors.placeholder,
-            ),
-            filled: true,
-            fillColor: AppColors.inputBackground,
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: 16,
-              vertical: 14,
-            ),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: AppColors.inputBorder),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: AppColors.inputBorder),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(
-                color: AppColors.darkGreen,
-                width: 1.5,
-              ),
-            ),
-          ),
-          style: const TextStyle(
-            fontFamily: 'Manrope',
-            fontSize: 15,
-            color: AppColors.black,
-          ),
-        );
-      },
-    );
-  }
 }

@@ -84,7 +84,14 @@ class CartItemTile extends StatelessWidget {
                 width: 80,
                 height: 80,
                 child: item.imageUrl.isNotEmpty
-                    ? Image.network(item.imageUrl, fit: BoxFit.cover)
+                    ? Image.network(
+                        item.imageUrl,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, __, ___) => const ColoredBox(
+                          color: Color(0xFFF1F5F9),
+                          child: Icon(Icons.eco, color: AppColors.lightGreen),
+                        ),
+                      )
                     : const ColoredBox(
                         color: Color(0xFFF1F5F9),
                         child: Icon(Icons.eco, color: AppColors.lightGreen),

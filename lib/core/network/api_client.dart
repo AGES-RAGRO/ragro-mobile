@@ -55,6 +55,7 @@ class _ErrorInterceptor extends Interceptor {
       exception = switch (statusCode) {
         400 => UnknownApiException(responseMessage ?? 'Dados invalidos'),
         401 => _map401(err.response?.data),
+        403 => ForbiddenException(responseMessage ?? 'Sem permissao para esta acao'),
         404 => NotFoundException(responseMessage ?? 'Recurso nao encontrado'),
         409 => ConflictException(responseMessage ?? 'Recurso ja existe'),
         429 => const RateLimitedException(),

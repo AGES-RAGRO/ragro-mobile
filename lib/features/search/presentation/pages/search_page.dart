@@ -5,6 +5,7 @@ import 'package:ragro_mobile/core/di/injection.dart';
 import 'package:ragro_mobile/core/theme/app_colors.dart';
 import 'package:ragro_mobile/features/search/presentation/bloc/search_bloc.dart';
 import 'package:ragro_mobile/features/search/presentation/bloc/search_event.dart';
+import 'package:ragro_mobile/features/search/presentation/bloc/search_state.dart';
 import 'package:ragro_mobile/features/search/presentation/pages/search_result_page.dart';
 import 'package:ragro_mobile/features/search/presentation/widgets/category_chip.dart';
 
@@ -43,7 +44,6 @@ class _SearchViewState extends State<_SearchView> {
     'Processados Artesanais',
     'Plantas e Mudas',
   ];
-  final _recentSearches = ['Tomate cereja orgânico', 'Queijo colonial'];
 
   @override
   void dispose() {
@@ -53,6 +53,7 @@ class _SearchViewState extends State<_SearchView> {
 
   void _goToResults(BuildContext context, String query) {
     if (query.trim().isEmpty) return;
+    context.read<SearchBloc>().add(SearchQuerySubmitted(query.trim()));
     context.push(
       '/customer/search/results',
       extra: SearchRouteParams(
@@ -88,7 +89,6 @@ class _SearchViewState extends State<_SearchView> {
               Padding(
                 padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
                 child: Container(
-                  height: 56,
                   decoration: BoxDecoration(
                     color: const Color(0xFFF1F5F9),
                     borderRadius: BorderRadius.circular(24),
@@ -100,36 +100,29 @@ class _SearchViewState extends State<_SearchView> {
                       ),
                     ],
                   ),
-                  child: Row(
-                    children: [
-                      const SizedBox(width: 16),
-                      const Icon(
+                  child: TextField(
+                    controller: _controller,
+                    textInputAction: TextInputAction.search,
+                    onSubmitted: (q) => _goToResults(context, q),
+                    style: const TextStyle(
+                      fontFamily: 'Figtree',
+                      fontSize: 16,
+                      color: AppColors.black,
+                    ),
+                    decoration: const InputDecoration(
+                      hintText: 'O que você procura hoje?',
+                      hintStyle: TextStyle(
+                        color: Color(0xFF64748B),
+                        fontSize: 16,
+                      ),
+                      prefixIcon: Icon(
                         Icons.search,
                         color: AppColors.placeholder,
                         size: 20,
                       ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: TextField(
-                          controller: _controller,
-                          textInputAction: TextInputAction.search,
-                          onSubmitted: (q) => _goToResults(context, q),
-                          style: const TextStyle(
-                            fontFamily: 'Figtree',
-                            fontSize: 16,
-                            color: AppColors.black,
-                          ),
-                          decoration: const InputDecoration(
-                            hintText: 'O que você procura hoje?',
-                            hintStyle: TextStyle(
-                              color: Color(0xFF64748B),
-                              fontSize: 16,
-                            ),
-                            border: InputBorder.none,
-                          ),
-                        ),
-                      ),
-                    ],
+                      border: InputBorder.none,
+                      contentPadding: EdgeInsets.symmetric(vertical: 18),
+                    ),
                   ),
                 ),
               ),
@@ -170,114 +163,52 @@ class _SearchViewState extends State<_SearchView> {
                   ],
                 ),
               ),
-              // Filtros avançados
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 24, 16, 0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'Filtros Avançados',
-                      style: TextStyle(
-                        fontFamily: 'Figtree',
-                        fontWeight: FontWeight.w700,
-                        fontSize: 16,
-                        color: AppColors.black,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    const Text(
-                      'Localização',
-                      style: TextStyle(
-                        fontFamily: 'Figtree',
-                        fontWeight: FontWeight.w600,
-                        fontSize: 14,
-                        color: AppColors.black,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Container(
-                      padding: const EdgeInsets.all(13),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFF8FAFC),
-                        borderRadius: BorderRadius.circular(24),
-                        border: Border.all(color: const Color(0xFFF1F5F9)),
-                      ),
-                      child: Row(
-                        children: [
-                          const Icon(
-                            Icons.location_on_outlined,
-                            size: 18,
-                            color: AppColors.darkGreen,
+              // Recent searches
+              BlocBuilder<SearchBloc, SearchState>(
+                buildWhen: (prev, curr) =>
+                    curr is SearchIdle && curr.recentSearches.isNotEmpty ||
+                    curr is SearchIdle && curr.recentSearches.isEmpty,
+                builder: (context, state) {
+                  final recent = state is SearchIdle
+                      ? state.recentSearches
+                      : <String>[];
+                  if (recent.isEmpty) return const SizedBox.shrink();
+                  return Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 24, 16, 0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Buscas Recentes',
+                          style: TextStyle(
+                            fontFamily: 'Figtree',
+                            fontWeight: FontWeight.w700,
+                            fontSize: 16,
+                            color: AppColors.black,
                           ),
-                          const SizedBox(width: 12),
-                          const Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Caxias do Sul, RS',
-                                  style: TextStyle(
-                                    fontFamily: 'Figtree',
-                                    fontWeight: FontWeight.w500,
-                                    fontSize: 14,
-                                    color: AppColors.black,
-                                  ),
+                        ),
+                        const SizedBox(height: 12),
+                        ...recent.map(
+                          (q) => Column(
+                            children: [
+                              _RecentSearchItem(
+                                query: q,
+                                onTap: () => _goToResults(context, q),
+                                onRemove: () => context.read<SearchBloc>().add(
+                                  SearchRecentItemRemoved(q),
                                 ),
-                                Text(
-                                  'Dentro de 15km',
-                                  style: TextStyle(
-                                    fontFamily: 'Figtree',
-                                    fontSize: 12,
-                                    color: Color(0xFF64748B),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          GestureDetector(
-                            onTap: () {},
-                            child: const Text(
-                              'MUDAR',
-                              style: TextStyle(
-                                fontFamily: 'Figtree',
-                                fontWeight: FontWeight.w700,
-                                fontSize: 12,
-                                color: AppColors.darkGreen,
-                                letterSpacing: 0.6,
                               ),
-                            ),
+                              const Divider(
+                                color: Color(0xFFF1F5F9),
+                                height: 1,
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
-                    const SizedBox(height: 24),
-                    const Text(
-                      'Buscas Recentes',
-                      style: TextStyle(
-                        fontFamily: 'Figtree',
-                        fontWeight: FontWeight.w700,
-                        fontSize: 16,
-                        color: AppColors.black,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    ..._recentSearches.map(
-                      (q) => Column(
-                        children: [
-                          _RecentSearchItem(
-                            query: q,
-                            onTap: () => _goToResults(context, q),
-                            onRemove: () => context.read<SearchBloc>().add(
-                              SearchRecentItemRemoved(q),
-                            ),
-                          ),
-                          const Divider(color: Color(0xFFF1F5F9), height: 1),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
+                  );
+                },
               ),
             ],
           ),

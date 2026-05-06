@@ -1,3 +1,4 @@
+import 'package:ragro_mobile/core/network/api_endpoints.dart';
 import 'package:ragro_mobile/features/search/domain/entities/search_result.dart';
 
 class SearchResultModel extends SearchResult {
@@ -36,7 +37,7 @@ class SearchResultModel extends SearchResult {
       type: type,
       name: json['name'] as String? ?? '',
       subtitle: json['subtitle'] as String? ?? '',
-      imageUrl: json['image_url'] as String? ?? '',
+      imageUrl: ApiEndpoints.resolveMediaUrl(json['image_url'] as String? ?? ''),
       producerId:
           json['producerId'] as String? ??
           json['farmerId'] as String? ??

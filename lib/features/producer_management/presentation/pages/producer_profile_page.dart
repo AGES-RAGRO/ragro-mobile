@@ -9,6 +9,7 @@ import 'package:go_router/go_router.dart';
 import 'package:ragro_mobile/core/di/injection.dart';
 import 'package:ragro_mobile/core/theme/app_colors.dart';
 import 'package:ragro_mobile/features/producer_management/domain/entities/producer_dashboard.dart';
+
 import 'package:ragro_mobile/features/producer_management/presentation/bloc/producer_management_bloc.dart';
 import 'package:ragro_mobile/features/producer_management/presentation/bloc/producer_management_event.dart';
 import 'package:ragro_mobile/features/producer_management/presentation/bloc/producer_management_state.dart';
@@ -135,6 +136,9 @@ class _ProducerProfileView extends StatelessWidget {
                             backgroundImage: dashboard.avatarUrl.isNotEmpty
                                 ? NetworkImage(dashboard.avatarUrl)
                                 : null,
+                            onBackgroundImageError: dashboard.avatarUrl.isNotEmpty
+                                ? (_, __) {}
+                                : null,
                             child: dashboard.avatarUrl.isEmpty
                                 ? Text(
                                     dashboard.producerName.isNotEmpty
@@ -231,33 +235,7 @@ class _ProducerProfileView extends StatelessWidget {
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(color: const Color(0xFFE2E8F0)),
               ),
-              child: const Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Horário de atendimento',
-                    style: TextStyle(
-                      fontFamily: 'Figtree',
-                      fontWeight: FontWeight.w700,
-                      fontSize: 15,
-                      color: AppColors.black,
-                    ),
-                  ),
-                  SizedBox(height: 12),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      _DaySchedule(day: 'Seg'),
-                      _DaySchedule(day: 'Ter'),
-                      _DaySchedule(day: 'Qua'),
-                      _DaySchedule(day: 'Qui'),
-                      _DaySchedule(day: 'Sex'),
-                      _DaySchedule(day: 'Sáb', active: false),
-                      _DaySchedule(day: 'Dom', active: false),
-                    ],
-                  ),
-                ],
-              ),
+              child: _ScheduleSection(availability: dashboard.availability),
             ),
           ),
 
@@ -450,10 +428,70 @@ class _ProducerProfileView extends StatelessWidget {
   }
 }
 
+class _ScheduleSection extends StatelessWidget {
+  const _ScheduleSection({required this.availability});
+
+  final List<DashboardAvailabilitySlot> availability;
+
+  // UI order: Seg(1), Ter(2), Qua(3), Qui(4), Sex(5), Sáb(6), Dom(0)
+  static const _days = [
+    (label: 'Seg', weekday: 1),
+    (label: 'Ter', weekday: 2),
+    (label: 'Qua', weekday: 3),
+    (label: 'Qui', weekday: 4),
+    (label: 'Sex', weekday: 5),
+    (label: 'Sáb', weekday: 6),
+    (label: 'Dom', weekday: 0),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    final slotByWeekday = {
+      for (final s in availability) s.weekday: s,
+    };
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Horário de atendimento',
+          style: TextStyle(
+            fontFamily: 'Figtree',
+            fontWeight: FontWeight.w700,
+            fontSize: 15,
+            color: AppColors.black,
+          ),
+        ),
+        const SizedBox(height: 12),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: _days.map((d) {
+            final slot = slotByWeekday[d.weekday];
+            return _DaySchedule(
+              day: d.label,
+              active: slot != null,
+              opensAt: slot?.opensAt,
+              closesAt: slot?.closesAt,
+            );
+          }).toList(),
+        ),
+      ],
+    );
+  }
+}
+
 class _DaySchedule extends StatelessWidget {
-  const _DaySchedule({required this.day, this.active = true});
+  const _DaySchedule({
+    required this.day,
+    this.active = true,
+    this.opensAt,
+    this.closesAt,
+  });
+
   final String day;
   final bool active;
+  final String? opensAt;
+  final String? closesAt;
 
   @override
   Widget build(BuildContext context) {
@@ -477,11 +515,11 @@ class _DaySchedule extends StatelessWidget {
             color: active ? AppColors.darkGreen : AppColors.placeholder,
           ),
         ),
-        if (active)
-          const Text(
-            '14:00\n18:30',
+        if (active && opensAt != null && closesAt != null)
+          Text(
+            '$opensAt\n$closesAt',
             textAlign: TextAlign.center,
-            style: TextStyle(
+            style: const TextStyle(
               fontFamily: 'Manrope',
               fontSize: 10,
               color: AppColors.placeholder,

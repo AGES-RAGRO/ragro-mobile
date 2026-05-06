@@ -1,3 +1,4 @@
+import 'package:ragro_mobile/core/network/api_endpoints.dart';
 import 'package:ragro_mobile/features/home/domain/entities/producer.dart';
 
 class ProducerModel extends Producer {
@@ -16,12 +17,10 @@ class ProducerModel extends Producer {
       id: (json['id'] ?? '').toString(),
       name: json['farm_name'] as String? ?? 'Fazenda sem nome',
       description: json['description'] as String? ?? '',
-      avatarUrl:
-          json['avatar_s3'] as String? ?? json['avatarUrl'] as String? ?? '',
-      coverUrl:
-          json['display_photo_s3'] as String? ??
-          json['coverUrl'] as String? ??
-          '',
+      avatarUrl: ApiEndpoints.resolveMediaUrl(
+          json['avatar_s3'] as String? ?? json['avatarUrl'] as String? ?? ''),
+      coverUrl: ApiEndpoints.resolveMediaUrl(
+          json['display_photo_s3'] as String? ?? json['coverUrl'] as String? ?? ''),
       averageRating: (json['average_rating'] as num?)?.toDouble() ?? 0.0,
       ownerName: json['owner_name'] as String? ?? '',
     );

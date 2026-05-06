@@ -105,6 +105,18 @@ class _ProductDetailView extends StatelessWidget {
                                   ? Image.network(
                                       product.imageUrl,
                                       fit: BoxFit.cover,
+                                      errorBuilder: (_, __, ___) => ColoredBox(
+                                        color: AppColors.mintGreen.withValues(
+                                          alpha: 0.3,
+                                        ),
+                                        child: const Center(
+                                          child: Icon(
+                                            Icons.eco,
+                                            size: 80,
+                                            color: AppColors.darkGreen,
+                                          ),
+                                        ),
+                                      ),
                                     )
                                   : ColoredBox(
                                       color: AppColors.mintGreen.withValues(
@@ -160,54 +172,61 @@ class _ProductDetailView extends StatelessWidget {
                               ),
                               const SizedBox(height: 16),
                               // Producer info
-                              Text(
-                                'Produtor: ${product.producerName}',
-                                style: const TextStyle(
-                                  fontFamily: 'Figtree',
-                                  fontSize: 14,
-                                  color: AppColors.black,
-                                ),
-                              ),
-                              const SizedBox(height: 8),
-                              Row(
-                                children: [
-                                  const Icon(
-                                    Icons.storefront_outlined,
-                                    size: 14,
-                                    color: AppColors.black,
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Text(
-                                    product.farmName,
-                                    style: const TextStyle(
-                                      fontFamily: 'Figtree',
-                                      fontSize: 14,
-                                      color: AppColors.black,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 16),
-                              // Category badge
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 10,
-                                  vertical: 4,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: AppColors.lightGreen,
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: Text(
-                                  product.category,
+                              if (product.producerName.isNotEmpty)
+                                Text(
+                                  'Produtor: ${product.producerName}',
                                   style: const TextStyle(
                                     fontFamily: 'Figtree',
-                                    fontWeight: FontWeight.w700,
-                                    fontSize: 10,
-                                    color: AppColors.white,
+                                    fontSize: 14,
+                                    color: AppColors.black,
                                   ),
                                 ),
-                              ),
+                              if (product.producerName.isNotEmpty)
+                                const SizedBox(height: 8),
+                              if (product.farmName.isNotEmpty)
+                                Row(
+                                  children: [
+                                    const Icon(
+                                      Icons.storefront_outlined,
+                                      size: 14,
+                                      color: AppColors.black,
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      product.farmName,
+                                      style: const TextStyle(
+                                        fontFamily: 'Figtree',
+                                        fontSize: 14,
+                                        color: AppColors.black,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              if (product.farmName.isNotEmpty)
+                                const SizedBox(height: 16),
+                              // Category badge — only shown when assigned
+                              if (product.category.isNotEmpty)
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 10,
+                                    vertical: 4,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.lightGreen,
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: Text(
+                                    product.category,
+                                    style: const TextStyle(
+                                      fontFamily: 'Figtree',
+                                      fontWeight: FontWeight.w700,
+                                      fontSize: 10,
+                                      color: AppColors.white,
+                                    ),
+                                  ),
+                                ),
+                              if (product.category.isNotEmpty)
+                                const SizedBox(height: 8),
                               const SizedBox(height: 24),
                               // Description
                               const Text(

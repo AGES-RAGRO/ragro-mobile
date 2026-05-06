@@ -110,6 +110,10 @@ class _ProducerPublicProfileView extends StatelessWidget {
                                         producer.avatarUrl.isNotEmpty
                                         ? NetworkImage(producer.avatarUrl)
                                         : null,
+                                    onBackgroundImageError:
+                                        producer.avatarUrl.isNotEmpty
+                                        ? (_, __) {}
+                                        : null,
                                     child: producer.avatarUrl.isEmpty
                                         ? const Icon(
                                             Icons.person,
@@ -403,7 +407,16 @@ class _CoverPhoto extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (coverUrl.isNotEmpty) {
-      return Image.network(coverUrl, fit: BoxFit.cover);
+      return Image.network(
+        coverUrl,
+        fit: BoxFit.cover,
+        errorBuilder: (_, __, ___) => ColoredBox(
+          color: AppColors.darkGreen.withValues(alpha: 0.3),
+          child: const Center(
+            child: Icon(Icons.landscape, size: 64, color: AppColors.white),
+          ),
+        ),
+      );
     }
     return ColoredBox(
       color: AppColors.darkGreen.withValues(alpha: 0.3),
