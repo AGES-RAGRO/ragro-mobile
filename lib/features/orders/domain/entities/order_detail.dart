@@ -172,7 +172,7 @@ class OrderDetail extends Equatable {
 
   bool get canContactProducer =>
       actions?.canContactProducer ??
-      ((producerPhone?.trim().isNotEmpty ?? false));
+      (producerPhone?.trim().isNotEmpty ?? false);
 
   String get friendlyStatusLabel {
     if (statusLabel != null && statusLabel!.isNotEmpty) return statusLabel!;

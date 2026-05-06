@@ -179,31 +179,14 @@ class _CheckoutView extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            const Text(
-                              'Endereço de Entrega',
-                              style: TextStyle(
-                                fontFamily: 'Manrope',
-                                fontWeight: FontWeight.w700,
-                                fontSize: 18,
-                                color: AppColors.black,
-                              ),
-                            ),
-                            GestureDetector(
-                              onTap: () {},
-                              child: const Text(
-                                'Alterar',
-                                style: TextStyle(
-                                  fontFamily: 'Figtree',
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 14,
-                                  color: AppColors.darkGreen,
-                                ),
-                              ),
-                            ),
-                          ],
+                        const Text(
+                          'Endereço de Entrega',
+                          style: TextStyle(
+                            fontFamily: 'Manrope',
+                            fontWeight: FontWeight.w700,
+                            fontSize: 18,
+                            color: AppColors.black,
+                          ),
                         ),
                         const SizedBox(height: 16),
                         Container(
@@ -245,9 +228,9 @@ class _CheckoutView extends StatelessWidget {
                                         color: AppColors.black,
                                       ),
                                     ),
-                                    Text(
+                                    const Text(
                                       'Endereço será confirmado pelo cadastro',
-                                      style: const TextStyle(
+                                      style: TextStyle(
                                         fontFamily: 'Manrope',
                                         fontSize: 14,
                                         color: AppColors.black,

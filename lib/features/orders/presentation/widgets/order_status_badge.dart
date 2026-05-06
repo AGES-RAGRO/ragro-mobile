@@ -15,33 +15,35 @@ class OrderStatusBadge extends StatelessWidget {
     OrderStatus.cancelled => AppColors.red,
   };
 
+  IconData get _icon => switch (status) {
+    OrderStatus.pending => Icons.schedule,
+    OrderStatus.accepted => Icons.check_circle_outline,
+    OrderStatus.inDelivery => Icons.local_shipping_outlined,
+    OrderStatus.delivered => Icons.check_circle,
+    OrderStatus.cancelled => Icons.cancel_outlined,
+  };
+
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
         color: _backgroundColor,
-        borderRadius: BorderRadius.circular(6),
+        borderRadius: BorderRadius.circular(20),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          if (status != OrderStatus.cancelled) ...[
-            const Icon(
-              Icons.check_circle_outline,
-              color: Colors.white,
-              size: 12,
-            ),
-            const SizedBox(width: 4),
-          ],
+          Icon(_icon, color: Colors.white, size: 13),
+          const SizedBox(width: 5),
           Text(
-            status.label,
+            status.label.toUpperCase(),
             style: const TextStyle(
               fontFamily: 'Manrope',
-              fontWeight: FontWeight.w500,
-              fontSize: 10,
+              fontWeight: FontWeight.w700,
+              fontSize: 11,
               color: Colors.white,
-              letterSpacing: 0.6,
+              letterSpacing: 0.5,
             ),
           ),
         ],

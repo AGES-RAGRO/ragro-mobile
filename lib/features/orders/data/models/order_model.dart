@@ -5,6 +5,7 @@ import 'package:ragro_mobile/features/orders/domain/entities/order_status.dart';
 class OrderModel extends Order {
   const OrderModel({
     required super.id,
+    required super.orderNumber,
     required super.producerId,
     required super.producerPhone,
     required super.farmName,
@@ -36,6 +37,7 @@ class OrderModel extends Order {
 
     return OrderModel(
       id: json['id'] as String? ?? '',
+      orderNumber: json['orderNumber'] as String? ?? '',
       producerPhone:
           json['producerPhone'] as String? ??
           json['phone'] as String? ??
@@ -46,11 +48,12 @@ class OrderModel extends Order {
           producerJson?['id'] as String? ??
           '',
       farmName:
-          json['producerName'] as String? ??
           json['farmName'] as String? ??
+          json['producerName'] as String? ??
           producerJson?['name'] as String? ??
           '',
       farmAvatarUrl:
+          json['producerPicture'] as String? ??
           json['producerPhoto'] as String? ??
           json['producerPhotoUrl'] as String? ??
           json['farmAvatarUrl'] as String? ??
@@ -65,6 +68,7 @@ class OrderModel extends Order {
           (json['total'] as num? ??
                   json['totalAmount'] as num? ??
                   json['totalPrice'] as num? ??
+                  json['price'] as num? ??
                   0)
               .toDouble(),
       status: _parseStatus(json['status'] as String?),
