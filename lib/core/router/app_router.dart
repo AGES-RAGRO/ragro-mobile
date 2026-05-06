@@ -16,6 +16,7 @@ import 'package:ragro_mobile/features/auth/presentation/pages/login_page.dart';
 import 'package:ragro_mobile/features/cart/presentation/pages/cart_page.dart';
 import 'package:ragro_mobile/features/customer_profile/presentation/bloc/customer_profile_bloc.dart';
 import 'package:ragro_mobile/features/customer_profile/presentation/bloc/customer_profile_event.dart';
+import 'package:ragro_mobile/features/customer_profile/presentation/pages/customer_edit_address_page.dart';
 import 'package:ragro_mobile/features/customer_profile/presentation/pages/customer_edit_profile_page.dart';
 import 'package:ragro_mobile/features/customer_profile/presentation/pages/customer_profile_page.dart';
 import 'package:ragro_mobile/features/home/presentation/pages/customer_home_page.dart';
@@ -183,6 +184,10 @@ class AppRouter {
         GoRoute(
           path: '/customer/checkout',
           builder: (_, __) => const OrderConfirmationPage(),
+        ),
+        GoRoute(
+          path: '/customer/edit-address',
+          builder: (_, __) => const CustomerEditAddressPage(),
         ),
 
         // Top-level producer profile (fullscreen) — used from outside the
