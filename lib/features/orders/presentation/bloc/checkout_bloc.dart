@@ -1,5 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
+import 'package:ragro_mobile/core/network/api_exception.dart';
 import 'package:ragro_mobile/features/cart/domain/usecases/get_cart.dart';
 import 'package:ragro_mobile/features/orders/domain/usecases/confirm_order.dart';
 import 'package:ragro_mobile/features/orders/presentation/bloc/checkout_event.dart';
@@ -24,8 +25,10 @@ class CheckoutBloc extends Bloc<CheckoutEvent, CheckoutState> {
     try {
       final cart = await _getCart();
       emit(CheckoutReady(cart));
-    } on Exception catch (e) {
-      emit(CheckoutFailure(message: e.toString()));
+    } on ApiException catch (e) {
+      emit(CheckoutFailure(message: e.message));
+    } on Exception catch (_) {
+      emit(const CheckoutFailure(message: 'Não foi possível carregar o carrinho.'));
     }
   }
 
@@ -43,8 +46,10 @@ class CheckoutBloc extends Bloc<CheckoutEvent, CheckoutState> {
     try {
       final order = await _confirmOrder(event.cartId);
       emit(CheckoutSuccess(order));
-    } on Exception catch (e) {
-      emit(CheckoutFailure(cart: cart, message: e.toString()));
+    } on ApiException catch (e) {
+      emit(CheckoutFailure(cart: cart, message: e.message));
+    } on Exception catch (_) {
+      emit(CheckoutFailure(cart: cart, message: 'Erro ao confirmar pedido.'));
     }
   }
 }

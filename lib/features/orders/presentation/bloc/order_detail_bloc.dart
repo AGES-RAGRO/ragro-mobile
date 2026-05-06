@@ -2,6 +2,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 import 'package:ragro_mobile/core/network/api_exception.dart';
 import 'package:ragro_mobile/features/orders/domain/entities/order_detail.dart';
+import 'package:ragro_mobile/features/orders/domain/entities/order_status.dart';
 import 'package:ragro_mobile/features/orders/domain/usecases/cancel_customer_order.dart';
 import 'package:ragro_mobile/features/orders/domain/usecases/confirm_customer_delivery.dart';
 import 'package:ragro_mobile/features/orders/domain/usecases/get_customer_order_by_id.dart';
@@ -49,7 +50,7 @@ class OrderDetailBloc extends Bloc<OrderDetailEvent, OrderDetailState> {
     try {
       await _cancelOrder(event.orderId, reason: event.reason, details: event.details);
       final cancelled = current.order.copyWith(
-        status: 'CANCELLED',
+        status: OrderStatus.cancelled.backendValue,
         actions: const OrderDetailActions(
           canConfirmDelivery: false,
           canCancel: false,

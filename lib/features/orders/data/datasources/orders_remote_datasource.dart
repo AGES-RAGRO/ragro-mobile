@@ -180,15 +180,5 @@ class OrdersRemoteDatasource {
     return const [];
   }
 
-  // Backend OrderStatus enum (Java) é case-sensitive UPPERCASE.
-  // Ver ragro-backend/src/main/java/br/com/ragro/domain/enums/OrderStatus.java
-  String _statusQueryValue(OrderStatus status) {
-    return switch (status) {
-      OrderStatus.pending => 'PENDING',
-      OrderStatus.accepted => 'CONFIRMED',
-      OrderStatus.inDelivery => 'IN_DELIVERY',
-      OrderStatus.delivered => 'DELIVERED',
-      OrderStatus.cancelled => 'CANCELLED',
-    };
-  }
+  String _statusQueryValue(OrderStatus status) => status.backendValue;
 }
