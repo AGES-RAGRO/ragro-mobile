@@ -85,13 +85,15 @@ class ProducerOrdersRemoteDataSource {
     return rawList.whereType<Map<String, dynamic>>().toList();
   }
 
+  // Backend OrderStatus enum (Java) é case-sensitive UPPERCASE.
+  // Ver ragro-backend/src/main/java/br/com/ragro/domain/enums/OrderStatus.java
   String _statusQueryValue(ProducerOrderStatus status) {
     return switch (status) {
-      ProducerOrderStatus.pending => 'pending',
-      ProducerOrderStatus.accepted => 'confirmed',
+      ProducerOrderStatus.pending => 'PENDING',
+      ProducerOrderStatus.accepted => 'CONFIRMED',
       ProducerOrderStatus.inDelivery => 'IN_DELIVERY',
       ProducerOrderStatus.delivered => 'DELIVERED',
-      ProducerOrderStatus.cancelled => 'cancelled',
+      ProducerOrderStatus.cancelled => 'CANCELLED',
     };
   }
 }

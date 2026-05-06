@@ -1,3 +1,4 @@
+import 'package:ragro_mobile/core/network/api_endpoints.dart';
 import 'package:ragro_mobile/features/product_detail/domain/entities/product_detail.dart';
 
 class ProductDetailModel extends ProductDetail {
@@ -15,7 +16,11 @@ class ProductDetailModel extends ProductDetail {
     required super.stockQuantity,
   });
 
-  factory ProductDetailModel.fromJson(Map<String, dynamic> json) {
+  factory ProductDetailModel.fromJson(
+    Map<String, dynamic> json, {
+    String farmName = '',
+    String producerName = '',
+  }) {
     final categories = json['categories'] as List<dynamic>?;
     final photos = json['photos'] as List<dynamic>?;
     final firstCategory = categories != null && categories.isNotEmpty
@@ -24,20 +29,20 @@ class ProductDetailModel extends ProductDetail {
     final firstPhotoUrl = photos != null && photos.isNotEmpty
         ? (photos.first as Map<String, dynamic>)['url'] as String? ?? ''
         : '';
-    final imageUrl = firstPhotoUrl.isNotEmpty
+    final imageUrl = ApiEndpoints.resolveMediaUrl(firstPhotoUrl.isNotEmpty
         ? firstPhotoUrl
-        : (json['imageS3'] as String? ?? '');
+        : (json['imageS3'] as String? ?? ''));
     return ProductDetailModel(
-      id: json['id'] as String,
+      id: (json['id'] as Object).toString(),
       name: json['name'] as String,
       description: json['description'] as String? ?? '',
       price: (json['price'] as num).toDouble(),
       unityType: json['unityType'] as String? ?? 'kg',
       category: firstCategory,
       imageUrl: imageUrl,
-      farmName: '',
-      producerName: '',
-      producerId: json['farmerId'] as String? ?? '',
+      farmName: farmName,
+      producerName: producerName,
+      producerId: (json['farmerId'] as Object?)?.toString() ?? '',
       stockQuantity: (json['stockQuantity'] as num?)?.toDouble() ?? 0.0,
     );
   }

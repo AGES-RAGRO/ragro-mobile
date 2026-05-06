@@ -1,5 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
+import 'package:ragro_mobile/core/network/api_exception.dart';
 import 'package:ragro_mobile/features/orders/domain/entities/order_detail.dart';
 import 'package:ragro_mobile/features/orders/domain/usecases/cancel_customer_order.dart';
 import 'package:ragro_mobile/features/orders/domain/usecases/confirm_customer_delivery.dart';
@@ -31,8 +32,10 @@ class OrderDetailBloc extends Bloc<OrderDetailEvent, OrderDetailState> {
     try {
       final order = await _getCustomerOrderById(event.orderId);
       emit(OrderDetailLoaded(order));
-    } on Exception catch (e) {
-      emit(OrderDetailFailure(e.toString()));
+    } on ApiException catch (e) {
+      emit(OrderDetailFailure(e.message));
+    } on Exception catch (_) {
+      emit(const OrderDetailFailure('Não foi possível carregar o pedido.'));
     }
   }
 
@@ -60,11 +63,19 @@ class OrderDetailBloc extends Bloc<OrderDetailEvent, OrderDetailState> {
         ),
       );
       emit(OrderDetailLoaded(cancelled));
-    } on Exception catch (e) {
+    } on ApiException catch (e) {
       emit(
         OrderDetailActionFailure(
           order: current.order,
-          message: e.toString(),
+          message: e.message,
+        ),
+      );
+      emit(OrderDetailLoaded(current.order));
+    } on Exception catch (_) {
+      emit(
+        OrderDetailActionFailure(
+          order: current.order,
+          message: 'Não foi possível cancelar o pedido.',
         ),
       );
       emit(OrderDetailLoaded(current.order));
@@ -87,8 +98,22 @@ class OrderDetailBloc extends Bloc<OrderDetailEvent, OrderDetailState> {
         ),
       );
       emit(OrderDetailLoaded(order));
-    } on Exception catch (e) {
-      emit(OrderDetailFailure(e.toString()));
+    } on ApiException catch (e) {
+      emit(
+        OrderDetailActionFailure(
+          order: current.order,
+          message: e.message,
+        ),
+      );
+      emit(OrderDetailLoaded(current.order));
+    } on Exception catch (_) {
+      emit(
+        OrderDetailActionFailure(
+          order: current.order,
+          message: 'Não foi possível confirmar a entrega.',
+        ),
+      );
+      emit(OrderDetailLoaded(current.order));
     }
   }
 }

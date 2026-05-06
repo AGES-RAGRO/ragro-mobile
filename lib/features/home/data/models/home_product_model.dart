@@ -1,3 +1,4 @@
+import 'package:ragro_mobile/core/network/api_endpoints.dart';
 import 'package:ragro_mobile/features/home/domain/entities/home_product.dart';
 
 class HomeProductModel extends HomeProduct {
@@ -28,11 +29,11 @@ class HomeProductModel extends HomeProduct {
           primaryCategory?['name'] as String? ??
           '',
       price: (json['price'] as num?)?.toDouble() ?? 0,
-      imageUrl:
+      imageUrl: ApiEndpoints.resolveMediaUrl(
           json['imageS3'] as String? ??
           json['image_s3'] as String? ??
           json['imageUrl'] as String? ??
-          '',
+          ''),
       farmName:
           json['farmName'] as String? ??
           json['farm_name'] as String? ??
@@ -45,44 +46,4 @@ class HomeProductModel extends HomeProduct {
     );
   }
 
-  static List<HomeProductModel> mocks() {
-    return [
-      const HomeProductModel(
-        id: 'p1',
-        name: 'Kiwi Orgânico',
-        category: 'FRUTAS',
-        price: 8.90,
-        imageUrl: '',
-        farmName: 'Fazenda Sol Nascente',
-        producerId: 'producer_1',
-      ),
-      const HomeProductModel(
-        id: 'p2',
-        name: 'Alface Crespa',
-        category: 'HORTA',
-        price: 3.50,
-        imageUrl: '',
-        farmName: 'Fazenda Sol Nascente',
-        producerId: 'producer_1',
-      ),
-      const HomeProductModel(
-        id: 'p3',
-        name: 'Tomate Cereja',
-        category: 'HORTA',
-        price: 12.90,
-        imageUrl: '',
-        farmName: 'Sítio Verde Vivo',
-        producerId: 'producer_2',
-      ),
-      const HomeProductModel(
-        id: 'p4',
-        name: 'Manga Palmer',
-        category: 'FRUTAS',
-        price: 6,
-        imageUrl: '',
-        farmName: 'Sítio Verde Vivo',
-        producerId: 'producer_2',
-      ),
-    ];
-  }
 }

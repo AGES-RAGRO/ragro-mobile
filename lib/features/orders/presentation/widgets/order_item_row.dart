@@ -24,7 +24,12 @@ class OrderItemRow extends StatelessWidget {
               height: 64,
               color: AppColors.lightGreen.withValues(alpha: 0.05),
               child: item.imageUrl.isNotEmpty
-                  ? Image.network(item.imageUrl, fit: BoxFit.cover)
+                  ? Image.network(
+                      item.imageUrl,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) =>
+                          const Icon(Icons.eco, color: AppColors.lightGreen),
+                    )
                   : const Icon(Icons.eco, color: AppColors.lightGreen),
             ),
           ),

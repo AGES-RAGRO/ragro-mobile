@@ -1,3 +1,4 @@
+import 'package:ragro_mobile/core/network/api_endpoints.dart';
 import 'package:ragro_mobile/features/cart/domain/entities/cart_item.dart';
 
 class CartItemModel extends CartItem {
@@ -16,7 +17,7 @@ class CartItemModel extends CartItem {
     id: json['id'] as String,
     productId: json['productId'] as String,
     productName: json['productName'] as String? ?? '',
-    imageUrl: json['imageS3'] as String? ?? '',
+    imageUrl: ApiEndpoints.resolveMediaUrl(json['imageS3'] as String? ?? ''),
     unitPrice: (json['unitPrice'] as num).toDouble(),
     unityType: json['unityType'] as String? ?? '',
     quantity: (json['quantity'] as num).toDouble(),
