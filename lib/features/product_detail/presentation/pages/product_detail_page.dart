@@ -8,7 +8,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:ragro_mobile/core/di/injection.dart';
 import 'package:ragro_mobile/core/theme/app_colors.dart';
-import 'package:ragro_mobile/features/cart/domain/entities/cart_item.dart';
 import 'package:ragro_mobile/features/cart/presentation/bloc/cart_bloc.dart';
 import 'package:ragro_mobile/features/cart/presentation/bloc/cart_event.dart';
 import 'package:ragro_mobile/features/product_detail/presentation/bloc/product_detail_bloc.dart';
@@ -16,15 +15,21 @@ import 'package:ragro_mobile/features/product_detail/presentation/bloc/product_d
 import 'package:ragro_mobile/features/product_detail/presentation/bloc/product_detail_state.dart';
 
 class ProductDetailPage extends StatelessWidget {
-  const ProductDetailPage({required this.productId, super.key});
+  const ProductDetailPage({
+    required this.productId,
+    this.producerId = '',
+    super.key,
+  });
 
   final String productId;
+  final String producerId;
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (_) =>
-          getIt<ProductDetailBloc>()..add(ProductDetailStarted(productId)),
+          getIt<ProductDetailBloc>()
+            ..add(ProductDetailStarted(productId, producerId: producerId)),
       child: const _ProductDetailView(),
     );
   }
@@ -100,6 +105,18 @@ class _ProductDetailView extends StatelessWidget {
                                   ? Image.network(
                                       product.imageUrl,
                                       fit: BoxFit.cover,
+                                      errorBuilder: (_, __, ___) => ColoredBox(
+                                        color: AppColors.mintGreen.withValues(
+                                          alpha: 0.3,
+                                        ),
+                                        child: const Center(
+                                          child: Icon(
+                                            Icons.eco,
+                                            size: 80,
+                                            color: AppColors.darkGreen,
+                                          ),
+                                        ),
+                                      ),
                                     )
                                   : ColoredBox(
                                       color: AppColors.mintGreen.withValues(
@@ -155,54 +172,61 @@ class _ProductDetailView extends StatelessWidget {
                               ),
                               const SizedBox(height: 16),
                               // Producer info
-                              Text(
-                                'Produtor: ${product.producerName}',
-                                style: const TextStyle(
-                                  fontFamily: 'Figtree',
-                                  fontSize: 14,
-                                  color: AppColors.black,
-                                ),
-                              ),
-                              const SizedBox(height: 8),
-                              Row(
-                                children: [
-                                  const Icon(
-                                    Icons.storefront_outlined,
-                                    size: 14,
-                                    color: AppColors.black,
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Text(
-                                    product.farmName,
-                                    style: const TextStyle(
-                                      fontFamily: 'Figtree',
-                                      fontSize: 14,
-                                      color: AppColors.black,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 16),
-                              // Category badge
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 10,
-                                  vertical: 4,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: AppColors.lightGreen,
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: Text(
-                                  product.category,
+                              if (product.producerName.isNotEmpty)
+                                Text(
+                                  'Produtor: ${product.producerName}',
                                   style: const TextStyle(
                                     fontFamily: 'Figtree',
-                                    fontWeight: FontWeight.w700,
-                                    fontSize: 10,
-                                    color: AppColors.white,
+                                    fontSize: 14,
+                                    color: AppColors.black,
                                   ),
                                 ),
-                              ),
+                              if (product.producerName.isNotEmpty)
+                                const SizedBox(height: 8),
+                              if (product.farmName.isNotEmpty)
+                                Row(
+                                  children: [
+                                    const Icon(
+                                      Icons.storefront_outlined,
+                                      size: 14,
+                                      color: AppColors.black,
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      product.farmName,
+                                      style: const TextStyle(
+                                        fontFamily: 'Figtree',
+                                        fontSize: 14,
+                                        color: AppColors.black,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              if (product.farmName.isNotEmpty)
+                                const SizedBox(height: 16),
+                              // Category badge — only shown when assigned
+                              if (product.category.isNotEmpty)
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 10,
+                                    vertical: 4,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.lightGreen,
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: Text(
+                                    product.category,
+                                    style: const TextStyle(
+                                      fontFamily: 'Figtree',
+                                      fontWeight: FontWeight.w700,
+                                      fontSize: 10,
+                                      color: AppColors.white,
+                                    ),
+                                  ),
+                                ),
+                              if (product.category.isNotEmpty)
+                                const SizedBox(height: 8),
                               const SizedBox(height: 24),
                               // Description
                               const Text(
@@ -290,17 +314,8 @@ class _ProductDetailView extends StatelessWidget {
                           onTap: () {
                             getIt<CartBloc>().add(
                               CartItemAdded(
-                                CartItem(
-                                  productId: product.id,
-                                  productName: product.name,
-                                  imageUrl: product.imageUrl,
-                                  unitPrice: product.price,
-                                  unityType: product.unityType,
-                                  quantity: quantity,
-                                  farmName: product.farmName,
-                                  farmLocation: '',
-                                  producerId: product.producerId,
-                                ),
+                                productId: product.id,
+                                quantity: quantity.toDouble(),
                               ),
                             );
                             context.push('/customer/cart');

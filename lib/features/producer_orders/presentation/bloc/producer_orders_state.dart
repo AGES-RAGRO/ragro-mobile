@@ -33,3 +33,16 @@ class ProducerOrdersFailure extends ProducerOrdersState {
   @override
   List<Object?> get props => [message];
 }
+
+class ProducerOrdersActionSuccess extends ProducerOrdersState {
+  const ProducerOrdersActionSuccess({
+    required this.message,
+    required this.orders,
+    required this.activeTab,
+  });
+  final String message;
+  final List<ProducerOrder> orders;
+  final ProducerOrderStatus activeTab;
+  @override
+  List<Object?> get props => [message, orders, activeTab];
+}

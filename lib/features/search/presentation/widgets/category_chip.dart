@@ -19,7 +19,7 @@ class CategoryChip extends StatelessWidget {
       onTap: onTap,
       child: Container(
         height: 40,
-        padding: const EdgeInsets.symmetric(horizontal: 20),
+        padding: const EdgeInsets.symmetric(horizontal: 16),
         decoration: BoxDecoration(
           color: isSelected ? AppColors.darkGreen : const Color(0xFFF1F5F9),
           borderRadius: BorderRadius.circular(24),
@@ -34,16 +34,19 @@ class CategoryChip extends StatelessWidget {
                 ]
               : null,
         ),
-        child: Center(
-          child: Text(
-            label,
-            style: TextStyle(
-              fontFamily: 'Figtree',
-              fontWeight: FontWeight.w600,
-              fontSize: 14,
-              color: isSelected ? AppColors.white : const Color(0xFF334155),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              label,
+              style: TextStyle(
+                fontFamily: 'Manrope',
+                fontWeight: FontWeight.w600,
+                fontSize: 14,
+                color: isSelected ? AppColors.white : const Color(0xFF334155),
+              ),
             ),
-          ),
+          ],
         ),
       ),
     );

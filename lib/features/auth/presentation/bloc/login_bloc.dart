@@ -1,17 +1,21 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 import 'package:ragro_mobile/core/network/api_exception.dart';
+import 'package:ragro_mobile/features/auth/domain/usecases/forgot_password.dart';
 import 'package:ragro_mobile/features/auth/domain/usecases/login_user.dart';
 import 'package:ragro_mobile/features/auth/presentation/bloc/login_event.dart';
 import 'package:ragro_mobile/features/auth/presentation/bloc/login_state.dart';
 
 @injectable
 class LoginBloc extends Bloc<LoginEvent, LoginState> {
-  LoginBloc(this._loginUser) : super(const LoginInitial()) {
+  LoginBloc(this._loginUser, this._forgotPassword)
+    : super(const LoginInitial()) {
     on<LoginSubmitted>(_onSubmitted);
+    on<LoginForgotPasswordRequested>(_onForgotPasswordRequested);
   }
 
   final LoginUser _loginUser;
+  final ForgotPassword _forgotPassword;
 
   Future<void> _onSubmitted(
     LoginSubmitted event,
@@ -28,6 +32,21 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
       emit(LoginFailure(e.message));
     } on Object catch (_) {
       emit(const LoginFailure('Unexpected error. Please try again.'));
+    }
+  }
+
+  Future<void> _onForgotPasswordRequested(
+    LoginForgotPasswordRequested event,
+    Emitter<LoginState> emit,
+  ) async {
+    emit(const LoginForgotPasswordInProgress());
+    try {
+      await _forgotPassword(event.email);
+      emit(const LoginForgotPasswordSuccess());
+    } on ApiException catch (e) {
+      emit(LoginForgotPasswordFailure(e.message));
+    } on Object catch (_) {
+      emit(const LoginForgotPasswordFailure('Erro ao solicitar redefinição.'));
     }
   }
 }

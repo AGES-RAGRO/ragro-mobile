@@ -28,3 +28,18 @@ class LoginFailure extends LoginState {
   @override
   List<Object?> get props => [message];
 }
+
+class LoginForgotPasswordInProgress extends LoginState {
+  const LoginForgotPasswordInProgress();
+}
+
+class LoginForgotPasswordSuccess extends LoginState {
+  const LoginForgotPasswordSuccess();
+}
+
+class LoginForgotPasswordFailure extends LoginState {
+  const LoginForgotPasswordFailure(this.message);
+  final String message;
+  @override
+  List<Object?> get props => [message];
+}

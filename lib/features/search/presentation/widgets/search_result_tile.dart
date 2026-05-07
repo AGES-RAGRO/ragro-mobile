@@ -1,64 +1,54 @@
 import 'package:flutter/material.dart';
-import 'package:ragro_mobile/core/theme/app_colors.dart';
 import 'package:ragro_mobile/features/search/domain/entities/search_result.dart';
+import 'package:ragro_mobile/features/search/presentation/widgets/producer_tile.dart';
+import 'package:ragro_mobile/features/search/presentation/widgets/product_tile.dart';
 
 class SearchResultTile extends StatelessWidget {
   const SearchResultTile({
     required this.result,
     required this.onTap,
+    this.onAddToCart,
     super.key,
   });
 
   final SearchResult result;
   final VoidCallback onTap;
+  final VoidCallback? onAddToCart;
 
   @override
   Widget build(BuildContext context) {
-    return ListTile(
-      onTap: onTap,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      leading: Container(
-        width: 56,
-        height: 56,
-        decoration: BoxDecoration(
-          color: AppColors.mintGreen.withValues(alpha: 0.2),
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Icon(
-          result.type == SearchResultType.producer
-              ? Icons.storefront_outlined
-              : Icons.eco_outlined,
-          color: AppColors.darkGreen,
-        ),
-      ),
-      title: Text(
-        result.name,
-        style: const TextStyle(
-          fontFamily: 'Figtree',
-          fontWeight: FontWeight.w600,
-          fontSize: 16,
-          color: AppColors.black,
-        ),
-      ),
-      subtitle: Text(
-        result.subtitle,
-        style: const TextStyle(
-          fontFamily: 'Figtree',
-          fontSize: 13,
-          color: AppColors.placeholder,
-        ),
-      ),
-      trailing: result.price != null
-          ? Text(
-              'R\$ ${result.price!.toStringAsFixed(2).replaceAll('.', ',')}',
-              style: const TextStyle(
-                fontFamily: 'Figtree',
-                fontWeight: FontWeight.w700,
-                fontSize: 14,
-                color: AppColors.darkGreen,
-              ),
-            )
-          : null,
+    return result.type == SearchResultType.producer
+        ? ProducerTile(result: result, onTap: onTap)
+        : ProductTile(result: result, onTap: onTap, onAddToCart: onAddToCart);
+  }
+}
+
+class StarRating extends StatelessWidget {
+  const StarRating({required this.rating, super.key});
+
+  final double rating;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: List.generate(5, (i) {
+        if (i < rating.floor()) {
+          return const Icon(Icons.star, size: 13, color: Color(0xFFFBBF24));
+        } else if (i < rating && rating - i >= 0.5) {
+          return const Icon(
+            Icons.star_half,
+            size: 13,
+            color: Color(0xFFFBBF24),
+          );
+        } else {
+          return const Icon(
+            Icons.star_border,
+            size: 13,
+            color: Color(0xFFFBBF24),
+          );
+        }
+      }),
     );
   }
 }

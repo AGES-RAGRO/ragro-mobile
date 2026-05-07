@@ -12,11 +12,7 @@ class RagroLogo extends StatelessWidget {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        SvgPicture.asset(
-          'assets/images/logo_ragro.svg',
-          height: 300,
-          fit: BoxFit.contain,
-        ),
+        SvgPicture.asset('assets/images/logo_ragro.svg', height: 300),
         const SizedBox(height: 8),
         Text(
           'Do campo à mesa',

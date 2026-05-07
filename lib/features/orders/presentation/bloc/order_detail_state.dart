@@ -1,5 +1,5 @@
 import 'package:equatable/equatable.dart';
-import 'package:ragro_mobile/features/orders/domain/entities/order.dart';
+import 'package:ragro_mobile/features/orders/domain/entities/order_detail.dart';
 
 sealed class OrderDetailState extends Equatable {
   const OrderDetailState();
@@ -17,9 +17,34 @@ class OrderDetailLoading extends OrderDetailState {
 
 class OrderDetailLoaded extends OrderDetailState {
   const OrderDetailLoaded(this.order);
-  final Order order;
+  final OrderDetail order;
   @override
   List<Object?> get props => [order];
+}
+
+class OrderDetailUpdating extends OrderDetailState {
+  const OrderDetailUpdating(this.order);
+  final OrderDetail order;
+  @override
+  List<Object?> get props => [order];
+}
+
+class OrderDetailActionSuccess extends OrderDetailState {
+  const OrderDetailActionSuccess({required this.order, required this.message});
+
+  final OrderDetail order;
+  final String message;
+
+  @override
+  List<Object?> get props => [order, message];
+}
+
+class OrderDetailActionFailure extends OrderDetailState {
+  const OrderDetailActionFailure({required this.order, required this.message});
+  final OrderDetail order;
+  final String message;
+  @override
+  List<Object?> get props => [order, message];
 }
 
 class OrderDetailFailure extends OrderDetailState {

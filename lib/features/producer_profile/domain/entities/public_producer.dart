@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:ragro_mobile/features/home/domain/entities/home_product.dart';
+import 'package:ragro_mobile/features/producer_profile/domain/entities/review.dart';
 
 class AvailabilitySlot extends Equatable {
   const AvailabilitySlot({
@@ -40,7 +41,17 @@ class ProducerAddress extends Equatable {
   final double? longitude;
 
   @override
-  List<Object?> get props => [street, number, city, state, zipCode, complement, neighborhood, latitude, longitude];
+  List<Object?> get props => [
+    street,
+    number,
+    city,
+    state,
+    zipCode,
+    complement,
+    neighborhood,
+    latitude,
+    longitude,
+  ];
 }
 
 class ProducerPaymentMethod extends Equatable {
@@ -70,17 +81,17 @@ class ProducerPaymentMethod extends Equatable {
 
   @override
   List<Object?> get props => [
-        type,
-        pixKeyType,
-        pixKey,
-        bankCode,
-        bankName,
-        agency,
-        accountNumber,
-        accountType,
-        holderName,
-        fiscalNumber,
-      ];
+    type,
+    pixKeyType,
+    pixKey,
+    bankCode,
+    bankName,
+    agency,
+    accountNumber,
+    accountType,
+    holderName,
+    fiscalNumber,
+  ];
 }
 
 class PublicProducer extends Equatable {
@@ -95,14 +106,14 @@ class PublicProducer extends Equatable {
     required this.coverUrl,
     required this.averageRating,
     required this.totalReviews,
-    required this.totalOrders,
     required this.phone,
-    required this.products,
     required this.availability,
     required this.memberSince,
-    this.fiscalNumber,
+    this.photoUrl,
     this.producerAddress,
     this.paymentMethods,
+    this.products,
+    this.reviews,
   });
 
   final String id;
@@ -115,21 +126,39 @@ class PublicProducer extends Equatable {
   final String coverUrl;
   final double averageRating;
   final int totalReviews;
-  final int totalOrders;
   final String phone;
-  final List<HomeProduct> products;
   final List<AvailabilitySlot> availability;
   final DateTime memberSince;
-  
-  // Private fields for profile editing
-  final String? fiscalNumber;
+
+  final String? photoUrl;
   final ProducerAddress? producerAddress;
   final List<ProducerPaymentMethod>? paymentMethods;
+  final List<HomeProduct>? products;
+  final List<Review>? reviews;
 
   int get yearsOnPlatform {
     return DateTime.now().difference(memberSince).inDays ~/ 365;
   }
 
   @override
-  List<Object?> get props => [id, farmName, averageRating, products.length, fiscalNumber, producerAddress, paymentMethods];
+  List<Object?> get props => [
+    id,
+    name,
+    farmName,
+    location,
+    description,
+    story,
+    avatarUrl,
+    coverUrl,
+    averageRating,
+    totalReviews,
+    phone,
+    availability,
+    memberSince,
+    photoUrl,
+    producerAddress,
+    paymentMethods,
+    products,
+    reviews,
+  ];
 }

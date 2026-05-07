@@ -44,7 +44,8 @@ class HomeLoaded extends HomeState {
       products: products ?? this.products,
       currentProducersPage: currentProducersPage ?? this.currentProducersPage,
       hasMoreProducers: hasMoreProducers ?? this.hasMoreProducers,
-      isFetchingMoreProducers: isFetchingMoreProducers ?? this.isFetchingMoreProducers,
+      isFetchingMoreProducers:
+          isFetchingMoreProducers ?? this.isFetchingMoreProducers,
     );
   }
 

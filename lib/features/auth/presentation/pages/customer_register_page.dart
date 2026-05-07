@@ -10,6 +10,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:ragro_mobile/core/di/injection.dart';
 import 'package:ragro_mobile/core/formatters/input_masks.dart';
+import 'package:ragro_mobile/core/services/cep_service.dart';
 import 'package:ragro_mobile/core/theme/app_colors.dart';
 import 'package:ragro_mobile/core/theme/app_text_styles.dart';
 import 'package:ragro_mobile/core/validators/cpf_validator.dart';
@@ -83,7 +84,13 @@ class _CustomerRegisterViewState extends State<_CustomerRegisterView> {
   final _complementController = TextEditingController();
   final _neighborhoodController = TextEditingController();
   final _cityController = TextEditingController();
-  String? _selectedState;
+  final _stateController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    _zipCodeController.addListener(_onZipCodeChanged);
+  }
 
   bool _termsAccepted = false;
 
@@ -103,7 +110,27 @@ class _CustomerRegisterViewState extends State<_CustomerRegisterView> {
     _complementController.dispose();
     _neighborhoodController.dispose();
     _cityController.dispose();
+    _stateController.dispose();
     super.dispose();
+  }
+
+  void _onZipCodeChanged() {
+    final cep = _digitsOnly(_zipCodeController.text);
+    if (cep.length == 8) {
+      _lookupZipCode(cep);
+    }
+  }
+
+  Future<void> _lookupZipCode(String cep) async {
+    final address = await getIt<CepService>().fetchAddress(cep);
+    if (address != null && mounted) {
+      setState(() {
+        _streetController.text = address.street;
+        _neighborhoodController.text = address.neighborhood;
+        _cityController.text = address.city;
+        _stateController.text = address.state;
+      });
+    }
   }
 
   void _submit() {
@@ -124,18 +151,14 @@ class _CustomerRegisterViewState extends State<_CustomerRegisterView> {
         phone: _digitsOnly(_phoneController.text),
         email: _emailController.text.trim(),
         fiscalNumber: _digitsOnly(_cpfController.text),
-        password: _passwordController.text,
+        password: _passwordController.text.trim(),
         zipCode: _digitsOnly(_zipCodeController.text),
         street: _streetController.text.trim(),
         number: _numberController.text.trim(),
         city: _cityController.text.trim(),
-        state: _selectedState!,
-        complement: _complementController.text.trim().isEmpty
-            ? null
-            : _complementController.text.trim(),
-        neighborhood: _neighborhoodController.text.trim().isEmpty
-            ? null
-            : _neighborhoodController.text.trim(),
+        state: _stateController.text.trim(),
+        complement: _complementController.text.trim(),
+        neighborhood: _neighborhoodController.text.trim(),
       ),
     );
   }
@@ -301,15 +324,27 @@ class _CustomerRegisterViewState extends State<_CustomerRegisterView> {
                 ),
                 const SizedBox(height: 16),
                 AuthTextField(
-                  label: 'Complemento (opcional)',
+                  label: 'Complemento',
                   icon: Icons.apartment_outlined,
                   controller: _complementController,
+                  validator: (v) {
+                    if (v == null || v.trim().isEmpty) {
+                      return 'Informe o complemento';
+                    }
+                    return null;
+                  },
                 ),
                 const SizedBox(height: 16),
                 AuthTextField(
-                  label: 'Bairro (opcional)',
+                  label: 'Bairro',
                   icon: Icons.signpost_outlined,
                   controller: _neighborhoodController,
+                  validator: (v) {
+                    if (v == null || v.trim().isEmpty) {
+                      return 'Informe o bairro';
+                    }
+                    return null;
+                  },
                 ),
                 const SizedBox(height: 16),
                 Row(
@@ -331,9 +366,24 @@ class _CustomerRegisterViewState extends State<_CustomerRegisterView> {
                     const SizedBox(width: 12),
                     SizedBox(
                       width: 110,
-                      child: _UfAutocomplete(
-                        initialValue: _selectedState,
-                        onSelected: (uf) => setState(() => _selectedState = uf),
+                      child: AuthTextField(
+                        label: 'UF',
+                        icon: Icons.map_outlined,
+                        controller: _stateController,
+                        textCapitalization: TextCapitalization.characters,
+                        inputFormatters: [
+                          LengthLimitingTextInputFormatter(2),
+                          _UppercaseFormatter(),
+                        ],
+                        validator: (value) {
+                          if (value == null || value.trim().isEmpty) {
+                            return 'Informe a UF';
+                          }
+                          if (!_brazilianStates.contains(value.trim().toUpperCase())) {
+                            return 'UF inválida';
+                          }
+                          return null;
+                        },
                       ),
                     ),
                   ],
@@ -428,7 +478,11 @@ class _TermsCheckboxState extends State<_TermsCheckbox> {
 }
 
 class _UfAutocomplete extends StatelessWidget {
-  const _UfAutocomplete({required this.initialValue, required this.onSelected});
+  const _UfAutocomplete({
+    super.key,
+    required this.initialValue,
+    required this.onSelected,
+  });
 
   final String? initialValue;
   final ValueChanged<String> onSelected;

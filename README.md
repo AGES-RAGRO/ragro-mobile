@@ -6,6 +6,10 @@ Built with **Clean Architecture + BLoC**.
 
 ---
 
+# Community
+
+![Alt](https://repobeats.axiom.co/api/embed/617e665c556412a64d7c3727abc390b6630ee79c.svg "Repobeats analytics image")
+
 ## Tech Stack
 
 | Package | Purpose |

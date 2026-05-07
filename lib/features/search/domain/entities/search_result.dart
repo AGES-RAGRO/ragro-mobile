@@ -9,9 +9,13 @@ class SearchResult extends Equatable {
     required this.name,
     required this.subtitle,
     required this.imageUrl,
+    this.producerId,
     this.price,
     this.rating,
+    this.reviewCount,
     this.category,
+    this.distance,
+    this.unit,
   });
 
   final String id;
@@ -19,9 +23,13 @@ class SearchResult extends Equatable {
   final String name;
   final String subtitle;
   final String imageUrl;
+  final String? producerId;
   final double? price;
   final double? rating;
+  final int? reviewCount;
   final String? category;
+  final double? distance;
+  final String? unit;
 
   @override
   List<Object?> get props => [
@@ -30,8 +38,12 @@ class SearchResult extends Equatable {
     name,
     subtitle,
     imageUrl,
+    producerId,
     price,
     rating,
+    reviewCount,
     category,
+    distance,
+    unit,
   ];
 }

@@ -1,3 +1,4 @@
+import 'package:ragro_mobile/core/network/api_endpoints.dart';
 import 'package:ragro_mobile/features/search/domain/entities/search_result.dart';
 
 class SearchResultModel extends SearchResult {
@@ -7,39 +8,52 @@ class SearchResultModel extends SearchResult {
     required super.name,
     required super.subtitle,
     required super.imageUrl,
+    super.producerId,
     super.price,
     super.rating,
+    super.reviewCount,
     super.category,
+    super.distance,
+    super.unit,
   });
 
-  static List<SearchResultModel> mocks(String query) {
-    return [
-      const SearchResultModel(
-        id: 'p1',
-        type: SearchResultType.product,
-        name: 'Tomate Cereja Orgânico',
-        subtitle: 'Fazenda Sol Nascente',
-        imageUrl: '',
-        price: 12.90,
-        category: 'Horta',
-      ),
-      const SearchResultModel(
-        id: 'p2',
-        type: SearchResultType.product,
-        name: 'Alface Crespa',
-        subtitle: 'Fazenda Sol Nascente',
-        imageUrl: '',
-        price: 3.50,
-        category: 'Horta',
-      ),
-      const SearchResultModel(
-        id: 'pr1',
-        type: SearchResultType.producer,
-        name: 'Fazenda Sol Nascente',
-        subtitle: 'Caxias do Sul, RS • 4.9 ★',
-        imageUrl: '',
-        rating: 4.9,
-      ),
-    ];
+  factory SearchResultModel.fromJson(Map<String, dynamic> json) {
+    final type = _parseType(json['type'] as String?);
+    final id = switch (type) {
+      SearchResultType.product =>
+        json['productId'] as String? ??
+            json['product_id'] as String? ??
+            json['id'] as String? ??
+            '',
+      SearchResultType.producer =>
+        json['producerId'] as String? ??
+            json['producer_id'] as String? ??
+            json['id'] as String? ??
+            '',
+    };
+
+    return SearchResultModel(
+      id: id,
+      type: type,
+      name: json['name'] as String? ?? '',
+      subtitle: json['subtitle'] as String? ?? '',
+      imageUrl: ApiEndpoints.resolveMediaUrl(json['image_url'] as String? ?? ''),
+      producerId:
+          json['producerId'] as String? ??
+          json['farmerId'] as String? ??
+          json['producer_id'] as String? ??
+          json['farmer_id'] as String?,
+      price: (json['price'] as num?)?.toDouble(),
+      rating: (json['rating'] as num?)?.toDouble(),
+      reviewCount: json['review_count'] as int?,
+      category: json['category'] as String?,
+      unit: json['unit'] as String?,
+    );
+  }
+
+  static SearchResultType _parseType(String? rawType) {
+    return rawType == 'product'
+        ? SearchResultType.product
+        : SearchResultType.producer;
   }
 }

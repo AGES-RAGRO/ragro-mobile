@@ -24,3 +24,59 @@ class ProducerOrdersTabChanged extends ProducerOrdersEvent {
 class ProducerOrdersRefreshed extends ProducerOrdersEvent {
   const ProducerOrdersRefreshed();
 }
+
+class ProducerOrderAccepted extends ProducerOrdersEvent {
+  const ProducerOrderAccepted(this.orderId);
+
+  final String orderId;
+
+  @override
+  List<Object?> get props => [orderId];
+}
+
+class ProducerOrderCancelled extends ProducerOrdersEvent {
+  const ProducerOrderCancelled(this.orderId, {required this.reason, this.details});
+
+  final String orderId;
+  final String reason;
+  final String? details;
+
+  @override
+  List<Object?> get props => [orderId, reason, details];
+}
+
+class ProducerOrderLocallyRefused extends ProducerOrdersEvent {
+  const ProducerOrderLocallyRefused(this.orderId);
+
+  final String orderId;
+
+  @override
+  List<Object?> get props => [orderId];
+}
+
+class ProducerOrderMarkedInDelivery extends ProducerOrdersEvent {
+  const ProducerOrderMarkedInDelivery(this.orderId);
+
+  final String orderId;
+
+  @override
+  List<Object?> get props => [orderId];
+}
+
+class ProducerOrderDeliveryConfirmed extends ProducerOrdersEvent {
+  const ProducerOrderDeliveryConfirmed(this.orderId);
+
+  final String orderId;
+
+  @override
+  List<Object?> get props => [orderId];
+}
+
+class ProducerOrderLocallyDelivered extends ProducerOrdersEvent {
+  const ProducerOrderLocallyDelivered(this.orderId);
+
+  final String orderId;
+
+  @override
+  List<Object?> get props => [orderId];
+}

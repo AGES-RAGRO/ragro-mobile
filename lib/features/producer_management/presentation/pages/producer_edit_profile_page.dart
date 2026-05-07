@@ -10,6 +10,7 @@ import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:ragro_mobile/core/di/injection.dart';
 import 'package:ragro_mobile/core/formatters/input_masks.dart';
+import 'package:ragro_mobile/core/services/cep_service.dart';
 import 'package:ragro_mobile/core/theme/app_colors.dart';
 import 'package:ragro_mobile/features/auth/data/datasources/auth_local_datasource.dart';
 import 'package:ragro_mobile/features/producer_profile/domain/entities/public_producer.dart';
@@ -26,36 +27,6 @@ const _pixKeyTypeLabels = {
   'random': 'Chave aleatória',
 };
 
-const List<String> _brazilianStates = [
-  'AC',
-  'AL',
-  'AP',
-  'AM',
-  'BA',
-  'CE',
-  'DF',
-  'ES',
-  'GO',
-  'MA',
-  'MT',
-  'MS',
-  'MG',
-  'PA',
-  'PB',
-  'PR',
-  'PE',
-  'PI',
-  'RJ',
-  'RN',
-  'RS',
-  'RO',
-  'RR',
-  'SC',
-  'SP',
-  'SE',
-  'TO',
-];
-
 class ProducerEditProfilePage extends StatelessWidget {
   const ProducerEditProfilePage({super.key});
 
@@ -69,7 +40,8 @@ class ProducerEditProfilePage extends StatelessWidget {
     }
     return BlocProvider<ProducerProfileBloc>(
       create: (_) =>
-          getIt<ProducerProfileBloc>()..add(ProducerProfileStarted(producerId)),
+          getIt<ProducerProfileBloc>()
+            ..add(ProducerProfileStarted(producerId, isOwnerView: true)),
       child: _ProducerEditProfileView(producerId: producerId),
     );
   }
@@ -100,7 +72,7 @@ class _ProducerEditProfileViewState extends State<_ProducerEditProfileView> {
   final _numberController = TextEditingController();
   final _neighborhoodController = TextEditingController();
   final _cityController = TextEditingController();
-  String? _selectedState;
+  final _stateController = TextEditingController();
 
   // ── Forma de Recebimento ──────────────────────────────────────────────
   String? _pixKeyType;
@@ -124,6 +96,12 @@ class _ProducerEditProfileViewState extends State<_ProducerEditProfileView> {
   bool _hydrated = false;
   bool _isPicking = false;
 
+  @override
+  void initState() {
+    super.initState();
+    _cepController.addListener(_onCepChanged);
+  }
+
   static const _weekdayLabels = [
     'Seg',
     'Ter',
@@ -141,6 +119,25 @@ class _ProducerEditProfileViewState extends State<_ProducerEditProfileView> {
     return formatter
         .formatEditUpdate(TextEditingValue.empty, TextEditingValue(text: val))
         .text;
+  }
+
+  void _onCepChanged() {
+    final cep = _digitsOnly(_cepController.text);
+    if (cep.length == 8) {
+      _lookupCep(cep);
+    }
+  }
+
+  Future<void> _lookupCep(String cep) async {
+    final address = await getIt<CepService>().fetchAddress(cep);
+    if (address != null && mounted) {
+      setState(() {
+        _addressController.text = address.street;
+        _neighborhoodController.text = address.neighborhood;
+        _cityController.text = address.city;
+        _stateController.text = address.state;
+      });
+    }
   }
 
   List<TextInputFormatter> _pixKeyFormatters() {
@@ -166,6 +163,7 @@ class _ProducerEditProfileViewState extends State<_ProducerEditProfileView> {
     _numberController.dispose();
     _neighborhoodController.dispose();
     _cityController.dispose();
+    _stateController.dispose();
     _pixKeyController.dispose();
     _bankNameController.dispose();
     _bankCodeController.dispose();
@@ -183,11 +181,10 @@ class _ProducerEditProfileViewState extends State<_ProducerEditProfileView> {
     final producer = state.producer;
 
     _nameController.text = producer.name;
-    _bioController.text = producer.story;
+    _bioController.text = producer.description;
     _phoneController.text = _applyMask(producer.phone, PhoneInputFormatter());
     _farmNameController.text = producer.farmName;
 
-    // Address
     if (producer.producerAddress != null) {
       final addr = producer.producerAddress!;
       _cepController.text = _applyMask(addr.zipCode, CepInputFormatter());
@@ -195,7 +192,7 @@ class _ProducerEditProfileViewState extends State<_ProducerEditProfileView> {
       _numberController.text = addr.number;
       _neighborhoodController.text = addr.neighborhood ?? '';
       _cityController.text = addr.city;
-      _selectedState = addr.state;
+      _stateController.text = addr.state;
     }
 
     // Payment Methods
@@ -243,12 +240,14 @@ class _ProducerEditProfileViewState extends State<_ProducerEditProfileView> {
     if (producer.availability.isNotEmpty) {
       _scheduleStartController.text = producer.availability.first.opensAt;
       _scheduleEndController.text = producer.availability.first.closesAt;
-      for (int i = 0; i < 7; i++) {
+      for (var i = 0; i < 7; i++) {
         _weekdays[i] = false;
       }
       for (final slot in producer.availability) {
         final uiIndex = slot.weekday == 0 ? 6 : slot.weekday - 1;
-        if (uiIndex >= 0 && uiIndex < 7) _weekdays[uiIndex] = true;
+        if (uiIndex >= 0 && uiIndex < 7) {
+          _weekdays[uiIndex] = true;
+        }
       }
     } else {
       _scheduleStartController.text = '08:00';
@@ -261,14 +260,13 @@ class _ProducerEditProfileViewState extends State<_ProducerEditProfileView> {
   void _submit() {
     if (!(_formKey.currentState?.validate() ?? false)) return;
 
-    // Address
     Map<String, dynamic>? addressPayload;
     if (_addressController.text.trim().isNotEmpty) {
       addressPayload = {
         'street': _addressController.text.trim(),
         'number': _numberController.text.trim(),
         'city': _cityController.text.trim(),
-        'state': _selectedState ?? '',
+        'state': _stateController.text.trim(),
         'zipCode': _digitsOnly(_cepController.text),
         if (_neighborhoodController.text.trim().isNotEmpty)
           'neighborhood': _neighborhoodController.text.trim(),
@@ -324,10 +322,10 @@ class _ProducerEditProfileViewState extends State<_ProducerEditProfileView> {
     final availability = <Map<String, dynamic>>[];
     final sStart = _scheduleStartController.text.trim();
     final sEnd = _scheduleEndController.text.trim();
-    for (int i = 0; i < 7; i++) {
+    for (var i = 0; i < 7; i++) {
       if (_weekdays[i]) {
         // UI weekday: 0=Mon..6=Sun. API weekday: 0=Sun, 1=Mon..
-        int apiWeekday = (i == 6) ? 0 : i + 1;
+        final apiWeekday = (i == 6) ? 0 : i + 1;
         availability.add({
           'weekday': apiWeekday,
           'opensAt': sStart,
@@ -340,7 +338,7 @@ class _ProducerEditProfileViewState extends State<_ProducerEditProfileView> {
       ProducerProfileUpdateSubmitted(
         producerId: widget.producerId,
         name: _nameController.text,
-        story: _bioController.text,
+        description: _bioController.text,
         phone: _digitsOnly(_phoneController.text),
         farmName: _farmNameController.text,
         address: addressPayload,
@@ -617,9 +615,12 @@ class _ProducerEditProfileViewState extends State<_ProducerEditProfileView> {
                           prefixIcon: Icons.person_outline,
                           validator: (value) {
                             final trimmed = value?.trim() ?? '';
-                            if (trimmed.isEmpty) return 'Informe seu nome';
-                            if (trimmed.length < 3)
+                            if (trimmed.isEmpty) {
+                              return 'Informe seu nome';
+                            }
+                            if (trimmed.length < 3) {
                               return 'Nome deve ter ao menos 3 caracteres';
+                            }
                             return null;
                           },
                         ),
@@ -637,9 +638,12 @@ class _ProducerEditProfileViewState extends State<_ProducerEditProfileView> {
                               RegExp(r'\D'),
                               '',
                             );
-                            if (digits.isEmpty) return 'Informe um telefone';
-                            if (digits.length < 10)
+                            if (digits.isEmpty) {
+                              return 'Informe um telefone';
+                            }
+                            if (digits.length < 10) {
                               return 'Telefone deve ter ao menos 10 dígitos';
+                            }
                             return null;
                           },
                         ),
@@ -651,8 +655,9 @@ class _ProducerEditProfileViewState extends State<_ProducerEditProfileView> {
                           hint: 'Nome da sua propriedade rural',
                           prefixIcon: Icons.home_outlined,
                           validator: (value) {
-                            if (value?.trim().isEmpty ?? true)
+                            if (value?.trim().isEmpty ?? true) {
                               return 'Informe o nome da fazenda';
+                            }
                             return null;
                           },
                         ),
@@ -666,8 +671,9 @@ class _ProducerEditProfileViewState extends State<_ProducerEditProfileView> {
                           minLines: 1,
                           maxLines: null,
                           validator: (value) {
-                            if (value?.trim().isEmpty ?? true)
+                            if (value?.trim().isEmpty ?? true) {
                               return 'Conte um pouco sobre você';
+                            }
                             return null;
                           },
                         ),
@@ -685,10 +691,13 @@ class _ProducerEditProfileViewState extends State<_ProducerEditProfileView> {
                           keyboardType: TextInputType.number,
                           inputFormatters: [CepInputFormatter()],
                           validator: (value) {
-                            if (value == null || value.isEmpty) return null;
+                            if (value == null || value.isEmpty) {
+                              return null;
+                            }
                             final digits = _digitsOnly(value);
-                            if (digits.length != 8)
+                            if (digits.length != 8) {
                               return 'CEP deve ter 8 dígitos';
+                            }
                             return null;
                           },
                         ),
@@ -754,10 +763,20 @@ class _ProducerEditProfileViewState extends State<_ProducerEditProfileView> {
                                 children: [
                                   const _FieldLabel('Estado'),
                                   const SizedBox(height: 8),
-                                  _UfAutocomplete(
-                                    initialValue: _selectedState,
-                                    onSelected: (uf) =>
-                                        setState(() => _selectedState = uf),
+                                  _FormField(
+                                    controller: _stateController,
+                                    hint: 'UF',
+                                    prefixIcon: Icons.map_outlined,
+                                    inputFormatters: [
+                                      LengthLimitingTextInputFormatter(2),
+                                      _UppercaseFormatter(),
+                                    ],
+                                    validator: (v) {
+                                      if ((v ?? '').trim().isEmpty) {
+                                        return 'UF';
+                                      }
+                                      return null;
+                                    },
                                   ),
                                 ],
                               ),
@@ -805,7 +824,8 @@ class _ProducerEditProfileViewState extends State<_ProducerEditProfileView> {
                                 const _FieldLabel('Tipo da chave (opcional)'),
                                 const SizedBox(height: 8),
                                 DropdownButtonFormField<String>(
-                                  value: _pixKeyTypes.contains(_pixKeyType)
+                                  initialValue:
+                                      _pixKeyTypes.contains(_pixKeyType)
                                       ? _pixKeyType
                                       : null,
                                   decoration: _dropdownDecoration(),
@@ -1172,9 +1192,7 @@ class _FormField extends StatelessWidget {
     this.prefixIcon,
     this.maxLines = 1,
     this.minLines,
-    this.maxLength,
     this.keyboardType = TextInputType.text,
-    this.enabled = true,
     this.inputFormatters,
     this.validator,
     super.key,
@@ -1185,9 +1203,7 @@ class _FormField extends StatelessWidget {
   final IconData? prefixIcon;
   final int? maxLines;
   final int? minLines;
-  final int? maxLength;
   final TextInputType keyboardType;
-  final bool enabled;
   final List<TextInputFormatter>? inputFormatters;
   final String? Function(String?)? validator;
 
@@ -1197,9 +1213,7 @@ class _FormField extends StatelessWidget {
       controller: controller,
       maxLines: maxLines,
       minLines: minLines,
-      maxLength: maxLength,
       keyboardType: keyboardType,
-      enabled: enabled,
       inputFormatters: inputFormatters,
       validator: validator,
       autovalidateMode: AutovalidateMode.onUserInteraction,
@@ -1247,73 +1261,4 @@ class _UppercaseFormatter extends TextInputFormatter {
     TextEditingValue oldValue,
     TextEditingValue newValue,
   ) => newValue.copyWith(text: newValue.text.toUpperCase());
-}
-
-class _UfAutocomplete extends StatelessWidget {
-  const _UfAutocomplete({this.initialValue, required this.onSelected});
-  final String? initialValue;
-  final ValueChanged<String> onSelected;
-
-  @override
-  Widget build(BuildContext context) {
-    return Autocomplete<String>(
-      initialValue: TextEditingValue(text: initialValue ?? ''),
-      optionsBuilder: (v) {
-        if (v.text.isEmpty) return _brazilianStates;
-        return _brazilianStates.where(
-          (s) => s.toLowerCase().contains(v.text.toLowerCase()),
-        );
-      },
-      onSelected: onSelected,
-      fieldViewBuilder: (ctx, controller, node, onFieldSubmitted) {
-        return TextFormField(
-          controller: controller,
-          focusNode: node,
-          inputFormatters: [
-            LengthLimitingTextInputFormatter(2),
-            _UppercaseFormatter(),
-          ],
-          onChanged: (v) {
-            if (_brazilianStates.contains(v.toUpperCase())) {
-              onSelected(v.toUpperCase());
-            }
-          },
-          decoration: InputDecoration(
-            hintText: 'UF',
-            hintStyle: const TextStyle(
-              fontFamily: 'Manrope',
-              fontSize: 15,
-              color: AppColors.placeholder,
-            ),
-            filled: true,
-            fillColor: AppColors.inputBackground,
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: 16,
-              vertical: 14,
-            ),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: AppColors.inputBorder),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: AppColors.inputBorder),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(
-                color: AppColors.darkGreen,
-                width: 1.5,
-              ),
-            ),
-          ),
-          style: const TextStyle(
-            fontFamily: 'Manrope',
-            fontSize: 15,
-            color: AppColors.black,
-          ),
-        );
-      },
-    );
-  }
 }

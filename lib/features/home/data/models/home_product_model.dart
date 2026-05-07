@@ -1,3 +1,4 @@
+import 'package:ragro_mobile/core/network/api_endpoints.dart';
 import 'package:ragro_mobile/features/home/domain/entities/home_product.dart';
 
 class HomeProductModel extends HomeProduct {
@@ -11,58 +12,38 @@ class HomeProductModel extends HomeProduct {
     required super.producerId,
   });
 
-  factory HomeProductModel.fromJson(Map<String, dynamic> json) {
+  factory HomeProductModel.fromJson(
+    Map<String, dynamic> json, {
+    String fallbackFarmName = '',
+  }) {
+    final categories = json['categories'];
+    final primaryCategory = categories is List && categories.isNotEmpty
+        ? categories.first as Map<String, dynamic>
+        : null;
+
     return HomeProductModel(
-      id: json['id'] as String,
-      name: json['name'] as String,
-      category: json['category'] as String? ?? '',
-      price: (json['price'] as num).toDouble(),
-      imageUrl:
-          json['image_s3'] as String? ?? json['imageUrl'] as String? ?? '',
-      farmName: json['farm_name'] as String? ?? '',
+      id: (json['id'] ?? '').toString(),
+      name: json['name'] as String? ?? '',
+      category:
+          json['category'] as String? ??
+          primaryCategory?['name'] as String? ??
+          '',
+      price: (json['price'] as num?)?.toDouble() ?? 0,
+      imageUrl: ApiEndpoints.resolveMediaUrl(
+          json['imageS3'] as String? ??
+          json['image_s3'] as String? ??
+          json['imageUrl'] as String? ??
+          ''),
+      farmName:
+          json['farmName'] as String? ??
+          json['farm_name'] as String? ??
+          fallbackFarmName,
       producerId:
-          json['farmer_id'] as String? ?? json['producerId'] as String? ?? '',
+          json['farmerId'] as String? ??
+          json['farmer_id'] as String? ??
+          json['producerId'] as String? ??
+          '',
     );
   }
 
-  static List<HomeProductModel> mocks() {
-    return [
-      const HomeProductModel(
-        id: 'p1',
-        name: 'Kiwi Orgânico',
-        category: 'FRUTAS',
-        price: 8.90,
-        imageUrl: '',
-        farmName: 'Fazenda Sol Nascente',
-        producerId: 'producer_1',
-      ),
-      const HomeProductModel(
-        id: 'p2',
-        name: 'Alface Crespa',
-        category: 'HORTA',
-        price: 3.50,
-        imageUrl: '',
-        farmName: 'Fazenda Sol Nascente',
-        producerId: 'producer_1',
-      ),
-      const HomeProductModel(
-        id: 'p3',
-        name: 'Tomate Cereja',
-        category: 'HORTA',
-        price: 12.90,
-        imageUrl: '',
-        farmName: 'Sítio Verde Vivo',
-        producerId: 'producer_2',
-      ),
-      const HomeProductModel(
-        id: 'p4',
-        name: 'Manga Palmer',
-        category: 'FRUTAS',
-        price: 6,
-        imageUrl: '',
-        farmName: 'Sítio Verde Vivo',
-        producerId: 'producer_2',
-      ),
-    ];
-  }
 }

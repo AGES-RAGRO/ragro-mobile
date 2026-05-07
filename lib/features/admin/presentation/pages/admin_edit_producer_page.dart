@@ -9,6 +9,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:ragro_mobile/core/di/injection.dart';
 import 'package:ragro_mobile/core/formatters/input_masks.dart';
+import 'package:ragro_mobile/core/services/cep_service.dart';
 import 'package:ragro_mobile/core/theme/app_colors.dart';
 import 'package:ragro_mobile/features/admin/domain/entities/admin_producer.dart';
 import 'package:ragro_mobile/features/admin/presentation/bloc/admin_edit_producer_bloc.dart';
@@ -95,7 +96,7 @@ class _AdminEditProducerViewState extends State<_AdminEditProducerView> {
   final _numberController = TextEditingController();
   final _neighborhoodController = TextEditingController();
   final _cityController = TextEditingController();
-  String? _selectedState;
+  final _stateController = TextEditingController();
 
   // ── PIX (opcional no update — partial) ────────────────────────────────
   String? _pixKeyType;
@@ -118,6 +119,12 @@ class _AdminEditProducerViewState extends State<_AdminEditProducerView> {
   late AdminProducer _original;
   bool _controllersInitialized = false;
 
+  @override
+  void initState() {
+    super.initState();
+    _cepController.addListener(_onCepChanged);
+  }
+
   static const _weekdayLabels = [
     'Seg',
     'Ter',
@@ -135,6 +142,25 @@ class _AdminEditProducerViewState extends State<_AdminEditProducerView> {
     return formatter
         .formatEditUpdate(TextEditingValue.empty, TextEditingValue(text: val))
         .text;
+  }
+
+  void _onCepChanged() {
+    final cep = _digitsOnly(_cepController.text);
+    if (cep.length == 8) {
+      _lookupCep(cep);
+    }
+  }
+
+  Future<void> _lookupCep(String cep) async {
+    final address = await getIt<CepService>().fetchAddress(cep);
+    if (address != null && mounted) {
+      setState(() {
+        _addressController.text = address.street;
+        _neighborhoodController.text = address.neighborhood;
+        _cityController.text = address.city;
+        _stateController.text = address.state;
+      });
+    }
   }
 
   List<TextInputFormatter> _pixKeyFormatters() {
@@ -162,6 +188,7 @@ class _AdminEditProducerViewState extends State<_AdminEditProducerView> {
     _numberController.dispose();
     _neighborhoodController.dispose();
     _cityController.dispose();
+    _stateController.dispose();
     _pixKeyController.dispose();
     _bankNameController.dispose();
     _bankCodeController.dispose();
@@ -180,15 +207,21 @@ class _AdminEditProducerViewState extends State<_AdminEditProducerView> {
     _nameController.text = producer.name;
     _phoneController.text = _applyMask(producer.phone, PhoneInputFormatter());
     _emailController.text = producer.email;
-    _cpfCnpjController.text = _applyMask(producer.fiscalNumber, FiscalNumberInputFormatter());
+    _cpfCnpjController.text = _applyMask(
+      producer.fiscalNumber,
+      FiscalNumberInputFormatter(),
+    );
     _farmNameController.text = producer.farmName;
     _descriptionController.text = producer.description;
-    _cepController.text = _applyMask(producer.producerAddress?.zipCode ?? '', CepInputFormatter());
+    _cepController.text = _applyMask(
+      producer.producerAddress?.zipCode ?? '',
+      CepInputFormatter(),
+    );
     _addressController.text = producer.producerAddress?.street ?? '';
     _numberController.text = producer.producerAddress?.number ?? '';
     _neighborhoodController.text = producer.producerAddress?.neighborhood ?? '';
     _cityController.text = producer.producerAddress?.city ?? '';
-    _selectedState = producer.producerAddress?.state;
+    _stateController.text = producer.producerAddress?.state ?? '';
 
     // Pre-fill PIX
     final pix = producer.paymentMethods
@@ -197,9 +230,15 @@ class _AdminEditProducerViewState extends State<_AdminEditProducerView> {
     if (pix != null) {
       _pixKeyType = pix.pixKeyType;
       if (_pixKeyType == 'cpf' || _pixKeyType == 'cnpj') {
-        _pixKeyController.text = _applyMask(pix.pixKey ?? '', FiscalNumberInputFormatter());
+        _pixKeyController.text = _applyMask(
+          pix.pixKey ?? '',
+          FiscalNumberInputFormatter(),
+        );
       } else if (_pixKeyType == 'phone') {
-        _pixKeyController.text = _applyMask(pix.pixKey ?? '', PhoneInputFormatter());
+        _pixKeyController.text = _applyMask(
+          pix.pixKey ?? '',
+          PhoneInputFormatter(),
+        );
       } else {
         _pixKeyController.text = pix.pixKey ?? '';
       }
@@ -213,9 +252,15 @@ class _AdminEditProducerViewState extends State<_AdminEditProducerView> {
       _bankNameController.text = bank.bankName ?? '';
       _bankCodeController.text = bank.bankCode ?? '';
       _agencyController.text = bank.agency ?? '';
-      _accountController.text = _applyMask(bank.accountNumber ?? '', BankAccountInputFormatter());
+      _accountController.text = _applyMask(
+        bank.accountNumber ?? '',
+        BankAccountInputFormatter(),
+      );
       _holderController.text = bank.holderName ?? '';
-      _bankFiscalController.text = _applyMask(bank.fiscalNumber ?? '', FiscalNumberInputFormatter());
+      _bankFiscalController.text = _applyMask(
+        bank.fiscalNumber ?? '',
+        FiscalNumberInputFormatter(),
+      );
     }
 
     // Pre-fill horário
@@ -253,7 +298,7 @@ class _AdminEditProducerViewState extends State<_AdminEditProducerView> {
         _neighborhoodController.text !=
             (_original.producerAddress?.neighborhood ?? '') ||
         _cityController.text != (_original.producerAddress?.city ?? '') ||
-        _selectedState != _original.producerAddress?.state ||
+        _stateController.text != (_original.producerAddress?.state ?? '') ||
         _pixKeyType != pix?.pixKeyType ||
         _pixKeyController.text != (pix?.pixKey ?? '') ||
         _bankNameController.text != (bank?.bankName ?? '') ||
@@ -356,7 +401,7 @@ class _AdminEditProducerViewState extends State<_AdminEditProducerView> {
         number: _numberController.text.trim(),
         neighborhood: _neighborhoodController.text.trim(),
         city: _cityController.text.trim(),
-        state: _selectedState ?? '',
+        state: _stateController.text.trim(),
         cpfCnpj: _cpfCnpjController.text.trim(),
         farmName: _farmNameController.text.trim(),
         description: _descriptionController.text.trim(),
@@ -659,10 +704,19 @@ class _AdminEditProducerViewState extends State<_AdminEditProducerView> {
                     children: [
                       const _FieldLabel('Estado'),
                       const SizedBox(height: 8),
-                      _UfAutocomplete(
-                        initialValue: _selectedState,
-                        onSelected: (uf) => setState(() => _selectedState = uf),
-                        enabled: !isSaving,
+                      _TextField(
+                        controller: _stateController,
+                        hint: 'UF',
+                        inputFormatters: [
+                          LengthLimitingTextInputFormatter(2),
+                          _UppercaseFormatter(),
+                        ],
+                        validator: (v) {
+                          if ((v ?? '').trim().isEmpty) {
+                            return 'UF';
+                          }
+                          return null;
+                        },
                       ),
                     ],
                   ),
@@ -1143,6 +1197,7 @@ class _TextField extends StatelessWidget {
 
 class _UfAutocomplete extends StatelessWidget {
   const _UfAutocomplete({
+    super.key,
     required this.initialValue,
     required this.onSelected,
     this.enabled = true,
