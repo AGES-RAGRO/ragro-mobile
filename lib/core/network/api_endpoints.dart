@@ -1,23 +1,20 @@
-abstract final class ApiEndpoints {
-  static const String _defaultBase = 'http://localhost:8080';
+import 'dart:io';
+import 'package:flutter/foundation.dart';
 
-  /// `http://10.0.2.2:8080`, device físico `http://<IP_LAN>:8080`).
+abstract final class ApiEndpoints {
+  static String get _defaultBase {
+    if (kIsWeb) return 'http://localhost:8080';
+    if (Platform.isAndroid) return 'http://10.0.2.2:8080';
+    return 'http://localhost:8080';
+  }
+
   static final String _base = _resolveBaseUrl();
 
   static String _resolveBaseUrl() {
-    const rawBase = String.fromEnvironment(
-      'API_BASE_URL',
-      defaultValue: _defaultBase,
-    );
-    final normalized = rawBase.trim().replaceFirst(RegExp(r'\/+$'), '');
-    final uri = Uri.tryParse(normalized);
-    final hasHttpScheme = uri?.scheme == 'http' || uri?.scheme == 'https';
+    const rawBase = String.fromEnvironment('API_BASE_URL');
 
-    if (normalized.isEmpty || normalized == 'http:' || normalized == 'https:') {
-      return _defaultBase;
-    }
-
-    if (hasHttpScheme && (uri?.host.isNotEmpty ?? false)) {
+    if (rawBase.isNotEmpty) {
+      final normalized = rawBase.trim().replaceFirst(RegExp(r'\/+$'), '');
       return normalized;
     }
 

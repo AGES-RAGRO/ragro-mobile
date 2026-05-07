@@ -307,19 +307,7 @@ class _ProducerHeader extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 18),
       child: Row(
         children: [
-          CircleAvatar(
-            radius: 22,
-            backgroundColor: AppColors.lightGreen.withValues(alpha: 0.12),
-            backgroundImage:
-                order.producerPicture != null &&
-                    order.producerPicture!.isNotEmpty
-                ? NetworkImage(order.producerPicture!)
-                : null,
-            child:
-                order.producerPicture == null || order.producerPicture!.isEmpty
-                ? const Icon(Icons.storefront, color: AppColors.lightGreen)
-                : null,
-          ),
+          _ProducerAvatar(url: order.producerPicture),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
@@ -351,6 +339,37 @@ class _ProducerHeader extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _ProducerAvatar extends StatelessWidget {
+  const _ProducerAvatar({required this.url});
+
+  final String? url;
+
+  @override
+  Widget build(BuildContext context) {
+    final hasUrl = url != null && url!.isNotEmpty;
+    return Container(
+      width: 44,
+      height: 44,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: AppColors.lightGreen.withValues(alpha: 0.12),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: hasUrl
+          ? Image.network(
+              url!,
+              fit: BoxFit.cover,
+              errorBuilder: (_, __, ___) => const Center(
+                child: Icon(Icons.storefront, color: AppColors.lightGreen),
+              ),
+            )
+          : const Center(
+              child: Icon(Icons.storefront, color: AppColors.lightGreen),
+            ),
     );
   }
 }
@@ -446,7 +465,12 @@ class _OrderDetailItemRow extends StatelessWidget {
               height: 64,
               color: AppColors.lightGreen.withValues(alpha: 0.05),
               child: item.productPhoto.isNotEmpty
-                  ? Image.network(item.productPhoto, fit: BoxFit.cover)
+                  ? Image.network(
+                      item.productPhoto,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) =>
+                          const Icon(Icons.eco, color: AppColors.lightGreen),
+                    )
                   : const Icon(Icons.eco, color: AppColors.lightGreen),
             ),
           ),

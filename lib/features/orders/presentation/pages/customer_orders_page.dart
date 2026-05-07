@@ -26,9 +26,15 @@ class CustomerOrdersPage extends StatelessWidget {
   }
 }
 
-class _OrdersView extends StatelessWidget {
+class _OrdersView extends StatefulWidget {
   const _OrdersView();
 
+  @override
+  State<_OrdersView> createState() => _OrdersViewState();
+}
+
+class _OrdersViewState extends State<_OrdersView>
+    with SingleTickerProviderStateMixin {
   static const _tabs = [
     (OrderStatus.pending, 'Pendentes'),
     (OrderStatus.accepted, 'Aceitos'),
@@ -36,6 +42,20 @@ class _OrdersView extends StatelessWidget {
     (OrderStatus.delivered, 'Entregues'),
     (OrderStatus.cancelled, 'Cancelados'),
   ];
+
+  late final TabController _tabController;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: _tabs.length, vsync: this);
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -45,9 +65,8 @@ class _OrdersView extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Title
             const Padding(
-              padding: EdgeInsets.fromLTRB(20, 10, 0, 0),
+              padding: EdgeInsets.fromLTRB(20, 10, 0, 16),
               child: Text(
                 'Pedidos',
                 style: TextStyle(
@@ -58,132 +77,122 @@ class _OrdersView extends StatelessWidget {
                 ),
               ),
             ),
-            // Tab bar
-            BlocBuilder<OrdersBloc, OrdersState>(
-              builder: (context, state) {
-                final activeTab = state is OrdersLoading
-                    ? state.activeTab
-                    : state is OrdersLoaded
-                    ? state.activeTab
-                    : OrderStatus.pending;
-                return SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  padding: const EdgeInsets.only(left: 16),
-                  child: Row(
-                    children: _tabs.map((tab) {
-                      final isActive = activeTab == tab.$1;
-                      return GestureDetector(
-                        onTap: () => context.read<OrdersBloc>().add(
-                          OrdersTabChanged(tab.$1),
-                        ),
-                        child: Container(
-                          padding: const EdgeInsets.fromLTRB(24, 17, 24, 18),
-                          decoration: BoxDecoration(
-                            border: isActive
-                                ? const Border(
-                                    bottom: BorderSide(
-                                      color: AppColors.darkGreen,
-                                      width: 3,
-                                    ),
-                                  )
-                                : null,
-                          ),
-                          child: Text(
-                            tab.$2,
-                            style: TextStyle(
-                              fontFamily: 'Manrope',
-                              fontWeight: isActive
-                                  ? FontWeight.w700
-                                  : FontWeight.w500,
-                              fontSize: 14,
-                              color: isActive
-                                  ? AppColors.darkGreen
-                                  : AppColors.placeholder,
-                            ),
-                          ),
-                        ),
-                      );
-                    }).toList(),
-                  ),
-                );
-              },
+            TabBar(
+              controller: _tabController,
+              isScrollable: true,
+              tabAlignment: TabAlignment.start,
+              labelPadding: const EdgeInsets.symmetric(horizontal: 24),
+              indicatorColor: AppColors.darkGreen,
+              indicatorWeight: 3,
+              indicatorSize: TabBarIndicatorSize.tab,
+              dividerColor: Colors.transparent,
+              labelColor: AppColors.darkGreen,
+              unselectedLabelColor: AppColors.placeholder,
+              labelStyle: const TextStyle(
+                fontFamily: 'Manrope',
+                fontWeight: FontWeight.w700,
+                fontSize: 14,
+              ),
+              unselectedLabelStyle: const TextStyle(
+                fontFamily: 'Manrope',
+                fontWeight: FontWeight.w500,
+                fontSize: 14,
+              ),
+              tabs: _tabs.map((tab) => Tab(text: tab.$2)).toList(),
             ),
-            // Content
             Expanded(
-              child: BlocBuilder<OrdersBloc, OrdersState>(
-                builder: (context, state) {
-                  if (state is OrdersLoading) {
-                    return const Center(
-                      child: CircularProgressIndicator(
-                        color: AppColors.darkGreen,
-                      ),
-                    );
-                  }
-                  if (state is OrdersFailure) {
-                    return Center(
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            state.message,
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(
-                              fontFamily: 'Manrope',
-                              fontSize: 14,
-                              color: AppColors.placeholder,
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-                          TextButton(
-                            onPressed: () => context.read<OrdersBloc>().add(
-                              const OrdersStarted(OrderStatus.pending),
-                            ),
-                            child: const Text('Tentar novamente'),
-                          ),
-                        ],
-                      ),
-                    );
-                  }
-                  if (state is! OrdersLoaded) return const SizedBox.shrink();
-                  final orders = state.orders
-                      .where((order) => order.status == state.activeTab)
-                      .toList();
-                  if (orders.isEmpty) {
-                    return Center(
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Icon(
-                            Icons.shopping_bag_outlined,
-                            size: 64,
-                            color: AppColors.placeholder,
-                          ),
-                          const SizedBox(height: 16),
-                          Text(
-                            'Nenhum pedido ${state.activeTab.label.toLowerCase()}',
-                            style: const TextStyle(
-                              fontFamily: 'Manrope',
-                              fontSize: 16,
-                              color: AppColors.placeholder,
-                            ),
-                          ),
-                        ],
-                      ),
-                    );
-                  }
-                  return ListView.separated(
-                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                    itemCount: orders.length,
-                    separatorBuilder: (_, __) => const SizedBox(height: 13),
-                    itemBuilder: (context, index) =>
-                        OrderCard(order: orders[index]),
-                  );
-                },
+              child: TabBarView(
+                controller: _tabController,
+                children: _tabs
+                    .map((tab) => _OrderTabContent(status: tab.$1))
+                    .toList(),
               ),
             ),
           ],
         ),
       ),
+    );
+  }
+}
+
+class _OrderTabContent extends StatelessWidget {
+  const _OrderTabContent({required this.status});
+
+  final OrderStatus status;
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<OrdersBloc, OrdersState>(
+      builder: (context, state) {
+        if (state is OrdersLoading || state is OrdersInitial) {
+          return const Center(
+            child: CircularProgressIndicator(color: AppColors.darkGreen),
+          );
+        }
+
+        if (state is OrdersFailure) {
+          return Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  state.message,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontFamily: 'Manrope',
+                    fontSize: 14,
+                    color: AppColors.placeholder,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                TextButton(
+                  onPressed: () => context.read<OrdersBloc>().add(
+                    const OrdersRefreshed(),
+                  ),
+                  child: const Text('Tentar novamente'),
+                ),
+              ],
+            ),
+          );
+        }
+
+        if (state is! OrdersLoaded) return const SizedBox.shrink();
+
+        final orders = state.orders
+            .where((order) => order.status == status)
+            .toList();
+
+        if (orders.isEmpty) {
+          return Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(
+                  Icons.shopping_bag_outlined,
+                  size: 64,
+                  color: AppColors.placeholder,
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  'Nenhum pedido ${status.label.toLowerCase()}',
+                  style: const TextStyle(
+                    fontFamily: 'Manrope',
+                    fontSize: 16,
+                    color: AppColors.placeholder,
+                  ),
+                ),
+              ],
+            ),
+          );
+        }
+
+        return ListView.separated(
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+          itemCount: orders.length,
+          separatorBuilder: (_, __) => const SizedBox(height: 13),
+          itemBuilder: (context, index) => OrderCard(order: orders[index]),
+        );
+      },
     );
   }
 }
