@@ -16,6 +16,7 @@ import 'package:ragro_mobile/features/auth/presentation/pages/login_page.dart';
 import 'package:ragro_mobile/features/cart/presentation/pages/cart_page.dart';
 import 'package:ragro_mobile/features/customer_profile/presentation/bloc/customer_profile_bloc.dart';
 import 'package:ragro_mobile/features/customer_profile/presentation/bloc/customer_profile_event.dart';
+import 'package:ragro_mobile/features/customer_profile/presentation/pages/customer_edit_address_page.dart';
 import 'package:ragro_mobile/features/customer_profile/presentation/pages/customer_edit_profile_page.dart';
 import 'package:ragro_mobile/features/customer_profile/presentation/pages/customer_profile_page.dart';
 import 'package:ragro_mobile/features/home/presentation/pages/customer_home_page.dart';
@@ -31,6 +32,7 @@ import 'package:ragro_mobile/features/orders/presentation/pages/rate_producer_pa
 import 'package:ragro_mobile/features/producer_management/presentation/pages/producer_edit_profile_page.dart';
 import 'package:ragro_mobile/features/producer_management/presentation/pages/producer_profile_page.dart';
 import 'package:ragro_mobile/features/producer_management/presentation/pages/producer_settings_page.dart';
+import 'package:ragro_mobile/features/producer_orders/domain/entities/producer_order.dart';
 import 'package:ragro_mobile/features/producer_orders/presentation/pages/producer_order_detail_page.dart';
 import 'package:ragro_mobile/features/producer_orders/presentation/pages/producer_orders_page.dart';
 import 'package:ragro_mobile/features/producer_orders/presentation/pages/route_calculation_page.dart';
@@ -183,6 +185,10 @@ class AppRouter {
           path: '/customer/checkout',
           builder: (_, __) => const OrderConfirmationPage(),
         ),
+        GoRoute(
+          path: '/customer/edit-address',
+          builder: (_, __) => const CustomerEditAddressPage(),
+        ),
 
         // Top-level producer profile (fullscreen) — used from outside the
         // customer shell (e.g. cart). The shell-nested version at
@@ -208,6 +214,7 @@ class AppRouter {
                       path: 'orders/:orderId',
                       builder: (context, state) => ProducerOrderDetailPage(
                         orderId: state.pathParameters['orderId']!,
+                        initialOrder: state.extra as ProducerOrder?,
                       ),
                     ),
                     GoRoute(

@@ -1,23 +1,20 @@
-abstract final class ApiEndpoints {
-  static const String _defaultBase = 'http://localhost:8080';
+import 'dart:io';
+import 'package:flutter/foundation.dart';
 
-  /// `http://10.0.2.2:8080`, device físico `http://<IP_LAN>:8080`).
+abstract final class ApiEndpoints {
+  static String get _defaultBase {
+    if (kIsWeb) return 'http://localhost:8080';
+    if (Platform.isAndroid) return 'http://10.0.2.2:8080';
+    return 'http://localhost:8080';
+  }
+
   static final String _base = _resolveBaseUrl();
 
   static String _resolveBaseUrl() {
-    const rawBase = String.fromEnvironment(
-      'API_BASE_URL',
-      defaultValue: _defaultBase,
-    );
-    final normalized = rawBase.trim().replaceFirst(RegExp(r'\/+$'), '');
-    final uri = Uri.tryParse(normalized);
-    final hasHttpScheme = uri?.scheme == 'http' || uri?.scheme == 'https';
+    const rawBase = String.fromEnvironment('API_BASE_URL');
 
-    if (normalized.isEmpty || normalized == 'http:' || normalized == 'https:') {
-      return _defaultBase;
-    }
-
-    if (hasHttpScheme && (uri?.host.isNotEmpty ?? false)) {
+    if (rawBase.isNotEmpty) {
+      final normalized = rawBase.trim().replaceFirst(RegExp(r'\/+$'), '');
       return normalized;
     }
 
@@ -50,7 +47,17 @@ abstract final class ApiEndpoints {
 
   // Orders
   static String get orders => '$_base/orders';
+  static String get consumerOrders => '$_base/orders/consumer';
   static String order(String id) => '$_base/orders/$id';
+  static String customerOrder(String id) => '$_base/orders/customer/$id';
+  static String customerOrderCancel(String id) =>
+      '$_base/orders/customer/$id/cancel';
+  static String customerOrderConfirmDelivery(String id) =>
+      '$_base/orders/customer/$id/confirm-delivery';
+  static String orderCancel(String id) => '$_base/orders/$id/cancel';
+  static String orderStatus(String id) => '$_base/orders/$id/status';
+  static String orderConfirm(String id) => '$_base/orders/$id/confirm';
+  static String orderRepeat(String id) => '$_base/orders/$id/repeat';
   static String orderRating(String id) => '$_base/orders/$id/rating';
 
   // Customer cart
@@ -83,10 +90,11 @@ abstract final class ApiEndpoints {
 
   // Producer orders
   static String get producerOrders => '$_base/orders/producer';
+  static String producerOrder(String id) => '$_base/orders/producer/$id';
   static String get producerOrdersToday => '$_base/orders/today';
-  static String producerOrderConfirm(String id) => '$_base/orders/$id/confirm';
-  static String producerOrderStatus(String id) => '$_base/orders/$id/status';
-  static String producerOrderCancel(String id) => '$_base/orders/$id/cancel';
+  static String producerOrderConfirm(String id) => orderConfirm(id);
+  static String producerOrderStatus(String id) => orderStatus(id);
+  static String producerOrderCancel(String id) => orderCancel(id);
 
   // Admin
   static String get adminProducers => '$_base/admin/producers';

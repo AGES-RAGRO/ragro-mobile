@@ -44,6 +44,7 @@ class DeliveryAddress extends Equatable {
 class Order extends Equatable {
   const Order({
     required this.id,
+    required this.orderNumber,
     required this.producerId,
     required this.producerPhone,
     required this.farmName,
@@ -58,6 +59,7 @@ class Order extends Equatable {
   });
 
   final String id;
+  final String orderNumber;
   final String producerId;
   final String producerPhone;
   final String farmName;
@@ -82,6 +84,7 @@ class Order extends Equatable {
   @override
   List<Object?> get props => [
     id,
+    orderNumber,
     producerId,
     producerPhone,
     farmName,
