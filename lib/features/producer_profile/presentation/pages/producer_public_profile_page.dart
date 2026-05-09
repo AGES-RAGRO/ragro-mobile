@@ -163,6 +163,37 @@ class _ProducerPublicProfileView extends StatelessWidget {
                                 ),
                               ],
                             ),
+                            const SizedBox(height: 8),
+                            GestureDetector(
+                              onTap: () => context.push(
+                                '/customer/home/producer/${producer.id}/reviews',
+                                extra: {
+                                  'producerName': producer.name,
+                                  'producerLocation': producer.location,
+                                  'averageRating': producer.averageRating,
+                                  'totalReviews': producer.totalReviews,
+                                },
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const Icon(Icons.star, size: 16, color: Color(0xFFFBB040)),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    '${producer.averageRating.toStringAsFixed(1)} (${producer.totalReviews} Avaliações)',
+                                    style: const TextStyle(
+                                      fontFamily: 'Figtree',
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 14,
+                                      color: AppColors.darkGreen,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 4),
+                                  const Icon(Icons.chevron_right, size: 16, color: AppColors.darkGreen),
+                                ],
+                              ),
+                            ),
                             const SizedBox(height: 24),
                             // Contact button
                             SizedBox(
