@@ -2,7 +2,6 @@
 class ProducerUpdateRequest {
   const ProducerUpdateRequest({
     this.name,
-    this.story,
     this.phone,
     this.farmName,
     this.description,
@@ -12,7 +11,6 @@ class ProducerUpdateRequest {
   });
 
   final String? name;
-  final String? story;
   final String? phone;
   final String? farmName;
   final String? description;
@@ -22,7 +20,6 @@ class ProducerUpdateRequest {
 
   Map<String, dynamic> toJson() => {
     if (name != null) 'name': name,
-    if (story != null) 'story': story,
     if (phone != null) 'phone': phone,
     if (farmName != null) 'farmName': farmName,
     if (description != null) 'description': description,

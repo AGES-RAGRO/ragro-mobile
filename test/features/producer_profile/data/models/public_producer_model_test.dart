@@ -112,7 +112,7 @@ void main() {
       const request = ProducerUpdateRequest(
         name: 'João Silva',
         farmName: 'Fazenda Nova',
-        story: 'Minha história',
+        description: 'Minha história',
         phone: '(51) 99999-0001',
       );
 
@@ -121,7 +121,6 @@ void main() {
       expect(json.containsKey('farmName'), isTrue);
       expect(json['farmName'], 'Fazenda Nova');
       expect(json.containsKey('location'), isFalse);
-      expect(json.containsKey('description'), isFalse);
     });
 
     test('inclui apenas campos não nulos no payload', () {

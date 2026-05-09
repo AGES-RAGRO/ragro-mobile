@@ -24,6 +24,7 @@ class CartBloc extends Bloc<CartEvent, CartState> {
     on<CartItemQuantityUpdated>(_onQuantityUpdated);
     on<CartItemRemoved>(_onItemRemoved);
     on<CartCleared>(_onCleared);
+    on<CartOrderPlaced>(_onOrderPlaced);
   }
 
   final GetCart _getCart;
@@ -103,4 +104,8 @@ class CartBloc extends Bloc<CartEvent, CartState> {
 
   Future<void> _onCleared(CartCleared event, Emitter<CartState> emit) =>
       _runMutation(_clearCart.call, 'Erro ao limpar carrinho.', emit);
+
+  void _onOrderPlaced(CartOrderPlaced event, Emitter<CartState> emit) {
+    emit(const CartInitial());
+  }
 }

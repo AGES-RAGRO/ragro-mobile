@@ -1,295 +1,184 @@
+import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart' hide Order;
+import 'package:ragro_mobile/core/network/api_client.dart';
+import 'package:ragro_mobile/core/network/api_endpoints.dart';
+import 'package:ragro_mobile/core/network/api_exception.dart';
+import 'package:ragro_mobile/features/orders/data/models/order_detail_model.dart';
+import 'package:ragro_mobile/features/orders/data/models/order_model.dart';
 import 'package:ragro_mobile/features/orders/domain/entities/order.dart';
-import 'package:ragro_mobile/features/orders/domain/entities/order_item.dart';
+import 'package:ragro_mobile/features/orders/domain/entities/order_detail.dart';
 import 'package:ragro_mobile/features/orders/domain/entities/order_status.dart';
 
 @lazySingleton
 class OrdersRemoteDatasource {
-  static final List<Order> _mockOrders = [
-    Order(
-      id: '4829',
-      producerId: 'p1',
-      producerPhone: '+5511998765432',
-      farmName: 'Fazenda Sol Nascente',
-      farmAvatarUrl: '',
-      ownerName: 'Manoel Silva',
-      items: const [
-        OrderItem(
-          productId: 'prod1',
-          name: 'Tomate',
-          imageUrl: '',
-          quantity: 1,
-          unityType: 'un',
-          totalPrice: 12.90,
-        ),
-        OrderItem(
-          productId: 'prod2',
-          name: 'Bananas',
-          imageUrl: '',
-          quantity: 3,
-          unityType: 'kg',
-          totalPrice: 18,
-        ),
-        OrderItem(
-          productId: 'prod3',
-          name: 'Maçã',
-          imageUrl: '',
-          quantity: 1,
-          unityType: 'kg',
-          totalPrice: 9,
-        ),
-        OrderItem(
-          productId: 'prod4',
-          name: 'Alface Crespa',
-          imageUrl: '',
-          quantity: 1,
-          unityType: 'un',
-          totalPrice: 4.50,
-        ),
-      ],
-      totalAmount: 145.90,
-      status: OrderStatus.pending,
-      createdAt: DateTime(2026, 1, 21, 21, 8),
-      deliveryAddress: const DeliveryAddress(
-        street: 'Rua das Flores, 123 - Apto 42',
-        neighborhood: 'Bairro Primavera',
-        city: 'São Paulo',
-        state: 'SP',
-        zipCode: '01310-100',
-      ),
-      bankInfo: const ProducerBankInfo(
-        bank: 'Nubank (260)',
-        agency: '0001',
-        account: '12345-6',
-        pixKey: 'fazenda.boavista@email.com',
-      ),
-    ),
-    Order(
-      id: '4828',
-      producerId: 'p1',
-      producerPhone: '+5511998765432',
-      farmName: 'Fazenda Sol Nascente',
-      farmAvatarUrl: '',
-      ownerName: 'Manoel Silva',
-      items: const [
-        OrderItem(
-          productId: 'prod1',
-          name: 'Tomate',
-          imageUrl: '',
-          quantity: 1,
-          unityType: 'un',
-          totalPrice: 12.90,
-        ),
-        OrderItem(
-          productId: 'prod2',
-          name: 'Bananas',
-          imageUrl: '',
-          quantity: 3,
-          unityType: 'kg',
-          totalPrice: 18,
-        ),
-        OrderItem(
-          productId: 'prod3',
-          name: 'Maçã',
-          imageUrl: '',
-          quantity: 1,
-          unityType: 'kg',
-          totalPrice: 9,
-        ),
-      ],
-      totalAmount: 145.90,
-      status: OrderStatus.accepted,
-      createdAt: DateTime(2026, 1, 21, 21, 8),
-      deliveryAddress: const DeliveryAddress(
-        street: 'Rua das Flores, 123 - Apto 42',
-        neighborhood: 'Bairro Primavera',
-        city: 'São Paulo',
-        state: 'SP',
-        zipCode: '01310-100',
-      ),
-      bankInfo: const ProducerBankInfo(
-        bank: 'Nubank (260)',
-        agency: '0001',
-        account: '12345-6',
-        pixKey: 'fazenda.boavista@email.com',
-      ),
-    ),
-    Order(
-      id: '4827',
-      producerId: 'p1',
-      producerPhone: '+5511998765432',
-      farmName: 'Fazenda Sol Nascente',
-      farmAvatarUrl: '',
-      ownerName: 'Manoel Silva',
-      items: const [
-        OrderItem(
-          productId: 'prod1',
-          name: 'Tomate',
-          imageUrl: '',
-          quantity: 1,
-          unityType: 'un',
-          totalPrice: 12.90,
-        ),
-        OrderItem(
-          productId: 'prod5',
-          name: 'Maçã',
-          imageUrl: '',
-          quantity: 1,
-          unityType: 'kg',
-          totalPrice: 9,
-        ),
-      ],
-      totalAmount: 145.90,
-      status: OrderStatus.delivered,
-      createdAt: DateTime(2026, 1, 21, 21, 8),
-      deliveryAddress: const DeliveryAddress(
-        street: 'Rua das Flores, 123 - Apto 42',
-        neighborhood: 'Bairro Primavera',
-        city: 'São Paulo',
-        state: 'SP',
-        zipCode: '01310-100',
-      ),
-      bankInfo: const ProducerBankInfo(
-        bank: 'Nubank (260)',
-        agency: '0001',
-        account: '12345-6',
-        pixKey: 'fazenda.boavista@email.com',
-      ),
-    ),
-    Order(
-      id: '4826',
-      producerId: 'p1',
-      producerPhone: '+5511998765432',
-      farmName: 'Fazenda Sol Nascente',
-      farmAvatarUrl: '',
-      ownerName: 'Manoel Silva',
-      items: const [
-        OrderItem(
-          productId: 'prod2',
-          name: 'Bananas',
-          imageUrl: '',
-          quantity: 3,
-          unityType: 'kg',
-          totalPrice: 18,
-        ),
-      ],
-      totalAmount: 145.90,
-      status: OrderStatus.cancelled,
-      createdAt: DateTime(2026, 1, 21, 21, 8),
-      deliveryAddress: const DeliveryAddress(
-        street: 'Rua das Flores, 123 - Apto 42',
-        neighborhood: 'Bairro Primavera',
-        city: 'São Paulo',
-        state: 'SP',
-        zipCode: '01310-100',
-      ),
-      bankInfo: const ProducerBankInfo(
-        bank: 'Nubank (260)',
-        agency: '0001',
-        account: '12345-6',
-        pixKey: 'fazenda.boavista@email.com',
-      ),
-    ),
-  ];
+  const OrdersRemoteDatasource(this._apiClient);
 
-  /// Gets consumer orders, optionally filtered by [status].
-  ///
-  /// === REAL IMPLEMENTATION (uncomment when backend is ready) ===
-  ///
-  /// Future`<List<Order>>` getOrders({OrderStatus? status}) async {
-  ///   try {
-  ///     final response = await _apiClient.dio.get`<Map<String, dynamic>>`(
-  ///       ApiEndpoints.orders,
-  ///       queryParameters: {
-  ///         if (status != null) 'status': status.name,
-  ///       },
-  ///     );
-  ///     return (response.data!['data'] as List)
-  ///         .map((e) => Order.fromJson(e as `Map<String, dynamic>`))
-  ///         .toList();
-  ///   } on DioException catch (e) {
-  ///     throw e.error as ApiException? ?? const UnknownApiException();
-  ///   }
-  /// }
-  ///
-  /// === END REAL IMPLEMENTATION ===
-  ///
-  /// MOCK TEMPORÁRIO — remover quando backend estiver conectado:
+  final ApiClient _apiClient;
+
   Future<List<Order>> getOrders({OrderStatus? status}) async {
-    await Future<void>.delayed(const Duration(milliseconds: 600));
-    if (status == null) return List.from(_mockOrders);
-    return _mockOrders.where((o) => o.status == status).toList();
+    try {
+      final response = await _apiClient.dio.get<dynamic>(
+        ApiEndpoints.consumerOrders,
+        queryParameters: {
+          if (status != null) 'status': _statusQueryValue(status),
+        },
+      );
+
+      return _readList(response.data).map(OrderModel.fromJson).toList();
+    } on DioException catch (e) {
+      throw e.error as ApiException? ?? const UnknownApiException();
+    }
   }
 
-  /// Gets a single order by [id].
-  ///
-  /// === REAL IMPLEMENTATION (uncomment when backend is ready) ===
-  ///
-  /// Future`<Order>` getOrderById(String id) async {
-  ///   try {
-  ///     final response = await _apiClient.dio.get`<Map<String, dynamic>>`(
-  ///       ApiEndpoints.order(id),
-  ///     );
-  ///     return Order.fromJson(response.data!);
-  ///   } on DioException catch (e) {
-  ///     throw e.error as ApiException? ?? const UnknownApiException();
-  ///   }
-  /// }
-  ///
-  /// === END REAL IMPLEMENTATION ===
-  ///
-  /// MOCK TEMPORÁRIO — remover quando backend estiver conectado:
   Future<Order> getOrderById(String id) async {
-    await Future<void>.delayed(const Duration(milliseconds: 400));
-    return _mockOrders.firstWhere(
-      (o) => o.id == id,
-      orElse: () => _mockOrders.first,
-    );
+    try {
+      final response = await _apiClient.dio.get<Map<String, dynamic>>(
+        ApiEndpoints.customerOrder(id),
+      );
+
+      return OrderModel.fromJson(response.data!);
+    } on DioException catch (e) {
+      throw e.error as ApiException? ?? const UnknownApiException();
+    }
   }
 
-  /// Confirms an order from cart (POST /orders).
-  ///
-  /// === REAL IMPLEMENTATION (uncomment when backend is ready) ===
-  ///
-  /// Future`<Order>` confirmOrder(String cartId) async {
-  ///   try {
-  ///     final response = await _apiClient.dio.post`<Map<String, dynamic>>`(
-  ///       ApiEndpoints.orders,
-  ///       data: {'cart_id': cartId},
-  ///     );
-  ///     return Order.fromJson(response.data!);
-  ///   } on DioException catch (e) {
-  ///     throw e.error as ApiException? ?? const UnknownApiException();
-  ///   }
-  /// }
-  ///
-  /// === END REAL IMPLEMENTATION ===
-  ///
-  /// MOCK TEMPORÁRIO — remover quando backend estiver conectado:
-  Future<Order> confirmOrder(String cartId) async {
-    await Future<void>.delayed(const Duration(milliseconds: 800));
-    return _mockOrders.first;
+  Future<OrderDetail> getCustomerOrderById(String id) async {
+    try {
+      final response = await _apiClient.dio.get<Map<String, dynamic>>(
+        ApiEndpoints.customerOrder(id),
+      );
+
+      return OrderDetailModel.fromJson(response.data!);
+    } on DioException catch (e) {
+      throw e.error as ApiException? ?? const UnknownApiException();
+    }
   }
 
-  /// Rates a producer for a completed order.
-  ///
-  /// === REAL IMPLEMENTATION (uncomment when backend is ready) ===
-  ///
-  /// Future`<void>` rateProducer(String orderId, int rating) async {
-  ///   try {
-  ///     await _apiClient.dio.post`<void>`(
-  ///       ApiEndpoints.orderRating(orderId),
-  ///       data: {'rating': rating},
-  ///     );
-  ///   } on DioException catch (e) {
-  ///     throw e.error as ApiException? ?? const UnknownApiException();
-  ///   }
-  /// }
-  ///
-  /// === END REAL IMPLEMENTATION ===
-  ///
-  /// MOCK TEMPORÁRIO — remover quando backend estiver conectado:
+  Future<Order> createOrderFromCart() async {
+    try {
+      final response = await _apiClient.dio.post<Map<String, dynamic>>(
+        ApiEndpoints.orders,
+      );
+
+      return OrderModel.fromJson(response.data!);
+    } on DioException catch (e) {
+      throw e.error as ApiException? ?? const UnknownApiException();
+    }
+  }
+
+  Future<Order> cancelOrder(String id) async {
+    try {
+      final response = await _apiClient.dio.patch<Map<String, dynamic>>(
+        ApiEndpoints.orderCancel(id),
+      );
+
+      return OrderModel.fromJson(response.data!);
+    } on DioException catch (e) {
+      throw e.error as ApiException? ?? const UnknownApiException();
+    }
+  }
+
+  // NOTA: backend OrderController.cancelOrder NÃO declara @RequestBody — o
+  // payload {reason, details} é silenciosamente ignorado server-side. Mantemos o
+  // envio para que, quando o backend passar a aceitar o motivo, mobile já o
+  // forneça. Tracker: tech-debt mobile/backend (vault: discrepancias.md).
+  Future<void> cancelCustomerOrder(String id, {required String reason, String? details}) async {
+    try {
+      await _apiClient.dio.patch<void>(
+        ApiEndpoints.orderCancel(id),
+        data: {'reason': reason, if (details != null) 'details': details},
+      );
+    } on DioException catch (e) {
+      throw e.error as ApiException? ?? const UnknownApiException();
+    }
+  }
+
+  // TODO(orders): backend ainda NÃO expõe endpoint de confirmação de entrega pelo
+  // consumidor. OrderController.java só tem PATCH /orders/{id}/status (para FARMER),
+  // PATCH /orders/{id}/cancel e /orders/{id}/confirm. Quando o backend adicionar
+  // PATCH /orders/customer/{id}/confirm-delivery, este método volta a chamar a API.
+  // Enquanto isso, retorna BusinessApiException para o BLoC mostrar mensagem ao user.
+  // O botão na UI só aparece se actions.canConfirmDelivery=true (controlado pelo backend),
+  // que hoje sempre vem false — mas blindamos contra inconsistência.
+  Future<OrderDetail> confirmCustomerDelivery(String id) async {
+    try {
+      final response = await _apiClient.dio.patch<Map<String, dynamic>>(
+        ApiEndpoints.customerOrderConfirmDelivery(id),
+      );
+
+      return OrderDetailModel.fromJson(response.data!);
+    } on DioException catch (e) {
+      throw e.error as ApiException? ?? const UnknownApiException();
+    }
+  }
+
+  Future<Order> updateStatus(String id, OrderStatus status) async {
+    try {
+      final response = await _apiClient.dio.patch<Map<String, dynamic>>(
+        ApiEndpoints.orderStatus(id),
+        data: {'status': _statusQueryValue(status)},
+      );
+
+      return OrderModel.fromJson(response.data!);
+    } on DioException catch (e) {
+      throw e.error as ApiException? ?? const UnknownApiException();
+    }
+  }
+
+  Future<Order> confirmOrder(String id) async {
+    try {
+      final response = await _apiClient.dio.patch<Map<String, dynamic>>(
+        ApiEndpoints.orderConfirm(id),
+      );
+
+      return OrderModel.fromJson(response.data!);
+    } on DioException catch (e) {
+      throw e.error as ApiException? ?? const UnknownApiException();
+    }
+  }
+
+  // Backend: @PostMapping("/{id}/repeat") em OrderController.java retorna CartResponse.
+  // Aqui parseia como Order para manter contrato existente — caller é apenas o usecase
+  // RepeatOrder (atualmente não invocado por nenhum BLoC). Tech debt: ajustar tipo de
+  // retorno para Cart e migrar consumidores quando RepeatOrder voltar a ser usado.
+  Future<Order> repeatOrder(String id) async {
+    try {
+      final response = await _apiClient.dio.post<Map<String, dynamic>>(
+        ApiEndpoints.orderRepeat(id),
+      );
+
+      return OrderModel.fromJson(response.data!);
+    } on DioException catch (e) {
+      throw e.error as ApiException? ?? const UnknownApiException();
+    }
+  }
+
   Future<void> rateProducer(String orderId, int rating) async {
-    await Future<void>.delayed(const Duration(milliseconds: 400));
+    try {
+      await _apiClient.dio.post<void>(
+        ApiEndpoints.orderRating(orderId),
+        data: {'rating': rating},
+      );
+    } on DioException catch (e) {
+      throw e.error as ApiException? ?? const UnknownApiException();
+    }
   }
+
+  List<Map<String, dynamic>> _readList(dynamic data) {
+    if (data is List<dynamic>) {
+      return data.whereType<Map<String, dynamic>>().toList();
+    }
+    if (data is Map<String, dynamic>) {
+      for (final key in const ['data', 'content', 'items', 'orders', 'result', 'list']) {
+        if (data[key] is List<dynamic>) {
+          return (data[key] as List<dynamic>)
+              .whereType<Map<String, dynamic>>()
+              .toList();
+        }
+      }
+    }
+    return const [];
+  }
+
+  String _statusQueryValue(OrderStatus status) => status.backendValue;
 }

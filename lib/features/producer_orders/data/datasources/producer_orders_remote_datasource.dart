@@ -1,310 +1,99 @@
+import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart';
+import 'package:ragro_mobile/core/network/api_client.dart';
+import 'package:ragro_mobile/core/network/api_endpoints.dart';
+import 'package:ragro_mobile/core/network/api_exception.dart';
+import 'package:ragro_mobile/features/producer_orders/data/models/producer_order_model.dart';
 import 'package:ragro_mobile/features/producer_orders/domain/entities/producer_order.dart';
-import 'package:ragro_mobile/features/producer_orders/domain/entities/producer_order_item.dart';
 import 'package:ragro_mobile/features/producer_orders/domain/entities/producer_order_status.dart';
 
 @lazySingleton
 class ProducerOrdersRemoteDataSource {
-  static final List<ProducerOrder> _mockOrders = [
-    ProducerOrder(
-      id: 'po001',
-      consumerName: 'João Silva',
-      consumerAvatarUrl: '',
-      consumerSince: 'Janeiro de 2025',
-      status: ProducerOrderStatus.pending,
-      totalPrice: 47.80,
-      deliveryAddress: 'Rua das Flores, 123',
-      deliveryNeighborhood: 'Bairro Jardim',
-      deliveryCityState: 'Porto Alegre, RS',
-      deliveryComplement: 'Apto 42',
-      items: const [
-        ProducerOrderItem(
-          productId: 'p001',
-          name: 'Tomate Cereja Orgânico',
-          imageUrl: '',
-          unitPrice: 2.50,
-          totalPrice: 25,
-          quantity: 10,
-          unityType: 'kg',
-        ),
-        ProducerOrderItem(
-          productId: 'p002',
-          name: 'Couve Manteiga',
-          imageUrl: '',
-          unitPrice: 4.90,
-          totalPrice: 14.70,
-          quantity: 3,
-          unityType: 'maço',
-        ),
-        ProducerOrderItem(
-          productId: 'p003',
-          name: 'Batata Monalisa',
-          imageUrl: '',
-          unitPrice: 8.20,
-          totalPrice: 8.20,
-          quantity: 1,
-          unityType: 'kg',
-        ),
-      ],
-      createdAt: DateTime.now().subtract(const Duration(hours: 1)),
-      isNew: true,
-      consumerPhone: '51999990001',
-    ),
-    ProducerOrder(
-      id: 'po002',
-      consumerName: 'Maria Costa',
-      consumerAvatarUrl: '',
-      consumerSince: 'Março de 2024',
-      status: ProducerOrderStatus.accepted,
-      totalPrice: 32.60,
-      deliveryAddress: 'Av. Independência, 456',
-      deliveryNeighborhood: 'Bom Fim',
-      deliveryCityState: 'Porto Alegre, RS',
-      deliveryComplement: '',
-      items: const [
-        ProducerOrderItem(
-          productId: 'p001',
-          name: 'Tomate Cereja Orgânico',
-          imageUrl: '',
-          unitPrice: 2.50,
-          totalPrice: 12.50,
-          quantity: 5,
-          unityType: 'kg',
-        ),
-        ProducerOrderItem(
-          productId: 'p002',
-          name: 'Couve Manteiga',
-          imageUrl: '',
-          unitPrice: 4.90,
-          totalPrice: 9.80,
-          quantity: 2,
-          unityType: 'maço',
-        ),
-        ProducerOrderItem(
-          productId: 'p003',
-          name: 'Batata Monalisa',
-          imageUrl: '',
-          unitPrice: 8.20,
-          totalPrice: 8.20,
-          quantity: 1,
-          unityType: 'kg',
-        ),
-      ],
-      createdAt: DateTime.now().subtract(const Duration(hours: 3)),
-      isNew: false,
-      consumerPhone: '51999990002',
-    ),
-    ProducerOrder(
-      id: 'po003',
-      consumerName: 'Carlos Mendes',
-      consumerAvatarUrl: '',
-      consumerSince: 'Junho de 2024',
-      status: ProducerOrderStatus.inDelivery,
-      totalPrice: 19.60,
-      deliveryAddress: 'Rua Osvaldo Aranha, 789',
-      deliveryNeighborhood: 'Bom Fim',
-      deliveryCityState: 'Porto Alegre, RS',
-      deliveryComplement: 'Casa 2',
-      items: const [
-        ProducerOrderItem(
-          productId: 'p002',
-          name: 'Couve Manteiga',
-          imageUrl: '',
-          unitPrice: 4.90,
-          totalPrice: 9.80,
-          quantity: 2,
-          unityType: 'maço',
-        ),
-        ProducerOrderItem(
-          productId: 'p003',
-          name: 'Batata Monalisa',
-          imageUrl: '',
-          unitPrice: 8.20,
-          totalPrice: 8.20,
-          quantity: 1,
-          unityType: 'kg',
-        ),
-      ],
-      createdAt: DateTime.now().subtract(const Duration(hours: 5)),
-      isNew: false,
-      consumerPhone: '51999990003',
-    ),
-    ProducerOrder(
-      id: 'po004',
-      consumerName: 'Ana Souza',
-      consumerAvatarUrl: '',
-      consumerSince: 'Novembro de 2023',
-      status: ProducerOrderStatus.delivered,
-      totalPrice: 56.40,
-      deliveryAddress: 'Rua 24 de Outubro, 200',
-      deliveryNeighborhood: 'Moinhos de Vento',
-      deliveryCityState: 'Porto Alegre, RS',
-      deliveryComplement: 'Apto 301',
-      items: const [
-        ProducerOrderItem(
-          productId: 'p001',
-          name: 'Tomate Cereja Orgânico',
-          imageUrl: '',
-          unitPrice: 2.50,
-          totalPrice: 25,
-          quantity: 10,
-          unityType: 'kg',
-        ),
-        ProducerOrderItem(
-          productId: 'p002',
-          name: 'Couve Manteiga',
-          imageUrl: '',
-          unitPrice: 4.90,
-          totalPrice: 24.50,
-          quantity: 5,
-          unityType: 'maço',
-        ),
-        ProducerOrderItem(
-          productId: 'p003',
-          name: 'Batata Monalisa',
-          imageUrl: '',
-          unitPrice: 8.20,
-          totalPrice: 8.20,
-          quantity: 1,
-          unityType: 'kg',
-        ),
-      ],
-      createdAt: DateTime.now().subtract(const Duration(hours: 24)),
-      isNew: false,
-      consumerPhone: '51999990004',
-    ),
-  ];
+  const ProducerOrdersRemoteDataSource(this._apiClient);
 
-  /// Gets producer orders, optionally filtered by [status].
-  ///
-  /// === REAL IMPLEMENTATION (uncomment when backend is ready) ===
-  ///
-  /// Future`<List<ProducerOrder>>` getOrders({ProducerOrderStatus? status}) async {
-  ///   try {
-  ///     final response = await _apiClient.dio.get`<Map<String, dynamic>>`(
-  ///       ApiEndpoints.producerOrders,
-  ///       queryParameters: {
-  ///         if (status != null) 'status': status.name,
-  ///       },
-  ///     );
-  ///     return (response.data!['data'] as List)
-  ///         .map((e) => ProducerOrder.fromJson(e as `Map<String, dynamic>`))
-  ///         .toList();
-  ///   } on DioException catch (e) {
-  ///     throw e.error as ApiException? ?? const UnknownApiException();
-  ///   }
-  /// }
-  ///
-  /// === END REAL IMPLEMENTATION ===
-  ///
-  /// MOCK TEMPORÁRIO — remover quando backend estiver conectado:
+  final ApiClient _apiClient;
+
   Future<List<ProducerOrder>> getOrders({ProducerOrderStatus? status}) async {
-    await Future<void>.delayed(const Duration(milliseconds: 400));
-    if (status == null) return List.from(_mockOrders);
-    return _mockOrders.where((o) => o.status == status).toList();
+    try {
+      final response = await _apiClient.dio.get<dynamic>(
+        ApiEndpoints.producerOrders,
+        queryParameters: {
+          if (status != null) 'status': _statusQueryValue(status),
+        },
+      );
+
+      return _readList(response.data).map(ProducerOrderModel.fromJson).toList();
+    } on DioException catch (e) {
+      throw e.error as ApiException? ?? const UnknownApiException();
+    }
   }
 
-  /// Gets a single producer order by [id].
-  ///
-  /// === REAL IMPLEMENTATION (uncomment when backend is ready) ===
-  ///
-  /// Future`<ProducerOrder>` getOrderById(String id) async {
-  ///   try {
-  ///     final response = await _apiClient.dio.get`<Map<String, dynamic>>`(
-  ///       '${ApiEndpoints.producerOrders}/$id',
-  ///     );
-  ///     return ProducerOrder.fromJson(response.data!);
-  ///   } on DioException catch (e) {
-  ///     throw e.error as ApiException? ?? const UnknownApiException();
-  ///   }
-  /// }
-  ///
-  /// === END REAL IMPLEMENTATION ===
-  ///
-  /// MOCK TEMPORÁRIO — remover quando backend estiver conectado:
   Future<ProducerOrder> getOrderById(String id) async {
-    await Future<void>.delayed(const Duration(milliseconds: 300));
-    return _mockOrders.firstWhere((o) => o.id == id);
+    try {
+      final response = await _apiClient.dio.get<Map<String, dynamic>>(
+        ApiEndpoints.producerOrder(id),
+      );
+
+      return ProducerOrderModel.fromJson(response.data!);
+    } on DioException catch (e) {
+      throw e.error as ApiException? ?? const UnknownApiException();
+    }
   }
 
-  /// Confirms a producer order (accept it).
-  ///
-  /// === REAL IMPLEMENTATION (uncomment when backend is ready) ===
-  ///
-  /// Future`<void>` confirmOrder(String id) async {
-  ///   try {
-  ///     await _apiClient.dio.post`<void>`(
-  ///       ApiEndpoints.producerOrderConfirm(id),
-  ///     );
-  ///   } on DioException catch (e) {
-  ///     throw e.error as ApiException? ?? const UnknownApiException();
-  ///   }
-  /// }
-  ///
-  /// === END REAL IMPLEMENTATION ===
-  ///
-  /// MOCK TEMPORÁRIO — remover quando backend estiver conectado:
   Future<void> confirmOrder(String id) async {
-    await Future<void>.delayed(const Duration(milliseconds: 300));
-    final idx = _mockOrders.indexWhere((o) => o.id == id);
-    if (idx >= 0) {
-      _mockOrders[idx] = _mockOrders[idx].copyWith(
-        status: ProducerOrderStatus.accepted,
-        isNew: false,
-      );
+    try {
+      await _apiClient.dio.patch<void>(ApiEndpoints.producerOrderConfirm(id));
+    } on DioException catch (e) {
+      throw e.error as ApiException? ?? const UnknownApiException();
     }
   }
 
-  /// Refuses/cancels a producer order.
-  ///
-  /// === REAL IMPLEMENTATION (uncomment when backend is ready) ===
-  ///
-  /// Future`<void>` refuseOrder(String id) async {
-  ///   try {
-  ///     await _apiClient.dio.post`<void>`(
-  ///       ApiEndpoints.producerOrderCancel(id),
-  ///     );
-  ///   } on DioException catch (e) {
-  ///     throw e.error as ApiException? ?? const UnknownApiException();
-  ///   }
-  /// }
-  ///
-  /// === END REAL IMPLEMENTATION ===
-  ///
-  /// MOCK TEMPORÁRIO — remover quando backend estiver conectado:
-  Future<void> refuseOrder(String id) async {
-    await Future<void>.delayed(const Duration(milliseconds: 300));
-    final idx = _mockOrders.indexWhere((o) => o.id == id);
-    if (idx >= 0) {
-      _mockOrders[idx] = _mockOrders[idx].copyWith(
-        status: ProducerOrderStatus.cancelled,
+  Future<void> refuseOrder(String id, {required String reason, String? details}) async {
+    try {
+      await _apiClient.dio.patch<void>(
+        ApiEndpoints.producerOrderCancel(id),
+        data: {'reason': reason, if (details != null) 'details': details},
       );
+    } on DioException catch (e) {
+      throw e.error as ApiException? ?? const UnknownApiException();
     }
   }
 
-  /// Updates the status of a producer order.
-  ///
-  /// === REAL IMPLEMENTATION (uncomment when backend is ready) ===
-  ///
-  /// Future`<void>` updateStatus(String id, ProducerOrderStatus status) async {
-  ///   try {
-  ///     await _apiClient.dio.patch`<void>`(
-  ///       ApiEndpoints.producerOrderStatus(id),
-  ///       data: {'status': status.name},
-  ///     );
-  ///   } on DioException catch (e) {
-  ///     throw e.error as ApiException? ?? const UnknownApiException();
-  ///   }
-  /// }
-  ///
-  /// === END REAL IMPLEMENTATION ===
-  ///
-  /// MOCK TEMPORÁRIO — remover quando backend estiver conectado:
   Future<void> updateStatus(String id, ProducerOrderStatus status) async {
-    await Future<void>.delayed(const Duration(milliseconds: 300));
-    final idx = _mockOrders.indexWhere((o) => o.id == id);
-    if (idx >= 0) {
-      _mockOrders[idx] = _mockOrders[idx].copyWith(status: status);
+    try {
+      await _apiClient.dio.patch<void>(
+        ApiEndpoints.producerOrderStatus(id),
+        data: {'status': _statusQueryValue(status)},
+      );
+    } on DioException catch (e) {
+      throw e.error as ApiException? ?? const UnknownApiException();
     }
+  }
+
+  List<Map<String, dynamic>> _readList(dynamic data) {
+    final rawList = switch (data) {
+      final List<dynamic> list => list,
+      final Map<String, dynamic> map when map['data'] is List<dynamic> =>
+        map['data'] as List<dynamic>,
+      final Map<String, dynamic> map when map['content'] is List<dynamic> =>
+        map['content'] as List<dynamic>,
+      final Map<String, dynamic> map when map['items'] is List<dynamic> =>
+        map['items'] as List<dynamic>,
+      _ => const <dynamic>[],
+    };
+
+    return rawList.whereType<Map<String, dynamic>>().toList();
+  }
+
+  // Backend OrderStatus enum (Java) é case-sensitive UPPERCASE.
+  // Ver ragro-backend/src/main/java/br/com/ragro/domain/enums/OrderStatus.java
+  String _statusQueryValue(ProducerOrderStatus status) {
+    return switch (status) {
+      ProducerOrderStatus.pending => 'PENDING',
+      ProducerOrderStatus.accepted => 'CONFIRMED',
+      ProducerOrderStatus.inDelivery => 'IN_DELIVERY',
+      ProducerOrderStatus.delivered => 'DELIVERED',
+      ProducerOrderStatus.cancelled => 'CANCELLED',
+    };
   }
 }

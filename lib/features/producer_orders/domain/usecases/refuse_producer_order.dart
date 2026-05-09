@@ -7,5 +7,6 @@ class RefuseProducerOrder {
 
   final ProducerOrdersRepository _repository;
 
-  Future<void> call(String id) => _repository.refuseOrder(id);
+  Future<void> call(String id, {required String reason, String? details}) =>
+      _repository.refuseOrder(id, reason: reason, details: details);
 }

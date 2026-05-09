@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:ragro_mobile/features/cart/domain/entities/cart.dart';
 import 'package:ragro_mobile/features/orders/domain/entities/order.dart';
 
 sealed class CheckoutState extends Equatable {
@@ -16,10 +17,18 @@ class CheckoutLoading extends CheckoutState {
 }
 
 class CheckoutReady extends CheckoutState {
-  const CheckoutReady(this.order);
-  final Order order;
+  const CheckoutReady(this.cart);
+  final Cart cart;
   @override
-  List<Object?> get props => [order];
+  List<Object?> get props => [cart];
+}
+
+/// Cart loaded and order confirmation API call is in progress.
+class CheckoutConfirming extends CheckoutState {
+  const CheckoutConfirming(this.cart);
+  final Cart cart;
+  @override
+  List<Object?> get props => [cart];
 }
 
 class CheckoutSuccess extends CheckoutState {
@@ -30,8 +39,9 @@ class CheckoutSuccess extends CheckoutState {
 }
 
 class CheckoutFailure extends CheckoutState {
-  const CheckoutFailure(this.message);
+  const CheckoutFailure({required this.message, this.cart});
+  final Cart? cart;
   final String message;
   @override
-  List<Object?> get props => [message];
+  List<Object?> get props => [cart, message];
 }
