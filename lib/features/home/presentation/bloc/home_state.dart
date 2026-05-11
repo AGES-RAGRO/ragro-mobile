@@ -24,6 +24,9 @@ class HomeLoaded extends HomeState {
     this.currentProducersPage = 0,
     this.hasMoreProducers = true,
     this.isFetchingMoreProducers = false,
+    this.currentProductsProducerPage = 0,
+    this.hasMoreProducts = true,
+    this.isFetchingMoreProducts = false,
   });
 
   final List<Producer> producers;
@@ -31,6 +34,9 @@ class HomeLoaded extends HomeState {
   final int currentProducersPage;
   final bool hasMoreProducers;
   final bool isFetchingMoreProducers;
+  final int currentProductsProducerPage;
+  final bool hasMoreProducts;
+  final bool isFetchingMoreProducts;
 
   HomeLoaded copyWith({
     List<Producer>? producers,
@@ -38,6 +44,9 @@ class HomeLoaded extends HomeState {
     int? currentProducersPage,
     bool? hasMoreProducers,
     bool? isFetchingMoreProducers,
+    int? currentProductsProducerPage,
+    bool? hasMoreProducts,
+    bool? isFetchingMoreProducts,
   }) {
     return HomeLoaded(
       producers: producers ?? this.producers,
@@ -46,6 +55,11 @@ class HomeLoaded extends HomeState {
       hasMoreProducers: hasMoreProducers ?? this.hasMoreProducers,
       isFetchingMoreProducers:
           isFetchingMoreProducers ?? this.isFetchingMoreProducers,
+      currentProductsProducerPage:
+          currentProductsProducerPage ?? this.currentProductsProducerPage,
+      hasMoreProducts: hasMoreProducts ?? this.hasMoreProducts,
+      isFetchingMoreProducts:
+          isFetchingMoreProducts ?? this.isFetchingMoreProducts,
     );
   }
 
@@ -56,6 +70,9 @@ class HomeLoaded extends HomeState {
     currentProducersPage,
     hasMoreProducers,
     isFetchingMoreProducers,
+    currentProductsProducerPage,
+    hasMoreProducts,
+    isFetchingMoreProducts,
   ];
 }
 
