@@ -218,7 +218,7 @@ class _ProducerProfileView extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.center,
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Icon(Icons.star, size: 16, color: Color(0xFFFBB040)),
+                        const Icon(Icons.star, size: 16, color: AppColors.darkGreen),
                         const SizedBox(width: 4),
                         Text(
                           '${dashboard.averageRating.toStringAsFixed(1)} (${dashboard.totalReviews} Avaliações)',

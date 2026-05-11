@@ -115,11 +115,17 @@ class _ProducerPublicProfileView extends StatelessWidget {
                                         ? (_, __) {}
                                         : null,
                                     child: producer.avatarUrl.isEmpty
-                                        ? const Icon(
-                                            Icons.person,
-                                            size: 48,
-                                            color: AppColors.darkGreen,
-                                          )
+                                        ? Text(
+                                      producer.name.isNotEmpty
+                                          ? producer.name[0].toUpperCase()
+                                          : '?',
+                                      style: const TextStyle(
+                                        fontFamily: 'Figtree',
+                                        fontWeight: FontWeight.w700,
+                                        fontSize: 40,
+                                        color: AppColors.darkGreen,
+                                      ),
+                                    )
                                         : null,
                                   ),
                                 ),
@@ -178,7 +184,7 @@ class _ProducerPublicProfileView extends StatelessWidget {
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  const Icon(Icons.star, size: 16, color: Color(0xFFFBB040)),
+                                  const Icon(Icons.star, size: 16, color: AppColors.darkGreen),
                                   const SizedBox(width: 4),
                                   Text(
                                     '${producer.averageRating.toStringAsFixed(1)} (${producer.totalReviews} Avaliações)',
