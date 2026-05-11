@@ -16,7 +16,6 @@ import 'package:ragro_mobile/features/producer_profile/presentation/bloc/produce
 import 'package:ragro_mobile/features/producer_profile/presentation/bloc/producer_profile_state.dart';
 import 'package:ragro_mobile/features/producer_profile/presentation/widgets/availability_section.dart';
 import 'package:ragro_mobile/features/producer_profile/presentation/widgets/producer_stats_row.dart';
-import 'package:ragro_mobile/features/producer_profile/presentation/widgets/review_card.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class ProducerPublicProfilePage extends StatelessWidget {
@@ -116,16 +115,16 @@ class _ProducerPublicProfileView extends StatelessWidget {
                                         : null,
                                     child: producer.avatarUrl.isEmpty
                                         ? Text(
-                                      producer.name.isNotEmpty
-                                          ? producer.name[0].toUpperCase()
-                                          : '?',
-                                      style: const TextStyle(
-                                        fontFamily: 'Figtree',
-                                        fontWeight: FontWeight.w700,
-                                        fontSize: 40,
-                                        color: AppColors.darkGreen,
-                                      ),
-                                    )
+                                            producer.name.isNotEmpty
+                                                ? producer.name[0].toUpperCase()
+                                                : '?',
+                                            style: const TextStyle(
+                                              fontFamily: 'Figtree',
+                                              fontWeight: FontWeight.w700,
+                                              fontSize: 40,
+                                              color: AppColors.darkGreen,
+                                            ),
+                                          )
                                         : null,
                                   ),
                                 ),
@@ -138,67 +137,100 @@ class _ProducerPublicProfileView extends StatelessWidget {
                         padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
                         child: Column(
                           children: [
-                            Text(
-                              producer.name,
-                              style: const TextStyle(
-                                fontFamily: 'Figtree',
-                                fontWeight: FontWeight.w500,
-                                fontSize: 24,
-                                color: AppColors.darkGreen,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                            const SizedBox(height: 4),
                             Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                const Icon(
-                                  Icons.location_on,
-                                  size: 14,
-                                  color: Color(0xFF64748B),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        producer.name,
+                                        style: const TextStyle(
+                                          fontFamily: 'Figtree',
+                                          fontWeight: FontWeight.w500,
+                                          fontSize: 24,
+                                          color: AppColors.darkGreen,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Row(
+                                        children: [
+                                          const Icon(
+                                            Icons.location_on,
+                                            size: 14,
+                                            color: Color(0xFF64748B),
+                                          ),
+                                          const SizedBox(width: 4),
+                                          Expanded(
+                                            child: Text(
+                                              producer.location,
+                                              style: const TextStyle(
+                                                fontFamily: 'Figtree',
+                                                fontWeight: FontWeight.w500,
+                                                fontSize: 14,
+                                                color: Color(0xFF64748B),
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      const SizedBox(height: 8),
+                                      GestureDetector(
+                                        onTap: () => context.push(
+                                          '/customer/home/producer/${producer.id}/reviews',
+                                          extra: {
+                                            'producerName': producer.name,
+                                            'producerLocation':
+                                                producer.location,
+                                            'averageRating':
+                                                producer.averageRating,
+                                            'totalReviews':
+                                                producer.totalReviews,
+                                          },
+                                        ),
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            const Icon(
+                                              Icons.star,
+                                              size: 16,
+                                              color: AppColors.darkGreen,
+                                            ),
+                                            const SizedBox(width: 4),
+                                            Text(
+                                              '${producer.averageRating.toStringAsFixed(1)} (${producer.totalReviews} Avaliações)',
+                                              style: const TextStyle(
+                                                fontFamily: 'Figtree',
+                                                fontWeight: FontWeight.w600,
+                                                fontSize: 14,
+                                                color: AppColors.darkGreen,
+                                              ),
+                                            ),
+                                            const SizedBox(width: 4),
+                                            const Icon(
+                                              Icons.chevron_right,
+                                              size: 16,
+                                              color: AppColors.darkGreen,
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 ),
-                                const SizedBox(width: 4),
-                                Text(
-                                  producer.location,
-                                  style: const TextStyle(
-                                    fontFamily: 'Figtree',
-                                    fontWeight: FontWeight.w500,
-                                    fontSize: 14,
-                                    color: Color(0xFF64748B),
+                                const SizedBox(width: 12),
+                                IconButton(
+                                  onPressed: () {},
+                                  splashRadius: 24,
+                                  icon: const Icon(
+                                    Icons.favorite_border,
+                                    size: 38,
+                                    color: AppColors.darkGreen,
                                   ),
                                 ),
                               ],
-                            ),
-                            const SizedBox(height: 8),
-                            GestureDetector(
-                              onTap: () => context.push(
-                                '/customer/home/producer/${producer.id}/reviews',
-                                extra: {
-                                  'producerName': producer.name,
-                                  'producerLocation': producer.location,
-                                  'averageRating': producer.averageRating,
-                                  'totalReviews': producer.totalReviews,
-                                },
-                              ),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  const Icon(Icons.star, size: 16, color: AppColors.darkGreen),
-                                  const SizedBox(width: 4),
-                                  Text(
-                                    '${producer.averageRating.toStringAsFixed(1)} (${producer.totalReviews} Avaliações)',
-                                    style: const TextStyle(
-                                      fontFamily: 'Figtree',
-                                      fontWeight: FontWeight.w600,
-                                      fontSize: 14,
-                                      color: AppColors.darkGreen,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 4),
-                                  const Icon(Icons.chevron_right, size: 16, color: AppColors.darkGreen),
-                                ],
-                              ),
                             ),
                             const SizedBox(height: 24),
                             // Contact button
@@ -323,63 +355,6 @@ class _ProducerPublicProfileView extends StatelessWidget {
                                     },
                                   );
                                 },
-                              ),
-                            const SizedBox(height: 40),
-                            // Reviews section header
-                            const Align(
-                              alignment: Alignment.centerLeft,
-                              child: Text(
-                                'Avaliações Recentes',
-                                style: TextStyle(
-                                  fontFamily: 'Figtree',
-                                  fontWeight: FontWeight.w700,
-                                  fontSize: 22,
-                                  color: AppColors.black,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 16),
-                            // Reviews list or empty state
-                            if ((producer.reviews ?? const []).isEmpty)
-                              Center(
-                                child: Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                    vertical: 24,
-                                  ),
-                                  child: Column(
-                                    children: [
-                                      Icon(
-                                        Icons.rate_review_outlined,
-                                        size: 48,
-                                        color: AppColors.darkGreen.withValues(
-                                          alpha: 0.3,
-                                        ),
-                                      ),
-                                      const SizedBox(height: 12),
-                                      Text(
-                                        'Nenhuma avaliação ainda',
-                                        style: TextStyle(
-                                          fontFamily: 'Figtree',
-                                          fontWeight: FontWeight.w500,
-                                          fontSize: 16,
-                                          color: AppColors.darkGreen.withValues(
-                                            alpha: 0.6,
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              )
-                            else
-                              ListView.builder(
-                                shrinkWrap: true,
-                                physics: const NeverScrollableScrollPhysics(),
-                                itemCount:
-                                    (producer.reviews ?? const []).length,
-                                itemBuilder: (_, i) => ReviewCard(
-                                  review: (producer.reviews ?? const [])[i],
-                                ),
                               ),
                             const SizedBox(height: 24),
                           ],
