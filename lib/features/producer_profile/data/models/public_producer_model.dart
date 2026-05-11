@@ -20,6 +20,7 @@ class PublicProducerModel extends PublicProducer {
     super.producerAddress,
     super.paymentMethods,
     super.products,
+    super.reviews,
   });
 
   factory PublicProducerModel.fromJson(Map<String, dynamic> json) {

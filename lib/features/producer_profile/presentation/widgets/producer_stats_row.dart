@@ -43,6 +43,10 @@ class _StatCard extends StatelessWidget {
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
           color: AppColors.white,
+          border: Border.all(
+            color: AppColors.lightGreen.withValues(alpha: 0.35),
+            width: 1.2,
+          ),
           borderRadius: BorderRadius.circular(16),
         ),
         child: Column(

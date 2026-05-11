@@ -202,6 +202,38 @@ class _ProducerProfileView extends StatelessWidget {
                       color: AppColors.darkGreen,
                     ),
                   ),
+                  const SizedBox(height: 8),
+                  GestureDetector(
+                    onTap: () => context.push(
+                      '/producer/profile/reviews',
+                      extra: {
+                        'producerId': dashboard.producerId,
+                        'producerName': dashboard.producerName,
+                        'producerLocation': '',
+                        'averageRating': dashboard.averageRating,
+                        'totalReviews': dashboard.totalReviews,
+                      },
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.star, size: 16, color: AppColors.darkGreen),
+                        const SizedBox(width: 4),
+                        Text(
+                          '${dashboard.averageRating.toStringAsFixed(1)} (${dashboard.totalReviews} Avaliações)',
+                          style: const TextStyle(
+                            fontFamily: 'Figtree',
+                            fontWeight: FontWeight.w600,
+                            fontSize: 14,
+                            color: AppColors.darkGreen,
+                          ),
+                        ),
+                        const SizedBox(width: 4),
+                        const Icon(Icons.chevron_right, size: 16, color: AppColors.darkGreen),
+                      ],
+                    ),
+                  ),
                   const SizedBox(height: 12),
                   OutlinedButton.icon(
                     onPressed: () => _openEditProfile(context),

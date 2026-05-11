@@ -8,6 +8,7 @@ import 'package:ragro_mobile/core/utils/multipart_file_builder.dart';
 import 'package:ragro_mobile/features/home/data/models/home_product_model.dart';
 import 'package:ragro_mobile/features/producer_profile/data/models/producer_update_request.dart';
 import 'package:ragro_mobile/features/producer_profile/data/models/public_producer_model.dart';
+import 'package:ragro_mobile/features/producer_profile/data/models/review_model.dart';
 
 @lazySingleton
 class ProducerProfileRemoteDataSource {
@@ -34,6 +35,7 @@ class ProducerProfileRemoteDataSource {
             ),
           )
           .toList();
+      final reviews = await getProducerReviews(producerId);
 
       return PublicProducerModel(
         id: producer.id,
@@ -52,6 +54,7 @@ class ProducerProfileRemoteDataSource {
         photoUrl: producer.photoUrl,
         producerAddress: producer.producerAddress,
         products: products,
+        reviews: reviews,
       );
     } on DioException catch (e) {
       throw e.error as ApiException? ?? const UnknownApiException();
@@ -104,6 +107,22 @@ class ProducerProfileRemoteDataSource {
         data: formData,
       );
       return PublicProducerModel.fromJson(response.data!);
+    } on DioException catch (e) {
+      throw e.error as ApiException? ?? const UnknownApiException();
+    }
+  }
+
+  Future<List<ReviewModel>> getProducerReviews(String producerId) async {
+    try {
+      final response = await _apiClient.dio.get<Map<String, dynamic>>(
+        ApiEndpoints.producerReviews(producerId),
+        queryParameters: {'page': 0, 'size': 50},
+      );
+      final data = response.data!;
+      final items = data['content'] as List<dynamic>? ?? [];
+      return items
+          .map((item) => ReviewModel.fromJson(item as Map<String, dynamic>))
+          .toList();
     } on DioException catch (e) {
       throw e.error as ApiException? ?? const UnknownApiException();
     }

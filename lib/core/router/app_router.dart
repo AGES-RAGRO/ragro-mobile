@@ -37,6 +37,7 @@ import 'package:ragro_mobile/features/producer_orders/presentation/pages/produce
 import 'package:ragro_mobile/features/producer_orders/presentation/pages/producer_orders_page.dart';
 import 'package:ragro_mobile/features/producer_orders/presentation/pages/route_calculation_page.dart';
 import 'package:ragro_mobile/features/producer_profile/presentation/pages/producer_public_profile_page.dart';
+import 'package:ragro_mobile/features/producer_profile/presentation/pages/reviews_page.dart';
 import 'package:ragro_mobile/features/product_detail/presentation/pages/product_detail_page.dart';
 import 'package:ragro_mobile/features/search/presentation/pages/search_page.dart';
 import 'package:ragro_mobile/features/search/presentation/pages/search_result_page.dart';
@@ -90,6 +91,21 @@ class AppRouter {
                       builder: (context, state) => ProducerPublicProfilePage(
                         producerId: state.pathParameters['producerId']!,
                       ),
+                      routes: [
+                        GoRoute(
+                          path: 'reviews',
+                          builder: (context, state) {
+                            final extra = state.extra as Map<String, dynamic>? ?? {};
+                            return ReviewsPage(
+                              producerId: state.pathParameters['producerId']!,
+                              producerName: extra['producerName'] as String? ?? '',
+                              producerLocation: extra['producerLocation'] as String? ?? '',
+                              averageRating: (extra['averageRating'] as num?)?.toDouble() ?? 0.0,
+                              totalReviews: extra['totalReviews'] as int? ?? 0,
+                            );
+                          },
+                        ),
+                      ],
                     ),
                     GoRoute(
                       path: 'product/:productId',
@@ -297,6 +313,19 @@ class AppRouter {
                     GoRoute(
                       path: 'settings',
                       builder: (_, __) => const ProducerSettingsPage(),
+                    ),
+                    GoRoute(
+                      path: 'reviews',
+                      builder: (context, state) {
+                        final extra = state.extra as Map<String, dynamic>? ?? {};
+                        return ReviewsPage(
+                          producerId: extra['producerId'] as String? ?? '',
+                          producerName: extra['producerName'] as String? ?? '',
+                          producerLocation: extra['producerLocation'] as String? ?? '',
+                          averageRating: (extra['averageRating'] as num?)?.toDouble() ?? 0.0,
+                          totalReviews: extra['totalReviews'] as int? ?? 0,
+                        );
+                      },
                     ),
                   ],
                 ),
