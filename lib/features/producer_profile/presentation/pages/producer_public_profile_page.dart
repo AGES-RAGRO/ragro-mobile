@@ -104,7 +104,7 @@ class _ProducerPublicProfileView extends StatelessWidget {
                                   backgroundColor: AppColors.white,
                                   child: CircleAvatar(
                                     radius: 60,
-                                    backgroundColor: AppColors.mintGreen
+                                    backgroundColor: AppColors.darkGreen
                                         .withValues(alpha: 0.3),
                                     backgroundImage:
                                         producer.avatarUrl.isNotEmpty

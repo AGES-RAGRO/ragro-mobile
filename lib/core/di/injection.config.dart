@@ -249,6 +249,8 @@ import 'package:ragro_mobile/features/product_detail/domain/usecases/get_product
     as _i680;
 import 'package:ragro_mobile/features/product_detail/presentation/bloc/product_detail_bloc.dart'
     as _i740;
+import 'package:ragro_mobile/features/search/data/datasources/search_local_datasource.dart'
+    as _i52;
 import 'package:ragro_mobile/features/search/data/datasources/search_remote_datasource.dart'
     as _i987;
 import 'package:ragro_mobile/features/search/data/repositories/search_repository_impl.dart'
@@ -313,6 +315,9 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i209.AuthLocalDataSource>(
       () => _i209.AuthLocalDataSource(gh<_i460.SharedPreferences>()),
+    );
+    gh.lazySingleton<_i52.SearchLocalDataSource>(
+      () => _i52.SearchLocalDataSource(gh<_i460.SharedPreferences>()),
     );
     gh.lazySingleton<_i1067.StockMovementRepository>(
       () => _i619.StockMovementRepositoryImpl(
@@ -530,9 +535,6 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i436.UpdateCustomerProfile>(
       () => _i436.UpdateCustomerProfile(gh<_i788.CustomerProfileRepository>()),
     );
-    gh.factory<_i856.SearchBloc>(
-      () => _i856.SearchBloc(gh<_i894.SearchProducersAndProducts>()),
-    );
     gh.lazySingleton<_i251.CancelCustomerOrder>(
       () => _i251.CancelCustomerOrder(gh<_i165.OrdersRepository>()),
     );
@@ -623,6 +625,12 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i846.AdminProducerFormBloc>(
       () => _i846.AdminProducerFormBloc(gh<_i321.CreateAdminProducer>()),
     );
+    gh.factory<_i856.SearchBloc>(
+      () => _i856.SearchBloc(
+        gh<_i894.SearchProducersAndProducts>(),
+        gh<_i52.SearchLocalDataSource>(),
+      ),
+    );
     gh.lazySingleton<_i841.CartBloc>(
       () => _i841.CartBloc(
         gh<_i535.GetCart>(),
@@ -681,4 +689,3 @@ extension GetItInjectableX on _i174.GetIt {
 class _$SharedPreferencesModule extends _i55.SharedPreferencesModule {}
 
 class _$NetworkModule extends _i1002.NetworkModule {}
-
