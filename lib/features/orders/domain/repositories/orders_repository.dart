@@ -5,5 +5,5 @@ abstract class OrdersRepository {
   Future<List<Order>> getOrders({OrderStatus? status});
   Future<Order> getOrderById(String id);
   Future<Order> confirmOrder(String cartId);
-  Future<void> rateProducer(String orderId, int rating);
+  Future<void> createReview(String orderId, int rating, String comment);
 }

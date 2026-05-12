@@ -1,10 +1,19 @@
+import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart' hide Order;
+import 'package:ragro_mobile/core/network/api_client.dart';
+import 'package:ragro_mobile/core/network/api_endpoints.dart';
+import 'package:ragro_mobile/core/network/api_exception.dart';
+import 'package:ragro_mobile/features/orders/data/models/create_review_request.dart';
 import 'package:ragro_mobile/features/orders/domain/entities/order.dart';
 import 'package:ragro_mobile/features/orders/domain/entities/order_item.dart';
 import 'package:ragro_mobile/features/orders/domain/entities/order_status.dart';
 
 @lazySingleton
 class OrdersRemoteDatasource {
+  const OrdersRemoteDatasource(this._apiClient);
+
+  final ApiClient _apiClient;
+
   static final List<Order> _mockOrders = [
     Order(
       id: '4829',
@@ -267,25 +276,24 @@ class OrdersRemoteDatasource {
     return _mockOrders.first;
   }
 
-  /// Rates a producer for a completed order.
-  ///
-  /// === REAL IMPLEMENTATION (uncomment when backend is ready) ===
-  ///
-  /// Future`<void>` rateProducer(String orderId, int rating) async {
-  ///   try {
-  ///     await _apiClient.dio.post`<void>`(
-  ///       ApiEndpoints.orderRating(orderId),
-  ///       data: {'rating': rating},
-  ///     );
-  ///   } on DioException catch (e) {
-  ///     throw e.error as ApiException? ?? const UnknownApiException();
-  ///   }
-  /// }
-  ///
-  /// === END REAL IMPLEMENTATION ===
-  ///
-  /// MOCK TEMPORÁRIO — remover quando backend estiver conectado:
-  Future<void> rateProducer(String orderId, int rating) async {
-    await Future<void>.delayed(const Duration(milliseconds: 400));
+  /// Creates a review for a delivered order (POST /reviews).
+  Future<void> createReview(
+    String orderId,
+    int rating,
+    String comment,
+  ) async {
+    try {
+      final request = CreateReviewRequest(
+        orderId: orderId,
+        rating: rating,
+        comment: comment,
+      );
+      await _apiClient.dio.post<void>(
+        ApiEndpoints.reviews,
+        data: request.toJson(),
+      );
+    } on DioException catch (e) {
+      throw e.error as ApiException? ?? const UnknownApiException();
+    }
   }
 }

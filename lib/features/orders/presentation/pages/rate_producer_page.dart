@@ -1,7 +1,7 @@
 // Screen: Avaliar Produtor
 // User Story: US-13 — Rate Producer
 // Epic: EPIC 3 — Shopping & Orders
-// Routes: POST /orders/:id/rating
+// Routes: POST /reviews
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -38,6 +38,13 @@ class RateProducerPage extends StatelessWidget {
               ),
             );
             context.pop();
+          } else if (state is RateProducerFailure) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(state.message),
+                backgroundColor: AppColors.red,
+              ),
+            );
           }
         },
         child: Scaffold(
@@ -53,10 +60,22 @@ class RateProducerPage extends StatelessWidget {
               ),
               child: BlocBuilder<RateProducerBloc, RateProducerState>(
                 builder: (context, state) {
-                  final selectedRating = state is RateProducerInitial
+                    final selectedRating = state is RateProducerInitial
                       ? state.selectedRating
-                      : 0;
+                      : state is RateProducerSubmitting
+                        ? state.selectedRating
+                        : state is RateProducerFailure
+                          ? state.selectedRating
+                          : 0;
+                    final comment = state is RateProducerInitial
+                      ? state.comment
+                      : state is RateProducerSubmitting
+                        ? state.comment
+                        : state is RateProducerFailure
+                          ? state.comment
+                          : '';
                   final isSubmitting = state is RateProducerSubmitting;
+                    final canSubmit = selectedRating > 0;
 
                   return Column(
                     mainAxisSize: MainAxisSize.min,
@@ -64,15 +83,22 @@ class RateProducerPage extends StatelessWidget {
                       // Skip button
                       Align(
                         alignment: Alignment.topRight,
-                        child: GestureDetector(
-                          onTap: () => context.pop(),
-                          child: const Text(
-                            'Pular',
-                            style: TextStyle(
-                              fontFamily: 'Manrope',
-                              fontWeight: FontWeight.w600,
-                              fontSize: 14,
-                              color: AppColors.darkGreen,
+                        child: Material(
+                          color: Colors.transparent,
+                          child: InkWell(
+                            onTap: () => context.pop(),
+                            borderRadius: BorderRadius.circular(6),
+                            child: const Padding(
+                              padding: EdgeInsets.all(4),
+                              child: Text(
+                                'Pular',
+                                style: TextStyle(
+                                  fontFamily: 'Manrope',
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 14,
+                                  color: AppColors.darkGreen,
+                                ),
+                              ),
                             ),
                           ),
                         ),
@@ -80,44 +106,53 @@ class RateProducerPage extends StatelessWidget {
                       const SizedBox(height: 8),
                       // Title
                       const Text(
-                        'Avalie o produtor',
+                        'Avalie o Produtor',
                         style: TextStyle(
                           fontFamily: 'Manrope',
                           fontWeight: FontWeight.w600,
-                          fontSize: 24,
+                          fontSize: 20,
                           color: AppColors.darkGreen,
                         ),
                       ),
                       const SizedBox(height: 16),
-                      // Avatar
-                      CircleAvatar(
-                        radius: 40,
-                        backgroundColor: AppColors.lightGreen.withValues(
-                          alpha: 0.2,
-                        ),
-                        child: const Icon(
-                          Icons.storefront,
-                          size: 40,
-                          color: AppColors.lightGreen,
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      // Farm name
-                      Text(
-                        farmName,
-                        style: const TextStyle(
-                          fontFamily: 'Manrope',
-                          fontSize: 16,
-                          color: AppColors.black,
-                        ),
-                      ),
-                      Text(
-                        ownerName,
-                        style: const TextStyle(
-                          fontFamily: 'Manrope',
-                          fontSize: 16,
-                          color: AppColors.black,
-                        ),
+                      // Avatar + producer info
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          CircleAvatar(
+                            radius: 20,
+                            backgroundColor: AppColors.lightGreen.withValues(
+                              alpha: 0.2,
+                            ),
+                            child: const Icon(
+                              Icons.storefront,
+                              size: 18,
+                              color: AppColors.lightGreen,
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                ownerName,
+                                style: const TextStyle(
+                                  fontFamily: 'Manrope',
+                                  fontSize: 14,
+                                  color: AppColors.black,
+                                ),
+                              ),
+                              Text(
+                                farmName,
+                                style: const TextStyle(
+                                  fontFamily: 'Manrope',
+                                  fontSize: 14,
+                                  color: AppColors.placeholder,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
                       ),
                       const SizedBox(height: 20),
                       // Stars
@@ -137,7 +172,7 @@ class RateProducerPage extends StatelessWidget {
                                 starValue <= selectedRating
                                     ? Icons.star
                                     : Icons.star_border,
-                                color: const Color(0xFFFFB413),
+                                color: AppColors.darkGreen,
                                 size: 36,
                               ),
                             ),
@@ -145,36 +180,69 @@ class RateProducerPage extends StatelessWidget {
                         }),
                       ),
                       const SizedBox(height: 24),
-                      // Send button
-                      GestureDetector(
-                        onTap: (isSubmitting || selectedRating == 0)
-                            ? null
-                            : () => context.read<RateProducerBloc>().add(
-                                RateProducerSubmitted(orderId, selectedRating),
-                              ),
-                        child: Container(
-                          width: double.infinity,
-                          height: 56,
-                          decoration: BoxDecoration(
-                            color: selectedRating > 0
-                                ? AppColors.darkGreen
-                                : AppColors.placeholder,
+                      // Comment
+                      TextFormField(
+                        initialValue: comment,
+                        enabled: !isSubmitting,
+                        maxLines: 3,
+                        onChanged: (value) =>
+                            context.read<RateProducerBloc>().add(
+                                  RateProducerCommentChanged(value),
+                                ),
+                        decoration: InputDecoration(
+                          hintText: 'Comentario (opcional)',
+                          filled: true,
+                          fillColor: AppColors.white,
+                          border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(8),
+                            borderSide: BorderSide.none,
                           ),
-                          child: Center(
-                            child: isSubmitting
-                                ? const CircularProgressIndicator(
-                                    color: AppColors.white,
-                                  )
-                                : const Text(
-                                    'Enviar',
-                                    style: TextStyle(
-                                      fontFamily: 'Manrope',
-                                      fontWeight: FontWeight.w600,
-                                      fontSize: 24,
-                                      color: AppColors.white,
+                        ),
+                        style: const TextStyle(
+                          fontFamily: 'Manrope',
+                          fontSize: 14,
+                          color: AppColors.black,
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      // Send button
+                      Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          onTap: (!canSubmit || isSubmitting)
+                              ? null
+                              : () => context.read<RateProducerBloc>().add(
+                                    RateProducerSubmitted(
+                                      orderId,
+                                      selectedRating,
+                                      comment.trim(),
                                     ),
                                   ),
+                          borderRadius: BorderRadius.circular(8),
+                          child: Container(
+                            width: double.infinity,
+                            height: 56,
+                            decoration: BoxDecoration(
+                              color: canSubmit
+                                  ? AppColors.darkGreen
+                                  : AppColors.placeholder,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Center(
+                              child: isSubmitting
+                                  ? const CircularProgressIndicator(
+                                      color: AppColors.white,
+                                    )
+                                  : Text(
+                                      canSubmit ? 'Enviar' : 'Fechar',
+                                      style: const TextStyle(
+                                        fontFamily: 'Manrope',
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 20,
+                                        color: AppColors.white,
+                                      ),
+                                    ),
+                            ),
                           ),
                         ),
                       ),

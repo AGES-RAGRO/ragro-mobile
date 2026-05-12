@@ -144,12 +144,12 @@ import 'package:ragro_mobile/features/orders/domain/repositories/orders_reposito
     as _i165;
 import 'package:ragro_mobile/features/orders/domain/usecases/confirm_order.dart'
     as _i680;
+import 'package:ragro_mobile/features/orders/domain/usecases/CreateReview.dart'
+    as _i1071;
 import 'package:ragro_mobile/features/orders/domain/usecases/get_order_detail.dart'
     as _i884;
 import 'package:ragro_mobile/features/orders/domain/usecases/get_orders.dart'
     as _i52;
-import 'package:ragro_mobile/features/orders/domain/usecases/rate_producer.dart'
-    as _i907;
 import 'package:ragro_mobile/features/orders/presentation/bloc/checkout_bloc.dart'
     as _i463;
 import 'package:ragro_mobile/features/orders/presentation/bloc/order_detail_bloc.dart'
@@ -247,17 +247,11 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i368.ProductMockDataSource>(
       () => _i368.ProductMockDataSource(),
     );
-    gh.lazySingleton<_i384.OrdersRemoteDatasource>(
-      () => _i384.OrdersRemoteDatasource(),
-    );
     gh.lazySingleton<_i727.ProducerManagementRemoteDataSource>(
       () => _i727.ProducerManagementRemoteDataSource(),
     );
     gh.lazySingleton<_i608.ProducerOrdersRemoteDataSource>(
       () => _i608.ProducerOrdersRemoteDataSource(),
-    );
-    gh.lazySingleton<_i165.OrdersRepository>(
-      () => _i962.OrdersRepositoryImpl(gh<_i384.OrdersRemoteDatasource>()),
     );
     gh.lazySingleton<_i830.CartRepository>(
       () => _i939.CartRepositoryImpl(gh<_i488.CartLocalDatasource>()),
@@ -282,24 +276,9 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i727.ProducerManagementRemoteDataSource>(),
       ),
     );
-    gh.lazySingleton<_i680.ConfirmOrder>(
-      () => _i680.ConfirmOrder(gh<_i165.OrdersRepository>()),
-    );
-    gh.lazySingleton<_i884.GetOrderDetail>(
-      () => _i884.GetOrderDetail(gh<_i165.OrdersRepository>()),
-    );
-    gh.lazySingleton<_i52.GetOrders>(
-      () => _i52.GetOrders(gh<_i165.OrdersRepository>()),
-    );
-    gh.lazySingleton<_i907.RateProducer>(
-      () => _i907.RateProducer(gh<_i165.OrdersRepository>()),
-    );
     gh.lazySingleton<_i873.ApiClient>(() => _i873.ApiClient(gh<_i361.Dio>()));
     gh.factory<_i79.LearningBloc>(
       () => _i79.LearningBloc(gh<_i20.GetProducts>()),
-    );
-    gh.factory<_i591.OrderDetailBloc>(
-      () => _i591.OrderDetailBloc(gh<_i884.GetOrderDetail>()),
     );
     gh.lazySingleton<_i805.GetProducerDashboard>(
       () =>
@@ -307,9 +286,6 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i209.AuthLocalDataSource>(
       () => _i209.AuthLocalDataSource(gh<_i460.SharedPreferences>()),
-    );
-    gh.factory<_i463.CheckoutBloc>(
-      () => _i463.CheckoutBloc(gh<_i680.ConfirmOrder>()),
     );
     gh.lazySingleton<_i141.ConfirmProducerOrder>(
       () => _i141.ConfirmProducerOrder(gh<_i649.ProducerOrdersRepository>()),
@@ -328,7 +304,6 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i649.ProducerOrdersRepository>(),
       ),
     );
-    gh.factory<_i226.OrdersBloc>(() => _i226.OrdersBloc(gh<_i52.GetOrders>()));
     gh.factory<_i1.ProducerOrdersBloc>(
       () => _i1.ProducerOrdersBloc(gh<_i935.GetProducerOrders>()),
     );
@@ -346,9 +321,6 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i456.UpdateCartItemQuantity>(
       () => _i456.UpdateCartItemQuantity(gh<_i830.CartRepository>()),
-    );
-    gh.factory<_i432.RateProducerBloc>(
-      () => _i432.RateProducerBloc(gh<_i907.RateProducer>()),
     );
     gh.lazySingleton<_i291.CreateInventoryProduct>(
       () => _i291.CreateInventoryProduct(gh<_i276.InventoryRepository>()),
@@ -380,6 +352,9 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i904.HomeRemoteDataSource>(
       () => _i904.HomeRemoteDataSource(gh<_i873.ApiClient>()),
+    );
+    gh.lazySingleton<_i384.OrdersRemoteDatasource>(
+      () => _i384.OrdersRemoteDatasource(gh<_i873.ApiClient>()),
     );
     gh.lazySingleton<_i889.ProducerProfileRemoteDataSource>(
       () => _i889.ProducerProfileRemoteDataSource(gh<_i873.ApiClient>()),
@@ -464,6 +439,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i894.SearchProducersAndProducts>(
       () => _i894.SearchProducersAndProducts(gh<_i38.SearchRepository>()),
     );
+    gh.lazySingleton<_i165.OrdersRepository>(
+      () => _i962.OrdersRepositoryImpl(gh<_i384.OrdersRemoteDatasource>()),
+    );
     gh.lazySingleton<_i671.ActivateAdminProducer>(
       () => _i671.ActivateAdminProducer(gh<_i759.AdminRepository>()),
     );
@@ -523,6 +501,18 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i856.SearchBloc>(
       () => _i856.SearchBloc(gh<_i894.SearchProducersAndProducts>()),
     );
+    gh.lazySingleton<_i1071.CreateReview>(
+      () => _i1071.CreateReview(gh<_i165.OrdersRepository>()),
+    );
+    gh.lazySingleton<_i680.ConfirmOrder>(
+      () => _i680.ConfirmOrder(gh<_i165.OrdersRepository>()),
+    );
+    gh.lazySingleton<_i884.GetOrderDetail>(
+      () => _i884.GetOrderDetail(gh<_i165.OrdersRepository>()),
+    );
+    gh.lazySingleton<_i52.GetOrders>(
+      () => _i52.GetOrders(gh<_i165.OrdersRepository>()),
+    );
     gh.factory<_i914.AdminEditProducerBloc>(
       () => _i914.AdminEditProducerBloc(
         gh<_i852.GetAdminProducerById>(),
@@ -536,6 +526,13 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i671.ActivateAdminProducer>(),
       ),
     );
+    gh.factory<_i591.OrderDetailBloc>(
+      () => _i591.OrderDetailBloc(gh<_i884.GetOrderDetail>()),
+    );
+    gh.factory<_i463.CheckoutBloc>(
+      () => _i463.CheckoutBloc(gh<_i680.ConfirmOrder>()),
+    );
+    gh.factory<_i226.OrdersBloc>(() => _i226.OrdersBloc(gh<_i52.GetOrders>()));
     gh.lazySingleton<_i1031.GetProducerProfile>(
       () => _i1031.GetProducerProfile(gh<_i420.ProducerProfileRepository>()),
     );
@@ -553,6 +550,9 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i846.AdminProducerFormBloc>(
       () => _i846.AdminProducerFormBloc(gh<_i321.CreateAdminProducer>()),
+    );
+    gh.factory<_i432.RateProducerBloc>(
+      () => _i432.RateProducerBloc(gh<_i1071.CreateReview>()),
     );
     gh.factory<_i526.CustomerProfileBloc>(
       () => _i526.CustomerProfileBloc(

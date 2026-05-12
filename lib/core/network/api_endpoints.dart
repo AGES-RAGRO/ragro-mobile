@@ -52,6 +52,7 @@ abstract final class ApiEndpoints {
   static String get orders => '$_base/orders';
   static String order(String id) => '$_base/orders/$id';
   static String orderRating(String id) => '$_base/orders/$id/rating';
+  static String get reviews => '$_base/reviews';
 
   // Cart (local, no API endpoints needed yet)
 

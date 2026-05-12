@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:ragro_mobile/core/theme/app_colors.dart';
 import 'package:ragro_mobile/features/orders/domain/entities/order.dart';
+import 'package:ragro_mobile/features/orders/domain/entities/order_status.dart';
 import 'package:ragro_mobile/features/orders/presentation/widgets/order_status_badge.dart';
 
 class OrderCard extends StatelessWidget {
@@ -23,6 +24,14 @@ class OrderCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDelivered = order.status == OrderStatus.delivered;
+    final rateRoute = Uri(
+      path: '/customer/orders/${order.id}/rate',
+      queryParameters: {
+        'farmName': order.farmName,
+        'ownerName': order.ownerName,
+      },
+    ).toString();
     return Container(
       height: 156,
       decoration: BoxDecoration(
@@ -157,7 +166,9 @@ class OrderCard extends StatelessWidget {
                   ],
                 ),
                 GestureDetector(
-                  onTap: () => context.push('/customer/orders/${order.id}'),
+                  onTap: () => context.push(
+                    isDelivered ? rateRoute : '/customer/orders/${order.id}',
+                  ),
                   child: Container(
                     height: 30,
                     padding: const EdgeInsets.symmetric(horizontal: 10),
@@ -165,10 +176,10 @@ class OrderCard extends StatelessWidget {
                       color: AppColors.darkGreen,
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    child: const Center(
+                    child: Center(
                       child: Text(
-                        'Ver pedido',
-                        style: TextStyle(
+                        isDelivered ? 'Fazer Avaliacao' : 'Ver pedido',
+                        style: const TextStyle(
                           fontFamily: 'Manrope',
                           fontWeight: FontWeight.w700,
                           fontSize: 14,

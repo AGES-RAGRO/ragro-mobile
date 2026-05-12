@@ -20,6 +20,6 @@ class OrdersRepositoryImpl implements OrdersRepository {
   Future<Order> confirmOrder(String cartId) => _datasource.confirmOrder(cartId);
 
   @override
-  Future<void> rateProducer(String orderId, int rating) =>
-      _datasource.rateProducer(orderId, rating);
+  Future<void> createReview(String orderId, int rating, String comment) =>
+      _datasource.createReview(orderId, rating, comment);
 }
