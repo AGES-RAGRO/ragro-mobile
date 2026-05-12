@@ -14,274 +14,49 @@ class OrdersRemoteDatasource {
 
   final ApiClient _apiClient;
 
-  static final List<Order> _mockOrders = [
-    Order(
-      id: '4829',
-      producerId: 'p1',
-      farmName: 'Fazenda Sol Nascente',
-      farmAvatarUrl: '',
-      ownerName: 'Manoel Silva',
-      items: const [
-        OrderItem(
-          productId: 'prod1',
-          name: 'Tomate',
-          imageUrl: '',
-          quantity: 1,
-          unityType: 'un',
-          totalPrice: 12.90,
-        ),
-        OrderItem(
-          productId: 'prod2',
-          name: 'Bananas',
-          imageUrl: '',
-          quantity: 3,
-          unityType: 'kg',
-          totalPrice: 18,
-        ),
-        OrderItem(
-          productId: 'prod3',
-          name: 'Maçã',
-          imageUrl: '',
-          quantity: 1,
-          unityType: 'kg',
-          totalPrice: 9,
-        ),
-        OrderItem(
-          productId: 'prod4',
-          name: 'Alface Crespa',
-          imageUrl: '',
-          quantity: 1,
-          unityType: 'un',
-          totalPrice: 4.50,
-        ),
-      ],
-      totalAmount: 145.90,
-      status: OrderStatus.pending,
-      createdAt: DateTime(2026, 1, 21, 21, 8),
-      deliveryAddress: const DeliveryAddress(
-        street: 'Rua das Flores, 123 - Apto 42',
-        neighborhood: 'Bairro Primavera',
-        city: 'São Paulo',
-        state: 'SP',
-        zipCode: '01310-100',
-      ),
-      bankInfo: const ProducerBankInfo(
-        bank: 'Nubank (260)',
-        agency: '0001',
-        account: '12345-6',
-        pixKey: 'fazenda.boavista@email.com',
-      ),
-    ),
-    Order(
-      id: '4828',
-      producerId: 'p1',
-      farmName: 'Fazenda Sol Nascente',
-      farmAvatarUrl: '',
-      ownerName: 'Manoel Silva',
-      items: const [
-        OrderItem(
-          productId: 'prod1',
-          name: 'Tomate',
-          imageUrl: '',
-          quantity: 1,
-          unityType: 'un',
-          totalPrice: 12.90,
-        ),
-        OrderItem(
-          productId: 'prod2',
-          name: 'Bananas',
-          imageUrl: '',
-          quantity: 3,
-          unityType: 'kg',
-          totalPrice: 18,
-        ),
-        OrderItem(
-          productId: 'prod3',
-          name: 'Maçã',
-          imageUrl: '',
-          quantity: 1,
-          unityType: 'kg',
-          totalPrice: 9,
-        ),
-      ],
-      totalAmount: 145.90,
-      status: OrderStatus.accepted,
-      createdAt: DateTime(2026, 1, 21, 21, 8),
-      deliveryAddress: const DeliveryAddress(
-        street: 'Rua das Flores, 123 - Apto 42',
-        neighborhood: 'Bairro Primavera',
-        city: 'São Paulo',
-        state: 'SP',
-        zipCode: '01310-100',
-      ),
-      bankInfo: const ProducerBankInfo(
-        bank: 'Nubank (260)',
-        agency: '0001',
-        account: '12345-6',
-        pixKey: 'fazenda.boavista@email.com',
-      ),
-    ),
-    Order(
-      id: '4827',
-      producerId: 'p1',
-      farmName: 'Fazenda Sol Nascente',
-      farmAvatarUrl: '',
-      ownerName: 'Manoel Silva',
-      items: const [
-        OrderItem(
-          productId: 'prod1',
-          name: 'Tomate',
-          imageUrl: '',
-          quantity: 1,
-          unityType: 'un',
-          totalPrice: 12.90,
-        ),
-        OrderItem(
-          productId: 'prod5',
-          name: 'Maçã',
-          imageUrl: '',
-          quantity: 1,
-          unityType: 'kg',
-          totalPrice: 9,
-        ),
-      ],
-      totalAmount: 145.90,
-      status: OrderStatus.delivered,
-      createdAt: DateTime(2026, 1, 21, 21, 8),
-      deliveryAddress: const DeliveryAddress(
-        street: 'Rua das Flores, 123 - Apto 42',
-        neighborhood: 'Bairro Primavera',
-        city: 'São Paulo',
-        state: 'SP',
-        zipCode: '01310-100',
-      ),
-      bankInfo: const ProducerBankInfo(
-        bank: 'Nubank (260)',
-        agency: '0001',
-        account: '12345-6',
-        pixKey: 'fazenda.boavista@email.com',
-      ),
-    ),
-    Order(
-      id: '4826',
-      producerId: 'p1',
-      farmName: 'Fazenda Sol Nascente',
-      farmAvatarUrl: '',
-      ownerName: 'Manoel Silva',
-      items: const [
-        OrderItem(
-          productId: 'prod2',
-          name: 'Bananas',
-          imageUrl: '',
-          quantity: 3,
-          unityType: 'kg',
-          totalPrice: 18,
-        ),
-      ],
-      totalAmount: 145.90,
-      status: OrderStatus.cancelled,
-      createdAt: DateTime(2026, 1, 21, 21, 8),
-      deliveryAddress: const DeliveryAddress(
-        street: 'Rua das Flores, 123 - Apto 42',
-        neighborhood: 'Bairro Primavera',
-        city: 'São Paulo',
-        state: 'SP',
-        zipCode: '01310-100',
-      ),
-      bankInfo: const ProducerBankInfo(
-        bank: 'Nubank (260)',
-        agency: '0001',
-        account: '12345-6',
-        pixKey: 'fazenda.boavista@email.com',
-      ),
-    ),
-  ];
-
-  /// Gets consumer orders, optionally filtered by [status].
-  ///
-  /// === REAL IMPLEMENTATION (uncomment when backend is ready) ===
-  ///
-  /// Future`<List<Order>>` getOrders({OrderStatus? status}) async {
-  ///   try {
-  ///     final response = await _apiClient.dio.get`<Map<String, dynamic>>`(
-  ///       ApiEndpoints.orders,
-  ///       queryParameters: {
-  ///         if (status != null) 'status': status.name,
-  ///       },
-  ///     );
-  ///     return (response.data!['data'] as List)
-  ///         .map((e) => Order.fromJson(e as `Map<String, dynamic>`))
-  ///         .toList();
-  ///   } on DioException catch (e) {
-  ///     throw e.error as ApiException? ?? const UnknownApiException();
-  ///   }
-  /// }
-  ///
-  /// === END REAL IMPLEMENTATION ===
-  ///
-  /// MOCK TEMPORÁRIO — remover quando backend estiver conectado:
   Future<List<Order>> getOrders({OrderStatus? status}) async {
-    await Future<void>.delayed(const Duration(milliseconds: 600));
-    if (status == null) return List.from(_mockOrders);
-    return _mockOrders.where((o) => o.status == status).toList();
+    try {
+      final response = await _apiClient.dio.get<List<dynamic>>(
+        ApiEndpoints.consumerOrders,
+      );
+
+      final orders = (response.data ?? const [])
+          .map((json) => _mapOrder(json as Map<String, dynamic>))
+          .toList();
+
+      if (status == null) {
+        return orders;
+      }
+
+      return orders.where((order) => order.status == status).toList();
+    } on DioException catch (e) {
+      throw e.error as ApiException? ?? const UnknownApiException();
+    }
   }
 
-  /// Gets a single order by [id].
-  ///
-  /// === REAL IMPLEMENTATION (uncomment when backend is ready) ===
-  ///
-  /// Future`<Order>` getOrderById(String id) async {
-  ///   try {
-  ///     final response = await _apiClient.dio.get`<Map<String, dynamic>>`(
-  ///       ApiEndpoints.order(id),
-  ///     );
-  ///     return Order.fromJson(response.data!);
-  ///   } on DioException catch (e) {
-  ///     throw e.error as ApiException? ?? const UnknownApiException();
-  ///   }
-  /// }
-  ///
-  /// === END REAL IMPLEMENTATION ===
-  ///
-  /// MOCK TEMPORÁRIO — remover quando backend estiver conectado:
   Future<Order> getOrderById(String id) async {
-    await Future<void>.delayed(const Duration(milliseconds: 400));
-    return _mockOrders.firstWhere(
-      (o) => o.id == id,
-      orElse: () => _mockOrders.first,
-    );
+    try {
+      final response = await _apiClient.dio.get<Map<String, dynamic>>(
+        ApiEndpoints.customerOrder(id),
+      );
+      return _mapOrder(response.data ?? const <String, dynamic>{});
+    } on DioException catch (e) {
+      throw e.error as ApiException? ?? const UnknownApiException();
+    }
   }
 
-  /// Confirms an order from cart (POST /orders).
-  ///
-  /// === REAL IMPLEMENTATION (uncomment when backend is ready) ===
-  ///
-  /// Future`<Order>` confirmOrder(String cartId) async {
-  ///   try {
-  ///     final response = await _apiClient.dio.post`<Map<String, dynamic>>`(
-  ///       ApiEndpoints.orders,
-  ///       data: {'cart_id': cartId},
-  ///     );
-  ///     return Order.fromJson(response.data!);
-  ///   } on DioException catch (e) {
-  ///     throw e.error as ApiException? ?? const UnknownApiException();
-  ///   }
-  /// }
-  ///
-  /// === END REAL IMPLEMENTATION ===
-  ///
-  /// MOCK TEMPORÁRIO — remover quando backend estiver conectado:
   Future<Order> confirmOrder(String cartId) async {
-    await Future<void>.delayed(const Duration(milliseconds: 800));
-    return _mockOrders.first;
+    try {
+      final response = await _apiClient.dio.post<Map<String, dynamic>>(
+        ApiEndpoints.orders,
+      );
+      return _mapProducerOrder(response.data ?? const <String, dynamic>{});
+    } on DioException catch (e) {
+      throw e.error as ApiException? ?? const UnknownApiException();
+    }
   }
 
-  /// Creates a review for a delivered order (POST /reviews).
-  Future<void> createReview(
-    String orderId,
-    int rating,
-    String comment,
-  ) async {
+  Future<void> createReview(String orderId, int rating, String comment) async {
     try {
       final request = CreateReviewRequest(
         orderId: orderId,
@@ -295,5 +70,126 @@ class OrdersRemoteDatasource {
     } on DioException catch (e) {
       throw e.error as ApiException? ?? const UnknownApiException();
     }
+  }
+
+  Order _mapOrder(Map<String, dynamic> json) {
+    final producerName = (json['producerName'] as String? ?? '').trim();
+    final itemsJson = json['items'] as List<dynamic>? ?? const [];
+    final items = itemsJson
+        .map((item) => _mapOrderItem(item as Map<String, dynamic>))
+        .toList();
+
+    return Order(
+      id: (json['id'] ?? '').toString(),
+      producerId: (json['producerId'] ?? '').toString(),
+      farmName: producerName,
+      farmAvatarUrl: (json['producerPicture'] as String? ?? '').trim(),
+      ownerName: producerName,
+      items: items,
+      totalAmount: _asDouble(json['totalAmount'] ?? json['price']),
+      status: _mapOrderStatus(json['status'] as String?),
+      createdAt:
+          DateTime.tryParse(json['createdAt'] as String? ?? '') ??
+          DateTime.now(),
+      deliveryAddress: _mapDeliveryAddress(
+        json['deliveryAddress'] as Map<String, dynamic>?,
+      ),
+      bankInfo: const ProducerBankInfo(
+        bank: '',
+        agency: '',
+        account: '',
+        pixKey: '',
+      ),
+    );
+  }
+
+  Order _mapProducerOrder(Map<String, dynamic> json) {
+    final farmerName = (json['farmerName'] as String? ?? '').trim();
+    final itemsJson = json['items'] as List<dynamic>? ?? const [];
+    final items = itemsJson
+        .map((item) => _mapOrderItem(item as Map<String, dynamic>))
+        .toList();
+
+    return Order(
+      id: (json['id'] ?? '').toString(),
+      producerId: (json['farmerId'] ?? '').toString(),
+      farmName: farmerName,
+      farmAvatarUrl: '',
+      ownerName: farmerName,
+      items: items,
+      totalAmount: _asDouble(json['totalAmount']),
+      status: _mapOrderStatus(json['status'] as String?),
+      createdAt:
+          DateTime.tryParse(json['createdAt'] as String? ?? '') ??
+          DateTime.now(),
+      deliveryAddress: _mapDeliveryAddress(
+        json['deliveryAddress'] as Map<String, dynamic>?,
+      ),
+      bankInfo: const ProducerBankInfo(
+        bank: '',
+        agency: '',
+        account: '',
+        pixKey: '',
+      ),
+    );
+  }
+
+  OrderItem _mapOrderItem(Map<String, dynamic> json) {
+    return OrderItem(
+      productId: (json['productId'] ?? '').toString(),
+      name: (json['productName'] as String? ?? '').trim(),
+      imageUrl: (json['productPhoto'] as String? ?? '').trim(),
+      quantity: _asDouble(json['quantity']),
+      unityType: (json['unityType'] as String? ?? '').trim(),
+      totalPrice: _asDouble(json['subtotal']),
+    );
+  }
+
+  DeliveryAddress _mapDeliveryAddress(Map<String, dynamic>? json) {
+    final data = json ?? const <String, dynamic>{};
+    return DeliveryAddress(
+      street: _joinNonBlank([
+        data['street']?.toString(),
+        data['number']?.toString(),
+        data['complement']?.toString(),
+      ]),
+      neighborhood: (data['neighborhood'] as String? ?? '').trim(),
+      city: (data['city'] as String? ?? '').trim(),
+      state: (data['state'] as String? ?? '').trim(),
+      zipCode: (data['zipCode'] as String? ?? '').trim(),
+    );
+  }
+
+  OrderStatus _mapOrderStatus(String? rawStatus) {
+    switch ((rawStatus ?? '').toUpperCase()) {
+      case 'PENDING':
+        return OrderStatus.pending;
+      case 'CONFIRMED':
+      case 'IN_DELIVERY':
+        return OrderStatus.accepted;
+      case 'DELIVERED':
+        return OrderStatus.delivered;
+      case 'CANCELLED':
+        return OrderStatus.cancelled;
+      default:
+        return OrderStatus.pending;
+    }
+  }
+
+  double _asDouble(dynamic value) {
+    if (value is num) {
+      return value.toDouble();
+    }
+    if (value is String) {
+      return double.tryParse(value) ?? 0;
+    }
+    return 0;
+  }
+
+  String _joinNonBlank(List<String?> parts) {
+    return parts
+        .where((part) => part != null && part.trim().isNotEmpty)
+        .map((part) => part!.trim())
+        .join(', ');
   }
 }

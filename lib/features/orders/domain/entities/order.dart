@@ -72,7 +72,7 @@ class Order extends Equatable {
     if (items.isEmpty) return '';
     return items
             .take(3)
-            .map((i) => '${i.name} ${i.quantity}${i.unityType}')
+            .map((i) => '${i.name} ${i.quantityLabel}${i.unityType}')
             .join(' | ') +
         (items.length > 3 ? ' ...' : '');
   }

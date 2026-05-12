@@ -13,9 +13,19 @@ class OrderItem extends Equatable {
   final String productId;
   final String name;
   final String imageUrl;
-  final int quantity;
+  final double quantity;
   final String unityType;
   final double totalPrice;
+
+  String get quantityLabel {
+    if (quantity == quantity.truncateToDouble()) {
+      return quantity.toStringAsFixed(0);
+    }
+    return quantity
+        .toStringAsFixed(3)
+        .replaceFirst(RegExp(r'0+$'), '')
+        .replaceFirst(RegExp(r'\.$'), '');
+  }
 
   @override
   List<Object?> get props => [

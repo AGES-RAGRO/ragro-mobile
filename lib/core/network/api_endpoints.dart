@@ -50,7 +50,8 @@ abstract final class ApiEndpoints {
 
   // Orders
   static String get orders => '$_base/orders';
-  static String order(String id) => '$_base/orders/$id';
+  static String get consumerOrders => '$_base/orders/consumer';
+  static String customerOrder(String id) => '$_base/orders/customer/$id';
   static String orderRating(String id) => '$_base/orders/$id/rating';
   static String get reviews => '$_base/reviews';
 

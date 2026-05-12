@@ -45,7 +45,7 @@ class OrderItemRow extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'Qtd: ${item.quantity}${item.unityType}',
+                  'Qtd: ${item.quantityLabel}${item.unityType}',
                   style: const TextStyle(
                     fontFamily: 'Manrope',
                     fontSize: 14,
