@@ -15,6 +15,7 @@ import 'package:ragro_mobile/features/producer_orders/domain/entities/producer_o
 import 'package:ragro_mobile/features/producer_orders/presentation/bloc/producer_order_detail_bloc.dart';
 import 'package:ragro_mobile/features/producer_orders/presentation/bloc/producer_order_detail_event.dart';
 import 'package:ragro_mobile/features/producer_orders/presentation/bloc/producer_order_detail_state.dart';
+import 'package:ragro_mobile/shared/utils/unity_type_label.dart';
 import 'package:ragro_mobile/shared/widgets/cancel_order_dialog.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -465,7 +466,7 @@ class _ProducerOrderItemRow extends StatelessWidget {
     symbol: r'R$',
   );
 
-  String get _quantity => 'Qtd: ${item.quantity}${item.unityType}';
+  String get _quantity => 'Qtd: ${item.quantity} ${localizeUnityType(item.unityType)}';
 
   @override
   Widget build(BuildContext context) {

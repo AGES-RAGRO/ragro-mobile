@@ -19,6 +19,7 @@ import 'package:ragro_mobile/features/customer_profile/presentation/bloc/custome
 import 'package:ragro_mobile/features/orders/presentation/bloc/checkout_bloc.dart';
 import 'package:ragro_mobile/features/orders/presentation/bloc/checkout_event.dart';
 import 'package:ragro_mobile/features/orders/presentation/bloc/checkout_state.dart';
+import 'package:ragro_mobile/shared/utils/unity_type_label.dart';
 
 class OrderConfirmationPage extends StatelessWidget {
   const OrderConfirmationPage({super.key});
@@ -512,27 +513,14 @@ class _CheckoutView extends StatelessWidget {
                               Icon(Icons.local_shipping_outlined, size: 22),
                               SizedBox(width: 16),
                               Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      'Frete RAGRO Logística',
-                                      style: TextStyle(
-                                        fontFamily: 'Manrope',
-                                        fontWeight: FontWeight.w700,
-                                        fontSize: 14,
-                                        color: AppColors.black,
-                                      ),
-                                    ),
-                                    Text(
-                                      'Previsão: 3 a 5 dias úteis',
-                                      style: TextStyle(
-                                        fontFamily: 'Manrope',
-                                        fontSize: 12,
-                                        color: AppColors.placeholder,
-                                      ),
-                                    ),
-                                  ],
+                                child: Text(
+                                  'Frete RAGRO Logística',
+                                  style: TextStyle(
+                                    fontFamily: 'Manrope',
+                                    fontWeight: FontWeight.w700,
+                                    fontSize: 14,
+                                    color: AppColors.black,
+                                  ),
                                 ),
                               ),
                               Text(
@@ -752,7 +740,7 @@ class _CartItemRow extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'Qtd: ${_formatQuantity(item.quantity)}${item.unityType}',
+                  'Qtd: ${_formatQuantity(item.quantity)} ${localizeUnityType(item.unityType)}',
                   style: const TextStyle(
                     fontFamily: 'Manrope',
                     fontSize: 14,

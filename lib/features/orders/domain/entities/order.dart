@@ -76,9 +76,28 @@ class Order extends Equatable {
     if (items.isEmpty) return '';
     return items
             .take(3)
-            .map((i) => '${i.name} ${i.quantity}${i.unityType}')
+            .map((i) => '${i.name} ${i.quantity} ${_localUnit(i.unityType)}')
             .join(' | ') +
         (items.length > 3 ? ' ...' : '');
+  }
+
+  static String _localUnit(String u) {
+    switch (u.toLowerCase().trim()) {
+      case 'unit':
+      case 'un':
+        return 'un';
+      case 'box':
+      case 'cx':
+        return 'caixa';
+      case 'liter':
+      case 'l':
+        return 'L';
+      case 'dozen':
+      case 'dz':
+        return 'dz';
+      default:
+        return u;
+    }
   }
 
   @override

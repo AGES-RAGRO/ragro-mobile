@@ -13,6 +13,7 @@ import 'package:ragro_mobile/features/orders/domain/entities/order_detail.dart';
 import 'package:ragro_mobile/features/orders/presentation/bloc/order_detail_bloc.dart';
 import 'package:ragro_mobile/features/orders/presentation/bloc/order_detail_event.dart';
 import 'package:ragro_mobile/features/orders/presentation/bloc/order_detail_state.dart';
+import 'package:ragro_mobile/shared/utils/unity_type_label.dart';
 import 'package:ragro_mobile/shared/widgets/cancel_order_dialog.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -473,7 +474,7 @@ class _OrderDetailItemRow extends StatelessWidget {
     final value = item.quantity % 1 == 0
         ? item.quantity.toInt().toString()
         : item.quantity.toStringAsFixed(2).replaceAll('.', ',');
-    return 'Qtd: $value${item.unityType}';
+    return 'Qtd: $value ${localizeUnityType(item.unityType)}';
   }
 
   @override
