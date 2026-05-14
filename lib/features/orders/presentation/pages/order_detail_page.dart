@@ -22,30 +22,6 @@ class OrderDetailPage extends StatelessWidget {
 
   final String orderId;
 
-  String _formatPrice(double price) =>
-      'R\$ ${price.toStringAsFixed(2).replaceAll('.', ',')}';
-
-  Future<void> _openWhatsApp(BuildContext context, String phoneNumber) async {
-    final cleanPhone = phoneNumber.replaceAll(RegExp(r'[^\d+]'), '');
-    final formattedPhone = cleanPhone.startsWith('+')
-        ? cleanPhone.replaceFirst('+', '')
-        : cleanPhone;
-    final uri = Uri.parse('https://wa.me/$formattedPhone');
-
-    try {
-      await launchUrl(uri, mode: LaunchMode.externalApplication);
-    } on Object {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Não foi possível abrir o WhatsApp'),
-            duration: Duration(seconds: 2),
-          ),
-        );
-      }
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
@@ -868,7 +844,11 @@ class _ActionFooter extends StatelessWidget {
     final result = await CancelOrderDialog.showForCustomer(context);
     if (result != null && context.mounted) {
       context.read<OrderDetailBloc>().add(
-        OrderDetailCancelled(order.id, reason: result.reason, details: result.details),
+        OrderDetailCancelled(
+          order.id,
+          reason: result.reason,
+          details: result.details,
+        ),
       );
     }
   }
