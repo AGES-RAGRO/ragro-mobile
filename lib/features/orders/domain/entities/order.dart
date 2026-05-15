@@ -74,6 +74,40 @@ class Order extends Equatable {
   final ProducerBankInfo bankInfo;
   final bool avaliado;
 
+  Order copyWith({
+    String? id,
+    String? orderNumber,
+    String? producerId,
+    String? producerPhone,
+    String? farmName,
+    String? farmAvatarUrl,
+    String? ownerName,
+    List<OrderItem>? items,
+    double? totalAmount,
+    OrderStatus? status,
+    DateTime? createdAt,
+    DeliveryAddress? deliveryAddress,
+    ProducerBankInfo? bankInfo,
+    bool? avaliado,
+  }) {
+    return Order(
+      id: id ?? this.id,
+      orderNumber: orderNumber ?? this.orderNumber,
+      producerId: producerId ?? this.producerId,
+      producerPhone: producerPhone ?? this.producerPhone,
+      farmName: farmName ?? this.farmName,
+      farmAvatarUrl: farmAvatarUrl ?? this.farmAvatarUrl,
+      ownerName: ownerName ?? this.ownerName,
+      items: items ?? this.items,
+      totalAmount: totalAmount ?? this.totalAmount,
+      status: status ?? this.status,
+      createdAt: createdAt ?? this.createdAt,
+      deliveryAddress: deliveryAddress ?? this.deliveryAddress,
+      bankInfo: bankInfo ?? this.bankInfo,
+      avaliado: avaliado ?? this.avaliado,
+    );
+  }
+
   String get shortItemsPreview {
     if (items.isEmpty) return '';
     return items

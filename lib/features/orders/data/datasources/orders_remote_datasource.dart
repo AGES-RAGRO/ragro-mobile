@@ -9,10 +9,13 @@ import 'package:ragro_mobile/features/orders/data/models/order_model.dart';
 import 'package:ragro_mobile/features/orders/domain/entities/order.dart';
 import 'package:ragro_mobile/features/orders/domain/entities/order_detail.dart';
 import 'package:ragro_mobile/features/orders/domain/entities/order_status.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 @lazySingleton
 class OrdersRemoteDatasource {
   const OrdersRemoteDatasource(this._apiClient);
+
+  static const _ratedOrderIdsKey = 'orders.ratedOrderIds';
 
   final ApiClient _apiClient;
 
@@ -25,7 +28,15 @@ class OrdersRemoteDatasource {
         },
       );
 
-      return _readList(response.data).map(OrderModel.fromJson).toList();
+      final ratedOrderIds = await _readRatedOrderIds();
+      return _readList(response.data)
+          .map(OrderModel.fromJson)
+          .map(
+            (order) => ratedOrderIds.contains(order.id)
+                ? order.copyWith(avaliado: true)
+                : order,
+          )
+          .toList();
     } on DioException catch (e) {
       throw e.error as ApiException? ?? const UnknownApiException();
     }
@@ -37,7 +48,11 @@ class OrdersRemoteDatasource {
         ApiEndpoints.customerOrder(id),
       );
 
-      return OrderModel.fromJson(response.data!);
+      final order = OrderModel.fromJson(response.data!);
+      final ratedOrderIds = await _readRatedOrderIds();
+      return ratedOrderIds.contains(order.id)
+          ? order.copyWith(avaliado: true)
+          : order;
     } on DioException catch (e) {
       throw e.error as ApiException? ?? const UnknownApiException();
     }
@@ -149,6 +164,7 @@ class OrdersRemoteDatasource {
         ApiEndpoints.orderRating(orderId),
         data: {'rating': rating},
       );
+      await _saveRatedOrderId(orderId);
     } on DioException catch (e) {
       throw e.error as ApiException? ?? const UnknownApiException();
     }
@@ -165,9 +181,47 @@ class OrdersRemoteDatasource {
         ApiEndpoints.reviews,
         data: request.toJson(),
       );
+      await _saveRatedOrderId(orderId);
     } on DioException catch (e) {
-      throw e.error as ApiException? ?? const UnknownApiException();
+      final error = e.error as ApiException? ?? const UnknownApiException();
+      if (_isAlreadyRatedError(error)) {
+        await _saveRatedOrderId(orderId);
+        return;
+      }
+      throw error;
     }
+  }
+
+  bool _isAlreadyRatedError(ApiException error) {
+    if (error is ConflictException) return true;
+
+    final message = error.message.toLowerCase();
+    final mentionsReview =
+        message.contains('avalia') ||
+        message.contains('review') ||
+        message.contains('rating');
+    final mentionsDuplicate =
+        message.contains('ja') ||
+        message.contains('jã¡') ||
+        message.contains('já') ||
+        message.contains('already') ||
+        message.contains('existe') ||
+        message.contains('duplicate');
+
+    return mentionsReview && mentionsDuplicate;
+  }
+
+  Future<Set<String>> _readRatedOrderIds() async {
+    final prefs = await SharedPreferences.getInstance();
+    return (prefs.getStringList(_ratedOrderIdsKey) ?? const <String>[]).toSet();
+  }
+
+  Future<void> _saveRatedOrderId(String orderId) async {
+    final prefs = await SharedPreferences.getInstance();
+    final ids =
+        (prefs.getStringList(_ratedOrderIdsKey) ?? const <String>[]).toSet()
+          ..add(orderId);
+    await prefs.setStringList(_ratedOrderIdsKey, ids.toList(growable: false));
   }
 
   List<Map<String, dynamic>> _readList(dynamic data) {

@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:ragro_mobile/core/theme/app_colors.dart';
 import 'package:ragro_mobile/features/orders/domain/entities/order.dart';
 import 'package:ragro_mobile/features/orders/domain/entities/order_status.dart';
+import 'package:ragro_mobile/features/orders/presentation/bloc/orders_bloc.dart';
+import 'package:ragro_mobile/features/orders/presentation/bloc/orders_event.dart';
 import 'package:ragro_mobile/features/orders/presentation/widgets/order_status_badge.dart';
 
 class OrderCard extends StatelessWidget {
@@ -210,9 +213,15 @@ class _OrderActionButton extends StatelessWidget {
     ).toString();
 
     return GestureDetector(
-      onTap: () => context.push(
-        isDelivered ? rateRoute : '/customer/orders/${order.id}',
-      ),
+      onTap: () async {
+        final rated = await context.push<bool>(
+          isDelivered ? rateRoute : '/customer/orders/${order.id}',
+        );
+
+        if (context.mounted && (rated ?? false)) {
+          context.read<OrdersBloc>().add(OrderMarkedAsRated(order.id));
+        }
+      },
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
         decoration: BoxDecoration(

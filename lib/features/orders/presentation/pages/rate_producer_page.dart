@@ -39,7 +39,7 @@ class RateProducerPage extends StatelessWidget {
                 backgroundColor: AppColors.lightGreen,
               ),
             );
-            context.pop();
+            context.pop(true);
           } else if (state is RateProducerFailure) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(

@@ -44,17 +44,33 @@ class _OrdersViewState extends State<_OrdersView>
   ];
 
   late final TabController _tabController;
+  int _lastTabIndex = 0;
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: _tabs.length, vsync: this);
+    _tabController = TabController(length: _tabs.length, vsync: this)
+      ..addListener(_onTabChanged);
   }
 
   @override
   void dispose() {
-    _tabController.dispose();
+    _tabController
+      ..removeListener(_onTabChanged)
+      ..dispose();
     super.dispose();
+  }
+
+  void _onTabChanged() {
+    if (_tabController.indexIsChanging ||
+        _tabController.index == _lastTabIndex) {
+      return;
+    }
+
+    _lastTabIndex = _tabController.index;
+    context.read<OrdersBloc>().add(
+      OrdersTabChanged(_tabs[_tabController.index].$1),
+    );
   }
 
   @override
@@ -146,9 +162,8 @@ class _OrderTabContent extends StatelessWidget {
                 ),
                 const SizedBox(height: 16),
                 TextButton(
-                  onPressed: () => context.read<OrdersBloc>().add(
-                    const OrdersRefreshed(),
-                  ),
+                  onPressed: () =>
+                      context.read<OrdersBloc>().add(const OrdersRefreshed()),
                   child: const Text('Tentar novamente'),
                 ),
               ],

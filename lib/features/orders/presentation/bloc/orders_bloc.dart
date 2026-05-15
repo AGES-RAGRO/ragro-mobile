@@ -11,6 +11,7 @@ class OrdersBloc extends Bloc<OrdersEvent, OrdersState> {
     on<OrdersStarted>(_onStarted);
     on<OrdersTabChanged>(_onTabChanged);
     on<OrdersRefreshed>(_onRefreshed);
+    on<OrderMarkedAsRated>(_onOrderMarkedAsRated);
   }
 
   final GetOrders _getOrders;
@@ -55,5 +56,25 @@ class OrdersBloc extends Bloc<OrdersEvent, OrdersState> {
     } on Exception catch (e) {
       emit(OrdersFailure(e.toString()));
     }
+  }
+
+  void _onOrderMarkedAsRated(
+    OrderMarkedAsRated event,
+    Emitter<OrdersState> emit,
+  ) {
+    final currentState = state;
+    if (currentState is! OrdersLoaded) return;
+
+    final updatedOrders = currentState.orders
+        .map(
+          (order) => order.id == event.orderId
+              ? order.copyWith(avaliado: true)
+              : order,
+        )
+        .toList();
+
+    emit(
+      OrdersLoaded(orders: updatedOrders, activeTab: currentState.activeTab),
+    );
   }
 }
