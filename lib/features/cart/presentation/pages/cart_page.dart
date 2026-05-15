@@ -18,6 +18,7 @@ import 'package:ragro_mobile/features/cart/presentation/bloc/cart_state.dart';
 import 'package:ragro_mobile/features/cart/presentation/widgets/cart_item_tile.dart';
 import 'package:ragro_mobile/features/cart/presentation/widgets/producer_cart_header.dart';
 import 'package:ragro_mobile/shared/widgets/app_notification.dart';
+import 'package:ragro_mobile/shared/widgets/confirm_dialog.dart';
 
 class CartPage extends StatelessWidget {
   const CartPage({super.key});
@@ -133,9 +134,22 @@ class CartPage extends StatelessWidget {
                         GestureDetector(
                           onTap: isEmpty || isMutating
                               ? null
-                              : () => context.read<CartBloc>().add(
-                                  const CartCleared(),
-                                ),
+                              : () async {
+                                  final confirmed = await ConfirmDialog.show(
+                                    context: context,
+                                    title: 'Tem certeza que deseja excluir ',
+                                    highlight: 'todo o carrinho',
+                                    highlightColor: AppColors.red,
+                                    trailingTitle: '?',
+                                    confirmLabel: 'Excluir',
+                                    confirmColor: AppColors.red,
+                                  );
+                                  if ((confirmed ?? false) && context.mounted) {
+                                    context
+                                        .read<CartBloc>()
+                                        .add(const CartCleared());
+                                  }
+                                },
                           child: Text(
                             'Limpar',
                             style: TextStyle(
