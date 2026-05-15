@@ -133,6 +133,7 @@ class OrderDetailModel extends OrderDetail {
     required super.deliveryAddress,
     required super.actions,
     super.bankInfo,
+    super.reviewed,
   });
 
   factory OrderDetailModel.fromJson(Map<String, dynamic> json) {
@@ -156,9 +157,7 @@ class OrderDetailModel extends OrderDetail {
       statusLabel: json['statusLabel'] as String?,
       createdAt: DateTime.tryParse(json['createdAt'] as String? ?? ''),
       producerId:
-          json['producerId'] as String? ??
-          producerJson?['id'] as String? ??
-          '',
+          json['producerId'] as String? ?? producerJson?['id'] as String? ?? '',
       producerName:
           json['producerName'] as String? ??
           json['farmName'] as String? ??
@@ -192,7 +191,41 @@ class OrderDetailModel extends OrderDetail {
       bankInfo: bankJson == null
           ? null
           : OrderDetailBankInfoModel.fromJson(bankJson),
+      reviewed: _parseReviewed(json),
     );
+  }
+
+  static bool _parseReviewed(Map<String, dynamic> json) {
+    for (final key in const [
+      'avaliado',
+      'isRated',
+      'rated',
+      'reviewed',
+      'hasReview',
+      'hasReviewed',
+      'hasRating',
+    ]) {
+      final value = json[key];
+      if (value is bool) return value;
+      if (value is String) {
+        final normalized = value.toLowerCase().trim();
+        if (normalized == 'true' || normalized == '1') return true;
+        if (normalized == 'false' || normalized == '0') return false;
+      }
+      if (value is num) return value != 0;
+    }
+
+    for (final key in const ['reviewId', 'review_id', 'ratingId']) {
+      final value = json[key];
+      if (value is String && value.trim().isNotEmpty) return true;
+      if (value != null) return true;
+    }
+
+    final review = json['review'] ?? json['rating'];
+    if (review is Map<String, dynamic>) return review.isNotEmpty;
+    if (review is List<dynamic>) return review.isNotEmpty;
+
+    return false;
   }
 
   static String _normalizeStatus(String? status) {

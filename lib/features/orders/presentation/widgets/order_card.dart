@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:ragro_mobile/core/di/injection.dart';
 import 'package:ragro_mobile/core/theme/app_colors.dart';
 import 'package:ragro_mobile/features/orders/domain/entities/order.dart';
 import 'package:ragro_mobile/features/orders/domain/entities/order_status.dart';
+import 'package:ragro_mobile/features/orders/domain/repositories/orders_repository.dart';
 import 'package:ragro_mobile/features/orders/presentation/bloc/orders_bloc.dart';
 import 'package:ragro_mobile/features/orders/presentation/bloc/orders_event.dart';
 import 'package:ragro_mobile/features/orders/presentation/widgets/order_status_badge.dart';
@@ -214,9 +216,28 @@ class _OrderActionButton extends StatelessWidget {
 
     return GestureDetector(
       onTap: () async {
-        final rated = await context.push<bool>(
-          isDelivered ? rateRoute : '/customer/orders/${order.id}',
-        );
+        if (!isDelivered) {
+          await context.push<bool>('/customer/orders/${order.id}');
+          return;
+        }
+
+        final repository = getIt<OrdersRepository>();
+        final detail = await repository.getCustomerOrderById(order.id);
+
+        if (!context.mounted) return;
+
+        if (detail.reviewed || order.avaliado) {
+          context.read<OrdersBloc>().add(OrdersMarkedAsRated(order.id));
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Esse pedido já foi avaliado.'),
+              backgroundColor: AppColors.darkGreen,
+            ),
+          );
+          return;
+        }
+
+        final rated = await context.push<bool>(rateRoute);
 
         if (context.mounted && (rated ?? false)) {
           context.read<OrdersBloc>().add(const OrdersRefreshed());

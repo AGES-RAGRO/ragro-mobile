@@ -12,6 +12,7 @@ class OrdersBloc extends Bloc<OrdersEvent, OrdersState> {
     on<OrdersStarted>(_onStarted);
     on<OrdersTabChanged>(_onTabChanged);
     on<OrdersRefreshed>(_onRefreshed);
+    on<OrdersMarkedAsRated>(_onMarkedAsRated);
   }
 
   final GetOrders _getOrders;
@@ -39,6 +40,24 @@ class OrdersBloc extends Bloc<OrdersEvent, OrdersState> {
     Emitter<OrdersState> emit,
   ) async {
     await _loadOrdersForActiveTab(emit);
+  }
+
+  void _onMarkedAsRated(OrdersMarkedAsRated event, Emitter<OrdersState> emit) {
+    var updated = false;
+
+    for (final entry in _ordersCache.entries) {
+      final nextOrders = entry.value.map((order) {
+        if (order.id != event.orderId) return order;
+        updated = true;
+        return order.copyWith(avaliado: true);
+      }).toList();
+      _ordersCache[entry.key] = nextOrders;
+    }
+
+    if (!updated) return;
+
+    final activeOrders = _ordersCache[_activeTab] ?? const <Order>[];
+    emit(OrdersLoaded(orders: activeOrders, activeTab: _activeTab));
   }
 
   Future<void> _loadOrdersForActiveTab(Emitter<OrdersState> emit) async {

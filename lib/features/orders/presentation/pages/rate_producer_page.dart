@@ -28,6 +28,69 @@ class RateProducerPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (isRated) {
+      return Scaffold(
+        backgroundColor: Colors.black54,
+        body: Center(
+          child: Container(
+            width: double.infinity,
+            margin: const EdgeInsets.symmetric(horizontal: 16),
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: const Color(0xFFFAFAFA),
+              borderRadius: BorderRadius.circular(30),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(
+                  Icons.verified_outlined,
+                  size: 42,
+                  color: AppColors.darkGreen,
+                ),
+                const SizedBox(height: 16),
+                const Text(
+                  'Avaliação já enviada',
+                  style: TextStyle(
+                    fontFamily: 'Manrope',
+                    fontWeight: FontWeight.w700,
+                    fontSize: 20,
+                    color: AppColors.darkGreen,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  'Você já avaliou $ownerName${farmName.isNotEmpty ? ' em $farmName' : ''}.',
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontFamily: 'Manrope',
+                    fontSize: 14,
+                    color: AppColors.black,
+                  ),
+                ),
+                const SizedBox(height: 24),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () => context.pop(),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.darkGreen,
+                      foregroundColor: AppColors.white,
+                      minimumSize: const Size.fromHeight(52),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    child: const Text('Fechar'),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
     return BlocProvider(
       create: (_) => getIt<RateProducerBloc>(),
       child: BlocListener<RateProducerBloc, RateProducerState>(

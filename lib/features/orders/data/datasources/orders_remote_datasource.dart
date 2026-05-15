@@ -166,31 +166,8 @@ class OrdersRemoteDatasource {
         data: request.toJson(),
       );
     } on DioException catch (e) {
-      final error = e.error as ApiException? ?? const UnknownApiException();
-      if (_isAlreadyRatedError(error)) {
-        return;
-      }
-      throw error;
+      throw e.error as ApiException? ?? const UnknownApiException();
     }
-  }
-
-  bool _isAlreadyRatedError(ApiException error) {
-    if (error is ConflictException) return true;
-
-    final message = error.message.toLowerCase();
-    final mentionsReview =
-        message.contains('avalia') ||
-        message.contains('review') ||
-        message.contains('rating');
-    final mentionsDuplicate =
-        message.contains('ja') ||
-        message.contains('jã¡') ||
-        message.contains('já') ||
-        message.contains('already') ||
-        message.contains('existe') ||
-        message.contains('duplicate');
-
-    return mentionsReview && mentionsDuplicate;
   }
 
   List<Map<String, dynamic>> _readList(dynamic data) {
