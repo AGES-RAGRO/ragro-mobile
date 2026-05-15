@@ -19,6 +19,8 @@ import 'package:ragro_mobile/features/customer_profile/presentation/bloc/custome
 import 'package:ragro_mobile/features/orders/presentation/bloc/checkout_bloc.dart';
 import 'package:ragro_mobile/features/orders/presentation/bloc/checkout_event.dart';
 import 'package:ragro_mobile/features/orders/presentation/bloc/checkout_state.dart';
+import 'package:ragro_mobile/shared/utils/unity_type_label.dart';
+import 'package:ragro_mobile/shared/widgets/confirm_dialog.dart';
 
 class OrderConfirmationPage extends StatelessWidget {
   const OrderConfirmationPage({super.key});
@@ -35,15 +37,23 @@ class OrderConfirmationPage extends StatelessWidget {
         // instância no subtree, então context.read<CustomerProfileBloc>() em
         // callbacks (ex.: botão "Alterar") referencia o mesmo bloc do BlocBuilder.
         BlocProvider(
-          create: (_) => getIt<CustomerProfileBloc>()
-            ..add(const CustomerProfileStarted()),
+          create: (_) =>
+              getIt<CustomerProfileBloc>()..add(const CustomerProfileStarted()),
         ),
       ],
       child: BlocListener<CheckoutBloc, CheckoutState>(
-        listener: (context, state) {
+        listener: (context, state) async {
           if (state is CheckoutSuccess) {
             getIt<CartBloc>().add(const CartOrderPlaced());
-            context.go('/customer/orders/${state.order.id}');
+            await showDialog<void>(
+              context: context,
+
+              barrierColor: Colors.black.withValues(alpha: 0.55),
+              builder: (_) => const _OrderSuccessDialog(),
+            );
+            if (context.mounted) {
+              context.go('/customer/orders/${state.order.id}');
+            }
           }
           if (state is CheckoutFailure) {
             ScaffoldMessenger.of(context).showSnackBar(
@@ -57,7 +67,9 @@ class OrderConfirmationPage extends StatelessWidget {
         },
         child: BlocBuilder<CheckoutBloc, CheckoutState>(
           builder: (context, state) {
-            if (state is CheckoutLoading || state is CheckoutInitial) {
+            if (state is CheckoutLoading ||
+                state is CheckoutInitial ||
+                state is CheckoutSuccess) {
               return const Scaffold(
                 body: Center(
                   child: CircularProgressIndicator(color: AppColors.darkGreen),
@@ -99,9 +111,9 @@ class OrderConfirmationPage extends StatelessWidget {
                           ),
                           const SizedBox(height: 16),
                           ElevatedButton(
-                            onPressed: () => context
-                                .read<CheckoutBloc>()
-                                .add(const CheckoutStarted('cart')),
+                            onPressed: () => context.read<CheckoutBloc>().add(
+                              const CheckoutStarted('cart'),
+                            ),
                             style: ElevatedButton.styleFrom(
                               backgroundColor: AppColors.darkGreen,
                               foregroundColor: AppColors.white,
@@ -512,27 +524,14 @@ class _CheckoutView extends StatelessWidget {
                               Icon(Icons.local_shipping_outlined, size: 22),
                               SizedBox(width: 16),
                               Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      'Frete RAGRO Logística',
-                                      style: TextStyle(
-                                        fontFamily: 'Manrope',
-                                        fontWeight: FontWeight.w700,
-                                        fontSize: 14,
-                                        color: AppColors.black,
-                                      ),
-                                    ),
-                                    Text(
-                                      'Previsão: 3 a 5 dias úteis',
-                                      style: TextStyle(
-                                        fontFamily: 'Manrope',
-                                        fontSize: 12,
-                                        color: AppColors.placeholder,
-                                      ),
-                                    ),
-                                  ],
+                                child: Text(
+                                  'Frete RAGRO Logística',
+                                  style: TextStyle(
+                                    fontFamily: 'Manrope',
+                                    fontWeight: FontWeight.w700,
+                                    fontSize: 14,
+                                    color: AppColors.black,
+                                  ),
                                 ),
                               ),
                               Text(
@@ -647,9 +646,53 @@ class _CheckoutView extends StatelessWidget {
                   GestureDetector(
                     onTap: isConfirming
                         ? null
-                        : () => context.read<CheckoutBloc>().add(
-                            const CheckoutConfirmed('cart'),
-                          ),
+                        : () async {
+                            // Step 1 — confirm delivery data
+                            final profileState =
+                                context.read<CustomerProfileBloc>().state;
+                            final profile = switch (profileState) {
+                              CustomerProfileLoaded(:final profile) => profile,
+                              CustomerProfileUpdating(:final profile) =>
+                                profile,
+                              CustomerProfileUpdateSuccess(:final profile) =>
+                                profile,
+                              CustomerProfileUpdateFailure(:final profile) =>
+                                profile,
+                              _ => null,
+                            };
+
+                            if (profile != null) {
+                              final destOk = await ConfirmDialog.show(
+                                context: context,
+                                title: 'Os seus dados estão corretos?',
+                                description:
+                                    '${profile.name}\n'
+                                    '${profile.formattedPrimaryAddress}\n'
+                                    '${profile.phone}',
+                                confirmLabel: 'Sim',
+                                confirmColor: AppColors.lightGreen,
+                              );
+                              if (!(destOk ?? false) || !context.mounted) {
+                                return;
+                              }
+                            }
+
+                            // Step 2 — confirm order value
+                            final confirmed = await ConfirmDialog.show(
+                              context: context,
+                              title: 'Confirmar pedido de ',
+                              highlight: _formatPrice(cart.totalAmount),
+                              highlightColor: AppColors.lightGreen,
+                              trailingTitle: '?',
+                              confirmLabel: 'Sim',
+                              confirmColor: AppColors.lightGreen,
+                            );
+                            if ((confirmed ?? false) && context.mounted) {
+                              context
+                                  .read<CheckoutBloc>()
+                                  .add(const CheckoutConfirmed('cart'));
+                            }
+                          },
                     child: Container(
                       height: 56,
                       decoration: BoxDecoration(
@@ -752,7 +795,7 @@ class _CartItemRow extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'Qtd: ${_formatQuantity(item.quantity)}${item.unityType}',
+                  'Qtd: ${_formatQuantity(item.quantity)} ${localizeUnityType(item.unityType)}',
                   style: const TextStyle(
                     fontFamily: 'Manrope',
                     fontSize: 14,
@@ -789,9 +832,7 @@ class _DeliveryAddressCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.lightGreen.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(
-          color: AppColors.lightGreen.withValues(alpha: 0.1),
-        ),
+        border: Border.all(color: AppColors.lightGreen.withValues(alpha: 0.1)),
       ),
       child: Row(
         children: [
@@ -908,5 +949,66 @@ class _DeliveryAddressCard extends StatelessWidget {
     return neighborhood.isEmpty
         ? '$cityState • $cep'
         : '$neighborhood • $cityState • $cep';
+  }
+}
+
+class _OrderSuccessDialog extends StatelessWidget {
+  const _OrderSuccessDialog();
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      backgroundColor: AppColors.white,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      insetPadding: const EdgeInsets.symmetric(horizontal: 40),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(20, 16, 20, 28),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Align(
+              alignment: Alignment.centerRight,
+              child: GestureDetector(
+                onTap: () => Navigator.of(context).pop(),
+                child: Container(
+                  width: 32,
+                  height: 32,
+                  decoration: const BoxDecoration(
+                    color: AppColors.lightGreen,
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.close,
+                    color: AppColors.white,
+                    size: 18,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+            RichText(
+              textAlign: TextAlign.center,
+              text: const TextSpan(
+                style: TextStyle(
+                  fontFamily: 'Figtree',
+                  fontWeight: FontWeight.w600,
+                  fontSize: 20,
+                  color: AppColors.black,
+                  height: 1.4,
+                ),
+                children: [
+                  TextSpan(text: 'Seu pedido foi realizado com '),
+                  TextSpan(
+                    text: 'sucesso',
+                    style: TextStyle(color: AppColors.lightGreen),
+                  ),
+                  TextSpan(text: '!'),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }

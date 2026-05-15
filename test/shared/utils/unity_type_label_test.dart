@@ -4,10 +4,17 @@ import 'package:ragro_mobile/shared/utils/unity_type_label.dart';
 void main() {
   group('localizeUnityType', () {
     test('traduz unidades em inglês para abreviações pt-BR', () {
-      expect(localizeUnityType('unit'), 'unidade');
+      expect(localizeUnityType('unit'), 'un');
       expect(localizeUnityType('box'), 'caixa');
-      expect(localizeUnityType('liter'), 'litro');
-      expect(localizeUnityType('dozen'), 'dúzia');
+      expect(localizeUnityType('liter'), 'L');
+      expect(localizeUnityType('dozen'), 'dz');
+    });
+
+    test('aceita variantes já abreviadas', () {
+      expect(localizeUnityType('un'), 'un');
+      expect(localizeUnityType('cx'), 'caixa');
+      expect(localizeUnityType('l'), 'L');
+      expect(localizeUnityType('dz'), 'dz');
     });
 
     test('mantém unidades já universais', () {
@@ -17,13 +24,13 @@ void main() {
     });
 
     test('é case-insensitive', () {
-      expect(localizeUnityType('UNIT'), 'unidade');
+      expect(localizeUnityType('UNIT'), 'un');
       expect(localizeUnityType('Box'), 'caixa');
-      expect(localizeUnityType('LITER'), 'litro');
+      expect(localizeUnityType('LITER'), 'L');
     });
 
     test('ignora espaços ao redor', () {
-      expect(localizeUnityType('  unit  '), 'unidade');
+      expect(localizeUnityType('  unit  '), 'un');
     });
 
     test('retorna vazio para entrada vazia', () {

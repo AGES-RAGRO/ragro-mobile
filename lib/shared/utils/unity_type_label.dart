@@ -22,13 +22,17 @@ String localizeUnityType(String unityType) {
     case 'ml':
       return 'ml';
     case 'unit':
-      return 'unidade';
+    case 'un':
+      return 'un';
     case 'box':
+    case 'cx':
       return 'caixa';
     case 'liter':
-      return 'litro';
+    case 'l':
+      return 'L';
     case 'dozen':
-      return 'dúzia';
+    case 'dz':
+      return 'dz';
     default:
       return unityType;
   }
