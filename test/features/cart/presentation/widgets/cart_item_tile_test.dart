@@ -126,25 +126,22 @@ void main() {
       },
     );
 
-    testWidgets(
-      'tap fica desabilitado quando producerId vier vazio (evita URL '
-      'quebrada /producers//products/:id)',
-      (tester) async {
-        String? pushedLocation;
-        await tester.pumpWidget(
-          buildSubject(
-            item: buildItem(),
-            producerId: '',
-            onPush: (loc, _) => pushedLocation = loc,
-          ),
-        );
+    testWidgets('tap fica desabilitado quando producerId vier vazio (evita URL '
+        'quebrada /producers//products/:id)', (tester) async {
+      String? pushedLocation;
+      await tester.pumpWidget(
+        buildSubject(
+          item: buildItem(),
+          producerId: '',
+          onPush: (loc, _) => pushedLocation = loc,
+        ),
+      );
 
-        await tester.tap(find.text('Morango Orgânico'));
-        await tester.pumpAndSettle();
+      await tester.tap(find.text('Morango Orgânico'));
+      await tester.pumpAndSettle();
 
-        expect(pushedLocation, isNull);
-      },
-    );
+      expect(pushedLocation, isNull);
+    });
   });
 
   group('mutações', () {
@@ -192,13 +189,36 @@ void main() {
       },
     );
 
-    testWidgets('ícone de lixeira dispara CartItemRemoved', (tester) async {
-      await tester.pumpWidget(buildSubject(item: buildItem()));
+    testWidgets(
+      'ícone de lixeira abre confirmação e dispara CartItemRemoved ao confirmar',
+      (tester) async {
+        await tester.pumpWidget(buildSubject(item: buildItem()));
 
-      await tester.tap(find.byIcon(Icons.delete_outline));
-      await tester.pump();
+        await tester.tap(find.byIcon(Icons.delete_outline));
+        await tester.pumpAndSettle();
 
-      verify(() => bloc.add(const CartItemRemoved('item-1'))).called(1);
-    });
+        expect(find.text('Excluir'), findsOneWidget);
+
+        await tester.tap(find.text('Excluir'));
+        await tester.pumpAndSettle();
+
+        verify(() => bloc.add(const CartItemRemoved('item-1'))).called(1);
+      },
+    );
+
+    testWidgets(
+      'ícone de lixeira NÃO dispara CartItemRemoved ao cancelar',
+      (tester) async {
+        await tester.pumpWidget(buildSubject(item: buildItem()));
+
+        await tester.tap(find.byIcon(Icons.delete_outline));
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.text('Cancelar'));
+        await tester.pumpAndSettle();
+
+        verifyNever(() => bloc.add(const CartItemRemoved('item-1')));
+      },
+    );
   });
 }

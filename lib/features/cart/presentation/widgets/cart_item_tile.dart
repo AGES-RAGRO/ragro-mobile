@@ -6,13 +6,10 @@ import 'package:ragro_mobile/features/cart/domain/entities/cart_item.dart';
 import 'package:ragro_mobile/features/cart/presentation/bloc/cart_bloc.dart';
 import 'package:ragro_mobile/features/cart/presentation/bloc/cart_event.dart';
 import 'package:ragro_mobile/shared/utils/unity_type_label.dart';
+import 'package:ragro_mobile/shared/widgets/confirm_dialog.dart';
 
 class CartItemTile extends StatelessWidget {
-  const CartItemTile({
-    required this.item,
-    required this.producerId,
-    super.key,
-  });
+  const CartItemTile({required this.item, required this.producerId, super.key});
 
   final CartItem item;
   final String producerId;
@@ -182,9 +179,22 @@ class CartItemTile extends StatelessWidget {
                       const Spacer(),
                       // Delete
                       GestureDetector(
-                        onTap: () => context.read<CartBloc>().add(
-                          CartItemRemoved(item.id),
-                        ),
+                        onTap: () async {
+                          final confirmed = await ConfirmDialog.show(
+                            context: context,
+                            title: 'Tem certeza que deseja excluir ',
+                            highlight: item.productName,
+                            highlightColor: AppColors.red,
+                            trailingTitle: '?',
+                            confirmLabel: 'Excluir',
+                            confirmColor: AppColors.red,
+                          );
+                          if ((confirmed ?? false) && context.mounted) {
+                            context
+                                .read<CartBloc>()
+                                .add(CartItemRemoved(item.id));
+                          }
+                        },
                         child: const Icon(
                           Icons.delete_outline,
                           color: AppColors.red,
