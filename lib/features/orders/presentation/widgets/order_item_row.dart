@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:ragro_mobile/core/theme/app_colors.dart';
 import 'package:ragro_mobile/features/orders/domain/entities/order_item.dart';
+import 'package:ragro_mobile/shared/utils/unity_type_label.dart';
 
 class OrderItemRow extends StatelessWidget {
   const OrderItemRow({required this.item, super.key});
@@ -50,7 +51,7 @@ class OrderItemRow extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'Qtd: ${item.quantityLabel}${item.unityType}',
+                  'Qtd: ${_formatQuantity(item)}',
                   style: const TextStyle(
                     fontFamily: 'Manrope',
                     fontSize: 14,
@@ -72,5 +73,13 @@ class OrderItemRow extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  String _formatQuantity(OrderItem item) {
+    final localizedUnit = localizeUnityType(item.unityType);
+    if (localizedUnit.isEmpty) {
+      return item.quantityLabel;
+    }
+    return '${item.quantityLabel} $localizedUnit';
   }
 }

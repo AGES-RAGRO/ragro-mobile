@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:ragro_mobile/features/orders/domain/entities/order_item.dart';
 import 'package:ragro_mobile/features/orders/domain/entities/order_status.dart';
+import 'package:ragro_mobile/shared/utils/unity_type_label.dart';
 
 class ProducerBankInfo extends Equatable {
   const ProducerBankInfo({
@@ -112,9 +113,17 @@ class Order extends Equatable {
     if (items.isEmpty) return '';
     return items
             .take(3)
-            .map((i) => '${i.name} ${i.quantityLabel}${i.unityType}')
+            .map((i) => '${i.name} ${_formatQuantityWithUnit(i)}')
             .join(' | ') +
         (items.length > 3 ? ' ...' : '');
+  }
+
+  static String _formatQuantityWithUnit(OrderItem item) {
+    final localizedUnit = localizeUnityType(item.unityType);
+    if (localizedUnit.isEmpty) {
+      return item.quantityLabel;
+    }
+    return '${item.quantityLabel} $localizedUnit';
   }
 
   @override
