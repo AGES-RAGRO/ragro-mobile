@@ -28,8 +28,11 @@ class OrdersRepositoryImpl implements OrdersRepository {
   Future<Order> cancelOrder(String id) => _datasource.cancelOrder(id);
 
   @override
-  Future<void> cancelCustomerOrder(String id, {required String reason, String? details}) =>
-      _datasource.cancelCustomerOrder(id, reason: reason, details: details);
+  Future<void> cancelCustomerOrder(
+    String id, {
+    required String reason,
+    String? details,
+  }) => _datasource.cancelCustomerOrder(id, reason: reason, details: details);
 
   @override
   Future<OrderDetail> confirmCustomerDelivery(String id) =>
@@ -48,4 +51,8 @@ class OrdersRepositoryImpl implements OrdersRepository {
   @override
   Future<void> rateProducer(String orderId, int rating) =>
       _datasource.rateProducer(orderId, rating);
+
+  @override
+  Future<void> createReview(String orderId, int rating, String comment) =>
+      _datasource.createReview(orderId, rating, comment);
 }

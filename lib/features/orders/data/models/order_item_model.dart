@@ -27,7 +27,7 @@ class OrderItemModel extends OrderItem {
           json['imageS3'] as String? ??
           json['productPhoto'] as String? ??
           '',
-      quantity: quantity.toInt(),
+      quantity: quantity.toDouble(),
       unityType:
           json['unityType'] as String? ??
           json['unit'] as String? ??

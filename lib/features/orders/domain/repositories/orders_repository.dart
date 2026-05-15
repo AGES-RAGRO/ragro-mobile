@@ -8,10 +8,15 @@ abstract class OrdersRepository {
   Future<OrderDetail> getCustomerOrderById(String id);
   Future<Order> createOrderFromCart();
   Future<Order> cancelOrder(String id);
-  Future<void> cancelCustomerOrder(String id, {required String reason, String? details});
+  Future<void> cancelCustomerOrder(
+    String id, {
+    required String reason,
+    String? details,
+  });
   Future<OrderDetail> confirmCustomerDelivery(String id);
   Future<Order> updateStatus(String id, OrderStatus status);
   Future<Order> confirmOrder(String id);
   Future<Order> repeatOrder(String id);
   Future<void> rateProducer(String orderId, int rating);
+  Future<void> createReview(String orderId, int rating, String comment);
 }

@@ -175,6 +175,8 @@ import 'package:ragro_mobile/features/orders/domain/usecases/confirm_existing_or
     as _i179;
 import 'package:ragro_mobile/features/orders/domain/usecases/confirm_order.dart'
     as _i680;
+import 'package:ragro_mobile/features/orders/domain/usecases/CreateReview.dart'
+    as _i1071;
 import 'package:ragro_mobile/features/orders/domain/usecases/get_customer_order_by_id.dart'
     as _i961;
 import 'package:ragro_mobile/features/orders/domain/usecases/get_order_detail.dart'
@@ -535,6 +537,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i436.UpdateCustomerProfile>(
       () => _i436.UpdateCustomerProfile(gh<_i788.CustomerProfileRepository>()),
     );
+    gh.lazySingleton<_i1071.CreateReview>(
+      () => _i1071.CreateReview(gh<_i165.OrdersRepository>()),
+    );
     gh.lazySingleton<_i251.CancelCustomerOrder>(
       () => _i251.CancelCustomerOrder(gh<_i165.OrdersRepository>()),
     );
@@ -640,6 +645,9 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i992.ClearCart>(),
       ),
     );
+    gh.factory<_i432.RateProducerBloc>(
+      () => _i432.RateProducerBloc(gh<_i1071.CreateReview>()),
+    );
     gh.factory<_i151.HomeBloc>(
       () => _i151.HomeBloc(
         gh<_i159.GetHomeData>(),
@@ -652,9 +660,6 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i626.GetCustomerProfile>(),
         gh<_i436.UpdateCustomerProfile>(),
       ),
-    );
-    gh.factory<_i432.RateProducerBloc>(
-      () => _i432.RateProducerBloc(gh<_i907.RateProducer>()),
     );
     gh.factory<_i463.CheckoutBloc>(
       () => _i463.CheckoutBloc(gh<_i680.ConfirmOrder>(), gh<_i535.GetCart>()),

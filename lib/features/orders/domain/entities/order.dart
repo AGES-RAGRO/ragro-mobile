@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:ragro_mobile/features/orders/domain/entities/order_item.dart';
 import 'package:ragro_mobile/features/orders/domain/entities/order_status.dart';
+import 'package:ragro_mobile/shared/utils/unity_type_label.dart';
 
 class ProducerBankInfo extends Equatable {
   const ProducerBankInfo({
@@ -56,6 +57,7 @@ class Order extends Equatable {
     required this.createdAt,
     required this.deliveryAddress,
     required this.bankInfo,
+    this.avaliado = false,
   });
 
   final String id;
@@ -71,33 +73,57 @@ class Order extends Equatable {
   final DateTime createdAt;
   final DeliveryAddress deliveryAddress;
   final ProducerBankInfo bankInfo;
+  final bool avaliado;
+
+  Order copyWith({
+    String? id,
+    String? orderNumber,
+    String? producerId,
+    String? producerPhone,
+    String? farmName,
+    String? farmAvatarUrl,
+    String? ownerName,
+    List<OrderItem>? items,
+    double? totalAmount,
+    OrderStatus? status,
+    DateTime? createdAt,
+    DeliveryAddress? deliveryAddress,
+    ProducerBankInfo? bankInfo,
+    bool? avaliado,
+  }) {
+    return Order(
+      id: id ?? this.id,
+      orderNumber: orderNumber ?? this.orderNumber,
+      producerId: producerId ?? this.producerId,
+      producerPhone: producerPhone ?? this.producerPhone,
+      farmName: farmName ?? this.farmName,
+      farmAvatarUrl: farmAvatarUrl ?? this.farmAvatarUrl,
+      ownerName: ownerName ?? this.ownerName,
+      items: items ?? this.items,
+      totalAmount: totalAmount ?? this.totalAmount,
+      status: status ?? this.status,
+      createdAt: createdAt ?? this.createdAt,
+      deliveryAddress: deliveryAddress ?? this.deliveryAddress,
+      bankInfo: bankInfo ?? this.bankInfo,
+      avaliado: avaliado ?? this.avaliado,
+    );
+  }
 
   String get shortItemsPreview {
     if (items.isEmpty) return '';
     return items
             .take(3)
-            .map((i) => '${i.name} ${i.quantity} ${_localUnit(i.unityType)}')
+            .map((i) => '${i.name} ${_formatQuantityWithUnit(i)}')
             .join(' | ') +
         (items.length > 3 ? ' ...' : '');
   }
 
-  static String _localUnit(String u) {
-    switch (u.toLowerCase().trim()) {
-      case 'unit':
-      case 'un':
-        return 'un';
-      case 'box':
-      case 'cx':
-        return 'caixa';
-      case 'liter':
-      case 'l':
-        return 'L';
-      case 'dozen':
-      case 'dz':
-        return 'dz';
-      default:
-        return u;
+  static String _formatQuantityWithUnit(OrderItem item) {
+    final localizedUnit = localizeUnityType(item.unityType);
+    if (localizedUnit.isEmpty) {
+      return item.quantityLabel;
     }
+    return '${item.quantityLabel} $localizedUnit';
   }
 
   @override
@@ -115,5 +141,6 @@ class Order extends Equatable {
     createdAt,
     deliveryAddress,
     bankInfo,
+    avaliado,
   ];
 }

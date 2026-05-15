@@ -51,7 +51,7 @@ class OrderItemRow extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'Qtd: ${item.quantity} ${localizeUnityType(item.unityType)}',
+                  'Qtd: ${_formatQuantity(item)}',
                   style: const TextStyle(
                     fontFamily: 'Manrope',
                     fontSize: 14,
@@ -73,5 +73,13 @@ class OrderItemRow extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  String _formatQuantity(OrderItem item) {
+    final localizedUnit = localizeUnityType(item.unityType);
+    if (localizedUnit.isEmpty) {
+      return item.quantityLabel;
+    }
+    return '${item.quantityLabel} $localizedUnit';
   }
 }

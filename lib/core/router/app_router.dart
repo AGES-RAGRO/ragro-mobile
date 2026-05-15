@@ -95,12 +95,18 @@ class AppRouter {
                         GoRoute(
                           path: 'reviews',
                           builder: (context, state) {
-                            final extra = state.extra as Map<String, dynamic>? ?? {};
+                            final extra =
+                                state.extra as Map<String, dynamic>? ?? {};
                             return ReviewsPage(
                               producerId: state.pathParameters['producerId']!,
-                              producerName: extra['producerName'] as String? ?? '',
-                              producerLocation: extra['producerLocation'] as String? ?? '',
-                              averageRating: (extra['averageRating'] as num?)?.toDouble() ?? 0.0,
+                              producerName:
+                                  extra['producerName'] as String? ?? '',
+                              producerLocation:
+                                  extra['producerLocation'] as String? ?? '',
+                              averageRating:
+                                  (extra['averageRating'] as num?)
+                                      ?.toDouble() ??
+                                  0.0,
                               totalReviews: extra['totalReviews'] as int? ?? 0,
                             );
                           },
@@ -138,6 +144,8 @@ class AppRouter {
                                 state.uri.queryParameters['farmName'] ?? '',
                             ownerName:
                                 state.uri.queryParameters['ownerName'] ?? '',
+                            isRated:
+                                state.uri.queryParameters['isRated'] == 'true',
                           ),
                         ),
                       ],
@@ -264,8 +272,7 @@ class AppRouter {
                             state.extra as Map<String, dynamic>? ?? {};
                         return StockEntryPage(
                           productId: state.pathParameters['productId']!,
-                          productName:
-                              extra['productName'] as String? ?? '',
+                          productName: extra['productName'] as String? ?? '',
                           unit: extra['unit'] as String? ?? 'un',
                         );
                       },
@@ -280,7 +287,8 @@ class AppRouter {
                           productName: extra['productName'] as String? ?? '',
                           unit: extra['unit'] as String? ?? 'un',
                           currentStock:
-                              (extra['currentStock'] as num?)?.toDouble() ?? 0.0,
+                              (extra['currentStock'] as num?)?.toDouble() ??
+                              0.0,
                         );
                       },
                     ),
@@ -291,8 +299,7 @@ class AppRouter {
                             state.extra as Map<String, dynamic>? ?? {};
                         return StockMovementsPage(
                           productId: state.pathParameters['productId']!,
-                          productName:
-                              extra['productName'] as String? ?? '',
+                          productName: extra['productName'] as String? ?? '',
                         );
                       },
                     ),
@@ -317,12 +324,16 @@ class AppRouter {
                     GoRoute(
                       path: 'reviews',
                       builder: (context, state) {
-                        final extra = state.extra as Map<String, dynamic>? ?? {};
+                        final extra =
+                            state.extra as Map<String, dynamic>? ?? {};
                         return ReviewsPage(
                           producerId: extra['producerId'] as String? ?? '',
                           producerName: extra['producerName'] as String? ?? '',
-                          producerLocation: extra['producerLocation'] as String? ?? '',
-                          averageRating: (extra['averageRating'] as num?)?.toDouble() ?? 0.0,
+                          producerLocation:
+                              extra['producerLocation'] as String? ?? '',
+                          averageRating:
+                              (extra['averageRating'] as num?)?.toDouble() ??
+                              0.0,
                           totalReviews: extra['totalReviews'] as int? ?? 0,
                         );
                       },

@@ -139,6 +139,7 @@ class OrderDetail extends Equatable {
     required this.deliveryAddress,
     required this.actions,
     this.bankInfo,
+    this.reviewed = false,
   });
 
   final String id;
@@ -155,6 +156,7 @@ class OrderDetail extends Equatable {
   final OrderDetailAddress deliveryAddress;
   final OrderDetailActions? actions;
   final OrderDetailBankInfo? bankInfo;
+  final bool reviewed;
 
   String get displayNumber {
     if (orderNumber != null && orderNumber!.isNotEmpty) return orderNumber!;
@@ -192,6 +194,7 @@ class OrderDetail extends Equatable {
     String? status,
     String? statusLabel,
     OrderDetailActions? actions,
+    bool? reviewed,
   }) {
     return OrderDetail(
       id: id,
@@ -208,6 +211,7 @@ class OrderDetail extends Equatable {
       deliveryAddress: deliveryAddress,
       actions: actions ?? this.actions,
       bankInfo: bankInfo,
+      reviewed: reviewed ?? this.reviewed,
     );
   }
 
@@ -227,5 +231,6 @@ class OrderDetail extends Equatable {
     deliveryAddress,
     actions,
     bankInfo,
+    reviewed,
   ];
 }

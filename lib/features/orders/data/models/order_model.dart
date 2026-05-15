@@ -17,6 +17,7 @@ class OrderModel extends Order {
     required super.createdAt,
     required super.deliveryAddress,
     required super.bankInfo,
+    super.avaliado,
   });
 
   factory OrderModel.fromJson(Map<String, dynamic> json) {
@@ -39,9 +40,7 @@ class OrderModel extends Order {
       id: json['id'] as String? ?? '',
       orderNumber: json['orderNumber'] as String? ?? '',
       producerPhone:
-          json['producerPhone'] as String? ??
-          json['phone'] as String? ??
-          '',
+          json['producerPhone'] as String? ?? json['phone'] as String? ?? '',
       producerId:
           json['producerId'] as String? ??
           json['farmerId'] as String? ??
@@ -75,7 +74,41 @@ class OrderModel extends Order {
       createdAt: _parseDate(json['createdAt'] as String?),
       deliveryAddress: _parseAddress(addressJson),
       bankInfo: _parseBankInfo(bankJson),
+      avaliado: _parseRated(json),
     );
+  }
+
+  static bool _parseRated(Map<String, dynamic> json) {
+    for (final key in const [
+      'avaliado',
+      'isRated',
+      'rated',
+      'reviewed',
+      'hasReview',
+      'hasReviewed',
+      'hasRating',
+    ]) {
+      final value = json[key];
+      if (value is bool) return value;
+      if (value is String) {
+        final normalized = value.toLowerCase().trim();
+        if (normalized == 'true' || normalized == '1') return true;
+        if (normalized == 'false' || normalized == '0') return false;
+      }
+      if (value is num) return value != 0;
+    }
+
+    for (final key in const ['reviewId', 'review_id', 'ratingId']) {
+      final value = json[key];
+      if (value is String && value.trim().isNotEmpty) return true;
+      if (value != null) return true;
+    }
+
+    final review = json['review'] ?? json['rating'];
+    if (review is Map<String, dynamic>) return review.isNotEmpty;
+    if (review is List<dynamic>) return review.isNotEmpty;
+
+    return false;
   }
 
   static OrderStatus _parseStatus(String? status) {

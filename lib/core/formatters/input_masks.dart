@@ -206,15 +206,15 @@ class CurrencyInputFormatter extends TextInputFormatter {
     }
 
     double value = double.parse(digitsOnly) / 100;
-    
+
     final format = NumberFormat.currency(
       locale: 'pt_BR',
       symbol: '',
       decimalDigits: 2,
     );
-    
+
     String formatted = format.format(value).trim();
-    
+
     return TextEditingValue(
       text: formatted,
       selection: TextSelection.collapsed(offset: formatted.length),

@@ -1,7 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:ragro_mobile/core/di/injection.dart';
 import 'package:ragro_mobile/core/theme/app_colors.dart';
 import 'package:ragro_mobile/features/orders/domain/entities/order.dart';
+import 'package:ragro_mobile/features/orders/domain/entities/order_status.dart';
+import 'package:ragro_mobile/features/orders/domain/repositories/orders_repository.dart';
+import 'package:ragro_mobile/features/orders/presentation/bloc/orders_bloc.dart';
+import 'package:ragro_mobile/features/orders/presentation/bloc/orders_event.dart';
 import 'package:ragro_mobile/features/orders/presentation/widgets/order_status_badge.dart';
 
 class OrderCard extends StatelessWidget {
@@ -20,12 +26,17 @@ class OrderCard extends StatelessWidget {
 
   String get _displayNumber {
     if (order.orderNumber.isNotEmpty) return 'Pedido ${order.orderNumber}';
-    final short = order.id.length > 8 ? order.id.substring(0, 8).toUpperCase() : order.id;
+    final short = order.id.length > 8
+        ? order.id.substring(0, 8).toUpperCase()
+        : order.id;
     return 'Pedido #$short';
   }
 
   @override
   Widget build(BuildContext context) {
+    final isDelivered = order.status == OrderStatus.delivered;
+    final isRated = order.avaliado;
+
     return GestureDetector(
       onTap: () => context.push('/customer/orders/${order.id}'),
       child: Container(
@@ -45,7 +56,6 @@ class OrderCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Row 1: order number + date
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -69,8 +79,6 @@ class OrderCard extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 12),
-
-            // Row 2: avatar + farm/owner names + status badge
             Row(
               children: [
                 Container(
@@ -136,10 +144,8 @@ class OrderCard extends StatelessWidget {
                 OrderStatusBadge(status: order.status),
               ],
             ),
-
             if (order.shortItemsPreview.isNotEmpty) ...[
               const SizedBox(height: 12),
-              // Row 3: items preview
               Text(
                 order.shortItemsPreview,
                 style: const TextStyle(
@@ -151,10 +157,7 @@ class OrderCard extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
               ),
             ],
-
             const SizedBox(height: 14),
-
-            // Row 4: total + button
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               crossAxisAlignment: CrossAxisAlignment.end,
@@ -183,7 +186,8 @@ class OrderCard extends StatelessWidget {
                     ),
                   ],
                 ),
-                _VerPedidoButton(orderId: order.id),
+                if (!isDelivered || !isRated)
+                  _OrderActionButton(order: order, isDelivered: isDelivered),
               ],
             ),
           ],
@@ -193,24 +197,61 @@ class OrderCard extends StatelessWidget {
   }
 }
 
-class _VerPedidoButton extends StatelessWidget {
-  const _VerPedidoButton({required this.orderId});
+class _OrderActionButton extends StatelessWidget {
+  const _OrderActionButton({required this.order, required this.isDelivered});
 
-  final String orderId;
+  final Order order;
+  final bool isDelivered;
 
   @override
   Widget build(BuildContext context) {
+    final rateRoute = Uri(
+      path: '/customer/orders/${order.id}/rate',
+      queryParameters: {
+        'farmName': order.farmName,
+        'ownerName': order.ownerName,
+        'isRated': order.avaliado.toString(),
+      },
+    ).toString();
+
     return GestureDetector(
-      onTap: () => context.push('/customer/orders/$orderId'),
+      onTap: () async {
+        if (!isDelivered) {
+          await context.push<bool>('/customer/orders/${order.id}');
+          return;
+        }
+
+        final repository = getIt<OrdersRepository>();
+        final detail = await repository.getCustomerOrderById(order.id);
+
+        if (!context.mounted) return;
+
+        if (detail.reviewed || order.avaliado) {
+          context.read<OrdersBloc>().add(OrdersMarkedAsRated(order.id));
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Esse pedido já foi avaliado.'),
+              backgroundColor: AppColors.darkGreen,
+            ),
+          );
+          return;
+        }
+
+        final rated = await context.push<bool>(rateRoute);
+
+        if (context.mounted && (rated ?? false)) {
+          context.read<OrdersBloc>().add(const OrdersRefreshed());
+        }
+      },
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
         decoration: BoxDecoration(
           color: AppColors.darkGreen,
           borderRadius: BorderRadius.circular(22),
         ),
-        child: const Text(
-          'Ver pedido',
-          style: TextStyle(
+        child: Text(
+          isDelivered ? 'Fazer Avaliacao' : 'Ver pedido',
+          style: const TextStyle(
             fontFamily: 'Manrope',
             fontWeight: FontWeight.w700,
             fontSize: 13,
