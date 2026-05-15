@@ -24,12 +24,3 @@ class OrdersTabChanged extends OrdersEvent {
 class OrdersRefreshed extends OrdersEvent {
   const OrdersRefreshed();
 }
-
-class OrderMarkedAsRated extends OrdersEvent {
-  const OrderMarkedAsRated(this.orderId);
-
-  final String orderId;
-
-  @override
-  List<Object?> get props => [orderId];
-}

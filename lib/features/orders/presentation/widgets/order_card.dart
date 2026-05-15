@@ -219,7 +219,7 @@ class _OrderActionButton extends StatelessWidget {
         );
 
         if (context.mounted && (rated ?? false)) {
-          context.read<OrdersBloc>().add(OrderMarkedAsRated(order.id));
+          context.read<OrdersBloc>().add(const OrdersRefreshed());
         }
       },
       child: Container(

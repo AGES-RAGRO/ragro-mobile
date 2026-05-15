@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ragro_mobile/core/di/injection.dart';
 import 'package:ragro_mobile/core/theme/app_colors.dart';
+import 'package:ragro_mobile/features/orders/domain/entities/order.dart';
 import 'package:ragro_mobile/features/orders/domain/entities/order_status.dart';
 import 'package:ragro_mobile/features/orders/presentation/bloc/orders_bloc.dart';
 import 'package:ragro_mobile/features/orders/presentation/bloc/orders_event.dart';
@@ -116,14 +117,7 @@ class _OrdersViewState extends State<_OrdersView>
               ),
               tabs: _tabs.map((tab) => Tab(text: tab.$2)).toList(),
             ),
-            Expanded(
-              child: TabBarView(
-                controller: _tabController,
-                children: _tabs
-                    .map((tab) => _OrderTabContent(status: tab.$1))
-                    .toList(),
-              ),
-            ),
+            const Expanded(child: _OrdersContent()),
           ],
         ),
       ),
@@ -131,22 +125,35 @@ class _OrdersViewState extends State<_OrdersView>
   }
 }
 
-class _OrderTabContent extends StatelessWidget {
-  const _OrderTabContent({required this.status});
-
-  final OrderStatus status;
+class _OrdersContent extends StatelessWidget {
+  const _OrdersContent();
 
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<OrdersBloc, OrdersState>(
       builder: (context, state) {
-        if (state is OrdersLoading || state is OrdersInitial) {
+        if (state is OrdersInitial) {
           return const Center(
             child: CircularProgressIndicator(color: AppColors.darkGreen),
           );
         }
 
         if (state is OrdersFailure) {
+          if (state.previousOrders.isNotEmpty) {
+            final filteredOrders = _filterOrdersForTab(
+              state.previousOrders,
+              state.activeTab,
+            );
+            return Stack(
+              children: [
+                _OrdersList(orders: filteredOrders),
+                const _LoadingOverlay(
+                  message: 'Não foi possível atualizar os pedidos',
+                ),
+              ],
+            );
+          }
+
           return Center(
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -171,13 +178,33 @@ class _OrderTabContent extends StatelessWidget {
           );
         }
 
+        if (state is OrdersLoading) {
+          if (state.previousOrders.isEmpty) {
+            return const Center(
+              child: CircularProgressIndicator(color: AppColors.darkGreen),
+            );
+          }
+
+          final filteredOrders = _filterOrdersForTab(
+            state.previousOrders,
+            state.activeTab,
+          );
+          return Stack(
+            children: [
+              _OrdersList(orders: filteredOrders),
+              const _LoadingOverlay(),
+            ],
+          );
+        }
+
         if (state is! OrdersLoaded) return const SizedBox.shrink();
 
-        final orders = state.orders
-            .where((order) => order.status == status)
-            .toList();
+        final filteredOrders = _filterOrdersForTab(
+          state.orders,
+          state.activeTab,
+        );
 
-        if (orders.isEmpty) {
+        if (filteredOrders.isEmpty) {
           return Center(
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -189,7 +216,7 @@ class _OrderTabContent extends StatelessWidget {
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  'Nenhum pedido ${status.label.toLowerCase()}',
+                  'Nenhum pedido ${state.activeTab.label.toLowerCase()}',
                   style: const TextStyle(
                     fontFamily: 'Manrope',
                     fontSize: 16,
@@ -201,13 +228,83 @@ class _OrderTabContent extends StatelessWidget {
           );
         }
 
-        return ListView.separated(
-          padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
-          itemCount: orders.length,
-          separatorBuilder: (_, __) => const SizedBox(height: 13),
-          itemBuilder: (context, index) => OrderCard(order: orders[index]),
-        );
+        return _OrdersList(orders: filteredOrders);
       },
+    );
+  }
+
+  List<Order> _filterOrdersForTab(List<Order> orders, OrderStatus activeTab) {
+    return orders.where((order) => order.status == activeTab).toList();
+  }
+}
+
+class _OrdersList extends StatelessWidget {
+  const _OrdersList({required this.orders});
+
+  final List<Order> orders;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView.separated(
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+      itemCount: orders.length,
+      separatorBuilder: (_, __) => const SizedBox(height: 13),
+      itemBuilder: (context, index) => OrderCard(order: orders[index]),
+    );
+  }
+}
+
+class _LoadingOverlay extends StatelessWidget {
+  const _LoadingOverlay({this.message = 'Atualizando pedidos...'});
+
+  final String message;
+
+  @override
+  Widget build(BuildContext context) {
+    return Positioned.fill(
+      child: IgnorePointer(
+        child: Container(
+          color: Colors.white.withValues(alpha: 0.65),
+          alignment: Alignment.center,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(18),
+              boxShadow: const [
+                BoxShadow(
+                  color: Color(0x14000000),
+                  blurRadius: 18,
+                  offset: Offset(0, 6),
+                ),
+              ],
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const SizedBox(
+                  width: 24,
+                  height: 24,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2.4,
+                    color: AppColors.darkGreen,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  message,
+                  style: const TextStyle(
+                    fontFamily: 'Manrope',
+                    fontWeight: FontWeight.w600,
+                    fontSize: 13,
+                    color: AppColors.darkGreen,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

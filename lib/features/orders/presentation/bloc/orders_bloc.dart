@@ -1,5 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:injectable/injectable.dart';
+import 'package:injectable/injectable.dart' hide Order;
+import 'package:ragro_mobile/features/orders/domain/entities/order.dart';
 import 'package:ragro_mobile/features/orders/domain/entities/order_status.dart';
 import 'package:ragro_mobile/features/orders/domain/usecases/get_orders.dart';
 import 'package:ragro_mobile/features/orders/presentation/bloc/orders_event.dart';
@@ -11,24 +12,18 @@ class OrdersBloc extends Bloc<OrdersEvent, OrdersState> {
     on<OrdersStarted>(_onStarted);
     on<OrdersTabChanged>(_onTabChanged);
     on<OrdersRefreshed>(_onRefreshed);
-    on<OrderMarkedAsRated>(_onOrderMarkedAsRated);
   }
 
   final GetOrders _getOrders;
   OrderStatus _activeTab = OrderStatus.pending;
+  final Map<OrderStatus, List<Order>> _ordersCache = {};
 
   Future<void> _onStarted(
     OrdersStarted event,
     Emitter<OrdersState> emit,
   ) async {
     _activeTab = event.status;
-    emit(OrdersLoading(_activeTab));
-    try {
-      final orders = await _getOrders(status: _activeTab);
-      emit(OrdersLoaded(orders: orders, activeTab: _activeTab));
-    } on Exception catch (e) {
-      emit(OrdersFailure(e.toString()));
-    }
+    await _loadOrdersForActiveTab(emit);
   }
 
   Future<void> _onTabChanged(
@@ -36,45 +31,34 @@ class OrdersBloc extends Bloc<OrdersEvent, OrdersState> {
     Emitter<OrdersState> emit,
   ) async {
     _activeTab = event.status;
-    emit(OrdersLoading(_activeTab));
-    try {
-      final orders = await _getOrders(status: _activeTab);
-      emit(OrdersLoaded(orders: orders, activeTab: _activeTab));
-    } on Exception catch (e) {
-      emit(OrdersFailure(e.toString()));
-    }
+    await _loadOrdersForActiveTab(emit);
   }
 
   Future<void> _onRefreshed(
     OrdersRefreshed event,
     Emitter<OrdersState> emit,
   ) async {
-    emit(OrdersLoading(_activeTab));
-    try {
-      final orders = await _getOrders(status: _activeTab);
-      emit(OrdersLoaded(orders: orders, activeTab: _activeTab));
-    } on Exception catch (e) {
-      emit(OrdersFailure(e.toString()));
-    }
+    await _loadOrdersForActiveTab(emit);
   }
 
-  void _onOrderMarkedAsRated(
-    OrderMarkedAsRated event,
-    Emitter<OrdersState> emit,
-  ) {
-    final currentState = state;
-    if (currentState is! OrdersLoaded) return;
-
-    final updatedOrders = currentState.orders
-        .map(
-          (order) => order.id == event.orderId
-              ? order.copyWith(avaliado: true)
-              : order,
-        )
-        .toList();
-
-    emit(
-      OrdersLoaded(orders: updatedOrders, activeTab: currentState.activeTab),
+  Future<void> _loadOrdersForActiveTab(Emitter<OrdersState> emit) async {
+    final previousOrders = List<Order>.from(
+      _ordersCache[_activeTab] ?? const <Order>[],
     );
+    emit(OrdersLoading(_activeTab, previousOrders: previousOrders));
+
+    try {
+      final orders = await _getOrders(status: _activeTab);
+      _ordersCache[_activeTab] = orders;
+      emit(OrdersLoaded(orders: orders, activeTab: _activeTab));
+    } on Exception catch (e) {
+      emit(
+        OrdersFailure(
+          e.toString(),
+          activeTab: _activeTab,
+          previousOrders: previousOrders,
+        ),
+      );
+    }
   }
 }

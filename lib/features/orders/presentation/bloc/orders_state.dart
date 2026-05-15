@@ -13,10 +13,11 @@ class OrdersInitial extends OrdersState {
 }
 
 class OrdersLoading extends OrdersState {
-  const OrdersLoading(this.activeTab);
+  const OrdersLoading(this.activeTab, {this.previousOrders = const []});
   final OrderStatus activeTab;
+  final List<Order> previousOrders;
   @override
-  List<Object?> get props => [activeTab];
+  List<Object?> get props => [activeTab, previousOrders];
 }
 
 class OrdersLoaded extends OrdersState {
@@ -28,8 +29,14 @@ class OrdersLoaded extends OrdersState {
 }
 
 class OrdersFailure extends OrdersState {
-  const OrdersFailure(this.message);
+  const OrdersFailure(
+    this.message, {
+    required this.activeTab,
+    this.previousOrders = const [],
+  });
   final String message;
+  final OrderStatus activeTab;
+  final List<Order> previousOrders;
   @override
-  List<Object?> get props => [message];
+  List<Object?> get props => [message, activeTab, previousOrders];
 }
