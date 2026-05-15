@@ -6,5 +6,5 @@ import 'package:ragro_mobile/features/orders/domain/repositories/orders_reposito
 class ConfirmOrder {
   const ConfirmOrder(this._repository);
   final OrdersRepository _repository;
-  Future<Order> call(String cartId) => _repository.confirmOrder(cartId);
+  Future<Order> call([String? cartId]) => _repository.createOrderFromCart();
 }

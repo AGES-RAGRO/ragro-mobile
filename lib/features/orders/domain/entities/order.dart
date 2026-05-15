@@ -44,7 +44,9 @@ class DeliveryAddress extends Equatable {
 class Order extends Equatable {
   const Order({
     required this.id,
+    required this.orderNumber,
     required this.producerId,
+    required this.producerPhone,
     required this.farmName,
     required this.farmAvatarUrl,
     required this.ownerName,
@@ -54,10 +56,13 @@ class Order extends Equatable {
     required this.createdAt,
     required this.deliveryAddress,
     required this.bankInfo,
+    this.avaliado = false,
   });
 
   final String id;
+  final String orderNumber;
   final String producerId;
+  final String producerPhone;
   final String farmName;
   final String farmAvatarUrl;
   final String ownerName;
@@ -67,6 +72,7 @@ class Order extends Equatable {
   final DateTime createdAt;
   final DeliveryAddress deliveryAddress;
   final ProducerBankInfo bankInfo;
+  final bool avaliado;
 
   String get shortItemsPreview {
     if (items.isEmpty) return '';
@@ -80,7 +86,9 @@ class Order extends Equatable {
   @override
   List<Object?> get props => [
     id,
+    orderNumber,
     producerId,
+    producerPhone,
     farmName,
     farmAvatarUrl,
     ownerName,
@@ -90,5 +98,6 @@ class Order extends Equatable {
     createdAt,
     deliveryAddress,
     bankInfo,
+    avaliado,
   ];
 }

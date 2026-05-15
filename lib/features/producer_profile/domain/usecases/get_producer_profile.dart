@@ -8,6 +8,8 @@ class GetProducerProfile {
 
   final ProducerProfileRepository _repository;
 
-  Future<PublicProducer> call(String producerId) =>
-      _repository.getProducer(producerId);
+  Future<PublicProducer> call(String producerId, {bool isOwner = false}) =>
+      isOwner
+          ? _repository.getOwnProfile(producerId)
+          : _repository.getProducer(producerId);
 }

@@ -21,6 +21,15 @@ class HomeRepositoryImpl implements HomeRepository {
   }
 
   @override
-  Future<List<HomeProduct>> getRecommendedProducts() =>
-      _dataSource.getRecommendedProducts();
+  Future<({List<HomeProduct> products, bool hasMore})> getRecommendedProducts({
+    int producerPage = 0,
+  }) async {
+    final result = await _dataSource.getRecommendedProducts(
+      producerPage: producerPage,
+    );
+    return (
+      products: result.products.cast<HomeProduct>(),
+      hasMore: result.hasMore,
+    );
+  }
 }

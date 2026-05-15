@@ -1,5 +1,4 @@
 import 'package:equatable/equatable.dart';
-import 'package:ragro_mobile/features/cart/domain/entities/cart_item.dart';
 
 sealed class CartEvent extends Equatable {
   const CartEvent();
@@ -12,27 +11,35 @@ class CartStarted extends CartEvent {
 }
 
 class CartItemAdded extends CartEvent {
-  const CartItemAdded(this.item);
-  final CartItem item;
-  @override
-  List<Object?> get props => [item];
-}
-
-class CartItemQuantityUpdated extends CartEvent {
-  const CartItemQuantityUpdated(this.productId, this.quantity);
+  const CartItemAdded({required this.productId, required this.quantity});
   final String productId;
-  final int quantity;
+  final double quantity;
   @override
   List<Object?> get props => [productId, quantity];
 }
 
-class CartItemRemoved extends CartEvent {
-  const CartItemRemoved(this.productId);
-  final String productId;
+class CartItemQuantityUpdated extends CartEvent {
+  const CartItemQuantityUpdated({
+    required this.cartItemId,
+    required this.quantity,
+  });
+  final String cartItemId;
+  final double quantity;
   @override
-  List<Object?> get props => [productId];
+  List<Object?> get props => [cartItemId, quantity];
+}
+
+class CartItemRemoved extends CartEvent {
+  const CartItemRemoved(this.cartItemId);
+  final String cartItemId;
+  @override
+  List<Object?> get props => [cartItemId];
 }
 
 class CartCleared extends CartEvent {
   const CartCleared();
+}
+
+class CartOrderPlaced extends CartEvent {
+  const CartOrderPlaced();
 }

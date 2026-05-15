@@ -16,11 +16,15 @@ import 'package:ragro_mobile/features/auth/presentation/pages/login_page.dart';
 import 'package:ragro_mobile/features/cart/presentation/pages/cart_page.dart';
 import 'package:ragro_mobile/features/customer_profile/presentation/bloc/customer_profile_bloc.dart';
 import 'package:ragro_mobile/features/customer_profile/presentation/bloc/customer_profile_event.dart';
+import 'package:ragro_mobile/features/customer_profile/presentation/pages/customer_edit_address_page.dart';
 import 'package:ragro_mobile/features/customer_profile/presentation/pages/customer_edit_profile_page.dart';
 import 'package:ragro_mobile/features/customer_profile/presentation/pages/customer_profile_page.dart';
 import 'package:ragro_mobile/features/home/presentation/pages/customer_home_page.dart';
 import 'package:ragro_mobile/features/inventory/presentation/pages/inventory_page.dart';
 import 'package:ragro_mobile/features/inventory/presentation/pages/product_form_page.dart';
+import 'package:ragro_mobile/features/inventory/presentation/pages/stock_entry_page.dart';
+import 'package:ragro_mobile/features/inventory/presentation/pages/stock_exit_page.dart';
+import 'package:ragro_mobile/features/inventory/presentation/pages/stock_movements_page.dart';
 import 'package:ragro_mobile/features/orders/presentation/pages/customer_orders_page.dart';
 import 'package:ragro_mobile/features/orders/presentation/pages/order_confirmation_page.dart';
 import 'package:ragro_mobile/features/orders/presentation/pages/order_detail_page.dart';
@@ -28,10 +32,12 @@ import 'package:ragro_mobile/features/orders/presentation/pages/rate_producer_pa
 import 'package:ragro_mobile/features/producer_management/presentation/pages/producer_edit_profile_page.dart';
 import 'package:ragro_mobile/features/producer_management/presentation/pages/producer_profile_page.dart';
 import 'package:ragro_mobile/features/producer_management/presentation/pages/producer_settings_page.dart';
+import 'package:ragro_mobile/features/producer_orders/domain/entities/producer_order.dart';
 import 'package:ragro_mobile/features/producer_orders/presentation/pages/producer_order_detail_page.dart';
 import 'package:ragro_mobile/features/producer_orders/presentation/pages/producer_orders_page.dart';
 import 'package:ragro_mobile/features/producer_orders/presentation/pages/route_calculation_page.dart';
 import 'package:ragro_mobile/features/producer_profile/presentation/pages/producer_public_profile_page.dart';
+import 'package:ragro_mobile/features/producer_profile/presentation/pages/reviews_page.dart';
 import 'package:ragro_mobile/features/product_detail/presentation/pages/product_detail_page.dart';
 import 'package:ragro_mobile/features/search/presentation/pages/search_page.dart';
 import 'package:ragro_mobile/features/search/presentation/pages/search_result_page.dart';
@@ -85,6 +91,27 @@ class AppRouter {
                       builder: (context, state) => ProducerPublicProfilePage(
                         producerId: state.pathParameters['producerId']!,
                       ),
+                      routes: [
+                        GoRoute(
+                          path: 'reviews',
+                          builder: (context, state) {
+                            final extra =
+                                state.extra as Map<String, dynamic>? ?? {};
+                            return ReviewsPage(
+                              producerId: state.pathParameters['producerId']!,
+                              producerName:
+                                  extra['producerName'] as String? ?? '',
+                              producerLocation:
+                                  extra['producerLocation'] as String? ?? '',
+                              averageRating:
+                                  (extra['averageRating'] as num?)
+                                      ?.toDouble() ??
+                                  0.0,
+                              totalReviews: extra['totalReviews'] as int? ?? 0,
+                            );
+                          },
+                        ),
+                      ],
                     ),
                     GoRoute(
                       path: 'product/:productId',
@@ -117,6 +144,8 @@ class AppRouter {
                                 state.uri.queryParameters['farmName'] ?? '',
                             ownerName:
                                 state.uri.queryParameters['ownerName'] ?? '',
+                            isRated:
+                                state.uri.queryParameters['isRated'] == 'true',
                           ),
                         ),
                       ],
@@ -180,6 +209,20 @@ class AppRouter {
           path: '/customer/checkout',
           builder: (_, __) => const OrderConfirmationPage(),
         ),
+        GoRoute(
+          path: '/customer/edit-address',
+          builder: (_, __) => const CustomerEditAddressPage(),
+        ),
+
+        // Top-level producer profile (fullscreen) — used from outside the
+        // customer shell (e.g. cart). The shell-nested version at
+        // /customer/home/producer/:id keeps the bottom nav.
+        GoRoute(
+          path: '/customer/producer/:producerId',
+          builder: (context, state) => ProducerPublicProfilePage(
+            producerId: state.pathParameters['producerId']!,
+          ),
+        ),
 
         // Producer shell with 3 tabs
         StatefulShellRoute.indexedStack(
@@ -195,6 +238,7 @@ class AppRouter {
                       path: 'orders/:orderId',
                       builder: (context, state) => ProducerOrderDetailPage(
                         orderId: state.pathParameters['orderId']!,
+                        initialOrder: state.extra as ProducerOrder?,
                       ),
                     ),
                     GoRoute(
@@ -221,6 +265,44 @@ class AppRouter {
                         productId: state.pathParameters['productId'],
                       ),
                     ),
+                    GoRoute(
+                      path: ':productId/entry',
+                      builder: (context, state) {
+                        final extra =
+                            state.extra as Map<String, dynamic>? ?? {};
+                        return StockEntryPage(
+                          productId: state.pathParameters['productId']!,
+                          productName: extra['productName'] as String? ?? '',
+                          unit: extra['unit'] as String? ?? 'un',
+                        );
+                      },
+                    ),
+                    GoRoute(
+                      path: ':productId/exit',
+                      builder: (context, state) {
+                        final extra =
+                            state.extra as Map<String, dynamic>? ?? {};
+                        return StockExitPage(
+                          productId: state.pathParameters['productId']!,
+                          productName: extra['productName'] as String? ?? '',
+                          unit: extra['unit'] as String? ?? 'un',
+                          currentStock:
+                              (extra['currentStock'] as num?)?.toDouble() ??
+                              0.0,
+                        );
+                      },
+                    ),
+                    GoRoute(
+                      path: ':productId/history',
+                      builder: (context, state) {
+                        final extra =
+                            state.extra as Map<String, dynamic>? ?? {};
+                        return StockMovementsPage(
+                          productId: state.pathParameters['productId']!,
+                          productName: extra['productName'] as String? ?? '',
+                        );
+                      },
+                    ),
                   ],
                 ),
               ],
@@ -238,6 +320,23 @@ class AppRouter {
                     GoRoute(
                       path: 'settings',
                       builder: (_, __) => const ProducerSettingsPage(),
+                    ),
+                    GoRoute(
+                      path: 'reviews',
+                      builder: (context, state) {
+                        final extra =
+                            state.extra as Map<String, dynamic>? ?? {};
+                        return ReviewsPage(
+                          producerId: extra['producerId'] as String? ?? '',
+                          producerName: extra['producerName'] as String? ?? '',
+                          producerLocation:
+                              extra['producerLocation'] as String? ?? '',
+                          averageRating:
+                              (extra['averageRating'] as num?)?.toDouble() ??
+                              0.0,
+                          totalReviews: extra['totalReviews'] as int? ?? 0,
+                        );
+                      },
                     ),
                   ],
                 ),

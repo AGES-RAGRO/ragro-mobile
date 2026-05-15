@@ -2,6 +2,8 @@
 sealed class ApiException implements Exception {
   const ApiException(this.message);
   final String message;
+  @override
+  String toString() => message;
 }
 
 class UnauthorizedException extends ApiException {
@@ -17,6 +19,10 @@ class DeactivatedAccountException extends ApiException {
     super.message =
         'Sua conta está desativada. Entre em contato com o administrador.',
   ]);
+}
+
+class ForbiddenException extends ApiException {
+  const ForbiddenException([super.message = 'Sem permissão para esta ação']);
 }
 
 class NotFoundException extends ApiException {

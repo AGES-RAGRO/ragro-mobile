@@ -3,19 +3,26 @@ import 'package:injectable/injectable.dart';
 import 'package:ragro_mobile/core/network/api_exception.dart';
 import 'package:ragro_mobile/features/home/domain/usecases/get_home_data.dart';
 import 'package:ragro_mobile/features/home/domain/usecases/get_producers.dart';
+import 'package:ragro_mobile/features/home/domain/usecases/get_recommended_products.dart';
 import 'package:ragro_mobile/features/home/presentation/bloc/home_event.dart';
 import 'package:ragro_mobile/features/home/presentation/bloc/home_state.dart';
 
 @injectable
 class HomeBloc extends Bloc<HomeEvent, HomeState> {
-  HomeBloc(this._getHomeData, this._getProducers) : super(const HomeInitial()) {
+  HomeBloc(
+    this._getHomeData,
+    this._getProducers,
+    this._getRecommendedProducts,
+  ) : super(const HomeInitial()) {
     on<HomeStarted>(_onStarted);
     on<HomeRefreshed>(_onStarted);
     on<HomeLoadMoreProducers>(_onLoadMoreProducers);
+    on<HomeLoadMoreProducts>(_onLoadMoreProducts);
   }
 
   final GetHomeData _getHomeData;
   final GetProducers _getProducers;
+  final GetRecommendedProducts _getRecommendedProducts;
 
   Future<void> _onStarted(HomeEvent event, Emitter<HomeState> emit) async {
     emit(const HomeLoading());
@@ -27,6 +34,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
           products: data.products,
           currentProducersPage: data.producers.page,
           hasMoreProducers: data.producers.page < data.producers.totalPages - 1,
+          hasMoreProducts: data.hasMoreProducts,
         ),
       );
     } on ApiException catch (e) {
@@ -50,20 +58,49 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     emit(currentState.copyWith(isFetchingMoreProducers: true));
 
     try {
-      final response = await _getProducers(
-        page: currentState.currentProducersPage + 1,
-      );
+      final nextPage = currentState.currentProducersPage + 1;
+      final response = await _getProducers(page: nextPage);
 
       emit(
         currentState.copyWith(
           producers: [...currentState.producers, ...response.content],
-          currentProducersPage: response.page,
-          hasMoreProducers: response.page < response.totalPages - 1,
+          currentProducersPage: nextPage,
+          hasMoreProducers: nextPage < response.totalPages - 1,
           isFetchingMoreProducers: false,
         ),
       );
     } on Object {
       emit(currentState.copyWith(isFetchingMoreProducers: false));
+    }
+  }
+
+  Future<void> _onLoadMoreProducts(
+    HomeLoadMoreProducts event,
+    Emitter<HomeState> emit,
+  ) async {
+    final currentState = state;
+    if (currentState is! HomeLoaded ||
+        !currentState.hasMoreProducts ||
+        currentState.isFetchingMoreProducts) {
+      return;
+    }
+
+    emit(currentState.copyWith(isFetchingMoreProducts: true));
+
+    try {
+      final nextPage = currentState.currentProductsProducerPage + 1;
+      final result = await _getRecommendedProducts(producerPage: nextPage);
+
+      emit(
+        currentState.copyWith(
+          products: [...currentState.products, ...result.products],
+          currentProductsProducerPage: nextPage,
+          hasMoreProducts: result.hasMore,
+          isFetchingMoreProducts: false,
+        ),
+      );
+    } on Object {
+      emit(currentState.copyWith(isFetchingMoreProducts: false));
     }
   }
 }

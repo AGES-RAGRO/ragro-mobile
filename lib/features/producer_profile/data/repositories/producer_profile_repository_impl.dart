@@ -16,10 +16,14 @@ class ProducerProfileRepositoryImpl implements ProducerProfileRepository {
       _dataSource.getProducer(producerId);
 
   @override
+  Future<PublicProducer> getOwnProfile(String producerId) =>
+      _dataSource.getOwnProfile(producerId);
+
+  @override
   Future<void> updateProducer({
     required String producerId,
     required String name,
-    required String story,
+    required String description,
     required String phone,
     required String farmName,
     Map<String, dynamic>? address,
@@ -28,9 +32,9 @@ class ProducerProfileRepositoryImpl implements ProducerProfileRepository {
   }) {
     final request = ProducerUpdateRequest(
       name: name.trim(),
-      story: story.trim(),
       phone: phone.trim(),
       farmName: farmName.trim(),
+      description: description.trim(),
       address: address,
       paymentMethods: paymentMethods,
       availability: availability,

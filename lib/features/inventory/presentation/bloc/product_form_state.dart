@@ -16,10 +16,11 @@ class ProductFormLoading extends ProductFormState {
 }
 
 class ProductFormReady extends ProductFormState {
-  const ProductFormReady({this.product});
+  const ProductFormReady({this.product, this.availableCategories = const []});
   final InventoryProduct? product;
+  final List<Map<String, dynamic>> availableCategories;
   @override
-  List<Object?> get props => [product];
+  List<Object?> get props => [product, availableCategories];
 }
 
 class ProductFormSuccess extends ProductFormState {

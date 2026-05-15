@@ -7,17 +7,19 @@ class SearchResultTile extends StatelessWidget {
   const SearchResultTile({
     required this.result,
     required this.onTap,
+    this.onAddToCart,
     super.key,
   });
 
   final SearchResult result;
   final VoidCallback onTap;
+  final VoidCallback? onAddToCart;
 
   @override
   Widget build(BuildContext context) {
     return result.type == SearchResultType.producer
         ? ProducerTile(result: result, onTap: onTap)
-        : ProductTile(result: result, onTap: onTap);
+        : ProductTile(result: result, onTap: onTap, onAddToCart: onAddToCart);
   }
 }
 

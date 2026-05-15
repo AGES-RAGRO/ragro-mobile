@@ -19,129 +19,143 @@ class OrderCard extends StatelessWidget {
     return '$d/$m/$y, ${h}h$min';
   }
 
-  String _formatPrice(double price) =>
-      'R\$ ${price.toStringAsFixed(2).replaceAll('.', ',')}';
+  String get _displayNumber {
+    if (order.orderNumber.isNotEmpty) return 'Pedido ${order.orderNumber}';
+    final short = order.id.length > 8
+        ? order.id.substring(0, 8).toUpperCase()
+        : order.id;
+    return 'Pedido #$short';
+  }
 
   @override
   Widget build(BuildContext context) {
     final isDelivered = order.status == OrderStatus.delivered;
-    final rateRoute = Uri(
-      path: '/customer/orders/${order.id}/rate',
-      queryParameters: {
-        'farmName': order.farmName,
-        'ownerName': order.ownerName,
-      },
-    ).toString();
-    return Container(
-      height: 156,
-      decoration: BoxDecoration(
-        color: const Color(0xFFF4F4F4),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Stack(
-        children: [
-          // Order number (top-left)
-          Positioned(
-            top: 8,
-            left: 8,
-            child: Text(
-              'Pedido #${order.id}',
-              style: const TextStyle(
-                fontFamily: 'Manrope',
-                fontWeight: FontWeight.w500,
-                fontSize: 12,
-                color: AppColors.placeholder,
-              ),
+    final isRated = order.avaliado;
+
+    return GestureDetector(
+      onTap: () => context.push('/customer/orders/${order.id}'),
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: const Color(0xFFEEF2EE)),
+          boxShadow: const [
+            BoxShadow(
+              color: Color(0x0A000000),
+              blurRadius: 8,
+              offset: Offset(0, 2),
             ),
-          ),
-          // Date (top-right)
-          Positioned(
-            top: 8,
-            right: 8,
-            child: Text(
-              _formatDate(order.createdAt),
-              style: const TextStyle(
-                fontFamily: 'Manrope',
-                fontWeight: FontWeight.w500,
-                fontSize: 10,
-                color: AppColors.black,
-              ),
-            ),
-          ),
-          // Status badge
-          Positioned(
-            top: 28,
-            right: 8,
-            child: OrderStatusBadge(status: order.status),
-          ),
-          // Producer info
-          Positioned(
-            top: 27,
-            left: 8,
-            child: Row(
+          ],
+        ),
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                CircleAvatar(
-                  radius: 17,
-                  backgroundColor: AppColors.lightGreen.withValues(alpha: 0.2),
-                  backgroundImage: order.farmAvatarUrl.isNotEmpty
-                      ? NetworkImage(order.farmAvatarUrl)
-                      : null,
-                  child: order.farmAvatarUrl.isEmpty
-                      ? const Icon(
-                          Icons.storefront,
-                          size: 16,
-                          color: AppColors.lightGreen,
-                        )
-                      : null,
+                Text(
+                  _displayNumber,
+                  style: const TextStyle(
+                    fontFamily: 'Manrope',
+                    fontWeight: FontWeight.w600,
+                    fontSize: 13,
+                    color: AppColors.darkGreen,
+                  ),
                 ),
-                const SizedBox(width: 8),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      order.farmName,
-                      style: const TextStyle(
-                        fontFamily: 'Manrope',
-                        fontWeight: FontWeight.w700,
-                        fontSize: 14,
-                      ),
-                    ),
-                    Text(
-                      order.ownerName,
-                      style: const TextStyle(
-                        fontFamily: 'Manrope',
-                        fontWeight: FontWeight.w200,
-                        fontSize: 12,
-                      ),
-                    ),
-                  ],
+                Text(
+                  _formatDate(order.createdAt),
+                  style: const TextStyle(
+                    fontFamily: 'Manrope',
+                    fontSize: 11,
+                    color: AppColors.placeholder,
+                  ),
                 ),
               ],
             ),
-          ),
-          // Items preview
-          Positioned(
-            top: 75,
-            left: 8,
-            right: 8,
-            child: Text(
-              order.shortItemsPreview,
-              style: const TextStyle(
-                fontFamily: 'Manrope',
-                fontSize: 14,
-                color: AppColors.black,
-              ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Container(
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: AppColors.lightGreen.withValues(alpha: 0.15),
+                  ),
+                  clipBehavior: Clip.antiAlias,
+                  child: order.farmAvatarUrl.isNotEmpty
+                      ? Image.network(
+                          order.farmAvatarUrl,
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, __, ___) => const Center(
+                            child: Icon(
+                              Icons.storefront,
+                              size: 20,
+                              color: AppColors.lightGreen,
+                            ),
+                          ),
+                        )
+                      : const Center(
+                          child: Icon(
+                            Icons.storefront,
+                            size: 20,
+                            color: AppColors.lightGreen,
+                          ),
+                        ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        order.farmName,
+                        style: const TextStyle(
+                          fontFamily: 'Manrope',
+                          fontWeight: FontWeight.w700,
+                          fontSize: 15,
+                          color: AppColors.black,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      if (order.ownerName.isNotEmpty)
+                        Text(
+                          order.ownerName,
+                          style: const TextStyle(
+                            fontFamily: 'Manrope',
+                            fontWeight: FontWeight.w400,
+                            fontSize: 12,
+                            color: AppColors.placeholder,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 8),
+                OrderStatusBadge(status: order.status),
+              ],
             ),
-          ),
-          // Bottom row: total + button
-          Positioned(
-            bottom: 8,
-            left: 8,
-            right: 8,
-            child: Row(
+            if (order.shortItemsPreview.isNotEmpty) ...[
+              const SizedBox(height: 12),
+              Text(
+                order.shortItemsPreview,
+                style: const TextStyle(
+                  fontFamily: 'Manrope',
+                  fontSize: 13,
+                  color: AppColors.black,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
+            const SizedBox(height: 14),
+            Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -149,50 +163,71 @@ class OrderCard extends StatelessWidget {
                     const Text(
                       'Total do Pedido',
                       style: TextStyle(
-                        fontFamily: 'Figtree',
-                        fontWeight: FontWeight.w300,
+                        fontFamily: 'Manrope',
+                        fontWeight: FontWeight.w400,
                         fontSize: 12,
+                        color: AppColors.placeholder,
                       ),
                     ),
+                    const SizedBox(height: 2),
                     Text(
-                      _formatPrice(order.totalAmount),
+                      'R\$ ${order.totalAmount.toStringAsFixed(2).replaceAll('.', ',')}',
                       style: const TextStyle(
-                        fontFamily: 'Figtree',
+                        fontFamily: 'Manrope',
                         fontWeight: FontWeight.w700,
-                        fontSize: 12,
+                        fontSize: 15,
                         color: AppColors.darkGreen,
                       ),
                     ),
                   ],
                 ),
-                GestureDetector(
-                  onTap: () => context.push(
-                    isDelivered ? rateRoute : '/customer/orders/${order.id}',
-                  ),
-                  child: Container(
-                    height: 30,
-                    padding: const EdgeInsets.symmetric(horizontal: 10),
-                    decoration: BoxDecoration(
-                      color: AppColors.darkGreen,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Center(
-                      child: Text(
-                        isDelivered ? 'Fazer Avaliacao' : 'Ver pedido',
-                        style: const TextStyle(
-                          fontFamily: 'Manrope',
-                          fontWeight: FontWeight.w700,
-                          fontSize: 14,
-                          color: AppColors.white,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
+                if (!isDelivered || !isRated)
+                  _OrderActionButton(order: order, isDelivered: isDelivered),
               ],
             ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _OrderActionButton extends StatelessWidget {
+  const _OrderActionButton({required this.order, required this.isDelivered});
+
+  final Order order;
+  final bool isDelivered;
+
+  @override
+  Widget build(BuildContext context) {
+    final rateRoute = Uri(
+      path: '/customer/orders/${order.id}/rate',
+      queryParameters: {
+        'farmName': order.farmName,
+        'ownerName': order.ownerName,
+        'isRated': order.avaliado.toString(),
+      },
+    ).toString();
+
+    return GestureDetector(
+      onTap: () => context.push(
+        isDelivered ? rateRoute : '/customer/orders/${order.id}',
+      ),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+        decoration: BoxDecoration(
+          color: AppColors.darkGreen,
+          borderRadius: BorderRadius.circular(22),
+        ),
+        child: Text(
+          isDelivered ? 'Fazer Avaliacao' : 'Ver pedido',
+          style: const TextStyle(
+            fontFamily: 'Manrope',
+            fontWeight: FontWeight.w700,
+            fontSize: 13,
+            color: Colors.white,
           ),
-        ],
+        ),
       ),
     );
   }

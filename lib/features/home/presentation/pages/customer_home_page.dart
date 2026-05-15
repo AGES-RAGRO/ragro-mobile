@@ -8,6 +8,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:ragro_mobile/core/di/injection.dart';
 import 'package:ragro_mobile/core/theme/app_colors.dart';
+import 'package:ragro_mobile/features/cart/presentation/bloc/cart_bloc.dart';
+import 'package:ragro_mobile/features/cart/presentation/bloc/cart_event.dart';
 import 'package:ragro_mobile/features/home/domain/entities/producer.dart';
 import 'package:ragro_mobile/features/home/presentation/bloc/home_bloc.dart';
 import 'package:ragro_mobile/features/home/presentation/bloc/home_event.dart';
@@ -27,8 +29,36 @@ class CustomerHomePage extends StatelessWidget {
   }
 }
 
-class _CustomerHomeView extends StatelessWidget {
+class _CustomerHomeView extends StatefulWidget {
   const _CustomerHomeView();
+
+  @override
+  State<_CustomerHomeView> createState() => _CustomerHomeViewState();
+}
+
+class _CustomerHomeViewState extends State<_CustomerHomeView> {
+  final _scrollController = ScrollController();
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_onScroll);
+  }
+
+  @override
+  void dispose() {
+    _scrollController
+      ..removeListener(_onScroll)
+      ..dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    final pos = _scrollController.position;
+    if (pos.pixels >= pos.maxScrollExtent - 300) {
+      context.read<HomeBloc>().add(const HomeLoadMoreProducts());
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -44,6 +74,7 @@ class _CustomerHomeView extends StatelessWidget {
                   context.read<HomeBloc>().add(const HomeRefreshed());
                 },
                 child: CustomScrollView(
+                  controller: _scrollController,
                   slivers: [
                     const SliverToBoxAdapter(
                       child: Padding(
@@ -71,12 +102,16 @@ class _CustomerHomeView extends StatelessWidget {
                     SliverToBoxAdapter(
                       child: ProductsGrid(
                         products: products,
+                        isLoadingMore: state.isFetchingMoreProducts,
                         onProductTap: (p) => context.push(
                           '/customer/home/product/${p.id}',
                           extra: p.producerId,
                         ),
-                        onAddToCart: (_) {
-                          // TODO(eduardo): navigate to cart / add to cart
+                        onAddToCart: (product) {
+                          getIt<CartBloc>().add(
+                            CartItemAdded(productId: product.id, quantity: 1),
+                          );
+                          context.push('/customer/cart');
                         },
                       ),
                     ),

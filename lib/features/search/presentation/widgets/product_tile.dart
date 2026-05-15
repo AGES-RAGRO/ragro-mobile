@@ -3,10 +3,16 @@ import 'package:ragro_mobile/core/theme/app_colors.dart';
 import 'package:ragro_mobile/features/search/domain/entities/search_result.dart';
 
 class ProductTile extends StatelessWidget {
-  const ProductTile({required this.result, required this.onTap, super.key});
+  const ProductTile({
+    required this.result,
+    required this.onTap,
+    this.onAddToCart,
+    super.key,
+  });
 
   final SearchResult result;
   final VoidCallback onTap;
+  final VoidCallback? onAddToCart;
 
   @override
   Widget build(BuildContext context) {
@@ -90,7 +96,7 @@ class ProductTile extends StatelessWidget {
                           ),
                         ),
                       const Spacer(),
-                      const _CartButton(),
+                      _CartButton(onTap: onAddToCart),
                     ],
                   ),
                 ],
@@ -133,21 +139,27 @@ class _ProductImage extends StatelessWidget {
 }
 
 class _CartButton extends StatelessWidget {
-  const _CartButton();
+  const _CartButton({this.onTap});
+
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: 38,
-      height: 38,
-      decoration: BoxDecoration(
-        color: AppColors.darkGreen,
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: const Icon(
-        Icons.add_shopping_cart_outlined,
-        color: AppColors.white,
-        size: 18,
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: onTap,
+      child: Container(
+        width: 38,
+        height: 38,
+        decoration: BoxDecoration(
+          color: AppColors.darkGreen,
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: const Icon(
+          Icons.add_shopping_cart_outlined,
+          color: AppColors.white,
+          size: 18,
+        ),
       ),
     );
   }

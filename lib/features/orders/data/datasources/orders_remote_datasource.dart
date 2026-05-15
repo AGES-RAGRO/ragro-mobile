@@ -4,8 +4,10 @@ import 'package:ragro_mobile/core/network/api_client.dart';
 import 'package:ragro_mobile/core/network/api_endpoints.dart';
 import 'package:ragro_mobile/core/network/api_exception.dart';
 import 'package:ragro_mobile/features/orders/data/models/create_review_request.dart';
+import 'package:ragro_mobile/features/orders/data/models/order_detail_model.dart';
+import 'package:ragro_mobile/features/orders/data/models/order_model.dart';
 import 'package:ragro_mobile/features/orders/domain/entities/order.dart';
-import 'package:ragro_mobile/features/orders/domain/entities/order_item.dart';
+import 'package:ragro_mobile/features/orders/domain/entities/order_detail.dart';
 import 'package:ragro_mobile/features/orders/domain/entities/order_status.dart';
 
 @lazySingleton
@@ -16,19 +18,14 @@ class OrdersRemoteDatasource {
 
   Future<List<Order>> getOrders({OrderStatus? status}) async {
     try {
-      final response = await _apiClient.dio.get<List<dynamic>>(
+      final response = await _apiClient.dio.get<dynamic>(
         ApiEndpoints.consumerOrders,
+        queryParameters: {
+          if (status != null) 'status': _statusQueryValue(status),
+        },
       );
 
-      final orders = (response.data ?? const [])
-          .map((json) => _mapOrder(json as Map<String, dynamic>))
-          .toList();
-
-      if (status == null) {
-        return orders;
-      }
-
-      return orders.where((order) => order.status == status).toList();
+      return _readList(response.data).map(OrderModel.fromJson).toList();
     } on DioException catch (e) {
       throw e.error as ApiException? ?? const UnknownApiException();
     }
@@ -39,18 +36,119 @@ class OrdersRemoteDatasource {
       final response = await _apiClient.dio.get<Map<String, dynamic>>(
         ApiEndpoints.customerOrder(id),
       );
-      return _mapOrder(response.data ?? const <String, dynamic>{});
+
+      return OrderModel.fromJson(response.data!);
     } on DioException catch (e) {
       throw e.error as ApiException? ?? const UnknownApiException();
     }
   }
 
-  Future<Order> confirmOrder(String cartId) async {
+  Future<OrderDetail> getCustomerOrderById(String id) async {
+    try {
+      final response = await _apiClient.dio.get<Map<String, dynamic>>(
+        ApiEndpoints.customerOrder(id),
+      );
+
+      return OrderDetailModel.fromJson(response.data!);
+    } on DioException catch (e) {
+      throw e.error as ApiException? ?? const UnknownApiException();
+    }
+  }
+
+  Future<Order> createOrderFromCart() async {
     try {
       final response = await _apiClient.dio.post<Map<String, dynamic>>(
         ApiEndpoints.orders,
       );
-      return _mapProducerOrder(response.data ?? const <String, dynamic>{});
+
+      return OrderModel.fromJson(response.data!);
+    } on DioException catch (e) {
+      throw e.error as ApiException? ?? const UnknownApiException();
+    }
+  }
+
+  Future<Order> cancelOrder(String id) async {
+    try {
+      final response = await _apiClient.dio.patch<Map<String, dynamic>>(
+        ApiEndpoints.orderCancel(id),
+      );
+
+      return OrderModel.fromJson(response.data!);
+    } on DioException catch (e) {
+      throw e.error as ApiException? ?? const UnknownApiException();
+    }
+  }
+
+  Future<void> cancelCustomerOrder(
+    String id, {
+    required String reason,
+    String? details,
+  }) async {
+    try {
+      await _apiClient.dio.patch<void>(
+        ApiEndpoints.orderCancel(id),
+        data: {'reason': reason, if (details != null) 'details': details},
+      );
+    } on DioException catch (e) {
+      throw e.error as ApiException? ?? const UnknownApiException();
+    }
+  }
+
+  Future<OrderDetail> confirmCustomerDelivery(String id) async {
+    try {
+      final response = await _apiClient.dio.patch<Map<String, dynamic>>(
+        ApiEndpoints.customerOrderConfirmDelivery(id),
+      );
+
+      return OrderDetailModel.fromJson(response.data!);
+    } on DioException catch (e) {
+      throw e.error as ApiException? ?? const UnknownApiException();
+    }
+  }
+
+  Future<Order> updateStatus(String id, OrderStatus status) async {
+    try {
+      final response = await _apiClient.dio.patch<Map<String, dynamic>>(
+        ApiEndpoints.orderStatus(id),
+        data: {'status': _statusQueryValue(status)},
+      );
+
+      return OrderModel.fromJson(response.data!);
+    } on DioException catch (e) {
+      throw e.error as ApiException? ?? const UnknownApiException();
+    }
+  }
+
+  Future<Order> confirmOrder(String id) async {
+    try {
+      final response = await _apiClient.dio.patch<Map<String, dynamic>>(
+        ApiEndpoints.orderConfirm(id),
+      );
+
+      return OrderModel.fromJson(response.data!);
+    } on DioException catch (e) {
+      throw e.error as ApiException? ?? const UnknownApiException();
+    }
+  }
+
+  Future<Order> repeatOrder(String id) async {
+    try {
+      final response = await _apiClient.dio.post<Map<String, dynamic>>(
+        ApiEndpoints.orderRepeat(id),
+      );
+
+      return OrderModel.fromJson(response.data!);
+    } on DioException catch (e) {
+      throw e.error as ApiException? ?? const UnknownApiException();
+    }
+  }
+
+  Future<void> rateProducer(String orderId, int rating) async {
+    try {
+      await _apiClient.dio.post<void>(
+        ApiEndpoints.orderRating(orderId),
+        data: {'rating': rating},
+      );
     } on DioException catch (e) {
       throw e.error as ApiException? ?? const UnknownApiException();
     }
@@ -72,124 +170,28 @@ class OrdersRemoteDatasource {
     }
   }
 
-  Order _mapOrder(Map<String, dynamic> json) {
-    final producerName = (json['producerName'] as String? ?? '').trim();
-    final itemsJson = json['items'] as List<dynamic>? ?? const [];
-    final items = itemsJson
-        .map((item) => _mapOrderItem(item as Map<String, dynamic>))
-        .toList();
-
-    return Order(
-      id: (json['id'] ?? '').toString(),
-      producerId: (json['producerId'] ?? '').toString(),
-      farmName: producerName,
-      farmAvatarUrl: (json['producerPicture'] as String? ?? '').trim(),
-      ownerName: producerName,
-      items: items,
-      totalAmount: _asDouble(json['totalAmount'] ?? json['price']),
-      status: _mapOrderStatus(json['status'] as String?),
-      createdAt:
-          DateTime.tryParse(json['createdAt'] as String? ?? '') ??
-          DateTime.now(),
-      deliveryAddress: _mapDeliveryAddress(
-        json['deliveryAddress'] as Map<String, dynamic>?,
-      ),
-      bankInfo: const ProducerBankInfo(
-        bank: '',
-        agency: '',
-        account: '',
-        pixKey: '',
-      ),
-    );
-  }
-
-  Order _mapProducerOrder(Map<String, dynamic> json) {
-    final farmerName = (json['farmerName'] as String? ?? '').trim();
-    final itemsJson = json['items'] as List<dynamic>? ?? const [];
-    final items = itemsJson
-        .map((item) => _mapOrderItem(item as Map<String, dynamic>))
-        .toList();
-
-    return Order(
-      id: (json['id'] ?? '').toString(),
-      producerId: (json['farmerId'] ?? '').toString(),
-      farmName: farmerName,
-      farmAvatarUrl: '',
-      ownerName: farmerName,
-      items: items,
-      totalAmount: _asDouble(json['totalAmount']),
-      status: _mapOrderStatus(json['status'] as String?),
-      createdAt:
-          DateTime.tryParse(json['createdAt'] as String? ?? '') ??
-          DateTime.now(),
-      deliveryAddress: _mapDeliveryAddress(
-        json['deliveryAddress'] as Map<String, dynamic>?,
-      ),
-      bankInfo: const ProducerBankInfo(
-        bank: '',
-        agency: '',
-        account: '',
-        pixKey: '',
-      ),
-    );
-  }
-
-  OrderItem _mapOrderItem(Map<String, dynamic> json) {
-    return OrderItem(
-      productId: (json['productId'] ?? '').toString(),
-      name: (json['productName'] as String? ?? '').trim(),
-      imageUrl: (json['productPhoto'] as String? ?? '').trim(),
-      quantity: _asDouble(json['quantity']),
-      unityType: (json['unityType'] as String? ?? '').trim(),
-      totalPrice: _asDouble(json['subtotal']),
-    );
-  }
-
-  DeliveryAddress _mapDeliveryAddress(Map<String, dynamic>? json) {
-    final data = json ?? const <String, dynamic>{};
-    return DeliveryAddress(
-      street: _joinNonBlank([
-        data['street']?.toString(),
-        data['number']?.toString(),
-        data['complement']?.toString(),
-      ]),
-      neighborhood: (data['neighborhood'] as String? ?? '').trim(),
-      city: (data['city'] as String? ?? '').trim(),
-      state: (data['state'] as String? ?? '').trim(),
-      zipCode: (data['zipCode'] as String? ?? '').trim(),
-    );
-  }
-
-  OrderStatus _mapOrderStatus(String? rawStatus) {
-    switch ((rawStatus ?? '').toUpperCase()) {
-      case 'PENDING':
-        return OrderStatus.pending;
-      case 'CONFIRMED':
-      case 'IN_DELIVERY':
-        return OrderStatus.accepted;
-      case 'DELIVERED':
-        return OrderStatus.delivered;
-      case 'CANCELLED':
-        return OrderStatus.cancelled;
-      default:
-        return OrderStatus.pending;
+  List<Map<String, dynamic>> _readList(dynamic data) {
+    if (data is List<dynamic>) {
+      return data.whereType<Map<String, dynamic>>().toList();
     }
+    if (data is Map<String, dynamic>) {
+      for (final key in const [
+        'data',
+        'content',
+        'items',
+        'orders',
+        'result',
+        'list',
+      ]) {
+        if (data[key] is List<dynamic>) {
+          return (data[key] as List<dynamic>)
+              .whereType<Map<String, dynamic>>()
+              .toList();
+        }
+      }
+    }
+    return const [];
   }
 
-  double _asDouble(dynamic value) {
-    if (value is num) {
-      return value.toDouble();
-    }
-    if (value is String) {
-      return double.tryParse(value) ?? 0;
-    }
-    return 0;
-  }
-
-  String _joinNonBlank(List<String?> parts) {
-    return parts
-        .where((part) => part != null && part.trim().isNotEmpty)
-        .map((part) => part!.trim())
-        .join(', ');
-  }
+  String _statusQueryValue(OrderStatus status) => status.backendValue;
 }

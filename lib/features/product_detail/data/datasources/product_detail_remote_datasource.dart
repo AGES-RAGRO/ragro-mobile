@@ -16,10 +16,30 @@ class ProductDetailRemoteDataSource {
     String producerId = '',
   }) async {
     try {
-      final response = await _apiClient.dio.get<Map<String, dynamic>>(
-        ApiEndpoints.producerProduct(producerId, productId),
+      final endpoint = producerId.isNotEmpty
+          ? ApiEndpoints.producerProduct(producerId, productId)
+          : ApiEndpoints.product(productId);
+
+      // Fetch product and producer profile in parallel when producerId is known
+      final futures = [
+        _apiClient.dio.get<Map<String, dynamic>>(endpoint),
+        if (producerId.isNotEmpty)
+          _apiClient.dio.get<Map<String, dynamic>>(
+            ApiEndpoints.producerPublicProfile(producerId),
+          ),
+      ];
+
+      final results = await Future.wait(futures);
+      final productData = (results[0] as dynamic).data as Map<String, dynamic>;
+      final producerData = results.length > 1
+          ? (results[1] as dynamic).data as Map<String, dynamic>?
+          : null;
+
+      return ProductDetailModel.fromJson(
+        productData,
+        farmName: producerData?['farmName'] as String? ?? '',
+        producerName: producerData?['name'] as String? ?? '',
       );
-      return ProductDetailModel.fromJson(response.data!);
     } on DioException catch (e) {
       throw e.error as ApiException? ?? const UnknownApiException();
     }

@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:ragro_mobile/core/di/injection.dart';
+import 'package:ragro_mobile/core/formatters/input_masks.dart';
+import 'package:ragro_mobile/core/services/cep_service.dart';
 import 'package:ragro_mobile/core/theme/app_colors.dart';
 import 'package:ragro_mobile/features/customer_profile/presentation/bloc/customer_profile_bloc.dart';
 import 'package:ragro_mobile/features/customer_profile/presentation/bloc/customer_profile_event.dart';
@@ -42,6 +46,7 @@ class _CustomerEditProfilePageState extends State<CustomerEditProfilePage> {
     _neighborhoodController = TextEditingController();
     _cityController = TextEditingController();
     _stateController = TextEditingController();
+    _zipCodeController.addListener(_onZipCodeChanged);
 
     _hydrateControllers(context.read<CustomerProfileBloc>().state);
   }
@@ -149,8 +154,9 @@ class _CustomerEditProfilePageState extends State<CustomerEditProfilePage> {
                           label: 'Telefone',
                           controller: _phoneController,
                           icon: Icons.phone_outlined,
-                          hint: '51999999999',
+                          hint: '(XX) XXXXX-XXXX',
                           keyboardType: TextInputType.phone,
+                          inputFormatters: [PhoneInputFormatter()],
                           validator: (value) {
                             final digits = (value ?? '').replaceAll(
                               RegExp(r'\D'),
@@ -168,8 +174,9 @@ class _CustomerEditProfilePageState extends State<CustomerEditProfilePage> {
                           label: 'CEP',
                           controller: _zipCodeController,
                           icon: Icons.markunread_mailbox_outlined,
-                          hint: '90010120',
+                          hint: '00000-000',
                           keyboardType: TextInputType.number,
+                          inputFormatters: [CepInputFormatter()],
                           validator: (value) {
                             final digits = (value ?? '').replaceAll(
                               RegExp(r'\D'),
@@ -203,6 +210,7 @@ class _CustomerEditProfilePageState extends State<CustomerEditProfilePage> {
                           controller: _complementController,
                           icon: Icons.apartment_outlined,
                           hint: 'Apto 42',
+                          validator: _requiredValidator,
                         ),
                         const SizedBox(height: 24),
                         _buildField(
@@ -210,6 +218,7 @@ class _CustomerEditProfilePageState extends State<CustomerEditProfilePage> {
                           controller: _neighborhoodController,
                           icon: Icons.location_city_outlined,
                           hint: 'Centro',
+                          validator: _requiredValidator,
                         ),
                         const SizedBox(height: 24),
                         _buildField(
@@ -336,8 +345,8 @@ class _CustomerEditProfilePageState extends State<CustomerEditProfilePage> {
     final address = profile.primaryAddress;
     _nameController.text = profile.name;
     _emailController.text = profile.email;
-    _phoneController.text = profile.phone;
-    _zipCodeController.text = address?.zipCode ?? '';
+    _phoneController.text = PhoneInputFormatter.apply(profile.phone);
+    _zipCodeController.text = CepInputFormatter.apply(address?.zipCode ?? '');
     _streetController.text = address?.street ?? '';
     _numberController.text = address?.number ?? '';
     _complementController.text = address?.complement ?? '';
@@ -354,6 +363,7 @@ class _CustomerEditProfilePageState extends State<CustomerEditProfilePage> {
     required String hint,
     String? Function(String?)? validator,
     TextInputType? keyboardType,
+    List<TextInputFormatter>? inputFormatters,
     bool readOnly = false,
   }) {
     return Column(
@@ -382,6 +392,7 @@ class _CustomerEditProfilePageState extends State<CustomerEditProfilePage> {
             validator: validator,
             readOnly: readOnly,
             keyboardType: keyboardType,
+            inputFormatters: inputFormatters,
             style: const TextStyle(
               fontFamily: 'Figtree',
               fontWeight: FontWeight.w400,
@@ -404,6 +415,25 @@ class _CustomerEditProfilePageState extends State<CustomerEditProfilePage> {
     );
   }
 
+  void _onZipCodeChanged() {
+    final cep = _zipCodeController.text.replaceAll(RegExp(r'\D'), '');
+    if (cep.length == 8) {
+      _lookupZipCode(cep);
+    }
+  }
+
+  Future<void> _lookupZipCode(String cep) async {
+    final address = await getIt<CepService>().fetchAddress(cep);
+    if (address != null && mounted) {
+      setState(() {
+        _streetController.text = address.street;
+        _neighborhoodController.text = address.neighborhood;
+        _cityController.text = address.city;
+        _stateController.text = address.state;
+      });
+    }
+  }
+
   String? _requiredValidator(String? value) {
     if ((value ?? '').trim().isEmpty) {
       return 'Campo obrigatorio';
@@ -423,12 +453,8 @@ class _CustomerEditProfilePageState extends State<CustomerEditProfilePage> {
         city: _cityController.text.trim(),
         state: _stateController.text.trim().toUpperCase(),
         zipCode: _zipCodeController.text.trim(),
-        complement: _complementController.text.trim().isEmpty
-            ? null
-            : _complementController.text.trim(),
-        neighborhood: _neighborhoodController.text.trim().isEmpty
-            ? null
-            : _neighborhoodController.text.trim(),
+        complement: _complementController.text.trim(),
+        neighborhood: _neighborhoodController.text.trim(),
       ),
     );
   }

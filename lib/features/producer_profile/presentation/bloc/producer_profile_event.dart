@@ -9,18 +9,19 @@ sealed class ProducerProfileEvent extends Equatable {
 }
 
 class ProducerProfileStarted extends ProducerProfileEvent {
-  const ProducerProfileStarted(this.producerId);
+  const ProducerProfileStarted(this.producerId, {this.isOwnerView = false});
   final String producerId;
+  final bool isOwnerView;
 
   @override
-  List<Object?> get props => [producerId];
+  List<Object?> get props => [producerId, isOwnerView];
 }
 
 class ProducerProfileUpdateSubmitted extends ProducerProfileEvent {
   const ProducerProfileUpdateSubmitted({
     required this.producerId,
     required this.name,
-    required this.story,
+    required this.description,
     required this.phone,
     required this.farmName,
     this.address,
@@ -30,7 +31,7 @@ class ProducerProfileUpdateSubmitted extends ProducerProfileEvent {
 
   final String producerId;
   final String name;
-  final String story;
+  final String description;
   final String phone;
   final String farmName;
   final Map<String, dynamic>? address;
@@ -41,7 +42,7 @@ class ProducerProfileUpdateSubmitted extends ProducerProfileEvent {
   List<Object?> get props => [
     producerId,
     name,
-    story,
+    description,
     phone,
     farmName,
     address,

@@ -1,19 +1,24 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 import 'package:ragro_mobile/core/network/api_exception.dart';
+import 'package:ragro_mobile/features/search/data/datasources/search_local_datasource.dart';
 import 'package:ragro_mobile/features/search/domain/usecases/search_producers_and_products.dart';
 import 'package:ragro_mobile/features/search/presentation/bloc/search_event.dart';
 import 'package:ragro_mobile/features/search/presentation/bloc/search_state.dart';
 
 @injectable
 class SearchBloc extends Bloc<SearchEvent, SearchState> {
-  SearchBloc(this._search) : super(const SearchIdle()) {
+  SearchBloc(this._search, this._local) : super(const SearchIdle()) {
     on<SearchQueryChanged>(_onQueryChanged);
     on<SearchCategoryChanged>(_onCategoryChanged);
+    on<SearchQuerySubmitted>(_onQuerySubmitted);
     on<SearchRecentItemRemoved>(_onRecentRemoved);
+    on<SearchLoadRecentSearches>(_onLoadRecent);
+    add(const SearchLoadRecentSearches());
   }
 
   final SearchProducersAndProducts _search;
+  final SearchLocalDataSource _local;
   String _currentCategory = 'Tudo';
 
   Future<void> _onQueryChanged(
@@ -48,13 +53,34 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
     _currentCategory = event.category ?? 'Tudo';
   }
 
+  Future<void> _onQuerySubmitted(
+    SearchQuerySubmitted event,
+    Emitter<SearchState> emit,
+  ) async {
+    if (event.query.trim().isEmpty) return;
+    await _local.addRecentSearch(event.query);
+    final recent = _local.getRecentSearches();
+    emit(SearchIdle(recentSearches: recent));
+  }
+
   void _onRecentRemoved(
     SearchRecentItemRemoved event,
     Emitter<SearchState> emit,
   ) {
     if (state is SearchIdle) {
+      _local.removeRecentSearch(event.query);
       final recent = List<String>.from((state as SearchIdle).recentSearches)
         ..remove(event.query);
+      emit(SearchIdle(recentSearches: recent));
+    }
+  }
+
+  Future<void> _onLoadRecent(
+    SearchLoadRecentSearches event,
+    Emitter<SearchState> emit,
+  ) async {
+    final recent = _local.getRecentSearches();
+    if (recent.isNotEmpty) {
       emit(SearchIdle(recentSearches: recent));
     }
   }

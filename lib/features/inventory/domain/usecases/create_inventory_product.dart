@@ -8,6 +8,6 @@ class CreateInventoryProduct {
 
   final InventoryRepository _repository;
 
-  Future<void> call(InventoryProduct product) =>
+  Future<InventoryProduct> call(InventoryProduct product) =>
       _repository.createProduct(product);
 }

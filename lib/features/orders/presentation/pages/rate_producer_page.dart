@@ -17,12 +17,14 @@ class RateProducerPage extends StatelessWidget {
     required this.orderId,
     required this.farmName,
     required this.ownerName,
+    this.isRated = false,
     super.key,
   });
 
   final String orderId;
   final String farmName;
   final String ownerName;
+  final bool isRated;
 
   @override
   Widget build(BuildContext context) {
@@ -60,22 +62,22 @@ class RateProducerPage extends StatelessWidget {
               ),
               child: BlocBuilder<RateProducerBloc, RateProducerState>(
                 builder: (context, state) {
-                    final selectedRating = state is RateProducerInitial
+                  final selectedRating = state is RateProducerInitial
                       ? state.selectedRating
                       : state is RateProducerSubmitting
-                        ? state.selectedRating
-                        : state is RateProducerFailure
-                          ? state.selectedRating
-                          : 0;
-                    final comment = state is RateProducerInitial
+                      ? state.selectedRating
+                      : state is RateProducerFailure
+                      ? state.selectedRating
+                      : 0;
+                  final comment = state is RateProducerInitial
                       ? state.comment
                       : state is RateProducerSubmitting
-                        ? state.comment
-                        : state is RateProducerFailure
-                          ? state.comment
-                          : '';
+                      ? state.comment
+                      : state is RateProducerFailure
+                      ? state.comment
+                      : '';
                   final isSubmitting = state is RateProducerSubmitting;
-                    final canSubmit = selectedRating > 0;
+                  final canSubmit = selectedRating > 0;
 
                   return Column(
                     mainAxisSize: MainAxisSize.min,
@@ -185,10 +187,9 @@ class RateProducerPage extends StatelessWidget {
                         initialValue: comment,
                         enabled: !isSubmitting,
                         maxLines: 3,
-                        onChanged: (value) =>
-                            context.read<RateProducerBloc>().add(
-                                  RateProducerCommentChanged(value),
-                                ),
+                        onChanged: (value) => context
+                            .read<RateProducerBloc>()
+                            .add(RateProducerCommentChanged(value)),
                         decoration: InputDecoration(
                           hintText: 'Comentario (opcional)',
                           filled: true,
@@ -212,12 +213,12 @@ class RateProducerPage extends StatelessWidget {
                           onTap: (!canSubmit || isSubmitting)
                               ? null
                               : () => context.read<RateProducerBloc>().add(
-                                    RateProducerSubmitted(
-                                      orderId,
-                                      selectedRating,
-                                      comment.trim(),
-                                    ),
+                                  RateProducerSubmitted(
+                                    orderId,
+                                    selectedRating,
+                                    comment.trim(),
                                   ),
+                                ),
                           borderRadius: BorderRadius.circular(8),
                           child: Container(
                             width: double.infinity,
