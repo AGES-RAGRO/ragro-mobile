@@ -112,12 +112,12 @@ class AppRouter {
                             return ReviewsPage(
                               producerId: state.pathParameters['producerId']!,
                               producerName:
-                              extra['producerName'] as String? ?? '',
+                                  extra['producerName'] as String? ?? '',
                               producerLocation:
-                              extra['producerLocation'] as String? ?? '',
+                                  extra['producerLocation'] as String? ?? '',
                               averageRating:
-                              (extra['averageRating'] as num?)
-                                  ?.toDouble() ??
+                                  (extra['averageRating'] as num?)
+                                      ?.toDouble() ??
                                   0.0,
                               totalReviews: extra['totalReviews'] as int? ?? 0,
                             );
@@ -297,7 +297,7 @@ class AppRouter {
                           productName: extra['productName'] as String? ?? '',
                           unit: extra['unit'] as String? ?? 'un',
                           currentStock:
-                          (extra['currentStock'] as num?)?.toDouble() ??
+                              (extra['currentStock'] as num?)?.toDouble() ??
                               0.0,
                         );
                       },
@@ -340,9 +340,9 @@ class AppRouter {
                           producerId: extra['producerId'] as String? ?? '',
                           producerName: extra['producerName'] as String? ?? '',
                           producerLocation:
-                          extra['producerLocation'] as String? ?? '',
+                              extra['producerLocation'] as String? ?? '',
                           averageRating:
-                          (extra['averageRating'] as num?)?.toDouble() ??
+                              (extra['averageRating'] as num?)?.toDouble() ??
                               0.0,
                           totalReviews: extra['totalReviews'] as int? ?? 0,
                         );

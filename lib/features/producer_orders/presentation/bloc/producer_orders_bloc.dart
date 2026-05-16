@@ -70,11 +70,13 @@ class ProducerOrdersBloc
     try {
       await _confirmProducerOrder(event.orderId);
       final orders = await _getProducerOrders();
-      emit(ProducerOrdersActionSuccess(
-        message: 'Pedido aceito com sucesso.',
-        orders: orders,
-        activeTab: _activeTab,
-      ));
+      emit(
+        ProducerOrdersActionSuccess(
+          message: 'Pedido aceito com sucesso.',
+          orders: orders,
+          activeTab: _activeTab,
+        ),
+      );
       emit(ProducerOrdersLoaded(orders: orders, activeTab: _activeTab));
     } on Exception catch (e) {
       emit(ProducerOrdersFailure(e.toString()));
@@ -94,7 +96,11 @@ class ProducerOrdersBloc
 
     emit(ProducerOrdersLoading(_activeTab));
     try {
-      await _refuseProducerOrder(event.orderId, reason: event.reason, details: event.details);
+      await _refuseProducerOrder(
+        event.orderId,
+        reason: event.reason,
+        details: event.details,
+      );
       final updated = currentOrders
           .map(
             (o) => o.id == event.orderId
@@ -102,11 +108,13 @@ class ProducerOrdersBloc
                 : o,
           )
           .toList();
-      emit(ProducerOrdersActionSuccess(
-        message: 'Pedido recusado com sucesso.',
-        orders: updated,
-        activeTab: _activeTab,
-      ));
+      emit(
+        ProducerOrdersActionSuccess(
+          message: 'Pedido recusado com sucesso.',
+          orders: updated,
+          activeTab: _activeTab,
+        ),
+      );
       emit(ProducerOrdersLoaded(orders: updated, activeTab: _activeTab));
     } on Exception catch (e) {
       emit(ProducerOrdersLoaded(orders: currentOrders, activeTab: _activeTab));
@@ -146,11 +154,13 @@ class ProducerOrdersBloc
         ProducerOrderStatus.inDelivery,
       );
       final orders = await _getProducerOrders();
-      emit(ProducerOrdersActionSuccess(
-        message: 'Entrega iniciada com sucesso.',
-        orders: orders,
-        activeTab: _activeTab,
-      ));
+      emit(
+        ProducerOrdersActionSuccess(
+          message: 'Entrega iniciada com sucesso.',
+          orders: orders,
+          activeTab: _activeTab,
+        ),
+      );
       emit(ProducerOrdersLoaded(orders: orders, activeTab: _activeTab));
     } on Exception catch (e) {
       emit(ProducerOrdersFailure(e.toString()));
@@ -181,11 +191,13 @@ class ProducerOrdersBloc
                 : o,
           )
           .toList();
-      emit(ProducerOrdersActionSuccess(
-        message: 'Entrega confirmada com sucesso.',
-        orders: updated,
-        activeTab: _activeTab,
-      ));
+      emit(
+        ProducerOrdersActionSuccess(
+          message: 'Entrega confirmada com sucesso.',
+          orders: updated,
+          activeTab: _activeTab,
+        ),
+      );
       emit(ProducerOrdersLoaded(orders: updated, activeTab: _activeTab));
     } on Exception catch (e) {
       emit(ProducerOrdersLoaded(orders: currentOrders, activeTab: _activeTab));

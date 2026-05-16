@@ -24,7 +24,11 @@ class ProducerOrderDetailConfirmed extends ProducerOrderDetailEvent {
 }
 
 class ProducerOrderDetailRefused extends ProducerOrderDetailEvent {
-  const ProducerOrderDetailRefused(this.orderId, {required this.reason, this.details});
+  const ProducerOrderDetailRefused(
+    this.orderId, {
+    required this.reason,
+    this.details,
+  });
   final String orderId;
   final String reason;
   final String? details;

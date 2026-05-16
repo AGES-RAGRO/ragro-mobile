@@ -60,7 +60,8 @@ class ProducerOrderDetailBloc
       emit(ProducerOrderDetailSuccess(order: updated, action: 'confirmed'));
       emit(ProducerOrderDetailLoaded(updated));
     } on Exception catch (e) {
-      emit(ProducerOrderDetailFailure(e.toString()));
+      emit(ProducerOrderDetailActionError(current.order, e.toString()));
+      emit(ProducerOrderDetailLoaded(current.order));
     }
   }
 
@@ -72,14 +73,19 @@ class ProducerOrderDetailBloc
     if (current is! ProducerOrderDetailLoaded) return;
     emit(ProducerOrderDetailRefusing(current.order));
     try {
-      await _refuseOrder(event.orderId, reason: event.reason, details: event.details);
+      await _refuseOrder(
+        event.orderId,
+        reason: event.reason,
+        details: event.details,
+      );
       final updated = current.order.copyWith(
         status: ProducerOrderStatus.cancelled,
       );
       emit(ProducerOrderDetailSuccess(order: updated, action: 'refused'));
       emit(ProducerOrderDetailLoaded(updated));
     } on Exception catch (e) {
-      emit(ProducerOrderDetailFailure(e.toString()));
+      emit(ProducerOrderDetailActionError(current.order, e.toString()));
+      emit(ProducerOrderDetailLoaded(current.order));
     }
   }
 
@@ -98,7 +104,8 @@ class ProducerOrderDetailBloc
       );
       emit(ProducerOrderDetailLoaded(updated));
     } on Exception catch (e) {
-      emit(ProducerOrderDetailFailure(e.toString()));
+      emit(ProducerOrderDetailActionError(current.order, e.toString()));
+      emit(ProducerOrderDetailLoaded(current.order));
     }
   }
 }

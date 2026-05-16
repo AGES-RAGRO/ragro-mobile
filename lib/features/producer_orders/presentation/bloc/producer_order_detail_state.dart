@@ -57,3 +57,11 @@ class ProducerOrderDetailFailure extends ProducerOrderDetailState {
   @override
   List<Object?> get props => [message];
 }
+
+class ProducerOrderDetailActionError extends ProducerOrderDetailState {
+  const ProducerOrderDetailActionError(this.order, this.message);
+  final ProducerOrder order;
+  final String message;
+  @override
+  List<Object?> get props => [order, message];
+}

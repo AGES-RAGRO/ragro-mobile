@@ -14,7 +14,7 @@ import 'package:ragro_mobile/features/producer_orders/presentation/bloc/producer
 import 'package:ragro_mobile/features/producer_orders/presentation/bloc/producer_orders_event.dart';
 import 'package:ragro_mobile/features/producer_orders/presentation/bloc/producer_orders_state.dart';
 import 'package:ragro_mobile/features/producer_orders/presentation/widgets/producer_order_card.dart';
-import 'package:ragro_mobile/shared/widgets/cancel_order_dialog.dart';
+import 'package:ragro_mobile/shared/widgets/confirm_dialog.dart';
 
 class ProducerOrdersPage extends StatelessWidget {
   const ProducerOrdersPage({super.key});
@@ -125,10 +125,9 @@ class _ProducerOrdersView extends StatelessWidget {
                       children: _tabs.map((tab) {
                         final isActive = activeTab == tab.$1;
                         return GestureDetector(
-                          onTap: () =>
-                              context.read<ProducerOrdersBloc>().add(
-                                ProducerOrdersTabChanged(tab.$1),
-                              ),
+                          onTap: () => context.read<ProducerOrdersBloc>().add(
+                            ProducerOrdersTabChanged(tab.$1),
+                          ),
                           child: Container(
                             padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
                             decoration: BoxDecoration(
@@ -224,8 +223,7 @@ class _ProducerOrdersView extends StatelessWidget {
                           Padding(
                             padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
                             child: GestureDetector(
-                              onTap: () =>
-                                  context.push('/producer/home/route'),
+                              onTap: () => context.push('/producer/home/route'),
                               child: Container(
                                 height: 44,
                                 decoration: BoxDecoration(
@@ -279,71 +277,43 @@ class _ProducerOrdersView extends StatelessWidget {
                               return ProducerOrderCard(
                                 order: order,
                                 onDetailTap: () async {
-                                  final result =
-                                      await context.push<String?>(
-                                        '/producer/home/orders/${order.id}',
-                                        extra: order,
-                                      );
+                                  final result = await context.push<String?>(
+                                    '/producer/home/orders/${order.id}',
+                                    extra: order,
+                                  );
                                   if (!context.mounted) return;
-                                  if (result == 'in_delivery') {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
-                                        content: Text(
-                                          'Entrega iniciada com sucesso.',
-                                        ),
-                                        backgroundColor: AppColors.darkGreen,
-                                      ),
-                                    );
-                                    context.read<ProducerOrdersBloc>().add(
-                                      const ProducerOrdersStarted(
-                                        ProducerOrderStatus.inDelivery,
-                                      ),
-                                    );
-                                  } else if (result == 'cancelled') {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
-                                        content: Text(
-                                          'Pedido recusado com sucesso.',
-                                        ),
-                                        backgroundColor: AppColors.darkGreen,
-                                      ),
-                                    );
+                                  if (result == 'cancelled') {
                                     context.read<ProducerOrdersBloc>().add(
                                       ProducerOrderLocallyRefused(order.id),
                                     );
-                                  } else if (result == 'delivered') {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
-                                        content: Text(
-                                          'Entrega confirmada com sucesso.',
-                                        ),
-                                        backgroundColor: AppColors.darkGreen,
+                                    context.read<ProducerOrdersBloc>().add(
+                                      const ProducerOrdersTabChanged(
+                                        ProducerOrderStatus.cancelled,
                                       ),
                                     );
+                                  } else {
+                                    final targetTab = switch (result) {
+                                      'in_delivery' =>
+                                        ProducerOrderStatus.inDelivery,
+                                      'delivered' =>
+                                        ProducerOrderStatus.delivered,
+                                      _ => activeTab,
+                                    };
                                     context.read<ProducerOrdersBloc>().add(
-                                      ProducerOrderLocallyDelivered(order.id),
+                                      ProducerOrdersStarted(targetTab),
                                     );
                                   }
                                 },
-                                onCancelTap:
-                                    order.status == ProducerOrderStatus.pending
-                                    ? () => _confirmCancel(context, order.id)
-                                    : null,
                                 onActionTap:
                                     order.status == ProducerOrderStatus.pending
-                                    ? () =>
-                                          context
-                                              .read<ProducerOrdersBloc>()
-                                              .add(
-                                                ProducerOrderAccepted(order.id),
-                                              )
+                                    ? () => context
+                                          .read<ProducerOrdersBloc>()
+                                          .add(ProducerOrderAccepted(order.id))
                                     : null,
-                                onDeliveryConfirmTap: order.status ==
+                                onDeliveryConfirmTap:
+                                    order.status ==
                                         ProducerOrderStatus.inDelivery
-                                    ? () => _confirmDelivery(
-                                        context,
-                                        order.id,
-                                      )
+                                    ? () => _confirmDelivery(context, order.id)
                                     : null,
                               );
                             },
@@ -361,40 +331,18 @@ class _ProducerOrdersView extends StatelessWidget {
     );
   }
 
-  Future<void> _confirmCancel(BuildContext context, String orderId) async {
-    final result = await CancelOrderDialog.showForProducer(context);
-    if (result != null && context.mounted) {
-      context.read<ProducerOrdersBloc>().add(
-        ProducerOrderCancelled(orderId, reason: result.reason, details: result.details),
-      );
-    }
-  }
-
   Future<void> _confirmDelivery(BuildContext context, String orderId) async {
-    final confirmed = await showDialog<bool>(
+    final confirmed = await ConfirmDialog.show(
       context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: const Text('Confirmar entrega'),
-        content: const Text(
-          'Tem certeza que deseja confirmar a entrega deste pedido?',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: const Text('Voltar'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: const Text('Confirmar entrega'),
-          ),
-        ],
-      ),
+      title: 'Confirmar a entrega deste pedido?',
+      confirmLabel: 'Sim',
+      confirmColor: const Color(0xFF3B82F6),
+      cancelLabel: 'Não',
     );
-
     if ((confirmed ?? false) && context.mounted) {
-      context
-          .read<ProducerOrdersBloc>()
-          .add(ProducerOrderDeliveryConfirmed(orderId));
+      context.read<ProducerOrdersBloc>().add(
+        ProducerOrderDeliveryConfirmed(orderId),
+      );
     }
   }
 }

@@ -5,6 +5,10 @@ abstract class ProducerOrdersRepository {
   Future<List<ProducerOrder>> getOrders({ProducerOrderStatus? status});
   Future<ProducerOrder> getOrderById(String id);
   Future<void> confirmOrder(String id);
-  Future<void> refuseOrder(String id, {required String reason, String? details});
+  Future<void> refuseOrder(
+    String id, {
+    required String reason,
+    String? details,
+  });
   Future<void> updateStatus(String id, ProducerOrderStatus status);
 }

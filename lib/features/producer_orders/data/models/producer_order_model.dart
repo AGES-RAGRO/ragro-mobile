@@ -5,6 +5,7 @@ import 'package:ragro_mobile/features/producer_orders/domain/entities/producer_o
 class ProducerOrderModel extends ProducerOrder {
   const ProducerOrderModel({
     required super.id,
+    required super.orderNumber,
     required super.consumerName,
     required super.consumerAvatarUrl,
     required super.consumerSince,
@@ -34,6 +35,7 @@ class ProducerOrderModel extends ProducerOrder {
 
     return ProducerOrderModel(
       id: json['id'] as String? ?? '',
+      orderNumber: (json['orderNumber'] as num?)?.toInt() ?? 0,
       consumerName:
           json['consumerName'] as String? ??
           json['customerName'] as String? ??

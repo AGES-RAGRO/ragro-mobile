@@ -5,6 +5,7 @@ import 'package:ragro_mobile/features/producer_orders/domain/entities/producer_o
 class ProducerOrder extends Equatable {
   const ProducerOrder({
     required this.id,
+    required this.orderNumber,
     required this.consumerName,
     required this.consumerAvatarUrl,
     required this.consumerSince,
@@ -21,6 +22,7 @@ class ProducerOrder extends Equatable {
   });
 
   final String id;
+  final int orderNumber;
   final String consumerName;
   final String consumerAvatarUrl;
   final String consumerSince;
@@ -38,6 +40,7 @@ class ProducerOrder extends Equatable {
   ProducerOrder copyWith({ProducerOrderStatus? status, bool? isNew}) {
     return ProducerOrder(
       id: id,
+      orderNumber: orderNumber,
       consumerName: consumerName,
       consumerAvatarUrl: consumerAvatarUrl,
       consumerSince: consumerSince,
@@ -57,6 +60,7 @@ class ProducerOrder extends Equatable {
   @override
   List<Object?> get props => [
     id,
+    orderNumber,
     consumerName,
     consumerAvatarUrl,
     consumerSince,

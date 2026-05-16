@@ -29,15 +29,13 @@ class ProducerOrdersRemoteDataSource {
   }
 
   Future<ProducerOrder> getOrderById(String id) async {
-    try {
-      final response = await _apiClient.dio.get<Map<String, dynamic>>(
-        ApiEndpoints.producerOrder(id),
-      );
-
-      return ProducerOrderModel.fromJson(response.data!);
-    } on DioException catch (e) {
-      throw e.error as ApiException? ?? const UnknownApiException();
-    }
+    final orders = await getOrders();
+    final order = orders.cast<ProducerOrder?>().firstWhere(
+      (o) => o?.id == id,
+      orElse: () => null,
+    );
+    if (order == null) throw const UnknownApiException();
+    return order;
   }
 
   Future<void> confirmOrder(String id) async {
@@ -48,11 +46,15 @@ class ProducerOrdersRemoteDataSource {
     }
   }
 
-  Future<void> refuseOrder(String id, {required String reason, String? details}) async {
+  Future<void> refuseOrder(
+    String id, {
+    required String reason,
+    String? details,
+  }) async {
     try {
       await _apiClient.dio.patch<void>(
-        ApiEndpoints.producerOrderCancel(id),
-        data: {'reason': reason, if (details != null) 'details': details},
+        ApiEndpoints.producerOrderStatus(id),
+        data: {'status': _statusQueryValue(ProducerOrderStatus.cancelled)},
       );
     } on DioException catch (e) {
       throw e.error as ApiException? ?? const UnknownApiException();

@@ -220,31 +220,6 @@ class ProducerOrderCard extends StatelessWidget {
                   ),
                 ),
               ),
-              if (order.status == ProducerOrderStatus.pending &&
-                  onCancelTap != null) ...[
-                const SizedBox(width: 8),
-                Expanded(
-                  child: ElevatedButton(
-                    onPressed: onCancelTap,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.red,
-                      foregroundColor: AppColors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(24),
-                      ),
-                      padding: const EdgeInsets.symmetric(vertical: 10),
-                    ),
-                    child: const Text(
-                      'Recusar',
-                      style: TextStyle(
-                        fontFamily: 'Manrope',
-                        fontWeight: FontWeight.w600,
-                        fontSize: 14,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
               if (onActionTap != null) ...[
                 const SizedBox(width: 8),
                 Expanded(
