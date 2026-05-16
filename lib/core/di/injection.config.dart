@@ -97,10 +97,14 @@ import 'package:ragro_mobile/features/customer_profile/domain/usecases/update_cu
     as _i436;
 import 'package:ragro_mobile/features/customer_profile/presentation/bloc/customer_profile_bloc.dart'
     as _i526;
+import 'package:ragro_mobile/features/home/data/datasources/favorite_producer_remote_datasource.dart'
+    as _i779;
 import 'package:ragro_mobile/features/home/data/datasources/home_remote_datasource.dart'
     as _i904;
 import 'package:ragro_mobile/features/home/data/repositories/home_repository_impl.dart'
     as _i1055;
+import 'package:ragro_mobile/features/home/domain/repositories/favorite_producer_repository.dart'
+    as _i104;
 import 'package:ragro_mobile/features/home/domain/repositories/home_repository.dart'
     as _i285;
 import 'package:ragro_mobile/features/home/domain/usecases/get_home_data.dart'
@@ -374,6 +378,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i767.ProducerManagementBloc>(
       () => _i767.ProducerManagementBloc(gh<_i805.GetProducerDashboard>()),
     );
+    gh.lazySingleton<_i104.FavoriteProducerRepository>(
+      () => _i779.FavoriteProducerRemoteDataSource(gh<_i873.ApiClient>()),
+    );
     gh.lazySingleton<_i818.ProductDetailRepository>(
       () => _i43.ProductDetailRepositoryImpl(
         gh<_i127.ProductDetailRemoteDataSource>(),
@@ -573,6 +580,14 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i903.UpdateOrderStatus>(
       () => _i903.UpdateOrderStatus(gh<_i165.OrdersRepository>()),
     );
+    gh.factory<_i151.HomeBloc>(
+      () => _i151.HomeBloc(
+        gh<_i159.GetHomeData>(),
+        gh<_i298.GetProducers>(),
+        gh<_i452.GetRecommendedProducts>(),
+        gh<_i104.FavoriteProducerRepository>(),
+      ),
+    );
     gh.factory<_i914.AdminEditProducerBloc>(
       () => _i914.AdminEditProducerBloc(
         gh<_i852.GetAdminProducerById>(),
@@ -647,13 +662,6 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i432.RateProducerBloc>(
       () => _i432.RateProducerBloc(gh<_i1071.CreateReview>()),
-    );
-    gh.factory<_i151.HomeBloc>(
-      () => _i151.HomeBloc(
-        gh<_i159.GetHomeData>(),
-        gh<_i298.GetProducers>(),
-        gh<_i452.GetRecommendedProducts>(),
-      ),
     );
     gh.factory<_i526.CustomerProfileBloc>(
       () => _i526.CustomerProfileBloc(
