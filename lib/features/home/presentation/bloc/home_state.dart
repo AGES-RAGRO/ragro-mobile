@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:ragro_mobile/features/home/domain/entities/home_product.dart';
 import 'package:ragro_mobile/features/home/domain/entities/producer.dart';
+import 'package:ragro_mobile/features/home/domain/entities/favorite_producer.dart';
 
 sealed class HomeState extends Equatable {
   const HomeState();
@@ -21,6 +22,8 @@ class HomeLoaded extends HomeState {
   const HomeLoaded({
     required this.producers,
     required this.products,
+    required this.favorites,
+    this.favoriteIds = const {},
     this.currentProducersPage = 0,
     this.hasMoreProducers = true,
     this.isFetchingMoreProducers = false,
@@ -31,6 +34,8 @@ class HomeLoaded extends HomeState {
 
   final List<Producer> producers;
   final List<HomeProduct> products;
+  final List<FavoriteProducer> favorites;
+  final Set<String> favoriteIds;
   final int currentProducersPage;
   final bool hasMoreProducers;
   final bool isFetchingMoreProducers;
@@ -38,9 +43,13 @@ class HomeLoaded extends HomeState {
   final bool hasMoreProducts;
   final bool isFetchingMoreProducts;
 
+  bool isFavorite(String producerId) => favoriteIds.contains(producerId);
+
   HomeLoaded copyWith({
     List<Producer>? producers,
     List<HomeProduct>? products,
+    List<FavoriteProducer>? favorites,
+    Set<String>? favoriteIds,
     int? currentProducersPage,
     bool? hasMoreProducers,
     bool? isFetchingMoreProducers,
@@ -51,6 +60,8 @@ class HomeLoaded extends HomeState {
     return HomeLoaded(
       producers: producers ?? this.producers,
       products: products ?? this.products,
+      favorites: favorites ?? this.favorites,
+      favoriteIds: favoriteIds ?? this.favoriteIds,
       currentProducersPage: currentProducersPage ?? this.currentProducersPage,
       hasMoreProducers: hasMoreProducers ?? this.hasMoreProducers,
       isFetchingMoreProducers:
@@ -67,6 +78,8 @@ class HomeLoaded extends HomeState {
   List<Object?> get props => [
     producers,
     products,
+    favorites,
+    favoriteIds,
     currentProducersPage,
     hasMoreProducers,
     isFetchingMoreProducers,

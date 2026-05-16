@@ -10,6 +10,7 @@ import 'package:ragro_mobile/core/di/injection.dart';
 import 'package:ragro_mobile/core/theme/app_colors.dart';
 import 'package:ragro_mobile/features/cart/presentation/bloc/cart_bloc.dart';
 import 'package:ragro_mobile/features/cart/presentation/bloc/cart_event.dart';
+import 'package:ragro_mobile/features/home/domain/repositories/favorite_producer_repository.dart';
 import 'package:ragro_mobile/features/home/presentation/widgets/home_product_card.dart';
 import 'package:ragro_mobile/features/producer_profile/presentation/bloc/producer_profile_bloc.dart';
 import 'package:ragro_mobile/features/producer_profile/presentation/bloc/producer_profile_event.dart';
@@ -27,14 +28,55 @@ class ProducerPublicProfilePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (_) =>
-          getIt<ProducerProfileBloc>()..add(ProducerProfileStarted(producerId)),
-      child: const _ProducerPublicProfileView(),
+      getIt<ProducerProfileBloc>()..add(ProducerProfileStarted(producerId)),
+      child: _ProducerPublicProfileView(producerId: producerId),
     );
   }
 }
 
-class _ProducerPublicProfileView extends StatelessWidget {
-  const _ProducerPublicProfileView();
+class _ProducerPublicProfileView extends StatefulWidget {
+  const _ProducerPublicProfileView({required this.producerId});
+
+  final String producerId;
+
+  @override
+  State<_ProducerPublicProfileView> createState() =>
+      _ProducerPublicProfileViewState();
+}
+
+class _ProducerPublicProfileViewState
+    extends State<_ProducerPublicProfileView> {
+  bool _isFavorite = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkFavorite();
+  }
+
+  Future<void> _checkFavorite() async {
+    final favorites =
+    await getIt<FavoriteProducerRepository>().getFavorites();
+    if (mounted) {
+      setState(() {
+        _isFavorite =
+            favorites.any((f) => f.producerId == widget.producerId);
+      });
+    }
+  }
+
+  Future<void> _toggleFavorite() async {
+    final repo = getIt<FavoriteProducerRepository>();
+    try {
+      if (_isFavorite) {
+        await repo.unfavoriteProducer(widget.producerId);
+      } else {
+        await repo.favoriteProducer(widget.producerId);
+      }
+      setState(() => _isFavorite = !_isFavorite);
+    } on Object {
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -222,10 +264,12 @@ class _ProducerPublicProfileView extends StatelessWidget {
                                 ),
                                 const SizedBox(width: 12),
                                 IconButton(
-                                  onPressed: () {},
+                                  onPressed: _toggleFavorite,
                                   splashRadius: 24,
-                                  icon: const Icon(
-                                    Icons.favorite_border,
+                                  icon: Icon(
+                                    _isFavorite
+                                        ? Icons.favorite
+                                        : Icons.favorite_border,
                                     size: 38,
                                     color: AppColors.darkGreen,
                                   ),

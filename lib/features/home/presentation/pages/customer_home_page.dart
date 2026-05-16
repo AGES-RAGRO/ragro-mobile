@@ -60,6 +60,13 @@ class _CustomerHomeViewState extends State<_CustomerHomeView> {
     }
   }
 
+  Future<void> _onProducerTap(BuildContext context, Producer producer) async {
+    await context.push('/customer/home/producer/${producer.id}');
+    if (context.mounted) {
+      context.read<HomeBloc>().add(const HomeRefreshed());
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -94,6 +101,8 @@ class _CustomerHomeViewState extends State<_CustomerHomeView> {
                     SliverToBoxAdapter(
                       child: ProducersSection(
                         producers: producers,
+                        favorites: state.favorites,
+                        favoriteIds: state.favoriteIds,
                         onProducerTap: (p) => _onProducerTap(context, p),
                         isLoadingMore: state.isFetchingMoreProducers,
                       ),
@@ -144,10 +153,6 @@ class _CustomerHomeViewState extends State<_CustomerHomeView> {
         ),
       ),
     );
-  }
-
-  void _onProducerTap(BuildContext context, Producer producer) {
-    context.push('/customer/home/producer/${producer.id}');
   }
 }
 

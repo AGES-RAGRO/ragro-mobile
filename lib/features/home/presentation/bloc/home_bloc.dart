@@ -6,6 +6,7 @@ import 'package:ragro_mobile/features/home/domain/usecases/get_producers.dart';
 import 'package:ragro_mobile/features/home/domain/usecases/get_recommended_products.dart';
 import 'package:ragro_mobile/features/home/presentation/bloc/home_event.dart';
 import 'package:ragro_mobile/features/home/presentation/bloc/home_state.dart';
+import 'package:ragro_mobile/features/home/domain/repositories/favorite_producer_repository.dart';
 
 @injectable
 class HomeBloc extends Bloc<HomeEvent, HomeState> {
@@ -13,25 +14,37 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     this._getHomeData,
     this._getProducers,
     this._getRecommendedProducts,
+    this._favoriteRepository,
   ) : super(const HomeInitial()) {
     on<HomeStarted>(_onStarted);
     on<HomeRefreshed>(_onStarted);
     on<HomeLoadMoreProducers>(_onLoadMoreProducers);
     on<HomeLoadMoreProducts>(_onLoadMoreProducts);
+    on<HomeFavoriteToggled>(_onFavoriteToggled);
   }
 
   final GetHomeData _getHomeData;
   final GetProducers _getProducers;
   final GetRecommendedProducts _getRecommendedProducts;
+  final FavoriteProducerRepository _favoriteRepository;
 
   Future<void> _onStarted(HomeEvent event, Emitter<HomeState> emit) async {
     emit(const HomeLoading());
     try {
-      final data = await _getHomeData();
+      final results = await Future.wait([
+        _getHomeData(),
+        _favoriteRepository.getFavorites(),
+      ]);
+
+      final data = results[0] as dynamic;
+      final favorites = results[1] as dynamic;
+
       emit(
         HomeLoaded(
           producers: data.producers.content,
           products: data.products,
+          favorites: favorites,
+          favoriteIds: {for (final f in favorites) f.producerId},
           currentProducersPage: data.producers.page,
           hasMoreProducers: data.producers.page < data.producers.totalPages - 1,
           hasMoreProducts: data.hasMoreProducts,
@@ -41,6 +54,40 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
       emit(HomeFailure(e.message));
     } on Exception catch (_) {
       emit(const HomeFailure('Erro ao carregar dados. Tente novamente.'));
+    }
+  }
+
+  Future<void> _onFavoriteToggled(
+      HomeFavoriteToggled event,
+      Emitter<HomeState> emit,
+      ) async {
+    final current = state;
+    if (current is! HomeLoaded) return;
+
+    final isFav = current.isFavorite(event.producerId);
+
+    final newIds = Set<String>.from(current.favoriteIds);
+    if (isFav) {
+      newIds.remove(event.producerId);
+    } else {
+      newIds.add(event.producerId);
+    }
+
+    emit(current.copyWith(favoriteIds: newIds));
+
+    try {
+      if (isFav) {
+        await _favoriteRepository.unfavoriteProducer(event.producerId);
+      } else {
+        await _favoriteRepository.favoriteProducer(event.producerId);
+      }
+      final favorites = await _favoriteRepository.getFavorites();
+      emit(current.copyWith(
+        favorites: favorites,
+        favoriteIds: {for (final f in favorites) f.producerId},
+      ));
+    } on Object {
+      emit(current.copyWith(favoriteIds: current.favoriteIds));
     }
   }
 
