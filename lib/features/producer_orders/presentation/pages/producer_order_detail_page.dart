@@ -52,6 +52,12 @@ class ProducerOrderDetailPage extends StatelessWidget {
               context.pop('cancelled');
               return;
             }
+            // When the producer performed actions except status updates, we still
+            // want to signal that the order was seen so the list updates.
+            if (state.action == 'confirmed' || state.action == 'refused' || state.action == 'viewed') {
+              context.pop('seen');
+              return;
+            }
             final message = switch (state.action) {
               'confirmed' => 'Pedido aceito com sucesso.',
               _ => 'Ação concluída.',
@@ -93,9 +99,17 @@ class ProducerOrderDetailPage extends StatelessWidget {
               state is ProducerOrderDetailRefusing ||
               state is ProducerOrderDetailUpdatingStatus;
 
-          return _ProducerOrderDetailView(
-            order: order,
-            isProcessing: isProcessing,
+          return WillPopScope(
+            onWillPop: () async {
+              // When user navigates back (system or app), return 'seen' if the
+              // order was previously new so the list can update immediately.
+              context.pop(order.isNew ? 'seen' : null);
+              return false;
+            },
+            child: _ProducerOrderDetailView(
+              order: order,
+              isProcessing: isProcessing,
+            ),
           );
         },
       ),
@@ -215,7 +229,7 @@ class _Header extends StatelessWidget {
       child: Row(
         children: [
           GestureDetector(
-            onTap: () => context.pop(),
+            onTap: () => context.pop(order.isNew ? 'seen' : null),
             child: const Padding(
               padding: EdgeInsets.all(8),
               child: Icon(Icons.arrow_back, size: 18),
