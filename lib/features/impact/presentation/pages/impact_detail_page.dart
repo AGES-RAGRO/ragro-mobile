@@ -49,6 +49,7 @@ class _ImpactDetailPageState extends State<ImpactDetailPage> {
 
       final total =
           (co2Response.data?['totalCo2Saved'] as num?)?.toDouble() ?? 0;
+
       final totalProducers =
           (producersResponse.data?['totalElements'] as num?)?.toInt() ?? 0;
 
@@ -59,9 +60,11 @@ class _ImpactDetailPageState extends State<ImpactDetailPage> {
           _loading = false;
         });
       }
-    } on DioException catch (_) {
+    } on DioException catch (e) {
+      debugPrint('[ImpactDetail] DioException: ${e.response?.statusCode} ${e.message}');
       if (mounted) setState(() => _loading = false);
-    } on Object catch (_) {
+    } on Object catch (e) {
+      debugPrint('[ImpactDetail] Error: $e');
       if (mounted) setState(() => _loading = false);
     }
   }
