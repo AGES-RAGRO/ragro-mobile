@@ -3,10 +3,12 @@ import 'package:ragro_mobile/core/theme/app_colors.dart';
 import 'package:ragro_mobile/features/home/domain/entities/producer.dart';
 
 class ProducerCard extends StatelessWidget {
-  const ProducerCard({required this.producer, required this.onTap, super.key});
+  const ProducerCard({required this.producer, required this.onTap, this.isFavorite, this.onFavoriteTap, super.key,});
 
   final Producer producer;
   final VoidCallback onTap;
+  final bool? isFavorite;
+  final VoidCallback? onFavoriteTap;
 
   @override
   Widget build(BuildContext context) {
@@ -128,23 +130,42 @@ class ProducerCard extends StatelessWidget {
                             ? NetworkImage(producer.avatarUrl)
                             : null,
                         child: producer.avatarUrl.isEmpty
-                            ? const Icon(
-                                Icons.person,
-                                size: 14,
-                                color: AppColors.darkGreen,
-                              )
+                            ? Text(
+                          producer.ownerName.isNotEmpty
+                              ? producer.ownerName[0].toUpperCase()
+                              : '?',
+                          style: const TextStyle(
+                            fontFamily: 'Figtree',
+                            fontWeight: FontWeight.w700,
+                            fontSize: 10,
+                            color: AppColors.darkGreen,
+                          ),
+                        )
                             : null,
                       ),
                       const SizedBox(width: 8),
-                      Text(
-                        producer.ownerName,
-                        style: const TextStyle(
-                          fontFamily: 'Figtree',
-                          fontWeight: FontWeight.w300,
-                          fontSize: 12,
-                          color: AppColors.black,
+                      Expanded(
+                        child: Text(
+                          producer.ownerName,
+                          style: const TextStyle(
+                            fontFamily: 'Figtree',
+                            fontWeight: FontWeight.w300,
+                            fontSize: 12,
+                            color: AppColors.black,
+                          ),
                         ),
                       ),
+                      if (isFavorite != null)
+                        GestureDetector(
+                          onTap: onFavoriteTap,
+                          child: Icon(
+                            isFavorite!
+                                ? Icons.favorite
+                                : Icons.favorite_border,
+                            color: AppColors.darkGreen,
+                            size: 20,
+                          ),
+                        ),
                     ],
                   ),
                 ],

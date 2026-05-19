@@ -8,6 +8,9 @@ import 'package:ragro_mobile/features/cart/presentation/bloc/cart_bloc.dart';
 import 'package:ragro_mobile/features/cart/presentation/bloc/cart_event.dart';
 import 'package:ragro_mobile/features/cart/presentation/bloc/cart_state.dart';
 import 'package:ragro_mobile/features/cart/presentation/widgets/cart_summary_bar.dart';
+import 'package:ragro_mobile/features/home/presentation/bloc/home_bloc.dart';
+import 'package:ragro_mobile/features/home/presentation/bloc/home_event.dart';
+import 'package:ragro_mobile/features/home/presentation/bloc/home_state.dart';
 import 'package:ragro_mobile/shared/widgets/app_notification.dart';
 
 class CustomerShell extends StatefulWidget {
@@ -23,9 +26,13 @@ class _CustomerShellState extends State<CustomerShell> {
   @override
   void initState() {
     super.initState();
-    final bloc = getIt<CartBloc>();
-    if (bloc.state is CartInitial) {
-      bloc.add(const CartStarted());
+    final cartBloc = getIt<CartBloc>();
+    if (cartBloc.state is CartInitial) {
+      cartBloc.add(const CartStarted());
+    }
+    final homeBloc = getIt<HomeBloc>();
+    if (homeBloc.state is HomeInitial) {
+      homeBloc.add(const HomeStarted());
     }
   }
 
