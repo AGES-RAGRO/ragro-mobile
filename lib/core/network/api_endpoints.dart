@@ -45,6 +45,7 @@ abstract final class ApiEndpoints {
   static String producerAvatar(String id) => '$_base/producers/$id/avatar';
   static String producerCover(String id) => '$_base/producers/$id/cover';
   static String producerReviews(String id) => '$_base/producers/$id/reviews';
+  static String get co2TotalSaved => '$_base/co2/total-saved';
 
   // Orders
   static String get orders => '$_base/orders';
