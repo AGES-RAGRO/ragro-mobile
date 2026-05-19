@@ -6,6 +6,7 @@ import 'package:ragro_mobile/features/home/domain/entities/producer.dart';
 import 'package:ragro_mobile/features/home/presentation/bloc/home_bloc.dart';
 import 'package:ragro_mobile/features/home/presentation/bloc/home_event.dart';
 import 'package:ragro_mobile/features/home/presentation/widgets/producer_card.dart';
+import 'package:ragro_mobile/shared/widgets/confirm_dialog.dart';
 
 class ProducersSection extends StatefulWidget {
   const ProducersSection({
@@ -89,9 +90,20 @@ class _ProducersSectionState extends State<ProducersSection> {
                   producer: producer,
                   isFavorite: true,
                   onTap: () => widget.onProducerTap(producer),
-                  onFavoriteTap: () => context.read<HomeBloc>().add(
-                    HomeFavoriteToggled(fav.producerId),
-                  ),
+                  onFavoriteTap: () async {
+                    final confirmed = await ConfirmDialog.show(
+                      context: context,
+                      title:
+                          'Tem certeza que quer tirar o produtor dos seus favoritos?',
+                      confirmLabel: 'Tirar dos favoritos',
+                      confirmColor: AppColors.red,
+                    );
+                    if ((confirmed ?? false) && context.mounted) {
+                      context.read<HomeBloc>().add(
+                        HomeFavoriteToggled(fav.producerId),
+                      );
+                    }
+                  },
                 );
               },
             ),

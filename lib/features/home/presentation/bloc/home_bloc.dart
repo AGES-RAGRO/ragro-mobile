@@ -8,7 +8,7 @@ import 'package:ragro_mobile/features/home/presentation/bloc/home_event.dart';
 import 'package:ragro_mobile/features/home/presentation/bloc/home_state.dart';
 import 'package:ragro_mobile/features/home/domain/repositories/favorite_producer_repository.dart';
 
-@injectable
+@lazySingleton
 class HomeBloc extends Bloc<HomeEvent, HomeState> {
   HomeBloc(
     this._getHomeData,
@@ -67,13 +67,19 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     final isFav = current.isFavorite(event.producerId);
 
     final newIds = Set<String>.from(current.favoriteIds);
+    final newFavorites = isFav
+        ? current.favorites
+              .where((f) => f.producerId != event.producerId)
+              .toList()
+        : current.favorites;
+
     if (isFav) {
       newIds.remove(event.producerId);
     } else {
       newIds.add(event.producerId);
     }
 
-    emit(current.copyWith(favoriteIds: newIds));
+    emit(current.copyWith(favorites: newFavorites, favoriteIds: newIds));
 
     try {
       if (isFav) {

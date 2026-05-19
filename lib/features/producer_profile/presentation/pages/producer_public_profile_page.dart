@@ -11,12 +11,15 @@ import 'package:ragro_mobile/core/theme/app_colors.dart';
 import 'package:ragro_mobile/features/cart/presentation/bloc/cart_bloc.dart';
 import 'package:ragro_mobile/features/cart/presentation/bloc/cart_event.dart';
 import 'package:ragro_mobile/features/home/domain/repositories/favorite_producer_repository.dart';
+import 'package:ragro_mobile/features/home/presentation/bloc/home_bloc.dart';
+import 'package:ragro_mobile/features/home/presentation/bloc/home_event.dart';
 import 'package:ragro_mobile/features/home/presentation/widgets/home_product_card.dart';
 import 'package:ragro_mobile/features/producer_profile/presentation/bloc/producer_profile_bloc.dart';
 import 'package:ragro_mobile/features/producer_profile/presentation/bloc/producer_profile_event.dart';
 import 'package:ragro_mobile/features/producer_profile/presentation/bloc/producer_profile_state.dart';
 import 'package:ragro_mobile/features/producer_profile/presentation/widgets/availability_section.dart';
 import 'package:ragro_mobile/features/producer_profile/presentation/widgets/producer_stats_row.dart';
+import 'package:ragro_mobile/shared/widgets/confirm_dialog.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class ProducerPublicProfilePage extends StatelessWidget {
@@ -66,15 +69,29 @@ class _ProducerPublicProfileViewState
   }
 
   Future<void> _toggleFavorite() async {
-    final repo = getIt<FavoriteProducerRepository>();
-    try {
-      if (_isFavorite) {
-        await repo.unfavoriteProducer(widget.producerId);
-      } else {
-        await repo.favoriteProducer(widget.producerId);
-      }
+    if (_isFavorite) {
+      final confirmed = await ConfirmDialog.show(
+        context: context,
+        title: 'Tem certeza que quer tirar o produtor dos seus favoritos?',
+        confirmLabel: 'Tirar dos favoritos',
+        confirmColor: AppColors.red,
+      );
+      if (!(confirmed ?? false)) return;
+    }
+
+    final wasAdding = !_isFavorite;
+    getIt<HomeBloc>().add(HomeFavoriteToggled(widget.producerId));
+
+    if (mounted) {
       setState(() => _isFavorite = !_isFavorite);
-    } on Object {
+      if (wasAdding) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Produtor adicionado aos favoritos'),
+            backgroundColor: AppColors.lightGreen,
+          ),
+        );
+      }
     }
   }
 

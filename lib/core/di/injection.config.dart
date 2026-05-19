@@ -580,7 +580,7 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i903.UpdateOrderStatus>(
       () => _i903.UpdateOrderStatus(gh<_i165.OrdersRepository>()),
     );
-    gh.factory<_i151.HomeBloc>(
+    gh.lazySingleton<_i151.HomeBloc>(
       () => _i151.HomeBloc(
         gh<_i159.GetHomeData>(),
         gh<_i298.GetProducers>(),

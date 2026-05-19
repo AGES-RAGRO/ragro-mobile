@@ -22,8 +22,8 @@ class CustomerHomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (_) => getIt<HomeBloc>()..add(const HomeStarted()),
+    return BlocProvider.value(
+      value: getIt<HomeBloc>(),
       child: const _CustomerHomeView(),
     );
   }
@@ -62,9 +62,6 @@ class _CustomerHomeViewState extends State<_CustomerHomeView> {
 
   Future<void> _onProducerTap(BuildContext context, Producer producer) async {
     await context.push('/customer/home/producer/${producer.id}');
-    if (context.mounted) {
-      context.read<HomeBloc>().add(const HomeRefreshed());
-    }
   }
 
   @override
