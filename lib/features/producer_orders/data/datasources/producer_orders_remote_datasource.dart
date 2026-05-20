@@ -53,8 +53,8 @@ class ProducerOrdersRemoteDataSource {
   }) async {
     try {
       await _apiClient.dio.patch<void>(
-        ApiEndpoints.producerOrderStatus(id),
-        data: {'status': _statusQueryValue(ProducerOrderStatus.cancelled)},
+        ApiEndpoints.producerOrderCancel(id),
+        data: {'reason': reason, if (details != null) 'details': details},
       );
     } on DioException catch (e) {
       throw e.error as ApiException? ?? const UnknownApiException();
