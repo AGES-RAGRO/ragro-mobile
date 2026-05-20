@@ -28,7 +28,9 @@ class CheckoutBloc extends Bloc<CheckoutEvent, CheckoutState> {
     } on ApiException catch (e) {
       emit(CheckoutFailure(message: e.message));
     } on Exception catch (_) {
-      emit(const CheckoutFailure(message: 'Não foi possível carregar o carrinho.'));
+      emit(
+        const CheckoutFailure(message: 'Não foi possível carregar o carrinho.'),
+      );
     }
   }
 
