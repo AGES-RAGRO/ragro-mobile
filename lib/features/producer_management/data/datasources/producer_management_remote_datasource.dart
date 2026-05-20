@@ -7,7 +7,6 @@ import 'package:ragro_mobile/core/network/api_exception.dart';
 import 'package:ragro_mobile/features/auth/data/datasources/auth_local_datasource.dart';
 import 'package:ragro_mobile/features/producer_management/domain/entities/producer_dashboard.dart';
 
-
 @lazySingleton
 class ProducerManagementRemoteDataSource {
   final ApiClient _apiClient = getIt<ApiClient>();
@@ -37,11 +36,13 @@ class ProducerManagementRemoteDataSource {
       if (rawAvailability is List) {
         for (final item in rawAvailability) {
           if (item is Map<String, dynamic>) {
-            availability.add(DashboardAvailabilitySlot(
-              weekday: (item['weekday'] as num?)?.toInt() ?? 0,
-              opensAt: item['opensAt'] as String? ?? '',
-              closesAt: item['closesAt'] as String? ?? '',
-            ));
+            availability.add(
+              DashboardAvailabilitySlot(
+                weekday: (item['weekday'] as num?)?.toInt() ?? 0,
+                opensAt: item['opensAt'] as String? ?? '',
+                closesAt: item['closesAt'] as String? ?? '',
+              ),
+            );
           }
         }
       }
@@ -51,9 +52,13 @@ class ProducerManagementRemoteDataSource {
         producerName: (data['name'] as String? ?? '').trim(),
         producerTitle: farmName.isNotEmpty ? farmName : 'Produtor',
         avatarUrl: ApiEndpoints.resolveMediaUrl(
-            data['avatarS3'] as String? ?? data['avatar_s3'] as String? ?? ''),
+          data['avatarS3'] as String? ?? data['avatar_s3'] as String? ?? '',
+        ),
         coverUrl: ApiEndpoints.resolveMediaUrl(
-            data['displayPhotoS3'] as String? ?? data['display_photo_s3'] as String? ?? ''),
+          data['displayPhotoS3'] as String? ??
+              data['display_photo_s3'] as String? ??
+              '',
+        ),
         averageRating: (data['averageRating'] as num?)?.toDouble() ?? 0.0,
         totalReviews: (data['totalReviews'] as num?)?.toInt() ?? 0,
         totalSales: 0,

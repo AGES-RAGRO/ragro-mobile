@@ -136,7 +136,8 @@ class _ProducerProfileView extends StatelessWidget {
                             backgroundImage: dashboard.avatarUrl.isNotEmpty
                                 ? NetworkImage(dashboard.avatarUrl)
                                 : null,
-                            onBackgroundImageError: dashboard.avatarUrl.isNotEmpty
+                            onBackgroundImageError:
+                                dashboard.avatarUrl.isNotEmpty
                                 ? (_, __) {}
                                 : null,
                             child: dashboard.avatarUrl.isEmpty
@@ -218,7 +219,11 @@ class _ProducerProfileView extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.center,
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Icon(Icons.star, size: 16, color: AppColors.darkGreen),
+                        const Icon(
+                          Icons.star,
+                          size: 16,
+                          color: AppColors.darkGreen,
+                        ),
                         const SizedBox(width: 4),
                         Text(
                           '${dashboard.averageRating.toStringAsFixed(1)} (${dashboard.totalReviews} Avaliações)',
@@ -230,7 +235,11 @@ class _ProducerProfileView extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(width: 4),
-                        const Icon(Icons.chevron_right, size: 16, color: AppColors.darkGreen),
+                        const Icon(
+                          Icons.chevron_right,
+                          size: 16,
+                          color: AppColors.darkGreen,
+                        ),
                       ],
                     ),
                   ),
@@ -478,9 +487,7 @@ class _ScheduleSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final slotByWeekday = {
-      for (final s in availability) s.weekday: s,
-    };
+    final slotByWeekday = {for (final s in availability) s.weekday: s};
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

@@ -27,7 +27,9 @@ class ReviewModel extends Review {
           ? DateTime.parse(createdAtRaw)
           : DateTime.now(),
       authorAvatarUrl: () {
-        final raw = json['authorAvatarUrl'] as String? ?? json['author_avatar_url'] as String?;
+        final raw =
+            json['authorAvatarUrl'] as String? ??
+            json['author_avatar_url'] as String?;
         if (raw == null || raw.isEmpty) return null;
         return ApiEndpoints.resolveMediaUrl(raw);
       }(),

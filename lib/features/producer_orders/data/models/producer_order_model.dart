@@ -19,6 +19,8 @@ class ProducerOrderModel extends ProducerOrder {
     required super.createdAt,
     required super.isNew,
     required super.consumerPhone,
+    super.cancellationReason,
+    super.cancellationDetails,
   });
 
   factory ProducerOrderModel.fromJson(Map<String, dynamic> json) {
@@ -72,6 +74,8 @@ class ProducerOrderModel extends ProducerOrder {
           json['customerPhone'] as String? ??
           consumer?['phone'] as String? ??
           '',
+      cancellationReason: json['cancellationReason'] as String?,
+      cancellationDetails: json['cancellationDetails'] as String?,
     );
   }
 

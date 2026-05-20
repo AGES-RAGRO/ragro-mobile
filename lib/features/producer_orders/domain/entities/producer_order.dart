@@ -19,6 +19,8 @@ class ProducerOrder extends Equatable {
     required this.createdAt,
     required this.isNew,
     required this.consumerPhone,
+    this.cancellationReason,
+    this.cancellationDetails,
   });
 
   final String id;
@@ -36,6 +38,8 @@ class ProducerOrder extends Equatable {
   final DateTime createdAt;
   final bool isNew;
   final String consumerPhone;
+  final String? cancellationReason;
+  final String? cancellationDetails;
 
   ProducerOrder copyWith({ProducerOrderStatus? status, bool? isNew}) {
     return ProducerOrder(
@@ -54,6 +58,8 @@ class ProducerOrder extends Equatable {
       createdAt: createdAt,
       isNew: isNew ?? this.isNew,
       consumerPhone: consumerPhone,
+      cancellationReason: cancellationReason,
+      cancellationDetails: cancellationDetails,
     );
   }
 
@@ -74,5 +80,7 @@ class ProducerOrder extends Equatable {
     createdAt,
     isNew,
     consumerPhone,
+    cancellationReason,
+    cancellationDetails,
   ];
 }

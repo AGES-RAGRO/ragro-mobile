@@ -208,6 +208,9 @@ class _ProducerOrderDetailView extends StatelessWidget {
                 children: [
                   _Header(order: order),
                   _CustomerHeader(order: order),
+                  if (order.status == ProducerOrderStatus.cancelled &&
+                      order.cancellationReason != null)
+                    _CancellationCard(order: order),
                   const _SectionTitle('ITENS DO PEDIDO'),
                   _ItemsCard(order: order),
                   const SizedBox(height: 18),
@@ -566,6 +569,69 @@ class _ProducerOrderItemRow extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _CancellationCard extends StatelessWidget {
+  const _CancellationCard({required this.order});
+
+  final ProducerOrder order;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 18),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: AppColors.red.withValues(alpha: 0.06),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: AppColors.red.withValues(alpha: 0.25)),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Row(
+              children: [
+                Icon(Icons.cancel_outlined, size: 16, color: AppColors.red),
+                SizedBox(width: 6),
+                Text(
+                  'Motivo do cancelamento',
+                  style: TextStyle(
+                    fontFamily: 'Manrope',
+                    fontWeight: FontWeight.w700,
+                    fontSize: 13,
+                    color: AppColors.red,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Text(
+              order.cancellationReason!,
+              style: const TextStyle(
+                fontFamily: 'Manrope',
+                fontSize: 14,
+                color: AppColors.black,
+              ),
+            ),
+            if (order.cancellationDetails != null &&
+                order.cancellationDetails!.isNotEmpty) ...[
+              const SizedBox(height: 4),
+              Text(
+                order.cancellationDetails!,
+                style: const TextStyle(
+                  fontFamily: 'Manrope',
+                  fontSize: 13,
+                  color: AppColors.placeholder,
+                ),
+              ),
+            ],
+          ],
+        ),
       ),
     );
   }

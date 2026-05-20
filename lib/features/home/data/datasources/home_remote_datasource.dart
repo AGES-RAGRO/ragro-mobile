@@ -53,27 +53,21 @@ class HomeRemoteDataSource {
         if (raw is List) {
           list = raw.cast<Map<String, dynamic>>();
         } else if (raw is Map) {
-          list =
-              (raw['content'] as List?)?.cast<Map<String, dynamic>>() ?? [];
+          list = (raw['content'] as List?)?.cast<Map<String, dynamic>>() ?? [];
         } else {
           list = [];
         }
         products.addAll(
-          list
-              .cast<Map<String, dynamic>>()
-              .map(
-                (json) => HomeProductModel.fromJson(
-                  json,
-                  fallbackFarmName: producer.name,
-                ),
-              ),
+          list.cast<Map<String, dynamic>>().map(
+            (json) => HomeProductModel.fromJson(
+              json,
+              fallbackFarmName: producer.name,
+            ),
+          ),
         );
       }
 
-      return (
-        products: products,
-        hasMore: producerPage < paged.totalPages - 1,
-      );
+      return (products: products, hasMore: producerPage < paged.totalPages - 1);
     } on DioException catch (e) {
       throw e.error as ApiException? ?? const UnknownApiException();
     }

@@ -29,9 +29,11 @@ class ProductDetailModel extends ProductDetail {
     final firstPhotoUrl = photos != null && photos.isNotEmpty
         ? (photos.first as Map<String, dynamic>)['url'] as String? ?? ''
         : '';
-    final imageUrl = ApiEndpoints.resolveMediaUrl(firstPhotoUrl.isNotEmpty
-        ? firstPhotoUrl
-        : (json['imageS3'] as String? ?? ''));
+    final imageUrl = ApiEndpoints.resolveMediaUrl(
+      firstPhotoUrl.isNotEmpty
+          ? firstPhotoUrl
+          : (json['imageS3'] as String? ?? ''),
+    );
     return ProductDetailModel(
       id: (json['id'] as Object).toString(),
       name: json['name'] as String,
