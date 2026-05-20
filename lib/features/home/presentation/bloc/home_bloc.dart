@@ -31,13 +31,10 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
   Future<void> _onStarted(HomeEvent event, Emitter<HomeState> emit) async {
     emit(const HomeLoading());
     try {
-      final results = await Future.wait([
+      final (data, favorites) = await (
         _getHomeData(),
         _favoriteRepository.getFavorites(),
-      ]);
-
-      final data = results[0] as dynamic;
-      final favorites = results[1] as dynamic;
+      ).wait;
 
       emit(
         HomeLoaded(
@@ -58,9 +55,9 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
   }
 
   Future<void> _onFavoriteToggled(
-      HomeFavoriteToggled event,
-      Emitter<HomeState> emit,
-      ) async {
+    HomeFavoriteToggled event,
+    Emitter<HomeState> emit,
+  ) async {
     final current = state;
     if (current is! HomeLoaded) return;
 
@@ -88,10 +85,12 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
         await _favoriteRepository.favoriteProducer(event.producerId);
       }
       final favorites = await _favoriteRepository.getFavorites();
-      emit(current.copyWith(
-        favorites: favorites,
-        favoriteIds: {for (final f in favorites) f.producerId},
-      ));
+      emit(
+        current.copyWith(
+          favorites: favorites,
+          favoriteIds: {for (final f in favorites) f.producerId},
+        ),
+      );
     } on Object {
       emit(current.copyWith(favoriteIds: current.favoriteIds));
     }
