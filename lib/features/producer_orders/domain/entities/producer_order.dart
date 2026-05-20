@@ -41,7 +41,12 @@ class ProducerOrder extends Equatable {
   final String? cancellationReason;
   final String? cancellationDetails;
 
-  ProducerOrder copyWith({ProducerOrderStatus? status, bool? isNew}) {
+  ProducerOrder copyWith({
+    ProducerOrderStatus? status,
+    bool? isNew,
+    String? cancellationReason,
+    String? cancellationDetails,
+  }) {
     return ProducerOrder(
       id: id,
       orderNumber: orderNumber,
@@ -58,8 +63,8 @@ class ProducerOrder extends Equatable {
       createdAt: createdAt,
       isNew: isNew ?? this.isNew,
       consumerPhone: consumerPhone,
-      cancellationReason: cancellationReason,
-      cancellationDetails: cancellationDetails,
+      cancellationReason: cancellationReason ?? this.cancellationReason,
+      cancellationDetails: cancellationDetails ?? this.cancellationDetails,
     );
   }
 

@@ -32,15 +32,19 @@ class ProducerOrderDetailBloc
     ProducerOrderDetailStarted event,
     Emitter<ProducerOrderDetailState> emit,
   ) async {
-    if (event.initialOrder != null) {
-      emit(ProducerOrderDetailLoaded(event.initialOrder!));
-      return;
+    final initial = event.initialOrder;
+    if (initial != null) {
+      emit(ProducerOrderDetailLoaded(initial));
+      // Cancelled orders need a full fetch to load cancellationReason from API.
+      if (initial.status != ProducerOrderStatus.cancelled) return;
+    } else {
+      emit(const ProducerOrderDetailLoading());
     }
-    emit(const ProducerOrderDetailLoading());
     try {
       final order = await _getDetail(event.orderId);
       emit(ProducerOrderDetailLoaded(order));
     } on Exception catch (e) {
+      if (initial != null) return; // keep showing initial order on refresh failure
       emit(ProducerOrderDetailFailure(e.toString()));
     }
   }
@@ -80,6 +84,8 @@ class ProducerOrderDetailBloc
       );
       final updated = current.order.copyWith(
         status: ProducerOrderStatus.cancelled,
+        cancellationReason: event.reason,
+        cancellationDetails: event.details,
       );
       emit(ProducerOrderDetailSuccess(order: updated, action: 'refused'));
       emit(ProducerOrderDetailLoaded(updated));
