@@ -75,10 +75,7 @@ void main() {
     });
 
     test('returns safe defaults when fields are missing or null', () {
-      final json = <String, dynamic>{
-        'id': 'order-3',
-        'status': 'PENDING',
-      };
+      final json = <String, dynamic>{'id': 'order-3', 'status': 'PENDING'};
 
       final model = OrderDetailModel.fromJson(json);
 

@@ -31,13 +31,8 @@ void main() {
   late _MockRemoveFromCart removeFromCart;
   late _MockClearCart clearCart;
 
-  CartBloc buildBloc() => CartBloc(
-    getCart,
-    addToCart,
-    updateQuantity,
-    removeFromCart,
-    clearCart,
-  );
+  CartBloc buildBloc() =>
+      CartBloc(getCart, addToCart, updateQuantity, removeFromCart, clearCart);
 
   const tItem = CartItem(
     id: 'item-1',
@@ -117,9 +112,8 @@ void main() {
         ).thenAnswer((_) async => tCart);
         return buildBloc();
       },
-      act: (bloc) => bloc.add(
-        const CartItemAdded(productId: 'p-1', quantity: 2),
-      ),
+      act: (bloc) =>
+          bloc.add(const CartItemAdded(productId: 'p-1', quantity: 2)),
       expect: () => [const CartLoaded(tCart)],
       verify: (_) {
         verify(() => addToCart(productId: 'p-1', quantity: 2)).called(1);
@@ -138,13 +132,9 @@ void main() {
         return buildBloc();
       },
       seed: () => const CartLoaded(tEmptyCart),
-      act: (bloc) => bloc.add(
-        const CartItemAdded(productId: 'p-1', quantity: 2),
-      ),
-      expect: () => [
-        const CartUpdating(tEmptyCart),
-        const CartLoaded(tCart),
-      ],
+      act: (bloc) =>
+          bloc.add(const CartItemAdded(productId: 'p-1', quantity: 2)),
+      expect: () => [const CartUpdating(tEmptyCart), const CartLoaded(tCart)],
     );
 
     blocTest<CartBloc, CartState>(
@@ -164,9 +154,8 @@ void main() {
         return buildBloc();
       },
       seed: () => const CartLoaded(tCart),
-      act: (bloc) => bloc.add(
-        const CartItemAdded(productId: 'p-2', quantity: 1),
-      ),
+      act: (bloc) =>
+          bloc.add(const CartItemAdded(productId: 'p-2', quantity: 1)),
       expect: () => [
         const CartUpdating(tCart),
         const CartUpdateFailure(
@@ -187,9 +176,8 @@ void main() {
         ).thenThrow(const NetworkException());
         return buildBloc();
       },
-      act: (bloc) => bloc.add(
-        const CartItemAdded(productId: 'p-1', quantity: 1),
-      ),
+      act: (bloc) =>
+          bloc.add(const CartItemAdded(productId: 'p-1', quantity: 1)),
       expect: () => [const CartFailure('Sem conexão com a internet')],
     );
   });
@@ -217,7 +205,10 @@ void main() {
           () => updateQuantity(cartItemId: 'item-1', quantity: 3),
         ).called(1);
         verifyNever(
-          () => updateQuantity(cartItemId: 'p-1', quantity: any(named: 'quantity')),
+          () => updateQuantity(
+            cartItemId: 'p-1',
+            quantity: any(named: 'quantity'),
+          ),
         );
       },
     );
@@ -232,10 +223,7 @@ void main() {
       },
       seed: () => const CartLoaded(tCart),
       act: (bloc) => bloc.add(const CartItemRemoved('item-1')),
-      expect: () => [
-        const CartUpdating(tCart),
-        const CartLoaded(tEmptyCart),
-      ],
+      expect: () => [const CartUpdating(tCart), const CartLoaded(tEmptyCart)],
       verify: (_) {
         verify(() => removeFromCart('item-1')).called(1);
       },
@@ -251,10 +239,7 @@ void main() {
       },
       seed: () => const CartLoaded(tCart),
       act: (bloc) => bloc.add(const CartCleared()),
-      expect: () => [
-        const CartUpdating(tCart),
-        const CartLoaded(tEmptyCart),
-      ],
+      expect: () => [const CartUpdating(tCart), const CartLoaded(tEmptyCart)],
     );
   });
 }
