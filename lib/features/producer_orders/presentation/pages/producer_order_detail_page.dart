@@ -253,7 +253,9 @@ class _Header extends StatelessWidget {
         children: [
           GestureDetector(
             onTap: () => context.pop(
-              order.status == ProducerOrderStatus.cancelled ? 'cancelled' : null,
+              order.status == ProducerOrderStatus.cancelled
+                  ? 'cancelled'
+                  : null,
             ),
             child: const Padding(
               padding: EdgeInsets.all(8),
@@ -737,25 +739,11 @@ class _ActionFooter extends StatelessWidget {
           label: 'Recusar Pedido',
           icon: Icons.cancel_outlined,
           color: AppColors.red,
-          onTap: isProcessing
-              ? null
-              : () => _confirmRefuse(context, 'recusar'),
+          onTap: isProcessing ? null : () => _confirmRefuse(context),
         ),
       ],
-      if (order.status == ProducerOrderStatus.accepted) ...[
-        _ActionButton(
-          label: 'Iniciar Entrega',
-          icon: Icons.local_shipping_outlined,
-          color: const Color(0xFFF97316),
-          onTap: isProcessing
-              ? null
-              : () => bloc.add(
-                  ProducerOrderDetailStatusUpdated(
-                    order.id,
-                    ProducerOrderStatus.inDelivery,
-                  ),
-                ),
-        ),
+      if (order.status == ProducerOrderStatus.accepted ||
+          order.status == ProducerOrderStatus.inDelivery) ...[
         _ActionButton(
           label: 'Cancelar Pedido',
           icon: Icons.cancel_outlined,
@@ -763,24 +751,7 @@ class _ActionFooter extends StatelessWidget {
           outlined: true,
           onTap: isProcessing
               ? null
-              : () => _confirmRefuse(context, 'cancelar'),
-        ),
-      ],
-      if (order.status == ProducerOrderStatus.inDelivery) ...[
-        _ActionButton(
-          label: 'Confirmar Pedido',
-          icon: Icons.check_circle_outline,
-          color: const Color(0xFF3B82F6),
-          onTap: isProcessing ? null : () => _confirmDelivery(context),
-        ),
-        _ActionButton(
-          label: 'Cancelar Pedido',
-          icon: Icons.cancel_outlined,
-          color: AppColors.red,
-          outlined: true,
-          onTap: isProcessing
-              ? null
-              : () => _confirmRefuse(context, 'cancelar'),
+              : () => _confirmRefuse(context),
         ),
       ],
       if (order.consumerPhone.isNotEmpty &&
@@ -827,49 +798,16 @@ class _ActionFooter extends StatelessWidget {
     );
   }
 
-  Future<void> _confirmRefuse(BuildContext context, String verb) async {
-    if (verb == 'recusar') {
-      final confirmed = await showDialog<bool>(
-        context: context,
-        barrierColor: Colors.black.withValues(alpha: 0.4),
-        builder: (_) => const _ProducerConfirmDialog(
-          icon: Icons.shopping_cart_outlined,
-          title: 'Recusar pedido',
-          description: 'Tem certeza que deseja recusar o pedido?',
-        ),
-      );
-      if (!(confirmed ?? false)) return;
-      bloc.add(
-        ProducerOrderDetailRefused(order.id, reason: 'Recusado pelo produtor'),
-      );
-    } else {
-      final cancelResult = await CancelOrderDialog.showForProducer(context);
-      if (cancelResult == null) return;
-      bloc.add(
-        ProducerOrderDetailRefused(
-          order.id,
-          reason: cancelResult.reason,
-          details: cancelResult.details,
-        ),
-      );
-    }
-  }
-
-  Future<void> _confirmDelivery(BuildContext context) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      barrierColor: Colors.black.withValues(alpha: 0.4),
-      builder: (_) => const _ProducerConfirmDialog(
-        icon: Icons.local_shipping_outlined,
-        title: 'Confirmar entrega',
-        description: 'Tem certeza que deseja confirmar a entrega deste pedido?',
+  Future<void> _confirmRefuse(BuildContext context) async {
+    final cancelResult = await CancelOrderDialog.showForProducer(context);
+    if (cancelResult == null) return;
+    bloc.add(
+      ProducerOrderDetailRefused(
+        order.id,
+        reason: cancelResult.reason,
+        details: cancelResult.details,
       ),
     );
-    if (confirmed ?? false) {
-      bloc.add(
-        ProducerOrderDetailStatusUpdated(order.id, ProducerOrderStatus.delivered),
-      );
-    }
   }
 
   Future<void> _contactCustomer(BuildContext context) async {
@@ -906,8 +844,7 @@ class _ActionButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final effectiveColor =
-        onTap == null ? color.withValues(alpha: 0.5) : color;
+    final effectiveColor = onTap == null ? color.withValues(alpha: 0.5) : color;
     final iconColor = outlined ? effectiveColor : AppColors.white;
     final textColor = outlined ? effectiveColor : AppColors.white;
 
@@ -1010,95 +947,21 @@ class _ProducerSuccessDialog extends StatelessWidget {
   }
 }
 
-class _ProducerConfirmDialog extends StatelessWidget {
-  const _ProducerConfirmDialog({
-    required this.icon,
-    required this.title,
-    required this.description,
-  });
-
-  final IconData icon;
-  final String title;
-  final String description;
-
-  @override
-  Widget build(BuildContext context) {
-    return Dialog(
-      backgroundColor: AppColors.white,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-      insetPadding: const EdgeInsets.symmetric(horizontal: 40),
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(24, 28, 24, 20),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 56,
-              height: 56,
-              decoration: BoxDecoration(
-                color: AppColors.lightGreen.withValues(alpha: 0.15),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(icon, color: AppColors.lightGreen, size: 28),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              title,
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontFamily: 'Figtree',
-                fontWeight: FontWeight.w700,
-                fontSize: 20,
-                color: AppColors.black,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              description,
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontFamily: 'Manrope',
-                fontSize: 14,
-                color: AppColors.placeholder,
-              ),
-            ),
-            const SizedBox(height: 24),
-            _ProducerDialogButton(
-              label: 'Voltar',
-              outlined: true,
-              color: AppColors.darkGreen,
-              onTap: () => Navigator.of(context).pop(false),
-            ),
-            const SizedBox(height: 10),
-            _ProducerDialogButton(
-              label: 'Confirmar',
-              color: AppColors.darkGreen,
-              onTap: () => Navigator.of(context).pop(true),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
 class _ProducerDialogButton extends StatelessWidget {
   const _ProducerDialogButton({
     required this.label,
     required this.color,
     required this.onTap,
-    this.outlined = false,
   });
 
   final String label;
   final Color color;
   final VoidCallback? onTap;
-  final bool outlined;
 
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: outlined ? Colors.transparent : color,
+      color: color,
       borderRadius: BorderRadius.circular(12),
       child: InkWell(
         onTap: onTap,
@@ -1106,20 +969,14 @@ class _ProducerDialogButton extends StatelessWidget {
         child: Container(
           width: double.infinity,
           padding: const EdgeInsets.symmetric(vertical: 13),
-          decoration: outlined
-              ? BoxDecoration(
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: color),
-                )
-              : null,
           alignment: Alignment.center,
           child: Text(
             label,
-            style: TextStyle(
+            style: const TextStyle(
               fontFamily: 'Manrope',
               fontWeight: FontWeight.w700,
               fontSize: 15,
-              color: outlined ? color : AppColors.white,
+              color: AppColors.white,
             ),
           ),
         ),

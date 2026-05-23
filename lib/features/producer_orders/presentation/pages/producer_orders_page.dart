@@ -42,22 +42,22 @@ class _ProducerOrdersViewState extends State<_ProducerOrdersView> {
   final Set<String> _selectedIds = {};
 
   void _enterSelectionMode() => setState(() {
-        _selectionMode = true;
-        _selectedIds.clear();
-      });
+    _selectionMode = true;
+    _selectedIds.clear();
+  });
 
   void _exitSelectionMode() => setState(() {
-        _selectionMode = false;
-        _selectedIds.clear();
-      });
+    _selectionMode = false;
+    _selectedIds.clear();
+  });
 
   void _toggleSelection(String id) => setState(() {
-        if (_selectedIds.contains(id)) {
-          _selectedIds.remove(id);
-        } else {
-          _selectedIds.add(id);
-        }
-      });
+    if (_selectedIds.contains(id)) {
+      _selectedIds.remove(id);
+    } else {
+      _selectedIds.add(id);
+    }
+  });
 
   void _saveSelection(BuildContext context) {
     final bloc = context.read<ProducerOrdersBloc>();
@@ -412,13 +412,13 @@ class _ProducerOrdersViewState extends State<_ProducerOrdersView> {
                                         child: ElevatedButton(
                                           onPressed: _selectedIds.isEmpty
                                               ? null
-                                              : () =>
-                                                    _saveSelection(context),
+                                              : () => _saveSelection(context),
                                           style: ElevatedButton.styleFrom(
-                                            backgroundColor: AppColors.darkGreen,
-                                            disabledBackgroundColor:
-                                                AppColors.darkGreen
-                                                    .withValues(alpha: 0.4),
+                                            backgroundColor:
+                                                AppColors.darkGreen,
+                                            disabledBackgroundColor: AppColors
+                                                .darkGreen
+                                                .withValues(alpha: 0.4),
                                             foregroundColor: AppColors.white,
                                             shape: RoundedRectangleBorder(
                                               borderRadius:

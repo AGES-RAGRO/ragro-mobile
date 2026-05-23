@@ -21,6 +21,7 @@ class ProducerOrderCard extends StatelessWidget {
   final VoidCallback? onActionTap;
   final VoidCallback? onCancelTap;
   final VoidCallback? onDeliveryConfirmTap;
+
   /// When non-null the card is in selection mode; tapping selects/deselects.
   final bool? isSelected;
   final VoidCallback? onSelect;
