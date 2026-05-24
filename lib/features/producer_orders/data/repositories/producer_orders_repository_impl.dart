@@ -30,4 +30,7 @@ class ProducerOrdersRepositoryImpl implements ProducerOrdersRepository {
   @override
   Future<void> updateStatus(String id, ProducerOrderStatus status) =>
       _dataSource.updateStatus(id, status);
+
+    @override
+    Future<void> markAsSeen(String id) => _dataSource.markAsSeen(id);
 }

@@ -120,9 +120,17 @@ class ProducerOrderDetailPage extends StatelessWidget {
               state is ProducerOrderDetailRefusing ||
               state is ProducerOrderDetailUpdatingStatus;
 
-          return _ProducerOrderDetailView(
-            order: order,
-            isProcessing: isProcessing,
+          return WillPopScope(
+            onWillPop: () async {
+              // When user navigates back (system or app), return 'seen' if the
+              // order was previously new so the list can update immediately.
+              context.pop(order.isNew ? 'seen' : null);
+              return false;
+            },
+            child: _ProducerOrderDetailView(
+              order: order,
+              isProcessing: isProcessing,
+            ),
           );
         },
       ),
@@ -252,11 +260,15 @@ class _Header extends StatelessWidget {
       child: Row(
         children: [
           GestureDetector(
-            onTap: () => context.pop(
-              order.status == ProducerOrderStatus.cancelled
-                  ? 'cancelled'
-                  : null,
-            ),
+            onTap: () {
+              if (order.status == ProducerOrderStatus.cancelled) {
+                context.pop('cancelled');
+              } else if (order.isNew) {
+                context.pop('seen');
+              } else {
+                context.pop();
+              }
+            },
             child: const Padding(
               padding: EdgeInsets.all(8),
               child: Icon(Icons.arrow_back, size: 18),

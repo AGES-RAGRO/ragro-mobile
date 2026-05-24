@@ -72,6 +72,14 @@ class ProducerOrdersRemoteDataSource {
     }
   }
 
+  Future<void> markAsSeen(String id) async {
+    try {
+      await _apiClient.dio.patch<void>(ApiEndpoints.orderSeen(id));
+    } on DioException catch (e) {
+      throw e.error as ApiException? ?? const UnknownApiException();
+    }
+  }
+
   List<Map<String, dynamic>> _readList(dynamic data) {
     final rawList = switch (data) {
       final List<dynamic> list => list,

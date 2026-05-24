@@ -5,6 +5,8 @@ import 'package:ragro_mobile/features/producer_orders/domain/usecases/confirm_pr
 import 'package:ragro_mobile/features/producer_orders/domain/usecases/get_producer_order_detail.dart';
 import 'package:ragro_mobile/features/producer_orders/domain/usecases/refuse_producer_order.dart';
 import 'package:ragro_mobile/features/producer_orders/domain/usecases/update_producer_order_status.dart';
+import 'package:ragro_mobile/core/di/injection.dart';
+import 'package:ragro_mobile/features/producer_orders/domain/repositories/producer_orders_repository.dart';
 import 'package:ragro_mobile/features/producer_orders/presentation/bloc/producer_order_detail_event.dart';
 import 'package:ragro_mobile/features/producer_orders/presentation/bloc/producer_order_detail_state.dart';
 
@@ -35,6 +37,10 @@ class ProducerOrderDetailBloc
     final initial = event.initialOrder;
     if (initial != null) {
       emit(ProducerOrderDetailLoaded(initial));
+      try {
+        await getIt<ProducerOrdersRepository>().markAsSeen(event.orderId);
+        emit(ProducerOrderDetailLoaded(initial.copyWith(isNew: false)));
+      } catch (_) {}
       // Cancelled orders need a full fetch to load cancellationReason from API.
       if (initial.status != ProducerOrderStatus.cancelled) return;
     } else {
@@ -42,7 +48,14 @@ class ProducerOrderDetailBloc
     }
     try {
       final order = await _getDetail(event.orderId);
-      emit(ProducerOrderDetailLoaded(order));
+      // Mark as seen after loading details and update view
+      try {
+        await getIt<ProducerOrdersRepository>().markAsSeen(event.orderId);
+        final updated = order.copyWith(isNew: false);
+        emit(ProducerOrderDetailLoaded(updated));
+      } catch (_) {
+        emit(ProducerOrderDetailLoaded(order));
+      }
     } on Exception catch (e) {
       if (initial != null) return; // keep showing initial order on refresh failure
       emit(ProducerOrderDetailFailure(e.toString()));
@@ -101,6 +114,7 @@ class ProducerOrderDetailBloc
   ) async {
     final current = state;
     if (current is! ProducerOrderDetailLoaded) return;
+
     emit(ProducerOrderDetailUpdatingStatus(current.order));
     try {
       await _updateStatus(event.orderId, event.status);
@@ -108,7 +122,14 @@ class ProducerOrderDetailBloc
       emit(
         ProducerOrderDetailSuccess(order: updated, action: 'status_updated'),
       );
-      emit(ProducerOrderDetailLoaded(updated));
+      
+      try {
+        await getIt<ProducerOrdersRepository>().markAsSeen(event.orderId);
+        final updatedSeen = updated.copyWith(isNew: false);
+        emit(ProducerOrderDetailLoaded(updatedSeen));
+      } catch (_) {
+        emit(ProducerOrderDetailLoaded(updated));
+      }
     } on Exception catch (e) {
       emit(ProducerOrderDetailActionError(current.order, e.toString()));
       emit(ProducerOrderDetailLoaded(current.order));

@@ -84,3 +84,12 @@ class ProducerOrderLocallyDelivered extends ProducerOrdersEvent {
   @override
   List<Object?> get props => [orderId];
 }
+
+class ProducerOrderLocallySeen extends ProducerOrdersEvent {
+  const ProducerOrderLocallySeen(this.orderId);
+
+  final String orderId;
+
+  @override
+  List<Object?> get props => [orderId];
+}

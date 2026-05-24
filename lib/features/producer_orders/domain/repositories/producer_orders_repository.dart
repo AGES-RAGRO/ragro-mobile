@@ -11,4 +11,5 @@ abstract class ProducerOrdersRepository {
     String? details,
   });
   Future<void> updateStatus(String id, ProducerOrderStatus status);
+  Future<void> markAsSeen(String id);
 }

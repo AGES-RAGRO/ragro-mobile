@@ -351,6 +351,10 @@ class _ProducerOrdersViewState extends State<_ProducerOrdersView> {
                                     context.read<ProducerOrdersBloc>().add(
                                       ProducerOrdersStarted(targetTab),
                                     );
+                                  } else if (result == 'seen') {
+                                    context.read<ProducerOrdersBloc>().add(
+                                      ProducerOrderLocallySeen(order.id),
+                                    );
                                   }
                                 },
                                 onActionTap:
