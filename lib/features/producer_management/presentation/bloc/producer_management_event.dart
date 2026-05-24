@@ -13,3 +13,16 @@ class ProducerManagementStarted extends ProducerManagementEvent {
 class ProducerManagementRefreshed extends ProducerManagementEvent {
   const ProducerManagementRefreshed();
 }
+
+class ProducerDashboardPeriodChanged extends ProducerManagementEvent {
+  const ProducerDashboardPeriodChanged({
+    required this.month,
+    required this.year,
+  });
+
+  final int month;
+  final int year;
+
+  @override
+  List<Object?> get props => [month, year];
+}

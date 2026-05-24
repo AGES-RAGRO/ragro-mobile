@@ -10,5 +10,8 @@ class ProducerManagementRepositoryImpl implements ProducerManagementRepository {
   final ProducerManagementRemoteDataSource _dataSource;
 
   @override
-  Future<ProducerDashboard> getDashboard() => _dataSource.getDashboard();
+  Future<ProducerDashboard> getDashboard({
+    required int month,
+    required int year,
+  }) => _dataSource.getDashboard(month: month, year: year);
 }
