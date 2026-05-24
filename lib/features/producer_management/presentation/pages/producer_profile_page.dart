@@ -419,10 +419,10 @@ class _ProducerProfileView extends StatelessWidget {
                     foregroundColor: AppColors.darkGreen,
                     side: const BorderSide(color: AppColors.darkGreen),
                     padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 6,
+                      horizontal: 18,
+                      vertical: 10,
                     ),
-                    minimumSize: Size.zero,
+                    minimumSize: const Size(104, 42),
                     tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(24),
@@ -430,7 +430,7 @@ class _ProducerProfileView extends StatelessWidget {
                     textStyle: const TextStyle(
                       fontFamily: 'Manrope',
                       fontWeight: FontWeight.w600,
-                      fontSize: 13,
+                      fontSize: 14,
                     ),
                   ),
                   child: Row(
@@ -439,8 +439,8 @@ class _ProducerProfileView extends StatelessWidget {
                       Text(
                         _periodLabel(state.selectedMonth, state.selectedYear),
                       ),
-                      const SizedBox(width: 4),
-                      const Icon(Icons.keyboard_arrow_down, size: 14),
+                      const SizedBox(width: 6),
+                      const Icon(Icons.keyboard_arrow_down, size: 18),
                     ],
                   ),
                 ),
