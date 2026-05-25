@@ -1,8 +1,3 @@
-// Screen: Customer Home
-// User Story: US-12 — View Producer List, US-35 — Recommend Products
-// Epic: EPIC 2 — Marketplace, EPIC 10 — Recommendations
-// Routes: GET /producers, GET /recommendations
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -16,14 +11,24 @@ import 'package:ragro_mobile/features/home/presentation/bloc/home_event.dart';
 import 'package:ragro_mobile/features/home/presentation/bloc/home_state.dart';
 import 'package:ragro_mobile/features/home/presentation/widgets/producers_section.dart';
 import 'package:ragro_mobile/features/home/presentation/widgets/products_grid.dart';
+import 'package:ragro_mobile/features/recommendations/domain/entities/recommendation.dart';
+import 'package:ragro_mobile/features/recommendations/presentation/bloc/recommendations_bloc.dart';
+import 'package:ragro_mobile/features/recommendations/presentation/bloc/recommendations_event.dart';
+import 'package:ragro_mobile/features/recommendations/presentation/bloc/recommendations_state.dart';
 
 class CustomerHomePage extends StatelessWidget {
   const CustomerHomePage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider.value(
-      value: getIt<HomeBloc>(),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider.value(value: getIt<HomeBloc>()),
+        BlocProvider(
+          create: (_) => getIt<RecommendationsBloc>()
+            ..add(const RecommendationsStarted()),
+        ),
+      ],
       child: const _CustomerHomeView(),
     );
   }
@@ -73,58 +78,77 @@ class _CustomerHomeViewState extends State<_CustomerHomeView> {
           builder: (context, state) {
             return switch (state) {
               HomeLoading() || HomeInitial() => const _HomeLoadingView(),
-              HomeLoaded(:final producers, :final products) => RefreshIndicator(
-                onRefresh: () async {
-                  context.read<HomeBloc>().add(const HomeRefreshed());
-                },
-                child: CustomScrollView(
-                  controller: _scrollController,
-                  slivers: [
-                    const SliverToBoxAdapter(
-                      child: Padding(
-                        padding: EdgeInsets.fromLTRB(16, 16, 16, 0),
-                        child: Text(
-                          'Início',
-                          style: TextStyle(
-                            fontFamily: 'Figtree',
-                            fontWeight: FontWeight.w700,
-                            fontSize: 34,
-                            color: AppColors.darkGreen,
+              HomeLoaded(:final producers, :final products) =>
+                BlocBuilder<RecommendationsBloc, RecommendationsState>(
+                  builder: (context, recommendationsState) {
+                    final recommendations = switch (recommendationsState) {
+                      RecommendationsLoaded(:final recommendations) =>
+                        recommendations,
+                      _ => <Recommendation>[],
+                    };
+
+                    return RefreshIndicator(
+                      onRefresh: () async {
+                        context.read<HomeBloc>().add(const HomeRefreshed());
+                        context.read<RecommendationsBloc>().add(
+                          const RecommendationsRefreshRequested(),
+                        );
+                      },
+                      child: CustomScrollView(
+                        controller: _scrollController,
+                        slivers: [
+                          const SliverToBoxAdapter(
+                            child: Padding(
+                              padding: EdgeInsets.fromLTRB(16, 16, 16, 0),
+                              child: Text(
+                                'Início',
+                                style: TextStyle(
+                                  fontFamily: 'Figtree',
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 34,
+                                  color: AppColors.darkGreen,
+                                ),
+                              ),
+                            ),
                           ),
-                        ),
+                          const SliverToBoxAdapter(child: SizedBox(height: 24)),
+                          SliverToBoxAdapter(
+                            child: ProducersSection(
+                              producers: producers,
+                              favorites: state.favorites,
+                              favoriteIds: state.favoriteIds,
+                              onProducerTap: (p) =>
+                                  _onProducerTap(context, p),
+                              isLoadingMore: state.isFetchingMoreProducers,
+                            ),
+                          ),
+                          const SliverToBoxAdapter(child: SizedBox(height: 32)),
+                          SliverToBoxAdapter(
+                            child: ProductsGrid(
+                              products: products,
+                              recommendations: recommendations,
+                              isLoadingMore: state.isFetchingMoreProducts,
+                              onProductTap: (p) => context.push(
+                                '/customer/home/product/${p.id}',
+                                extra: p.producerId,
+                              ),
+                              onAddToCart: (product) {
+                                getIt<CartBloc>().add(
+                                  CartItemAdded(
+                                    productId: product.id,
+                                    quantity: 1,
+                                  ),
+                                );
+                                context.push('/customer/cart');
+                              },
+                            ),
+                          ),
+                          const SliverToBoxAdapter(child: SizedBox(height: 32)),
+                        ],
                       ),
-                    ),
-                    const SliverToBoxAdapter(child: SizedBox(height: 24)),
-                    SliverToBoxAdapter(
-                      child: ProducersSection(
-                        producers: producers,
-                        favorites: state.favorites,
-                        favoriteIds: state.favoriteIds,
-                        onProducerTap: (p) => _onProducerTap(context, p),
-                        isLoadingMore: state.isFetchingMoreProducers,
-                      ),
-                    ),
-                    const SliverToBoxAdapter(child: SizedBox(height: 32)),
-                    SliverToBoxAdapter(
-                      child: ProductsGrid(
-                        products: products,
-                        isLoadingMore: state.isFetchingMoreProducts,
-                        onProductTap: (p) => context.push(
-                          '/customer/home/product/${p.id}',
-                          extra: p.producerId,
-                        ),
-                        onAddToCart: (product) {
-                          getIt<CartBloc>().add(
-                            CartItemAdded(productId: product.id, quantity: 1),
-                          );
-                          context.push('/customer/cart');
-                        },
-                      ),
-                    ),
-                    const SliverToBoxAdapter(child: SizedBox(height: 32)),
-                  ],
+                    );
+                  },
                 ),
-              ),
               HomeFailure(:final message) => Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
