@@ -1,12 +1,12 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 import 'package:ragro_mobile/core/network/api_exception.dart';
+import 'package:ragro_mobile/features/home/domain/repositories/favorite_producer_repository.dart';
 import 'package:ragro_mobile/features/home/domain/usecases/get_home_data.dart';
 import 'package:ragro_mobile/features/home/domain/usecases/get_producers.dart';
 import 'package:ragro_mobile/features/home/domain/usecases/get_recommended_products.dart';
 import 'package:ragro_mobile/features/home/presentation/bloc/home_event.dart';
 import 'package:ragro_mobile/features/home/presentation/bloc/home_state.dart';
-import 'package:ragro_mobile/features/home/domain/repositories/favorite_producer_repository.dart';
 
 @lazySingleton
 class HomeBloc extends Bloc<HomeEvent, HomeState> {
@@ -31,23 +31,23 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
   Future<void> _onStarted(HomeEvent event, Emitter<HomeState> emit) async {
     emit(const HomeLoading());
     try {
-      final results = await Future.wait([
-        _getHomeData(),
-        _favoriteRepository.getFavorites(),
-      ]);
+      final (
+        :producers,
+        :products,
+        :hasMoreProducts,
+      ) = await _getHomeData();
 
-      final data = results[0] as dynamic;
-      final favorites = results[1] as dynamic;
+      final favorites = await _favoriteRepository.getFavorites();
 
       emit(
         HomeLoaded(
-          producers: data.producers.content,
-          products: data.products,
+          producers: producers.content,
+          products: products,
           favorites: favorites,
           favoriteIds: {for (final f in favorites) f.producerId},
-          currentProducersPage: data.producers.page,
-          hasMoreProducers: data.producers.page < data.producers.totalPages - 1,
-          hasMoreProducts: data.hasMoreProducts,
+          currentProducersPage: producers.page,
+          hasMoreProducers: producers.page < producers.totalPages - 1,
+          hasMoreProducts: hasMoreProducts,
         ),
       );
     } on ApiException catch (e) {
@@ -58,9 +58,9 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
   }
 
   Future<void> _onFavoriteToggled(
-      HomeFavoriteToggled event,
-      Emitter<HomeState> emit,
-      ) async {
+    HomeFavoriteToggled event,
+    Emitter<HomeState> emit,
+  ) async {
     final current = state;
     if (current is! HomeLoaded) return;
 
@@ -69,8 +69,8 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     final newIds = Set<String>.from(current.favoriteIds);
     final newFavorites = isFav
         ? current.favorites
-              .where((f) => f.producerId != event.producerId)
-              .toList()
+            .where((f) => f.producerId != event.producerId)
+            .toList()
         : current.favorites;
 
     if (isFav) {

@@ -255,6 +255,16 @@ import 'package:ragro_mobile/features/product_detail/domain/usecases/get_product
     as _i680;
 import 'package:ragro_mobile/features/product_detail/presentation/bloc/product_detail_bloc.dart'
     as _i740;
+import 'package:ragro_mobile/features/recommendations/data/datasources/recommendation_remote_datasource.dart'
+    as _i1008;
+import 'package:ragro_mobile/features/recommendations/data/repositories/recommentations_repository_impl.dart'
+    as _i941;
+import 'package:ragro_mobile/features/recommendations/domain/repositories/recommendations_repository.dart'
+    as _i485;
+import 'package:ragro_mobile/features/recommendations/domain/usecases/get_recommendations_usecase.dart'
+    as _i3;
+import 'package:ragro_mobile/features/recommendations/presentation/bloc/recommendations_bloc.dart'
+    as _i721;
 import 'package:ragro_mobile/features/search/data/datasources/search_local_datasource.dart'
     as _i52;
 import 'package:ragro_mobile/features/search/data/datasources/search_remote_datasource.dart'
@@ -371,6 +381,9 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i127.ProductDetailRemoteDataSource>(
       () => _i127.ProductDetailRemoteDataSource(gh<_i873.ApiClient>()),
+    );
+    gh.lazySingleton<_i1008.RecommendationsRemoteDatasource>(
+      () => _i1008.RecommendationsRemoteDatasource(gh<_i873.ApiClient>()),
     );
     gh.lazySingleton<_i987.SearchRemoteDataSource>(
       () => _i987.SearchRemoteDataSource(gh<_i873.ApiClient>()),
@@ -509,6 +522,11 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i567.StockExitBloc>(
       () => _i567.StockExitBloc(gh<_i736.RegisterStockExit>()),
     );
+    gh.lazySingleton<_i485.RecommendationsRepository>(
+      () => _i941.RecommendationsRepositoryImpl(
+        gh<_i1008.RecommendationsRemoteDatasource>(),
+      ),
+    );
     gh.lazySingleton<_i285.HomeRepository>(
       () => _i1055.HomeRepositoryImpl(gh<_i904.HomeRemoteDataSource>()),
     );
@@ -642,6 +660,10 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i419.AppRouter>(
       () => _i419.AppRouter(gh<_i475.AuthBloc>()),
     );
+    gh.lazySingleton<_i3.GetRecommendationsUsecase>(
+      () =>
+          _i3.GetRecommendationsUsecase(gh<_i485.RecommendationsRepository>()),
+    );
     gh.factory<_i846.AdminProducerFormBloc>(
       () => _i846.AdminProducerFormBloc(gh<_i321.CreateAdminProducer>()),
     );
@@ -668,6 +690,9 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i626.GetCustomerProfile>(),
         gh<_i436.UpdateCustomerProfile>(),
       ),
+    );
+    gh.factory<_i721.RecommendationsBloc>(
+      () => _i721.RecommendationsBloc(gh<_i3.GetRecommendationsUsecase>()),
     );
     gh.factory<_i463.CheckoutBloc>(
       () => _i463.CheckoutBloc(gh<_i680.ConfirmOrder>(), gh<_i535.GetCart>()),

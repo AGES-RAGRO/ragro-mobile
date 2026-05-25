@@ -7,12 +7,14 @@ class HomeProductCard extends StatelessWidget {
     required this.product,
     required this.onTap,
     required this.onAddToCart,
+    this.isRecommended = false,
     super.key,
   });
 
   final HomeProduct product;
   final VoidCallback onTap;
   final VoidCallback onAddToCart;
+  final bool isRecommended;
 
   @override
   Widget build(BuildContext context) {
@@ -35,18 +37,56 @@ class HomeProductCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Product image
-            AspectRatio(
-              aspectRatio: 1,
-              child: product.imageUrl.isNotEmpty
-                  ? Image.network(
-                      product.imageUrl,
-                      fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => const _ProductPlaceholder(),
-                    )
-                  : const _ProductPlaceholder(),
+            Stack(
+              children: [
+                AspectRatio(
+                  aspectRatio: 1,
+                  child: product.imageUrl.isNotEmpty
+                      ? Image.network(
+                          product.imageUrl,
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, __, ___) =>
+                              const _ProductPlaceholder(),
+                        )
+                      : const _ProductPlaceholder(),
+                ),
+                if (isRecommended)
+                  Positioned(
+                    top: 8,
+                    left: 8,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF98FFBD),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: const Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.auto_awesome,
+                            color: AppColors.darkGreen,
+                            size: 11,
+                          ),
+                          SizedBox(width: 4),
+                          Text(
+                            'IA recomenda',
+                            style: TextStyle(
+                              fontFamily: 'Figtree',
+                              fontWeight: FontWeight.w600,
+                              fontSize: 10,
+                              color: AppColors.darkGreen,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+              ],
             ),
-            // Product info
             Padding(
               padding: const EdgeInsets.fromLTRB(4, 4, 4, 0),
               child: Column(
