@@ -63,6 +63,7 @@ abstract final class ApiEndpoints {
   static String orderConfirm(String id) => '$_base/orders/$id/confirm';
   static String orderRepeat(String id) => '$_base/orders/$id/repeat';
   static String orderRating(String id) => '$_base/orders/$id/rating';
+  static String orderSeen(String id) => '$_base/orders/$id/seen';
   static String get reviews => '$_base/reviews';
 
   // Customer cart

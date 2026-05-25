@@ -323,6 +323,10 @@ class _ProducerOrdersView extends StatelessWidget {
                                     context.read<ProducerOrdersBloc>().add(
                                       ProducerOrderLocallyDelivered(order.id),
                                     );
+                                  } else if (result == 'seen') {
+                                    context.read<ProducerOrdersBloc>().add(
+                                      ProducerOrderLocallySeen(order.id),
+                                    );
                                   }
                                 },
                                 onCancelTap:

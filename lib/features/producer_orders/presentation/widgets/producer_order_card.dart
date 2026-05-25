@@ -102,23 +102,24 @@ class ProducerOrderCard extends StatelessWidget {
                   ],
                 ),
               ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: _statusColor.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(6),
-                ),
-                child: Text(
-                  order.status.label.toUpperCase(),
-                  style: TextStyle(
-                    fontFamily: 'Manrope',
-                    fontWeight: FontWeight.w700,
-                    fontSize: 11,
-                    color: _statusColor,
-                    letterSpacing: 0.5,
+              if (order.status != ProducerOrderStatus.pending)
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: _statusColor.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Text(
+                    order.status.label.toUpperCase(),
+                    style: TextStyle(
+                      fontFamily: 'Manrope',
+                      fontWeight: FontWeight.w700,
+                      fontSize: 11,
+                      color: _statusColor,
+                      letterSpacing: 0.5,
+                    ),
                   ),
                 ),
-              ),
               const SizedBox(width: 6),
               if (order.isNew)
                 Container(

@@ -7,4 +7,5 @@ abstract class ProducerOrdersRepository {
   Future<void> confirmOrder(String id);
   Future<void> refuseOrder(String id, {required String reason, String? details});
   Future<void> updateStatus(String id, ProducerOrderStatus status);
+  Future<void> markAsSeen(String id);
 }

@@ -23,6 +23,7 @@ class ProducerOrdersBloc
     on<ProducerOrderAccepted>(_onAccepted);
     on<ProducerOrderCancelled>(_onCancelled);
     on<ProducerOrderLocallyRefused>(_onLocallyRefused);
+    on<ProducerOrderLocallySeen>(_onLocallySeen);
     on<ProducerOrderMarkedInDelivery>(_onMarkedInDelivery);
     on<ProducerOrderDeliveryConfirmed>(_onDeliveryConfirmed);
     on<ProducerOrderLocallyDelivered>(_onLocallyDelivered);
@@ -130,6 +131,25 @@ class ProducerOrdersBloc
           (o) => o.id == event.orderId
               ? o.copyWith(status: ProducerOrderStatus.cancelled)
               : o,
+        )
+        .toList();
+    emit(ProducerOrdersLoaded(orders: updated, activeTab: _activeTab));
+  }
+
+  void _onLocallySeen(
+    ProducerOrderLocallySeen event,
+    Emitter<ProducerOrdersState> emit,
+  ) {
+    final currentOrders = switch (state) {
+      ProducerOrdersLoaded(:final orders) => orders,
+      ProducerOrdersActionSuccess(:final orders) => orders,
+      _ => null,
+    };
+    if (currentOrders == null) return;
+
+    final updated = currentOrders
+        .map(
+          (o) => o.id == event.orderId ? o.copyWith(isNew: false) : o,
         )
         .toList();
     emit(ProducerOrdersLoaded(orders: updated, activeTab: _activeTab));
