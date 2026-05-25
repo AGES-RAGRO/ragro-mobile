@@ -77,8 +77,9 @@ class AuthRemoteDataSource {
     final keycloakDio = Dio();
     final KeycloakTokenModel keycloakToken;
     try {
+      final resolvedTokenUrl = ApiEndpoints.resolveMediaUrl(config.tokenUrl);
       final tokenResponse = await keycloakDio.post<Map<String, dynamic>>(
-        config.tokenUrl,
+        resolvedTokenUrl,
         data: {
           'grant_type': 'password',
           'client_id': config.clientId,
@@ -123,8 +124,9 @@ class AuthRemoteDataSource {
   }) async {
     final keycloakDio = Dio();
     try {
+      final resolvedTokenUrl = ApiEndpoints.resolveMediaUrl(tokenUrl);
       final response = await keycloakDio.post<Map<String, dynamic>>(
-        tokenUrl,
+        resolvedTokenUrl,
         data: {
           'grant_type': 'refresh_token',
           'client_id': clientId,
