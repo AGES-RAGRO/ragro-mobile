@@ -51,6 +51,7 @@ class ProducerOrderDetailPage extends StatelessWidget {
                   backgroundColor: Colors.black87,
                 ),
               );
+              if (context.mounted) context.pop('cancelled');
             } else if (state.action == 'confirmed') {
               await showDialog<void>(
                 context: context,
