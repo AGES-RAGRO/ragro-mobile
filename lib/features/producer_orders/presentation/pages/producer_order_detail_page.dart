@@ -217,14 +217,17 @@ class _ProducerOrderDetailView extends StatelessWidget {
                 children: [
                   _Header(order: order),
                   _CustomerHeader(order: order),
-                  if (order.status == ProducerOrderStatus.cancelled &&
-                      order.cancellationReason != null)
-                    _CancellationCard(order: order),
                   const _SectionTitle('ITENS DO PEDIDO'),
                   _ItemsCard(order: order),
                   const SizedBox(height: 18),
                   const _SectionTitle('ENTREGA'),
                   _DeliveryCard(order: order),
+                  if (order.status == ProducerOrderStatus.cancelled &&
+                      order.cancellationReason != null) ...[
+                    const SizedBox(height: 18),
+                    const _SectionTitle('CANCELAMENTO'),
+                    _CancellationCard(order: order),
+                  ],
                 ],
               ),
             ),
@@ -589,69 +592,6 @@ class _ProducerOrderItemRow extends StatelessWidget {
   }
 }
 
-class _CancellationCard extends StatelessWidget {
-  const _CancellationCard({required this.order});
-
-  final ProducerOrder order;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 0, 16, 18),
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: AppColors.red.withValues(alpha: 0.06),
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: AppColors.red.withValues(alpha: 0.25)),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Row(
-              children: [
-                Icon(Icons.cancel_outlined, size: 16, color: AppColors.red),
-                SizedBox(width: 6),
-                Text(
-                  'Motivo do cancelamento',
-                  style: TextStyle(
-                    fontFamily: 'Manrope',
-                    fontWeight: FontWeight.w700,
-                    fontSize: 13,
-                    color: AppColors.red,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Text(
-              order.cancellationReason!,
-              style: const TextStyle(
-                fontFamily: 'Manrope',
-                fontSize: 14,
-                color: AppColors.black,
-              ),
-            ),
-            if (order.cancellationDetails != null &&
-                order.cancellationDetails!.isNotEmpty) ...[
-              const SizedBox(height: 4),
-              Text(
-                order.cancellationDetails!,
-                style: const TextStyle(
-                  fontFamily: 'Manrope',
-                  fontSize: 13,
-                  color: AppColors.placeholder,
-                ),
-              ),
-            ],
-          ],
-        ),
-      ),
-    );
-  }
-}
-
 class _DeliveryCard extends StatelessWidget {
   const _DeliveryCard({required this.order});
 
@@ -716,6 +656,82 @@ class _DeliveryCard extends StatelessWidget {
                     ),
                   ),
                 ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _CancellationCard extends StatelessWidget {
+  const _CancellationCard({required this.order});
+
+  final ProducerOrder order;
+
+  static const _reasonLabels = <String, String>{
+    'OUT_OF_STOCK': 'Produto indisponível',
+    'PRICE_CHANGE': 'Alteração de preço',
+    'DELIVERY_ISSUE': 'Problema na entrega',
+    'OTHER': 'Outro motivo',
+  };
+
+  @override
+  Widget build(BuildContext context) {
+    final reason = _reasonLabels[order.cancellationReason] ??
+        order.cancellationReason ??
+        '';
+    final details = order.cancellationDetails;
+
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16),
+      padding: const EdgeInsets.all(17),
+      decoration: BoxDecoration(
+        color: AppColors.red.withValues(alpha: 0.05),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: AppColors.red.withValues(alpha: 0.2)),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Icon(Icons.cancel_outlined, size: 20, color: AppColors.red),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Motivo do cancelamento',
+                  style: TextStyle(
+                    fontFamily: 'Manrope',
+                    fontWeight: FontWeight.w700,
+                    fontSize: 14,
+                    color: AppColors.black,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                if (reason.isNotEmpty)
+                  Text(
+                    reason,
+                    style: const TextStyle(
+                      fontFamily: 'Manrope',
+                      fontSize: 14,
+                      color: AppColors.red,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                if (details != null && details.isNotEmpty) ...[
+                  const SizedBox(height: 4),
+                  Text(
+                    details,
+                    style: const TextStyle(
+                      fontFamily: 'Manrope',
+                      fontSize: 13,
+                      color: AppColors.black,
+                    ),
+                  ),
+                ],
               ],
             ),
           ),

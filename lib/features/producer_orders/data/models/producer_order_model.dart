@@ -74,8 +74,14 @@ class ProducerOrderModel extends ProducerOrder {
           json['customerPhone'] as String? ??
           consumer?['phone'] as String? ??
           '',
-      cancellationReason: json['cancellationReason'] as String?,
-      cancellationDetails: json['cancellationDetails'] as String?,
+      cancellationReason:
+          json['cancellationReason'] as String? ??
+          json['cancelReason'] as String? ??
+          json['reason'] as String?,
+      cancellationDetails:
+          json['cancellationDetails'] as String? ??
+          json['cancelDetails'] as String? ??
+          json['details'] as String?,
     );
   }
 
