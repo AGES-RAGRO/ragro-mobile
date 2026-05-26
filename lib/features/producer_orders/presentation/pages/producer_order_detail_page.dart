@@ -405,10 +405,10 @@ class _StatusBadge extends StatelessWidget {
   final ProducerOrderStatus status;
 
   Color get _color => switch (status) {
-    ProducerOrderStatus.pending => const Color(0xFFFFB413),
-    ProducerOrderStatus.accepted => AppColors.lightGreen,
-    ProducerOrderStatus.inDelivery => AppColors.lightGreen,
-    ProducerOrderStatus.delivered => const Color(0xFF3B82F6),
+    ProducerOrderStatus.pending => AppColors.yellow,
+    ProducerOrderStatus.accepted => AppColors.darkGreen,
+    ProducerOrderStatus.inDelivery => AppColors.orange,
+    ProducerOrderStatus.delivered => AppColors.blue,
     ProducerOrderStatus.cancelled => AppColors.red,
   };
 

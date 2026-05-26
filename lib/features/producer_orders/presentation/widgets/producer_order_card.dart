@@ -295,59 +295,50 @@ class _StatusBadge extends StatelessWidget {
   final ProducerOrderStatus status;
 
   static Color _colorFor(ProducerOrderStatus s) => switch (s) {
-    ProducerOrderStatus.pending => const Color(0xFFB45309),
+    ProducerOrderStatus.pending => AppColors.yellow,
     ProducerOrderStatus.accepted => AppColors.darkGreen,
-    ProducerOrderStatus.inDelivery => const Color(0xFFEA580C),
-    ProducerOrderStatus.delivered => AppColors.darkGreen,
+    ProducerOrderStatus.inDelivery => AppColors.orange,
+    ProducerOrderStatus.delivered => AppColors.blue,
     ProducerOrderStatus.cancelled => AppColors.red,
+  };
+
+  static IconData? _iconFor(ProducerOrderStatus s) => switch (s) {
+    ProducerOrderStatus.pending => Icons.schedule,
+    ProducerOrderStatus.accepted => Icons.check_circle_outline,
+    ProducerOrderStatus.inDelivery => Icons.local_shipping_outlined,
+    ProducerOrderStatus.delivered => Icons.check_circle_outline,
+    ProducerOrderStatus.cancelled => null,
   };
 
   @override
   Widget build(BuildContext context) {
     final color = _colorFor(status);
-
-    if (status == ProducerOrderStatus.accepted) {
-      return Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-        decoration: BoxDecoration(
-          color: AppColors.darkGreen,
-          borderRadius: BorderRadius.circular(20),
-        ),
-        child: const Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.check_circle_outline, color: AppColors.white, size: 12),
-            SizedBox(width: 4),
-            Text(
-              'ACEITO',
-              style: TextStyle(
-                fontFamily: 'Manrope',
-                fontWeight: FontWeight.w700,
-                fontSize: 11,
-                color: AppColors.white,
-                letterSpacing: 0.5,
-              ),
-            ),
-          ],
-        ),
-      );
-    }
+    final icon = _iconFor(status);
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(6),
+        color: color,
+        borderRadius: BorderRadius.circular(20),
       ),
-      child: Text(
-        status.label.toUpperCase(),
-        style: TextStyle(
-          fontFamily: 'Manrope',
-          fontWeight: FontWeight.w700,
-          fontSize: 11,
-          color: color,
-          letterSpacing: 0.5,
-        ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (icon != null) ...[
+            Icon(icon, color: AppColors.white, size: 12),
+            const SizedBox(width: 4),
+          ],
+          Text(
+            status.label.toUpperCase(),
+            style: const TextStyle(
+              fontFamily: 'Manrope',
+              fontWeight: FontWeight.w700,
+              fontSize: 11,
+              color: AppColors.white,
+              letterSpacing: 0.5,
+            ),
+          ),
+        ],
       ),
     );
   }
