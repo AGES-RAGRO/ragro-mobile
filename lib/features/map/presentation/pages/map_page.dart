@@ -1,3 +1,7 @@
+import 'dart:typed_data';
+import 'dart:ui' as ui;
+
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:go_router/go_router.dart';
@@ -17,6 +21,7 @@ class MapPage extends StatefulWidget {
 class _MapPageState extends State<MapPage> {
   GoogleMapController? _mapController;
   List<ProducerLocation> _producers = [];
+  final Map<String, BitmapDescriptor> _customMarkers = {};
   bool _isLoading = true;
   Position? _currentPosition;
   final LatLng _defaultLocation = const LatLng(
@@ -80,10 +85,22 @@ class _MapPageState extends State<MapPage> {
     try {
       final repository = getIt<MapRepository>();
       final producers = await repository.getProducerLocations();
+
       setState(() {
         _producers = producers;
         _isLoading = false;
       });
+
+      // Carregar os marcadores customizados em background para não travar a tela
+      for (final producer in producers) {
+        _createCustomMarker(producer.avatarUrl).then((marker) {
+          if (mounted) {
+            setState(() {
+              _customMarkers[producer.id] = marker;
+            });
+          }
+        });
+      }
     } on Exception catch (_) {
       setState(() {
         _isLoading = false;
@@ -94,6 +111,123 @@ class _MapPageState extends State<MapPage> {
         ).showSnackBar(const SnackBar(content: Text('Erro ao carregar mapa')));
       }
     }
+  }
+
+  Future<BitmapDescriptor> _createCustomMarker(String? avatarUrl) async {
+    const int size = 180;
+    final ui.PictureRecorder pictureRecorder = ui.PictureRecorder();
+    final Canvas canvas = Canvas(pictureRecorder);
+
+    // Fundo do pino (Gota verde escuro)
+    final Paint paint = Paint()..color = AppColors.darkGreen;
+    final Path path = Path()
+      ..moveTo(size / 2, size.toDouble())
+      ..quadraticBezierTo(size * 0.1, size * 0.6, size * 0.1, size * 0.4)
+      ..arcToPoint(
+        Offset(size * 0.9, size * 0.4),
+        radius: const Radius.circular(size * 0.4),
+        clockwise: true,
+      )
+      ..quadraticBezierTo(size * 0.9, size * 0.6, size / 2, size.toDouble());
+
+    canvas.drawPath(path, paint);
+
+    // Círculo branco interno
+    final Paint whitePaint = Paint()..color = Colors.white;
+    final Offset circleCenter = Offset(size / 2, size * 0.4);
+    final double circleRadius = size * 0.32;
+    canvas.drawCircle(circleCenter, circleRadius, whitePaint);
+
+    ui.Image? profileImage;
+    if (avatarUrl != null && avatarUrl.isNotEmpty) {
+      try {
+        // Corrige o localhost para o emulador Android
+        String resolvedUrl = avatarUrl;
+        if (Theme.of(context).platform == TargetPlatform.android &&
+            resolvedUrl.contains('localhost')) {
+          resolvedUrl = resolvedUrl.replaceAll('localhost', '10.0.2.2');
+        }
+
+        final response = await Dio().get<List<int>>(
+          resolvedUrl,
+          options: Options(
+            responseType: ResponseType.bytes,
+            sendTimeout: const Duration(seconds: 5),
+            receiveTimeout: const Duration(seconds: 5),
+          ),
+        );
+        if (response.data != null) {
+          final Uint8List bytes = Uint8List.fromList(response.data!);
+          final ui.Codec codec = await ui.instantiateImageCodec(
+            bytes,
+            targetWidth: (circleRadius * 2).toInt(),
+            targetHeight: (circleRadius * 2).toInt(),
+          );
+          final ui.FrameInfo fi = await codec.getNextFrame();
+          profileImage = fi.image;
+        }
+      } catch (_) {
+        // Fallback for failed image download
+      }
+    }
+
+    if (profileImage != null) {
+      // Desenha a foto de perfil recortada
+      canvas.save();
+      canvas.clipPath(
+        Path()..addOval(
+          Rect.fromCircle(center: circleCenter, radius: circleRadius - 2),
+        ),
+      );
+      canvas.drawImage(
+        profileImage,
+        Offset(
+          circleCenter.dx - profileImage.width / 2,
+          circleCenter.dy - profileImage.height / 2,
+        ),
+        Paint(),
+      );
+      canvas.restore();
+    } else {
+      // Ícone genérico
+      final TextPainter textPainter = TextPainter(
+        textDirection: TextDirection.ltr,
+      );
+      textPainter.text = TextSpan(
+        text: String.fromCharCode(Icons.storefront.codePoint),
+        style: TextStyle(
+          fontSize: size * 0.4,
+          fontFamily: Icons.storefront.fontFamily,
+          color: AppColors.darkGreen,
+        ),
+      );
+      textPainter.layout();
+      textPainter.paint(
+        canvas,
+        Offset(
+          circleCenter.dx - textPainter.width / 2,
+          circleCenter.dy - textPainter.height / 2,
+        ),
+      );
+    }
+
+    // Borda fina
+    final Paint borderPaint = Paint()
+      ..color = AppColors.darkGreen
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 3.0;
+    canvas.drawCircle(circleCenter, circleRadius, borderPaint);
+
+    final ui.Image markerAsImage = await pictureRecorder.endRecording().toImage(
+      size,
+      size,
+    );
+    final ByteData? byteData = await markerAsImage.toByteData(
+      format: ui.ImageByteFormat.png,
+    );
+    final Uint8List uint8List = byteData!.buffer.asUint8List();
+
+    return BitmapDescriptor.fromBytes(uint8List);
   }
 
   Set<Marker> _buildMarkers() {
@@ -108,7 +242,9 @@ class _MapPageState extends State<MapPage> {
             context.push('/customer/home/producer/${producer.id}');
           },
         ),
-        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen),
+        icon:
+            _customMarkers[producer.id] ??
+            BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen),
       );
     }).toSet();
   }
