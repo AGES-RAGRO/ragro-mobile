@@ -475,7 +475,7 @@ class _ProducerProfileView extends StatelessWidget {
                     label: 'Pedidos',
                     value: '${dashboard.totalOrders}',
                     change:
-                        '${_formatSignedPercent(dashboard.ordersGrowthPercent)} este mÃªs',
+                        '${_formatSignedPercent(dashboard.ordersGrowthPercent)} este mês',
                     positive: dashboard.ordersGrowthPercent >= 0,
                   ),
                 ),
@@ -487,7 +487,7 @@ class _ProducerProfileView extends StatelessWidget {
                     label: 'Estoque',
                     value: _formatPercent(dashboard.stockPercentage),
                     change:
-                        '${_formatSignedPercent(dashboard.stockChangePercent)} este mÃªs',
+                        '${_formatSignedPercent(dashboard.stockChangePercent)} este mês',
                     positive: dashboard.stockChangePercent >= 0,
                   ),
                 ),
@@ -813,7 +813,7 @@ class _WeeklyChart extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final maxVal = data.fold<double>(0, (m, v) => v > m ? v : m);
-    final activeDay = data.indexOf(maxVal);
+    final activeDay = maxVal > 0 ? data.indexOf(maxVal) : -1;
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 18, 16, 14),
       decoration: BoxDecoration(
@@ -871,12 +871,13 @@ class _WeeklyChart extends StatelessWidget {
               children: List.generate(data.length, (i) {
                 final ratio = maxVal > 0 ? data[i] / maxVal : 0.0;
                 final isActive = i == activeDay;
+                final barHeight = data[i] <= 0 ? 6.0 : 18.0 + (82.0 * ratio);
                 return Column(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     Container(
                       width: 28,
-                      height: 100 * ratio,
+                      height: barHeight,
                       decoration: BoxDecoration(
                         color: isActive
                             ? AppColors.darkGreen
