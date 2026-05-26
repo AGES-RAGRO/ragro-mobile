@@ -771,20 +771,44 @@ class _ActionFooter extends StatelessWidget {
           onTap: isProcessing ? null : () => _confirmRefuse(context),
         ),
       ],
-      if (order.status == ProducerOrderStatus.accepted ||
-          order.status == ProducerOrderStatus.inDelivery) ...[
+      if (order.status == ProducerOrderStatus.accepted) ...[
+        _ActionButton(
+          label: 'Iniciar Entrega',
+          icon: Icons.local_shipping_outlined,
+          color: AppColors.darkGreen,
+          onTap: isProcessing
+              ? null
+              : () => bloc.add(ProducerOrderDetailStatusUpdated(
+                    order.id,
+                    ProducerOrderStatus.inDelivery,
+                  )),
+        ),
         _ActionButton(
           label: 'Cancelar Pedido',
           icon: Icons.cancel_outlined,
           color: AppColors.red,
           outlined: true,
-          onTap: isProcessing
-              ? null
-              : () => _confirmRefuse(context),
+          onTap: isProcessing ? null : () => _confirmRefuse(context),
+        ),
+      ],
+      if (order.status == ProducerOrderStatus.inDelivery) ...[
+        _ActionButton(
+          label: 'Confirmar Entrega',
+          icon: Icons.check_circle_outline,
+          color: AppColors.darkGreen,
+          onTap: isProcessing ? null : () => _confirmDelivery(context),
+        ),
+        _ActionButton(
+          label: 'Cancelar Pedido',
+          icon: Icons.cancel_outlined,
+          color: AppColors.red,
+          outlined: true,
+          onTap: isProcessing ? null : () => _confirmRefuse(context),
         ),
       ],
       if (order.consumerPhone.isNotEmpty &&
-          order.status != ProducerOrderStatus.cancelled)
+          order.status != ProducerOrderStatus.cancelled &&
+          order.status != ProducerOrderStatus.delivered)
         _ActionButton(
           label: 'Contatar Cliente',
           icon: Icons.chat,
@@ -825,6 +849,34 @@ class _ActionFooter extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Future<void> _confirmDelivery(BuildContext context) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Confirmar entrega'),
+        content: const Text(
+          'Tem certeza que deseja confirmar a entrega deste pedido?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: const Text('Voltar'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: const Text('Confirmar entrega'),
+          ),
+        ],
+      ),
+    );
+    if ((confirmed ?? false) && context.mounted) {
+      bloc.add(ProducerOrderDetailStatusUpdated(
+        order.id,
+        ProducerOrderStatus.delivered,
+      ));
+    }
   }
 
   Future<void> _confirmRefuse(BuildContext context) async {
