@@ -32,7 +32,8 @@ abstract final class ApiEndpoints {
   static String get customers => '$_base/customers';
   static String get customerMe => '$_base/customers/me';
   static String get customerFavorites => '$_base/customers/me/favorites';
-  static String customerFavorite(String producerId) => '$_base/customers/me/favorites/$producerId';
+  static String customerFavorite(String producerId) =>
+      '$_base/customers/me/favorites/$producerId';
 
   // Producers / Farmers
   static String get producers => '$_base/producers';
@@ -93,6 +94,8 @@ abstract final class ApiEndpoints {
 
   // Producer management
   static String get producerDashboard => '$_base/producers/me/dashboard';
+  static String get producerDashboardWeek =>
+      '$_base/producers/me/dashboard/week';
 
   // Producer orders
   static String get producerOrders => '$_base/orders/producer';
