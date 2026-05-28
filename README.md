@@ -68,7 +68,7 @@ flutter run -d chrome
 
 ### Testing with the backend (real login)
 
-The app authenticates via Keycloak. You need the backend running locally.
+The app authenticates via Keycloak. You can run the backend locally or point the app at AWS through `API_BASE_URL`.
 
 **1. Start the backend** (from `ragro-backend/`):
 
@@ -84,7 +84,7 @@ This starts PostgreSQL, Keycloak, and the Spring Boot API. Three test users are 
 flutter run -d chrome
 ```
 
-The app defaults to `http://localhost:8080` as the API base URL.
+The app defaults to `https://7ruopxdlm7.execute-api.us-east-2.amazonaws.com` as the API base URL. To use the local backend, set `API_BASE_URL=http://localhost:8080`.
 
 **3. Log in with one of the test users:**
 
@@ -94,7 +94,7 @@ The app defaults to `http://localhost:8080` as the API base URL.
 | Farmer | `farmer@ragro.com.br` | `Test@123` |
 | Admin | `admin@ragro.com.br` | `Admin@123` |
 
-The login flow calls `GET /auth/config` to discover the Keycloak token URL, authenticates directly with Keycloak, then calls `GET /auth/session` to get the user's profile. The app routes to the correct home screen based on the user type.
+The login flow calls `GET /auth/config` to discover the Keycloak token URL, authenticates directly with Keycloak, then calls `GET /auth/session` to get the user's profile. The backend can return a local Keycloak URL (`http://localhost:8180`) or the AWS equivalent (`https://kwn6g5amn5.execute-api.us-east-2.amazonaws.com`) depending on the environment. The app routes to the correct home screen based on the user type.
 
 ### Demo mode (skip login, no backend needed)
 
@@ -109,10 +109,16 @@ flutter run -d chrome --dart-define=DEMO_MODE=true --dart-define=DEMO_ROLE=produ
 flutter run -d chrome --dart-define=DEMO_MODE=true --dart-define=DEMO_ROLE=admin
 ```
 
-### Production base URL
+### Switching between local and AWS
 
 ```bash
-flutter run --dart-define=API_BASE_URL=https://api.ragro.com.br
+flutter run --dart-define=API_BASE_URL=https://7ruopxdlm7.execute-api.us-east-2.amazonaws.com
+
+# Local backend on desktop
+flutter run --dart-define=API_BASE_URL=http://localhost:8080
+
+# Local backend on Android emulator
+flutter run --dart-define=API_BASE_URL=http://10.0.2.2:8080
 ```
 
 ### Run on Android
@@ -137,7 +143,7 @@ flutter test
 
 ### Visual regression tests (Playwright)
 
-Requires the Flutter app running on `http://localhost:8080`.
+Requires the Flutter app running locally in Chrome. The API can point to local backend or AWS via `API_BASE_URL`.
 
 ```bash
 # 1. Start the app
