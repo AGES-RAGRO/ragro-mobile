@@ -239,7 +239,7 @@ class _MapPageState extends State<MapPage> {
           title: producer.farmName,
           snippet: 'Clique para ver o produtor',
           onTap: () {
-            context.push('/customer/home/producer/${producer.id}');
+            context.push('/customer/producer/${producer.id}');
           },
         ),
         icon:
