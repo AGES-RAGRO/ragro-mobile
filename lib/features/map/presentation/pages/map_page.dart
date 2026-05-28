@@ -93,7 +93,11 @@ class _MapPageState extends State<MapPage> {
 
       // Carregar os marcadores customizados em background para não travar a tela
       for (final producer in producers) {
-        _createCustomMarker(producer.avatarUrl).then((marker) {
+        final imageUrl =
+            (producer.coverUrl != null && producer.coverUrl!.isNotEmpty)
+            ? producer.coverUrl
+            : producer.avatarUrl;
+        _createCustomMarker(imageUrl).then((marker) {
           if (mounted) {
             setState(() {
               _customMarkers[producer.id] = marker;

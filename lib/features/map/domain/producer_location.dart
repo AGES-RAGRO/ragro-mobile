@@ -5,6 +5,7 @@ class ProducerLocation {
     required this.latitude,
     required this.longitude,
     this.avatarUrl,
+    this.coverUrl,
   });
 
   factory ProducerLocation.fromJson(Map<String, dynamic> json) {
@@ -14,6 +15,10 @@ class ProducerLocation {
       latitude: (json['latitude'] as num).toDouble(),
       longitude: (json['longitude'] as num).toDouble(),
       avatarUrl: json['avatarUrl'] as String?,
+      coverUrl:
+          json['display_photo_s3'] as String? ??
+          json['coverUrl'] as String? ??
+          json['cover_url'] as String?,
     );
   }
   final String id;
@@ -21,4 +26,5 @@ class ProducerLocation {
   final double latitude;
   final double longitude;
   final String? avatarUrl;
+  final String? coverUrl;
 }
