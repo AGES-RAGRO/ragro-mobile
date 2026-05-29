@@ -2,24 +2,37 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 
 abstract final class ApiEndpoints {
-  static String get _defaultBase {
-    if (kIsWeb) return 'http://localhost:8080';
-    if (Platform.isAndroid) return 'http://10.0.2.2:8080';
-    return 'http://localhost:8080';
-  }
+    static const String _productionBase =
+            'https://7ruopxdlm7.execute-api.us-east-2.amazonaws.com';
+
+    static String get _defaultBase => _productionBase;
 
   static final String _base = _resolveBaseUrl();
 
   static String _resolveBaseUrl() {
     const rawBase = String.fromEnvironment('API_BASE_URL');
 
-    if (rawBase.isNotEmpty) {
-      final normalized = rawBase.trim().replaceFirst(RegExp(r'\/+$'), '');
-      return normalized;
+        if (rawBase.trim().isNotEmpty) {
+            final normalized = rawBase.trim().replaceFirst(RegExp(r'\/+$'), '');
+            return _normalizeForRuntime(normalized);
     }
 
     return _defaultBase;
   }
+
+    static String _normalizeForRuntime(String baseUrl) {
+        if (kIsWeb) return baseUrl;
+
+        final apiUri = Uri.tryParse(baseUrl);
+        if (apiUri == null) return baseUrl;
+
+        if (Platform.isAndroid &&
+                (apiUri.host == 'localhost' || apiUri.host == '127.0.0.1')) {
+            return apiUri.replace(host: '10.0.2.2').toString();
+        }
+
+        return baseUrl;
+    }
 
   // Auth
   static String get authConfig => '$_base/auth/config';
@@ -32,7 +45,8 @@ abstract final class ApiEndpoints {
   static String get customers => '$_base/customers';
   static String get customerMe => '$_base/customers/me';
   static String get customerFavorites => '$_base/customers/me/favorites';
-  static String customerFavorite(String producerId) => '$_base/customers/me/favorites/$producerId';
+  static String customerFavorite(String producerId) =>
+      '$_base/customers/me/favorites/$producerId';
 
   // Producers / Farmers
   static String get producers => '$_base/producers';
@@ -93,6 +107,8 @@ abstract final class ApiEndpoints {
 
   // Producer management
   static String get producerDashboard => '$_base/producers/me/dashboard';
+  static String get producerDashboardWeek =>
+      '$_base/producers/me/dashboard/week';
 
   // Producer orders
   static String get producerOrders => '$_base/orders/producer';
@@ -106,10 +122,9 @@ abstract final class ApiEndpoints {
   static String get adminProducers => '$_base/admin/producers';
   static String adminProducer(String id) => '$_base/admin/producers/$id';
 
-  /// Rewrites a media URL that came from the backend (e.g. MinIO public URL).
-  /// In dev, the backend stores `http://localhost:9000/...` but the device
-  /// cannot reach `localhost` on the host machine — it needs the same host
-  /// that the API uses (e.g. `10.0.2.2` for an Android emulator).
+    /// Rewrites a media URL that came from the backend (e.g. MinIO public URL).
+    /// This keeps local backend URLs reachable on emulators by matching the
+    /// host used by the configured API base URL.
   static String resolveMediaUrl(String url) {
     if (url.isEmpty) return url;
     final mediaUri = Uri.tryParse(url);
