@@ -156,9 +156,7 @@ class ProducerOrdersBloc
     if (currentOrders == null) return;
 
     final updated = currentOrders
-        .map(
-          (o) => o.id == event.orderId ? o.copyWith(isNew: false) : o,
-        )
+        .map((o) => o.id == event.orderId ? o.copyWith(isNew: false) : o)
         .toList();
     emit(ProducerOrdersLoaded(orders: updated, activeTab: _activeTab));
   }

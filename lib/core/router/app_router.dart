@@ -63,7 +63,8 @@ class AppRouter {
         }
         if (authState is AuthAuthenticated && isAuthRoute) {
           return switch (authState.user.type) {
-            UserType.customer => '/customer/impact', // ← redireciona para impact
+            UserType.customer =>
+              '/customer/impact', // ← redireciona para impact
             UserType.producer => '/producer/home',
             UserType.admin => '/admin/producers',
           };
@@ -153,11 +154,11 @@ class AppRouter {
                           builder: (context, state) => RateProducerPage(
                             orderId: state.pathParameters['orderId']!,
                             farmName:
-                            state.uri.queryParameters['farmName'] ?? '',
+                                state.uri.queryParameters['farmName'] ?? '',
                             ownerName:
-                            state.uri.queryParameters['ownerName'] ?? '',
+                                state.uri.queryParameters['ownerName'] ?? '',
                             isRated:
-                            state.uri.queryParameters['isRated'] == 'true',
+                                state.uri.queryParameters['isRated'] == 'true',
                           ),
                         ),
                       ],
@@ -172,8 +173,8 @@ class AppRouter {
                   builder: (_, __, child) {
                     return BlocProvider(
                       create: (_) =>
-                      getIt<CustomerProfileBloc>()
-                        ..add(const CustomerProfileStarted()),
+                          getIt<CustomerProfileBloc>()
+                            ..add(const CustomerProfileStarted()),
                       child: child,
                     );
                   },

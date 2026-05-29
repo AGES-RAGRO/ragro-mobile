@@ -7,10 +7,7 @@ sealed class RateProducerState extends Equatable {
 }
 
 class RateProducerInitial extends RateProducerState {
-  const RateProducerInitial({
-    this.selectedRating = 0,
-    this.comment = '',
-  });
+  const RateProducerInitial({this.selectedRating = 0, this.comment = ''});
 
   final int selectedRating;
   final String comment;

@@ -23,13 +23,13 @@ class RateProducerBloc extends Bloc<RateProducerEvent, RateProducerState> {
     final current = currentState is RateProducerInitial
         ? currentState.selectedRating
         : currentState is RateProducerSubmitting
-            ? currentState.selectedRating
-            : 0;
+        ? currentState.selectedRating
+        : 0;
     final currentComment = currentState is RateProducerInitial
         ? currentState.comment
         : currentState is RateProducerSubmitting
-            ? currentState.comment
-            : '';
+        ? currentState.comment
+        : '';
     emit(
       RateProducerInitial(
         selectedRating: event.rating == current ? 0 : event.rating,
@@ -46,8 +46,8 @@ class RateProducerBloc extends Bloc<RateProducerEvent, RateProducerState> {
     final currentRating = currentState is RateProducerInitial
         ? currentState.selectedRating
         : currentState is RateProducerSubmitting
-            ? currentState.selectedRating
-            : 0;
+        ? currentState.selectedRating
+        : 0;
     emit(
       RateProducerInitial(
         selectedRating: currentRating,

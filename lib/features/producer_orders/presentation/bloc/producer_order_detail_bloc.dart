@@ -57,7 +57,8 @@ class ProducerOrderDetailBloc
         emit(ProducerOrderDetailLoaded(order));
       }
     } on Exception catch (e) {
-      if (initial != null) return; // keep showing initial order on refresh failure
+      if (initial != null)
+        return; // keep showing initial order on refresh failure
       emit(ProducerOrderDetailFailure(e.toString()));
     }
   }
@@ -122,7 +123,7 @@ class ProducerOrderDetailBloc
       emit(
         ProducerOrderDetailSuccess(order: updated, action: 'status_updated'),
       );
-      
+
       try {
         await getIt<ProducerOrdersRepository>().markAsSeen(event.orderId);
         final updatedSeen = updated.copyWith(isNew: false);

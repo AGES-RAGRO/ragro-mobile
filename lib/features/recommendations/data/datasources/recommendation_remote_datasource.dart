@@ -18,7 +18,9 @@ class RecommendationsRemoteDatasource {
         ApiEndpoints.recommendations,
       );
 
-      return _readList(response.data).map(RecommendationModel.fromJson).toList();
+      return _readList(
+        response.data,
+      ).map(RecommendationModel.fromJson).toList();
     } on DioException catch (e) {
       throw e.error as ApiException? ?? const UnknownApiException();
     }

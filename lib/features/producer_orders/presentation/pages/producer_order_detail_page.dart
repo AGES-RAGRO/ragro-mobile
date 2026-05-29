@@ -679,7 +679,8 @@ class _CancellationCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final reason = _reasonLabels[order.cancellationReason] ??
+    final reason =
+        _reasonLabels[order.cancellationReason] ??
         order.cancellationReason ??
         '';
     final details = order.cancellationDetails;
