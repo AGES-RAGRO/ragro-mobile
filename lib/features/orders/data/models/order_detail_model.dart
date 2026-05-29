@@ -134,6 +134,8 @@ class OrderDetailModel extends OrderDetail {
     required super.actions,
     super.bankInfo,
     super.reviewed,
+    super.cancellationReason,
+    super.cancellationDetails,
   });
 
   factory OrderDetailModel.fromJson(Map<String, dynamic> json) {
@@ -192,6 +194,14 @@ class OrderDetailModel extends OrderDetail {
           ? null
           : OrderDetailBankInfoModel.fromJson(bankJson),
       reviewed: _parseReviewed(json),
+      cancellationReason:
+          json['cancellationReason'] as String? ??
+          json['cancelReason'] as String? ??
+          json['reason'] as String?,
+      cancellationDetails:
+          json['cancellationDetails'] as String? ??
+          json['cancelDetails'] as String? ??
+          json['details'] as String?,
     );
   }
 

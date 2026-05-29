@@ -8,10 +8,10 @@ class OrderStatusBadge extends StatelessWidget {
   final OrderStatus status;
 
   Color get _backgroundColor => switch (status) {
-    OrderStatus.pending => const Color(0xFFFFB413),
+    OrderStatus.pending => AppColors.yellow,
     OrderStatus.accepted => AppColors.lightGreen,
-    OrderStatus.inDelivery => AppColors.lightGreen,
-    OrderStatus.delivered => const Color(0xFF3B82F6),
+    OrderStatus.inDelivery => AppColors.orange,
+    OrderStatus.delivered => AppColors.blue,
     OrderStatus.cancelled => AppColors.red,
   };
 
