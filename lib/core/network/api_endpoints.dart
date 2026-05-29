@@ -13,7 +13,7 @@ abstract final class ApiEndpoints {
     const rawBase = String.fromEnvironment('API_BASE_URL');
 
         if (rawBase.trim().isNotEmpty) {
-            final normalized = rawBase.trim().replaceFirst(RegExp(r'\/+'), '');
+            final normalized = rawBase.trim().replaceFirst(RegExp(r'\/+$'), '');
             return _normalizeForRuntime(normalized);
     }
 
