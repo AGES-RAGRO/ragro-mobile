@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-API_BASE_URL="${API_BASE_URL:-http://10.0.2.2:8080}"
+API_BASE_URL="${API_BASE_URL:-https://7ruopxdlm7.execute-api.us-east-2.amazonaws.com}"
 DEVICE="${DEVICE:-emulator-5554}"
 KEYCLOAK_PORT="${KEYCLOAK_PORT:-8180}"
 ADB="${ADB:-$HOME/Android/Sdk/platform-tools/adb}"

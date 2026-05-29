@@ -1,5 +1,6 @@
 // lib/core/network/api_client.dart
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:injectable/injectable.dart';
 import 'package:ragro_mobile/core/network/api_exception.dart';
 
@@ -71,6 +72,7 @@ class _ErrorInterceptor extends Interceptor {
     } else if (err.type == DioExceptionType.connectionError) {
       exception = const NetworkException();
     } else {
+      debugPrint('[ApiClient] DioExceptionType: ${err.type} | message: ${err.message} | error: ${err.error}');
       exception = const UnknownApiException();
     }
     handler.reject(
