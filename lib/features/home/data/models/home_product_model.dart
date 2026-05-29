@@ -30,10 +30,11 @@ class HomeProductModel extends HomeProduct {
           '',
       price: (json['price'] as num?)?.toDouble() ?? 0,
       imageUrl: ApiEndpoints.resolveMediaUrl(
-          json['imageS3'] as String? ??
-          json['image_s3'] as String? ??
-          json['imageUrl'] as String? ??
-          ''),
+        json['imageS3'] as String? ??
+            json['image_s3'] as String? ??
+            json['imageUrl'] as String? ??
+            '',
+      ),
       farmName:
           json['farmName'] as String? ??
           json['farm_name'] as String? ??
@@ -45,5 +46,4 @@ class HomeProductModel extends HomeProduct {
           '',
     );
   }
-
 }

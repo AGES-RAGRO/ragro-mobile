@@ -7,7 +7,8 @@ import 'package:ragro_mobile/features/inventory/presentation/bloc/stock_movement
 @injectable
 class StockMovementsBloc
     extends Bloc<StockMovementsEvent, StockMovementsState> {
-  StockMovementsBloc(this._getMovements) : super(const StockMovementsInitial()) {
+  StockMovementsBloc(this._getMovements)
+    : super(const StockMovementsInitial()) {
     on<StockMovementsStarted>(_onStarted);
   }
 

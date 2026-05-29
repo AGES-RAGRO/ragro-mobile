@@ -46,9 +46,7 @@ void main() {
 
   group('RepeatOrder', () {
     test('repassa orderId para o repository e retorna nova Order', () async {
-      when(
-        () => repo.repeatOrder(any()),
-      ).thenAnswer((_) async => tOrder);
+      when(() => repo.repeatOrder(any())).thenAnswer((_) async => tOrder);
 
       final result = await useCase('order-1');
 
@@ -60,9 +58,7 @@ void main() {
     });
 
     test('propaga NotFoundException quando order não existe', () async {
-      when(
-        () => repo.repeatOrder(any()),
-      ).thenThrow(const NotFoundException());
+      when(() => repo.repeatOrder(any())).thenThrow(const NotFoundException());
 
       expect(
         () => useCase('order-nonexistent'),
@@ -70,26 +66,24 @@ void main() {
       );
     });
 
-    test('propaga UnauthorizedException quando usuário não tem permissão', () async {
-      when(
-        () => repo.repeatOrder(any()),
-      ).thenThrow(const UnauthorizedException());
+    test(
+      'propaga UnauthorizedException quando usuário não tem permissão',
+      () async {
+        when(
+          () => repo.repeatOrder(any()),
+        ).thenThrow(const UnauthorizedException());
 
-      expect(
-        () => useCase('order-forbidden'),
-        throwsA(isA<UnauthorizedException>()),
-      );
-    });
+        expect(
+          () => useCase('order-forbidden'),
+          throwsA(isA<UnauthorizedException>()),
+        );
+      },
+    );
 
     test('propaga NetworkException quando há erro de rede', () async {
-      when(
-        () => repo.repeatOrder(any()),
-      ).thenThrow(const NetworkException());
+      when(() => repo.repeatOrder(any())).thenThrow(const NetworkException());
 
-      expect(
-        () => useCase('order-1'),
-        throwsA(isA<NetworkException>()),
-      );
+      expect(() => useCase('order-1'), throwsA(isA<NetworkException>()));
     });
   });
 }

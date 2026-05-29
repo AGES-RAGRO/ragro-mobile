@@ -58,10 +58,7 @@ class _StockExitViewState extends State<_StockExitView> {
   final _notesController = TextEditingController();
   String _selectedReason = 'LOSS';
 
-  static const _reasons = [
-    ('LOSS', 'Perda'),
-    ('DISPOSAL', 'Descarte'),
-  ];
+  static const _reasons = [('LOSS', 'Perda'), ('DISPOSAL', 'Descarte')];
 
   @override
   void dispose() {
@@ -191,8 +188,9 @@ class _StockExitViewState extends State<_StockExitView> {
                                 style: TextStyle(
                                   fontFamily: 'Manrope',
                                   fontSize: 13,
-                                  color:
-                                      AppColors.darkGreen.withValues(alpha: 0.8),
+                                  color: AppColors.darkGreen.withValues(
+                                    alpha: 0.8,
+                                  ),
                                 ),
                               ),
                             ],
@@ -231,13 +229,15 @@ class _StockExitViewState extends State<_StockExitView> {
                       ),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide:
-                            const BorderSide(color: AppColors.inputBorder),
+                        borderSide: const BorderSide(
+                          color: AppColors.inputBorder,
+                        ),
                       ),
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide:
-                            const BorderSide(color: AppColors.inputBorder),
+                        borderSide: const BorderSide(
+                          color: AppColors.inputBorder,
+                        ),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
@@ -318,13 +318,15 @@ class _StockExitViewState extends State<_StockExitView> {
                       ),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide:
-                            const BorderSide(color: AppColors.inputBorder),
+                        borderSide: const BorderSide(
+                          color: AppColors.inputBorder,
+                        ),
                       ),
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide:
-                            const BorderSide(color: AppColors.inputBorder),
+                        borderSide: const BorderSide(
+                          color: AppColors.inputBorder,
+                        ),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),

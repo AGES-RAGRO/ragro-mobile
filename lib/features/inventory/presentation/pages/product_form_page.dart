@@ -54,7 +54,17 @@ class _ProductFormViewState extends State<_ProductFormView> {
   List<int> _selectedCategoryIds = [];
   List<Map<String, dynamic>> _availableCategories = [];
 
-  static const _units = ['kg', 'g', 'un', 'maço', 'pacote', 'box', 'liter', 'ml', 'dozen'];
+  static const _units = [
+    'kg',
+    'g',
+    'un',
+    'maço',
+    'pacote',
+    'box',
+    'liter',
+    'ml',
+    'dozen',
+  ];
 
   @override
   void dispose() {
@@ -221,7 +231,7 @@ class _ProductFormViewState extends State<_ProductFormView> {
                                 image: kIsWeb
                                     ? NetworkImage(_pickedPhoto!.path)
                                     : FileImage(File(_pickedPhoto!.path))
-                                        as ImageProvider,
+                                          as ImageProvider,
                                 width: double.infinity,
                                 height: 210,
                                 fit: BoxFit.cover,
@@ -234,27 +244,27 @@ class _ProductFormViewState extends State<_ProductFormView> {
                                 ),
                               )
                             : (_existingImageUrl != null &&
-                                    _existingImageUrl!.isNotEmpty)
-                                ? Image.network(
-                                    _existingImageUrl!,
-                                    width: double.infinity,
-                                    height: 210,
-                                    fit: BoxFit.cover,
-                                    errorBuilder: (_, __, ___) => const Center(
-                                      child: Icon(
-                                        Icons.eco_outlined,
-                                        size: 64,
-                                        color: AppColors.darkGreen,
-                                      ),
-                                    ),
-                                  )
-                                : const Center(
-                                    child: Icon(
-                                      Icons.eco_outlined,
-                                      size: 64,
-                                      color: AppColors.darkGreen,
-                                    ),
+                                  _existingImageUrl!.isNotEmpty)
+                            ? Image.network(
+                                _existingImageUrl!,
+                                width: double.infinity,
+                                height: 210,
+                                fit: BoxFit.cover,
+                                errorBuilder: (_, __, ___) => const Center(
+                                  child: Icon(
+                                    Icons.eco_outlined,
+                                    size: 64,
+                                    color: AppColors.darkGreen,
                                   ),
+                                ),
+                              )
+                            : const Center(
+                                child: Icon(
+                                  Icons.eco_outlined,
+                                  size: 64,
+                                  color: AppColors.darkGreen,
+                                ),
+                              ),
                       ),
                       Positioned(
                         bottom: 12,
@@ -428,7 +438,9 @@ class _ProductFormViewState extends State<_ProductFormView> {
                             fontFamily: 'Manrope',
                             fontSize: 13,
                             fontWeight: FontWeight.w600,
-                            color: selected ? AppColors.white : AppColors.darkGreen,
+                            color: selected
+                                ? AppColors.white
+                                : AppColors.darkGreen,
                           ),
                         ),
                         selected: selected,
@@ -444,7 +456,9 @@ class _ProductFormViewState extends State<_ProductFormView> {
                                 });
                               },
                         selectedColor: AppColors.darkGreen,
-                        backgroundColor: AppColors.darkGreen.withValues(alpha: 0.08),
+                        backgroundColor: AppColors.darkGreen.withValues(
+                          alpha: 0.08,
+                        ),
                         checkmarkColor: AppColors.white,
                         side: BorderSide(
                           color: selected
@@ -455,7 +469,10 @@ class _ProductFormViewState extends State<_ProductFormView> {
                           borderRadius: BorderRadius.circular(20),
                         ),
                         showCheckmark: false,
-                        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 4,
+                          vertical: 2,
+                        ),
                       );
                     }).toList(),
                   ),

@@ -32,7 +32,9 @@ class InventoryProduct extends Equatable {
         producerId: (json['farmerId'] as String?) ?? '',
         name: (json['name'] as String?) ?? '',
         description: (json['description'] as String?) ?? '',
-        imageUrl: ApiEndpoints.resolveMediaUrl((json['imageS3'] as String?) ?? ''),
+        imageUrl: ApiEndpoints.resolveMediaUrl(
+          (json['imageS3'] as String?) ?? '',
+        ),
         price: (json['price'] as num?)?.toDouble() ?? 0.0,
         unit: (json['unityType'] as String?) ?? 'un',
         stock: (json['stockQuantity'] as num?)?.toDouble() ?? 0.0,

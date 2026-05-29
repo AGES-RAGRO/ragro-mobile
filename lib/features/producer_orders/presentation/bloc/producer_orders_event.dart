@@ -35,7 +35,11 @@ class ProducerOrderAccepted extends ProducerOrdersEvent {
 }
 
 class ProducerOrderCancelled extends ProducerOrdersEvent {
-  const ProducerOrderCancelled(this.orderId, {required this.reason, this.details});
+  const ProducerOrderCancelled(
+    this.orderId, {
+    required this.reason,
+    this.details,
+  });
 
   final String orderId;
   final String reason;

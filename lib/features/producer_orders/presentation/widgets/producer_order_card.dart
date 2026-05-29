@@ -11,6 +11,8 @@ class ProducerOrderCard extends StatelessWidget {
     this.onActionTap,
     this.onCancelTap,
     this.onDeliveryConfirmTap,
+    this.isSelected,
+    this.onSelect,
     super.key,
   });
 
@@ -19,6 +21,10 @@ class ProducerOrderCard extends StatelessWidget {
   final VoidCallback? onActionTap;
   final VoidCallback? onCancelTap;
   final VoidCallback? onDeliveryConfirmTap;
+
+  /// When non-null the card is in selection mode; tapping selects/deselects.
+  final bool? isSelected;
+  final VoidCallback? onSelect;
 
   static final _dateFormat = DateFormat('dd/MM/yyyy, HH:mm', 'pt_BR');
 
@@ -30,25 +36,25 @@ class ProducerOrderCard extends StatelessWidget {
     ProducerOrderStatus.cancelled => 'Pedido cancelado',
   };
 
-  Color get _statusColor => switch (order.status) {
-    ProducerOrderStatus.pending => AppColors.yellow,
-    ProducerOrderStatus.accepted => AppColors.darkGreen,
-    ProducerOrderStatus.inDelivery => AppColors.lightGreen,
-    ProducerOrderStatus.delivered => AppColors.darkGreen,
-    ProducerOrderStatus.cancelled => AppColors.red,
-  };
-
   String _formatPrice(double price) =>
       r'R$ ' + price.toStringAsFixed(2).replaceAll('.', ',');
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    final inSelectionMode = isSelected != null;
+    final selected = isSelected ?? false;
+
+    final card = Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.white,
+        color: selected
+            ? AppColors.darkGreen.withValues(alpha: 0.06)
+            : AppColors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
+        border: Border.all(
+          color: selected ? AppColors.darkGreen : const Color(0xFFE2E8F0),
+          width: selected ? 1.5 : 1,
+        ),
         boxShadow: const [
           BoxShadow(
             color: Color(0x08000000),
@@ -102,46 +108,44 @@ class ProducerOrderCard extends StatelessWidget {
                   ],
                 ),
               ),
-              if (order.status != ProducerOrderStatus.pending)
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: _statusColor.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(6),
+              if (inSelectionMode)
+                Checkbox(
+                  value: selected,
+                  onChanged: (_) => onSelect?.call(),
+                  activeColor: AppColors.darkGreen,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(4),
                   ),
-                  child: Text(
-                    order.status.label.toUpperCase(),
-                    style: TextStyle(
-                      fontFamily: 'Manrope',
-                      fontWeight: FontWeight.w700,
-                      fontSize: 11,
-                      color: _statusColor,
-                      letterSpacing: 0.5,
+                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  visualDensity: VisualDensity.compact,
+                )
+              else ...[
+                _StatusBadge(status: order.status),
+                if (order.isNew &&
+                    order.status != ProducerOrderStatus.accepted) ...[
+                  const SizedBox(width: 6),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: AppColors.darkGreen.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: const Text(
+                      'NOVO',
+                      style: TextStyle(
+                        fontFamily: 'Manrope',
+                        fontWeight: FontWeight.w700,
+                        fontSize: 11,
+                        color: AppColors.darkGreen,
+                        letterSpacing: 0.5,
+                      ),
                     ),
                   ),
-                ),
-              const SizedBox(width: 6),
-              if (order.isNew)
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 4,
-                  ),
-                  decoration: BoxDecoration(
-                    color: AppColors.darkGreen.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                  child: const Text(
-                    'NOVO',
-                    style: TextStyle(
-                      fontFamily: 'Manrope',
-                      fontWeight: FontWeight.w700,
-                      fontSize: 11,
-                      color: AppColors.darkGreen,
-                      letterSpacing: 0.5,
-                    ),
-                  ),
-                ),
+                ],
+              ],
             ],
           ),
 
@@ -195,48 +199,25 @@ class ProducerOrderCard extends StatelessWidget {
             ],
           ),
 
-          const SizedBox(height: 12),
+          if (!inSelectionMode) ...[
+            const SizedBox(height: 12),
 
-          // Actions
-          Row(
-            children: [
-              Expanded(
-                child: OutlinedButton(
-                  onPressed: onDetailTap,
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: AppColors.darkGreen,
-                    side: const BorderSide(color: AppColors.darkGreen),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(24),
-                    ),
-                    padding: const EdgeInsets.symmetric(vertical: 10),
-                  ),
-                  child: const Text(
-                    'Detalhes',
-                    style: TextStyle(
-                      fontFamily: 'Manrope',
-                      fontWeight: FontWeight.w600,
-                      fontSize: 14,
-                    ),
-                  ),
-                ),
-              ),
-              if (order.status == ProducerOrderStatus.pending &&
-                  onCancelTap != null) ...[
-                const SizedBox(width: 8),
+            // Actions
+            Row(
+              children: [
                 Expanded(
-                  child: ElevatedButton(
-                    onPressed: onCancelTap,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.red,
-                      foregroundColor: AppColors.white,
+                  child: OutlinedButton(
+                    onPressed: onDetailTap,
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: AppColors.darkGreen,
+                      side: const BorderSide(color: AppColors.darkGreen),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(24),
                       ),
                       padding: const EdgeInsets.symmetric(vertical: 10),
                     ),
                     child: const Text(
-                      'Recusar',
+                      'Detalhes',
                       style: TextStyle(
                         fontFamily: 'Manrope',
                         fontWeight: FontWeight.w600,
@@ -245,59 +226,128 @@ class ProducerOrderCard extends StatelessWidget {
                     ),
                   ),
                 ),
-              ],
-              if (onActionTap != null) ...[
-                const SizedBox(width: 8),
-                Expanded(
-                  child: ElevatedButton(
-                    onPressed: onActionTap,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.darkGreen,
-                      foregroundColor: AppColors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(24),
+                if (onActionTap != null) ...[
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: onActionTap,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.darkGreen,
+                        foregroundColor: AppColors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(24),
+                        ),
+                        padding: const EdgeInsets.symmetric(vertical: 10),
                       ),
-                      padding: const EdgeInsets.symmetric(vertical: 10),
-                    ),
-                    child: const Text(
-                      'Aceitar',
-                      style: TextStyle(
-                        fontFamily: 'Manrope',
-                        fontWeight: FontWeight.w600,
-                        fontSize: 14,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-              if (order.status == ProducerOrderStatus.inDelivery &&
-                  onDeliveryConfirmTap != null) ...[
-                const SizedBox(width: 8),
-                Expanded(
-                  child: ElevatedButton(
-                    onPressed: onDeliveryConfirmTap,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.darkGreen,
-                      foregroundColor: AppColors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(24),
-                      ),
-                      padding: const EdgeInsets.symmetric(vertical: 10),
-                    ),
-                    child: const Text(
-                      'Entregue',
-                      style: TextStyle(
-                        fontFamily: 'Manrope',
-                        fontWeight: FontWeight.w600,
-                        fontSize: 14,
+                      child: const Text(
+                        'Aceitar',
+                        style: TextStyle(
+                          fontFamily: 'Manrope',
+                          fontWeight: FontWeight.w600,
+                          fontSize: 14,
+                        ),
                       ),
                     ),
                   ),
-                ),
+                ],
+                if (order.status == ProducerOrderStatus.inDelivery &&
+                    onDeliveryConfirmTap != null) ...[
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: onDeliveryConfirmTap,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.darkGreen,
+                        foregroundColor: AppColors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(24),
+                        ),
+                        padding: const EdgeInsets.symmetric(vertical: 10),
+                      ),
+                      child: const Text(
+                        'Entregue',
+                        style: TextStyle(
+                          fontFamily: 'Manrope',
+                          fontWeight: FontWeight.w600,
+                          fontSize: 14,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ],
-            ],
-          ),
+            ),
+          ],
         ],
+      ),
+    );
+
+    if (inSelectionMode) {
+      return GestureDetector(onTap: onSelect, child: card);
+    }
+    return card;
+  }
+}
+
+class _StatusBadge extends StatelessWidget {
+  const _StatusBadge({required this.status});
+
+  final ProducerOrderStatus status;
+
+  static Color _colorFor(ProducerOrderStatus s) => switch (s) {
+    ProducerOrderStatus.pending => const Color(0xFFB45309),
+    ProducerOrderStatus.accepted => AppColors.darkGreen,
+    ProducerOrderStatus.inDelivery => const Color(0xFFEA580C),
+    ProducerOrderStatus.delivered => AppColors.darkGreen,
+    ProducerOrderStatus.cancelled => AppColors.red,
+  };
+
+  @override
+  Widget build(BuildContext context) {
+    final color = _colorFor(status);
+
+    if (status == ProducerOrderStatus.accepted) {
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+        decoration: BoxDecoration(
+          color: AppColors.darkGreen,
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: const Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.check_circle_outline, color: AppColors.white, size: 12),
+            SizedBox(width: 4),
+            Text(
+              'ACEITO',
+              style: TextStyle(
+                fontFamily: 'Manrope',
+                fontWeight: FontWeight.w700,
+                fontSize: 11,
+                color: AppColors.white,
+                letterSpacing: 0.5,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: Text(
+        status.label.toUpperCase(),
+        style: TextStyle(
+          fontFamily: 'Manrope',
+          fontWeight: FontWeight.w700,
+          fontSize: 11,
+          color: color,
+          letterSpacing: 0.5,
+        ),
       ),
     );
   }

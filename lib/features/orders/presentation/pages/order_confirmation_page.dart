@@ -409,7 +409,7 @@ class _CheckoutView extends StatelessWidget {
                                         Text(
                                           cart.bankPixKey.isNotEmpty
                                               ? cart.bankPixKey
-                                              : 'Disponível nos detalhes do pedido',
+                                              : 'Não cadastrada',
                                           style: const TextStyle(
                                             fontFamily: 'Manrope',
                                             fontWeight: FontWeight.w700,
@@ -648,8 +648,9 @@ class _CheckoutView extends StatelessWidget {
                         ? null
                         : () async {
                             // Step 1 — confirm delivery data
-                            final profileState =
-                                context.read<CustomerProfileBloc>().state;
+                            final profileState = context
+                                .read<CustomerProfileBloc>()
+                                .state;
                             final profile = switch (profileState) {
                               CustomerProfileLoaded(:final profile) => profile,
                               CustomerProfileUpdating(:final profile) =>
@@ -688,9 +689,9 @@ class _CheckoutView extends StatelessWidget {
                               confirmColor: AppColors.lightGreen,
                             );
                             if ((confirmed ?? false) && context.mounted) {
-                              context
-                                  .read<CheckoutBloc>()
-                                  .add(const CheckoutConfirmed('cart'));
+                              context.read<CheckoutBloc>().add(
+                                const CheckoutConfirmed('cart'),
+                              );
                             }
                           },
                     child: Container(

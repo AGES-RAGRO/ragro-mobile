@@ -21,8 +21,11 @@ class ProducerOrdersRepositoryImpl implements ProducerOrdersRepository {
   Future<void> confirmOrder(String id) => _dataSource.confirmOrder(id);
 
   @override
-  Future<void> refuseOrder(String id, {required String reason, String? details}) =>
-      _dataSource.refuseOrder(id, reason: reason, details: details);
+  Future<void> refuseOrder(
+    String id, {
+    required String reason,
+    String? details,
+  }) => _dataSource.refuseOrder(id, reason: reason, details: details);
 
   @override
   Future<void> updateStatus(String id, ProducerOrderStatus status) =>
