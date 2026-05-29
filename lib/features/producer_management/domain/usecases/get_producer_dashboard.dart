@@ -8,5 +8,6 @@ class GetProducerDashboard {
 
   final ProducerManagementRepository _repository;
 
-  Future<ProducerDashboard> call() => _repository.getDashboard();
+  Future<ProducerDashboard> call({required int month, required int year}) =>
+      _repository.getDashboard(month: month, year: year);
 }
