@@ -163,6 +163,18 @@ import 'package:ragro_mobile/features/learning/domain/usecases/get_products.dart
     as _i20;
 import 'package:ragro_mobile/features/learning/presentation/bloc/learning_bloc.dart'
     as _i79;
+import 'package:ragro_mobile/features/notifications/data/datasources/notifications_remote_datasource.dart'
+    as _i1100;
+import 'package:ragro_mobile/features/notifications/data/repositories/notifications_repository_impl.dart'
+    as _i1101;
+import 'package:ragro_mobile/features/notifications/domain/repositories/notifications_repository.dart'
+    as _i1102;
+import 'package:ragro_mobile/features/notifications/domain/usecases/get_notifications.dart'
+    as _i1103;
+import 'package:ragro_mobile/features/notifications/domain/usecases/mark_notification_as_read.dart'
+    as _i1104;
+import 'package:ragro_mobile/features/notifications/presentation/bloc/notifications_bloc.dart'
+    as _i1105;
 import 'package:ragro_mobile/features/orders/data/datasources/orders_remote_datasource.dart'
     as _i384;
 import 'package:ragro_mobile/features/orders/data/repositories/orders_repository_impl.dart'
@@ -373,6 +385,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i384.OrdersRemoteDatasource>(
       () => _i384.OrdersRemoteDatasource(gh<_i873.ApiClient>()),
     );
+    gh.lazySingleton<_i1100.NotificationsRemoteDataSource>(
+      () => _i1100.NotificationsRemoteDataSource(gh<_i873.ApiClient>()),
+    );
     gh.lazySingleton<_i608.ProducerOrdersRemoteDataSource>(
       () => _i608.ProducerOrdersRemoteDataSource(gh<_i873.ApiClient>()),
     );
@@ -493,6 +508,11 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i165.OrdersRepository>(
       () => _i962.OrdersRepositoryImpl(gh<_i384.OrdersRemoteDatasource>()),
     );
+    gh.lazySingleton<_i1102.NotificationsRepository>(
+      () => _i1101.NotificationsRepositoryImpl(
+        gh<_i1100.NotificationsRemoteDataSource>(),
+      ),
+    );
     gh.lazySingleton<_i671.ActivateAdminProducer>(
       () => _i671.ActivateAdminProducer(gh<_i759.AdminRepository>()),
     );
@@ -598,6 +618,14 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i903.UpdateOrderStatus>(
       () => _i903.UpdateOrderStatus(gh<_i165.OrdersRepository>()),
     );
+    gh.lazySingleton<_i1103.GetNotifications>(
+      () => _i1103.GetNotifications(gh<_i1102.NotificationsRepository>()),
+    );
+    gh.lazySingleton<_i1104.MarkNotificationAsRead>(
+      () => _i1104.MarkNotificationAsRead(
+        gh<_i1102.NotificationsRepository>(),
+      ),
+    );
     gh.lazySingleton<_i151.HomeBloc>(
       () => _i151.HomeBloc(
         gh<_i159.GetHomeData>(),
@@ -637,6 +665,12 @@ extension GetItInjectableX on _i174.GetIt {
       ),
     );
     gh.factory<_i226.OrdersBloc>(() => _i226.OrdersBloc(gh<_i52.GetOrders>()));
+    gh.factory<_i1105.NotificationsBloc>(
+      () => _i1105.NotificationsBloc(
+        gh<_i1103.GetNotifications>(),
+        gh<_i1104.MarkNotificationAsRead>(),
+      ),
+    );
     gh.factory<_i1.ProducerOrdersBloc>(
       () => _i1.ProducerOrdersBloc(
         gh<_i935.GetProducerOrders>(),

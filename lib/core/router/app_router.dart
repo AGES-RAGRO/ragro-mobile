@@ -27,6 +27,7 @@ import 'package:ragro_mobile/features/inventory/presentation/pages/product_form_
 import 'package:ragro_mobile/features/inventory/presentation/pages/stock_entry_page.dart';
 import 'package:ragro_mobile/features/inventory/presentation/pages/stock_exit_page.dart';
 import 'package:ragro_mobile/features/inventory/presentation/pages/stock_movements_page.dart';
+import 'package:ragro_mobile/features/notifications/presentation/pages/notifications_page.dart';
 import 'package:ragro_mobile/features/orders/presentation/pages/customer_orders_page.dart';
 import 'package:ragro_mobile/features/orders/presentation/pages/order_confirmation_page.dart';
 import 'package:ragro_mobile/features/orders/presentation/pages/order_detail_page.dart';
@@ -209,6 +210,14 @@ class AppRouter {
                       },
                     ),
                   ],
+                ),
+              ],
+            ),
+            StatefulShellBranch(
+              routes: [
+                GoRoute(
+                  path: '/customer/notifications',
+                  builder: (_, __) => const NotificationsPage(),
                 ),
               ],
             ),

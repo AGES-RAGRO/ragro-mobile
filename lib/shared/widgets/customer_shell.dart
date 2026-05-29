@@ -119,6 +119,13 @@ class _CustomerShellState extends State<CustomerShell> {
                         isActive: widget.navigationShell.currentIndex == 3,
                         onTap: () => _onTap(3),
                       ),
+                      _NavItem(
+                        icon: Icons.notifications_none,
+                        activeIcon: Icons.notifications,
+                        label: 'Notificações',
+                        isActive: widget.navigationShell.currentIndex == 4,
+                        onTap: () => _onTap(4),
+                      ),
                     ],
                   ),
                 ),

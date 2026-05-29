@@ -35,6 +35,10 @@ abstract final class ApiEndpoints {
   static String customerFavorite(String producerId) =>
       '$_base/customers/me/favorites/$producerId';
 
+  // Notifications
+  static String get notifications => '$_base/notifications';
+  static String notificationRead(String id) => '$_base/notifications/$id/read';
+
   // Producers / Farmers
   static String get producers => '$_base/producers';
   static String get search => '$_base/search';
