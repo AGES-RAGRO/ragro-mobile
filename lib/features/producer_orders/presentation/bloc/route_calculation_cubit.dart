@@ -1,5 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:ragro_mobile/features/producer_orders/data/models/co2_request_model.dart';
 import 'package:ragro_mobile/features/producer_orders/data/repositories/co2_repository.dart';
 import 'package:ragro_mobile/features/producer_orders/data/repositories/directions_repository.dart';
@@ -11,7 +12,28 @@ class RouteCalculationCubit extends Cubit<RouteCalculationState> {
   final DirectionsRepository _directionsRepository;
 
   RouteCalculationCubit(this._co2Repository, this._directionsRepository) : super(const RouteCalculationState()) {
-    calculateRealRoute();
+    _initRoute();
+  }
+
+  Future<void> _initRoute() async {
+    try {
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+      }
+      
+      if (permission == LocationPermission.whileInUse || permission == LocationPermission.always) {
+        final position = await Geolocator.getCurrentPosition();
+        emit(state.copyWith(producerLat: position.latitude, producerLng: position.longitude));
+      } else {
+        // Fallback for demo
+        emit(state.copyWith(producerLat: -16.6868, producerLng: -49.2647));
+      }
+    } catch (e) {
+      emit(state.copyWith(producerLat: -16.6868, producerLng: -49.2647));
+    }
+    
+    await calculateRealRoute();
   }
 
   void updateFormData({String? vehicle, String? fuel, String? consumption}) {
@@ -62,8 +84,10 @@ class RouteCalculationCubit extends Cubit<RouteCalculationState> {
   }
 
   Future<void> calculateRealRoute() async {
-    // Mocked coordinates for the current location and deliveries
-    const origin = '-16.6868,-49.2647'; // Producer
+    // Uses real producer location from state
+    final lat = state.producerLat ?? -16.6868;
+    final lng = state.producerLng ?? -49.2647;
+    final origin = '$lat,$lng'; 
     
     final allStops = {
       '1': '-16.7000,-49.2500',

@@ -12,6 +12,8 @@ class RouteCalculationState extends Equatable {
   final Set<String> confirmedDeliveries;
   final int totalDurationMins;
   final double totalDistanceKm;
+  final double? producerLat;
+  final double? producerLng;
 
   const RouteCalculationState({
     this.status = RouteCalculationStatus.initial,
@@ -23,6 +25,8 @@ class RouteCalculationState extends Equatable {
     this.confirmedDeliveries = const {},
     this.totalDurationMins = 40,
     this.totalDistanceKm = 10.2,
+    this.producerLat,
+    this.producerLng,
   });
 
   RouteCalculationState copyWith({
@@ -35,6 +39,8 @@ class RouteCalculationState extends Equatable {
     Set<String>? confirmedDeliveries,
     int? totalDurationMins,
     double? totalDistanceKm,
+    double? producerLat,
+    double? producerLng,
   }) {
     return RouteCalculationState(
       status: status ?? this.status,
@@ -46,6 +52,8 @@ class RouteCalculationState extends Equatable {
       confirmedDeliveries: confirmedDeliveries ?? this.confirmedDeliveries,
       totalDurationMins: totalDurationMins ?? this.totalDurationMins,
       totalDistanceKm: totalDistanceKm ?? this.totalDistanceKm,
+      producerLat: producerLat ?? this.producerLat,
+      producerLng: producerLng ?? this.producerLng,
     );
   }
 
@@ -60,5 +68,7 @@ class RouteCalculationState extends Equatable {
         confirmedDeliveries,
         totalDurationMins,
         totalDistanceKm,
+        producerLat,
+        producerLng,
       ];
 }
