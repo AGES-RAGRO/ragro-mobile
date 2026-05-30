@@ -11,6 +11,10 @@ class NotificationsStarted extends NotificationsEvent {
   const NotificationsStarted();
 }
 
+class NotificationsUnreadCountRequested extends NotificationsEvent {
+  const NotificationsUnreadCountRequested();
+}
+
 class NotificationsRefreshed extends NotificationsEvent {
   const NotificationsRefreshed();
 }
@@ -22,4 +26,8 @@ class NotificationMarkedAsRead extends NotificationsEvent {
 
   @override
   List<Object?> get props => [id];
+}
+
+class NotificationsAllMarkedAsRead extends NotificationsEvent {
+  const NotificationsAllMarkedAsRead();
 }

@@ -37,7 +37,10 @@ abstract final class ApiEndpoints {
 
   // Notifications
   static String get notifications => '$_base/notifications';
+  static String get notificationsUnreadCount =>
+      '$_base/notifications/unread-count';
   static String notificationRead(String id) => '$_base/notifications/$id/read';
+  static String get notificationsReadAll => '$_base/notifications/read-all';
 
   // Producers / Farmers
   static String get producers => '$_base/producers';

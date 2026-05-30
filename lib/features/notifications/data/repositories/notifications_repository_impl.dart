@@ -15,7 +15,17 @@ class NotificationsRepositoryImpl implements NotificationsRepository {
   }
 
   @override
+  Future<int> getUnreadCount() {
+    return _dataSource.getUnreadCount();
+  }
+
+  @override
   Future<void> markAsRead(String id) {
     return _dataSource.markAsRead(id);
+  }
+
+  @override
+  Future<void> markAllAsRead() {
+    return _dataSource.markAllAsRead();
   }
 }
