@@ -1,7 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-API_BASE_URL="${API_BASE_URL:-http://10.0.2.2:8080}"
+# Arquivo de environment a usar (padrão: env/local.json — localhost, sem segredos).
+# Para prod: ENV_FILE=env/prod.json ./scripts/run_emulator.sh
+# Para outro env: ENV_FILE=env/staging.json ./scripts/run_emulator.sh
+ENV_FILE="${ENV_FILE:-env/local.json}"
+
 DEVICE="${DEVICE:-emulator-5554}"
 KEYCLOAK_PORT="${KEYCLOAK_PORT:-8180}"
 ADB="${ADB:-$HOME/Android/Sdk/platform-tools/adb}"
@@ -17,5 +21,5 @@ fi
 
 exec flutter run \
   -d "$DEVICE" \
-  --dart-define=API_BASE_URL="$API_BASE_URL" \
+  --dart-define-from-file="$ENV_FILE" \
   "$@"

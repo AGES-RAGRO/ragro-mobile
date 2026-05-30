@@ -68,7 +68,16 @@ flutter run -d chrome
 
 ### Testing with the backend (real login)
 
-The app authenticates via Keycloak. You need the backend running locally.
+The app authenticates via Keycloak. The **default API base URL is `http://localhost:8080`** — no configuration needed for local dev. Environment files in `env/` control where the app points.
+
+| File | Purpose | Tracked? |
+|------|---------|----------|
+| `env/local.json` | Dev local (`localhost:8080`) | Yes — committed |
+| `env/prod.example.json` | Prod template — copy to `env/prod.json` and fill in the URL | Yes — committed |
+| `env/prod.json` | Real prod build config | **No — gitignored** |
+
+> **Production API (AWS API Gateway):** `https://7ruopxdlm7.execute-api.us-east-2.amazonaws.com`
+> The committed `env/prod.example.json` is only a template with a placeholder — real prod builds read `env/prod.json` (gitignored), so the endpoint is never baked into a committed JSON file.
 
 **1. Start the backend** (from `ragro-backend/`):
 
@@ -78,13 +87,18 @@ docker compose up -d --build
 
 This starts PostgreSQL, Keycloak, and the Spring Boot API. Three test users are created automatically in both Keycloak and the database.
 
-**2. Run the Flutter app:**
+**2. Run the Flutter app (local backend):**
 
 ```bash
+# Chrome / desktop — uses localhost default
 flutter run -d chrome
+
+# Android emulator — IntelliJ: use the "main (emulator)" run config
+# or via script (auto-picks env/local.json):
+./scripts/run_emulator.sh
 ```
 
-The app defaults to `http://localhost:8080` as the API base URL.
+On Android emulator the app automatically rewrites `localhost` → `10.0.2.2` — no extra config needed.
 
 **3. Log in with one of the test users:**
 
@@ -109,11 +123,28 @@ flutter run -d chrome --dart-define=DEMO_MODE=true --dart-define=DEMO_ROLE=produ
 flutter run -d chrome --dart-define=DEMO_MODE=true --dart-define=DEMO_ROLE=admin
 ```
 
-### Production base URL
+### Switching between local and prod (AWS)
+
+Environment is controlled via `--dart-define-from-file`. The `env/` directory holds the JSON files:
 
 ```bash
-flutter run --dart-define=API_BASE_URL=https://api.ragro.com.br
+# Dev local (default — already works without any flag)
+flutter run -d chrome
+# or explicitly:
+flutter run -d chrome --dart-define-from-file=env/local.json
+
+# Prod (AWS): create env/prod.json from the template, set the URL, then build.
+#    cp env/prod.example.json env/prod.json
+#    # edit env/prod.json → API_BASE_URL = https://7ruopxdlm7.execute-api.us-east-2.amazonaws.com
+flutter build apk --dart-define-from-file=env/prod.json
+# (or `flutter run --dart-define-from-file=env/prod.json` to run against prod)
+
+# One-off override (takes precedence over the file):
+flutter run --dart-define-from-file=env/local.json --dart-define=API_BASE_URL=http://192.168.1.10:8080
 ```
+
+**Physical device (local backend):** the device must be on the same Wi-Fi as the dev machine.
+Use the machine's LAN IP instead of `localhost`, e.g. `http://192.168.1.10:8080`, either via `--dart-define=API_BASE_URL=http://192.168.1.10:8080` or by creating a custom env JSON file.
 
 ### Run on Android
 
@@ -137,7 +168,7 @@ flutter test
 
 ### Visual regression tests (Playwright)
 
-Requires the Flutter app running on `http://localhost:8080`.
+Requires the Flutter app running locally in Chrome. The API can point to local backend or AWS via `API_BASE_URL`.
 
 ```bash
 # 1. Start the app
