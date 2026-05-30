@@ -2,10 +2,9 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 
 abstract final class ApiEndpoints {
-    static const String _productionBase =
-            'https://7ruopxdlm7.execute-api.us-east-2.amazonaws.com';
-
-    static String get _defaultBase => _productionBase;
+  // Default para dev local. Em prod, passe --dart-define-from-file=env/prod.json
+  // (ou --dart-define=API_BASE_URL=https://...) via CI.
+  static const String _localBase = 'http://localhost:8080';
 
   static final String _base = _resolveBaseUrl();
 
@@ -17,7 +16,7 @@ abstract final class ApiEndpoints {
             return _normalizeForRuntime(normalized);
     }
 
-    return _defaultBase;
+    return _normalizeForRuntime(_localBase);
   }
 
     static String _normalizeForRuntime(String baseUrl) {
