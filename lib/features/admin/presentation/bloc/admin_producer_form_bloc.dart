@@ -1,4 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:geocoding/geocoding.dart';
 import 'package:injectable/injectable.dart';
 import 'package:ragro_mobile/core/network/api_exception.dart';
 import 'package:ragro_mobile/features/admin/domain/entities/admin_address.dart';
@@ -61,6 +62,20 @@ class AdminProducerFormBloc
         ),
       ];
 
+      double? lat;
+      double? lng;
+      try {
+        final fullAddress =
+            '${event.address}, ${event.number}, ${event.city}, ${event.state}';
+        final locations = await locationFromAddress(fullAddress);
+        if (locations.isNotEmpty) {
+          lat = locations.first.latitude;
+          lng = locations.first.longitude;
+        }
+      } catch (e) {
+        // Ignorar erro de geocoding para não bloquear a criação
+      }
+
       final producer = AdminProducer(
         id: DateTime.now().millisecondsSinceEpoch.toString(),
         name: event.name,
@@ -83,6 +98,8 @@ class AdminProducerFormBloc
           neighborhood: (event.neighborhood?.isNotEmpty ?? false)
               ? event.neighborhood
               : null,
+          latitude: lat,
+          longitude: lng,
         ),
         paymentMethods: paymentMethods,
         availability: selectedDays.isNotEmpty ? selectedDays : null,

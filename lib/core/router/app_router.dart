@@ -27,6 +27,7 @@ import 'package:ragro_mobile/features/inventory/presentation/pages/product_form_
 import 'package:ragro_mobile/features/inventory/presentation/pages/stock_entry_page.dart';
 import 'package:ragro_mobile/features/inventory/presentation/pages/stock_exit_page.dart';
 import 'package:ragro_mobile/features/inventory/presentation/pages/stock_movements_page.dart';
+import 'package:ragro_mobile/features/map/presentation/pages/map_page.dart';
 import 'package:ragro_mobile/features/orders/presentation/pages/customer_orders_page.dart';
 import 'package:ragro_mobile/features/orders/presentation/pages/order_confirmation_page.dart';
 import 'package:ragro_mobile/features/orders/presentation/pages/order_detail_page.dart';
@@ -63,7 +64,8 @@ class AppRouter {
         }
         if (authState is AuthAuthenticated && isAuthRoute) {
           return switch (authState.user.type) {
-            UserType.customer => '/customer/impact', // ← redireciona para impact
+            UserType.customer =>
+              '/customer/impact', // ← redireciona para impact
             UserType.producer => '/producer/home',
             UserType.admin => '/admin/producers',
           };
@@ -112,12 +114,12 @@ class AppRouter {
                             return ReviewsPage(
                               producerId: state.pathParameters['producerId']!,
                               producerName:
-                              extra['producerName'] as String? ?? '',
+                                  extra['producerName'] as String? ?? '',
                               producerLocation:
-                              extra['producerLocation'] as String? ?? '',
+                                  extra['producerLocation'] as String? ?? '',
                               averageRating:
-                              (extra['averageRating'] as num?)
-                                  ?.toDouble() ??
+                                  (extra['averageRating'] as num?)
+                                      ?.toDouble() ??
                                   0.0,
                               totalReviews: extra['totalReviews'] as int? ?? 0,
                             );
@@ -153,11 +155,11 @@ class AppRouter {
                           builder: (context, state) => RateProducerPage(
                             orderId: state.pathParameters['orderId']!,
                             farmName:
-                            state.uri.queryParameters['farmName'] ?? '',
+                                state.uri.queryParameters['farmName'] ?? '',
                             ownerName:
-                            state.uri.queryParameters['ownerName'] ?? '',
+                                state.uri.queryParameters['ownerName'] ?? '',
                             isRated:
-                            state.uri.queryParameters['isRated'] == 'true',
+                                state.uri.queryParameters['isRated'] == 'true',
                           ),
                         ),
                       ],
@@ -168,12 +170,20 @@ class AppRouter {
             ),
             StatefulShellBranch(
               routes: [
+                GoRoute(
+                  path: '/customer/map',
+                  builder: (_, __) => const MapPage(),
+                ),
+              ],
+            ),
+            StatefulShellBranch(
+              routes: [
                 ShellRoute(
                   builder: (_, __, child) {
                     return BlocProvider(
                       create: (_) =>
-                      getIt<CustomerProfileBloc>()
-                        ..add(const CustomerProfileStarted()),
+                          getIt<CustomerProfileBloc>()
+                            ..add(const CustomerProfileStarted()),
                       child: child,
                     );
                   },
@@ -297,7 +307,7 @@ class AppRouter {
                           productName: extra['productName'] as String? ?? '',
                           unit: extra['unit'] as String? ?? 'un',
                           currentStock:
-                          (extra['currentStock'] as num?)?.toDouble() ??
+                              (extra['currentStock'] as num?)?.toDouble() ??
                               0.0,
                         );
                       },
@@ -340,9 +350,9 @@ class AppRouter {
                           producerId: extra['producerId'] as String? ?? '',
                           producerName: extra['producerName'] as String? ?? '',
                           producerLocation:
-                          extra['producerLocation'] as String? ?? '',
+                              extra['producerLocation'] as String? ?? '',
                           averageRating:
-                          (extra['averageRating'] as num?)?.toDouble() ??
+                              (extra['averageRating'] as num?)?.toDouble() ??
                               0.0,
                           totalReviews: extra['totalReviews'] as int? ?? 0,
                         );
