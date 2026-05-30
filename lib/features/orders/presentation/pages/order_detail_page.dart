@@ -270,15 +270,15 @@ class _OrderDetailView extends StatelessWidget {
                       ],
                     ),
                   ),
-                  if (order.isCancelled &&
-                      order.cancellationReason != null) ...[
-                    const SizedBox(height: 18),
-                    const _SectionTitle('CANCELAMENTO'),
-                    _CancellationCard(order: order),
-                  ],
                   const SizedBox(height: 18),
                   const _SectionTitle('ENTREGA'),
                   _DeliveryCard(address: order.deliveryAddress),
+                  if (order.isCancelled &&
+                      (order.cancellationReason?.isNotEmpty ?? false)) ...[
+                    const SizedBox(height: 18),
+                    const _SectionTitle('MOTIVO DE CANCELAMENTO'),
+                    _CancellationCard(order: order),
+                  ],
                   if (order.bankInfo != null && order.bankInfo!.hasAnyInfo) ...[
                     const SizedBox(height: 18),
                     const _SectionTitle('PAGAMENTO'),
@@ -605,8 +605,18 @@ class _CancellationCard extends StatelessWidget {
 
   final OrderDetail order;
 
+  static const _reasonLabels = {
+    'REFUSED_BY_FARMER': 'Cancelado pelo produtor',
+    'CUSTOMER_CANCELLED': 'Cancelado pelo cliente',
+  };
+
   @override
   Widget build(BuildContext context) {
+    final reason =
+        _reasonLabels[order.cancellationReason] ??
+        order.cancellationReason ??
+        '';
+
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16),
       padding: const EdgeInsets.all(17),
@@ -635,7 +645,7 @@ class _CancellationCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  order.cancellationReason!,
+                  reason,
                   style: const TextStyle(
                     fontFamily: 'Manrope',
                     fontSize: 14,
@@ -956,12 +966,14 @@ class _ActionButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final effectiveColor = onTap == null ? color.withValues(alpha: 0.5) : color;
+
     return GestureDetector(
       onTap: onTap,
       child: Container(
         height: 52,
         decoration: BoxDecoration(
-          color: onTap == null ? color.withValues(alpha: 0.6) : color,
+          color: effectiveColor,
           borderRadius: BorderRadius.circular(24),
         ),
         child: Row(
@@ -969,13 +981,16 @@ class _ActionButton extends StatelessWidget {
           children: [
             Icon(icon, color: AppColors.white, size: 20),
             const SizedBox(width: 8),
-            Text(
-              label,
-              style: const TextStyle(
-                fontFamily: 'Manrope',
-                fontWeight: FontWeight.w700,
-                fontSize: 16,
-                color: AppColors.white,
+            Flexible(
+              child: Text(
+                label,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  fontFamily: 'Manrope',
+                  fontWeight: FontWeight.w700,
+                  fontSize: 15,
+                  color: AppColors.white,
+                ),
               ),
             ),
           ],

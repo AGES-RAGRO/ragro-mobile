@@ -37,23 +37,21 @@ class OrderCard extends StatelessWidget {
     final isDelivered = order.status == OrderStatus.delivered;
     final isRated = order.avaliado;
 
-    return GestureDetector(
-      onTap: () => context.push('/customer/orders/${order.id}'),
-      child: Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: const Color(0xFFEEF2EE)),
-          boxShadow: const [
-            BoxShadow(
-              color: Color(0x0A000000),
-              blurRadius: 8,
-              offset: Offset(0, 2),
-            ),
-          ],
-        ),
-        padding: const EdgeInsets.all(16),
-        child: Column(
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: const Color(0xFFEEF2EE)),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x0A000000),
+            blurRadius: 8,
+            offset: Offset(0, 2),
+          ),
+        ],
+      ),
+      padding: const EdgeInsets.all(16),
+      child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
@@ -186,22 +184,56 @@ class OrderCard extends StatelessWidget {
                     ),
                   ],
                 ),
-                if (!isDelivered || !isRated)
-                  _OrderActionButton(order: order, isDelivered: isDelivered),
+                Row(
+                  children: [
+                    _ViewOrderButton(order: order),
+                    if (isDelivered && !isRated) ...[
+                      const SizedBox(width: 8),
+                      _RateOrderButton(order: order),
+                    ],
+                  ],
+                ),
               ],
             ),
           ],
+        ),
+      );
+  }
+}
+
+class _ViewOrderButton extends StatelessWidget {
+  const _ViewOrderButton({required this.order});
+
+  final Order order;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () => context.push('/customer/orders/${order.id}'),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+        decoration: BoxDecoration(
+          color: AppColors.darkGreen,
+          borderRadius: BorderRadius.circular(22),
+        ),
+        child: const Text(
+          'Ver pedido',
+          style: TextStyle(
+            fontFamily: 'Manrope',
+            fontWeight: FontWeight.w700,
+            fontSize: 13,
+            color: Colors.white,
+          ),
         ),
       ),
     );
   }
 }
 
-class _OrderActionButton extends StatelessWidget {
-  const _OrderActionButton({required this.order, required this.isDelivered});
+class _RateOrderButton extends StatelessWidget {
+  const _RateOrderButton({required this.order});
 
   final Order order;
-  final bool isDelivered;
 
   @override
   Widget build(BuildContext context) {
@@ -216,11 +248,6 @@ class _OrderActionButton extends StatelessWidget {
 
     return GestureDetector(
       onTap: () async {
-        if (!isDelivered) {
-          await context.push<bool>('/customer/orders/${order.id}');
-          return;
-        }
-
         final repository = getIt<OrdersRepository>();
         final detail = await repository.getCustomerOrderById(order.id);
 
@@ -246,12 +273,12 @@ class _OrderActionButton extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
         decoration: BoxDecoration(
-          color: AppColors.darkGreen,
+          color: AppColors.lightGreen,
           borderRadius: BorderRadius.circular(22),
         ),
-        child: Text(
-          isDelivered ? 'Fazer Avaliacao' : 'Ver pedido',
-          style: const TextStyle(
+        child: const Text(
+          'Avaliar',
+          style: TextStyle(
             fontFamily: 'Manrope',
             fontWeight: FontWeight.w700,
             fontSize: 13,

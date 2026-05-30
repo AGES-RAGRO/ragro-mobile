@@ -2,10 +2,9 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 
 abstract final class ApiEndpoints {
-  static const String _productionBase =
-      'https://7ruopxdlm7.execute-api.us-east-2.amazonaws.com';
+  static const String _localBase = 'http://localhost:8080';
 
-  static String get _defaultBase => _productionBase;
+  static String get _defaultBase => _localBase;
 
   static final String _base = _resolveBaseUrl();
 

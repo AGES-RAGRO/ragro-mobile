@@ -10,7 +10,6 @@ class ProducerOrderCard extends StatelessWidget {
     required this.onDetailTap,
     this.onActionTap,
     this.onCancelTap,
-    this.onDeliveryConfirmTap,
     this.isSelected,
     this.onSelect,
     super.key,
@@ -20,7 +19,6 @@ class ProducerOrderCard extends StatelessWidget {
   final VoidCallback onDetailTap;
   final VoidCallback? onActionTap;
   final VoidCallback? onCancelTap;
-  final VoidCallback? onDeliveryConfirmTap;
 
   /// When non-null the card is in selection mode; tapping selects/deselects.
   final bool? isSelected;
@@ -241,31 +239,6 @@ class ProducerOrderCard extends StatelessWidget {
                       ),
                       child: const Text(
                         'Aceitar',
-                        style: TextStyle(
-                          fontFamily: 'Manrope',
-                          fontWeight: FontWeight.w600,
-                          fontSize: 14,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-                if (order.status == ProducerOrderStatus.inDelivery &&
-                    onDeliveryConfirmTap != null) ...[
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: onDeliveryConfirmTap,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.darkGreen,
-                        foregroundColor: AppColors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(24),
-                        ),
-                        padding: const EdgeInsets.symmetric(vertical: 10),
-                      ),
-                      child: const Text(
-                        'Entregue',
                         style: TextStyle(
                           fontFamily: 'Manrope',
                           fontWeight: FontWeight.w600,
