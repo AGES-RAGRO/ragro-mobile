@@ -16,4 +16,16 @@ class AuthConfigModel {
   final String tokenUrl;
   final String clientId;
   final String realm;
+
+  AuthConfigModel copyWith({
+    String? tokenUrl,
+    String? clientId,
+    String? realm,
+  }) {
+    return AuthConfigModel(
+      tokenUrl: tokenUrl ?? this.tokenUrl,
+      clientId: clientId ?? this.clientId,
+      realm: realm ?? this.realm,
+    );
+  }
 }

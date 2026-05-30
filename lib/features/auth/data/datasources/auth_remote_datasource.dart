@@ -66,7 +66,8 @@ class AuthRemoteDataSource {
           'Resposta inválida ao carregar configuração de autenticação.',
         );
       }
-      config = AuthConfigModel.fromJson(data);
+      final raw = AuthConfigModel.fromJson(data);
+      config = raw.copyWith(tokenUrl: ApiEndpoints.fixUrl(raw.tokenUrl));
     } on DioException catch (e) {
       throw e.error as ApiException? ?? const UnknownApiException();
     }

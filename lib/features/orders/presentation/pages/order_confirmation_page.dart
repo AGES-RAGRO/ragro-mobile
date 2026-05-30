@@ -278,150 +278,152 @@ class _CheckoutView extends StatelessWidget {
                           ),
                           child: Column(
                             children: [
-                              // Bank
-                              Row(
-                                children: [
-                                  const Icon(
-                                    Icons.account_balance_outlined,
-                                    size: 20,
-                                    color: AppColors.darkGreen,
-                                  ),
-                                  const SizedBox(width: 16),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        const Text(
-                                          'Banco',
-                                          style: TextStyle(
-                                            fontFamily: 'Manrope',
-                                            fontWeight: FontWeight.w700,
-                                            fontSize: 14,
-                                            color: AppColors.placeholder,
-                                          ),
-                                        ),
-                                        Text(
-                                          cart.bankName.isNotEmpty
-                                              ? cart.bankName
-                                              : '-',
-                                          style: const TextStyle(
-                                            fontFamily: 'Manrope',
-                                            fontWeight: FontWeight.w700,
-                                            fontSize: 14,
-                                            color: AppColors.black,
-                                          ),
-                                        ),
-                                      ],
+                              if (cart.bankName.isNotEmpty) ...[
+                                Row(
+                                  children: [
+                                    const Icon(
+                                      Icons.account_balance_outlined,
+                                      size: 20,
+                                      color: AppColors.darkGreen,
                                     ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 12),
-                              // Agency + Account
-                              Row(
-                                children: [
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        const Text(
-                                          'Agência',
-                                          style: TextStyle(
-                                            fontFamily: 'Manrope',
-                                            fontWeight: FontWeight.w700,
-                                            fontSize: 12,
-                                            color: AppColors.placeholder,
+                                    const SizedBox(width: 16),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          const Text(
+                                            'Banco',
+                                            style: TextStyle(
+                                              fontFamily: 'Manrope',
+                                              fontWeight: FontWeight.w700,
+                                              fontSize: 14,
+                                              color: AppColors.placeholder,
+                                            ),
                                           ),
-                                        ),
-                                        Text(
-                                          cart.bankAgency.isNotEmpty
-                                              ? cart.bankAgency
-                                              : '-',
-                                          style: const TextStyle(
-                                            fontFamily: 'Manrope',
-                                            fontWeight: FontWeight.w700,
-                                            fontSize: 14,
-                                            color: AppColors.black,
+                                          Text(
+                                            cart.bankName,
+                                            style: const TextStyle(
+                                              fontFamily: 'Manrope',
+                                              fontWeight: FontWeight.w700,
+                                              fontSize: 14,
+                                              color: AppColors.black,
+                                            ),
                                           ),
-                                        ),
-                                      ],
+                                        ],
+                                      ),
                                     ),
+                                  ],
+                                ),
+                                const SizedBox(height: 12),
+                              ],
+                              if (cart.bankAgency.isNotEmpty ||
+                                  cart.bankAccount.isNotEmpty) ...[
+                                Row(
+                                  children: [
+                                    if (cart.bankAgency.isNotEmpty)
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            const Text(
+                                              'Agência',
+                                              style: TextStyle(
+                                                fontFamily: 'Manrope',
+                                                fontWeight: FontWeight.w700,
+                                                fontSize: 12,
+                                                color: AppColors.placeholder,
+                                              ),
+                                            ),
+                                            Text(
+                                              cart.bankAgency,
+                                              style: const TextStyle(
+                                                fontFamily: 'Manrope',
+                                                fontWeight: FontWeight.w700,
+                                                fontSize: 14,
+                                                color: AppColors.black,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    if (cart.bankAccount.isNotEmpty)
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            const Text(
+                                              'Conta Corrente',
+                                              style: TextStyle(
+                                                fontFamily: 'Manrope',
+                                                fontWeight: FontWeight.w700,
+                                                fontSize: 12,
+                                                color: AppColors.placeholder,
+                                              ),
+                                            ),
+                                            Text(
+                                              cart.bankAccount,
+                                              style: const TextStyle(
+                                                fontFamily: 'Manrope',
+                                                fontWeight: FontWeight.w700,
+                                                fontSize: 14,
+                                                color: AppColors.black,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                  ],
+                                ),
+                                const SizedBox(height: 12),
+                              ],
+                              if (cart.bankPixKey.isNotEmpty) ...[
+                                if (cart.bankName.isNotEmpty ||
+                                    cart.bankAgency.isNotEmpty ||
+                                    cart.bankAccount.isNotEmpty)
+                                  const Divider(
+                                    color: Color(0xFFF1F5F9),
+                                    height: 24,
                                   ),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        const Text(
-                                          'Conta Corrente',
-                                          style: TextStyle(
-                                            fontFamily: 'Manrope',
-                                            fontWeight: FontWeight.w700,
-                                            fontSize: 12,
-                                            color: AppColors.placeholder,
-                                          ),
-                                        ),
-                                        Text(
-                                          cart.bankAccount.isNotEmpty
-                                              ? cart.bankAccount
-                                              : '-',
-                                          style: const TextStyle(
-                                            fontFamily: 'Manrope',
-                                            fontWeight: FontWeight.w700,
-                                            fontSize: 14,
-                                            color: AppColors.black,
-                                          ),
-                                        ),
-                                      ],
+                                Row(
+                                  children: [
+                                    const Icon(
+                                      Icons.pix,
+                                      size: 22,
+                                      color: AppColors.lightGreen,
                                     ),
-                                  ),
-                                ],
-                              ),
-                              const Divider(
-                                color: Color(0xFFF1F5F9),
-                                height: 24,
-                              ),
-                              // PIX
-                              Row(
-                                children: [
-                                  const Icon(
-                                    Icons.pix,
-                                    size: 22,
-                                    color: AppColors.lightGreen,
-                                  ),
-                                  const SizedBox(width: 16),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        const Text(
-                                          'Chave PIX',
-                                          style: TextStyle(
-                                            fontFamily: 'Manrope',
-                                            fontWeight: FontWeight.w700,
-                                            fontSize: 12,
-                                            color: AppColors.placeholder,
+                                    const SizedBox(width: 16),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          const Text(
+                                            'Chave PIX',
+                                            style: TextStyle(
+                                              fontFamily: 'Manrope',
+                                              fontWeight: FontWeight.w700,
+                                              fontSize: 12,
+                                              color: AppColors.placeholder,
+                                            ),
                                           ),
-                                        ),
-                                        Text(
-                                          cart.bankPixKey.isNotEmpty
-                                              ? cart.bankPixKey
-                                              : 'Não cadastrada',
-                                          style: const TextStyle(
-                                            fontFamily: 'Manrope',
-                                            fontWeight: FontWeight.w700,
-                                            fontSize: 14,
-                                            color: AppColors.black,
+                                          Text(
+                                            cart.bankPixKey,
+                                            style: const TextStyle(
+                                              fontFamily: 'Manrope',
+                                              fontWeight: FontWeight.w700,
+                                              fontSize: 14,
+                                              color: AppColors.black,
+                                            ),
                                           ),
-                                        ),
-                                      ],
+                                        ],
+                                      ),
                                     ),
-                                  ),
-                                ],
-                              ),
+                                  ],
+                                ),
+                              ],
                             ],
                           ),
                         ),
