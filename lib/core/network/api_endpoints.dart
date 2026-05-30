@@ -2,13 +2,9 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 
 abstract final class ApiEndpoints {
+  // Default para dev local. Em prod, passe --dart-define-from-file=env/prod.json
+  // (ou --dart-define=API_BASE_URL=https://...) via CI.
   static const String _localBase = 'http://localhost:8080';
-
-  static String get _defaultBase {
-    if (kIsWeb) return 'http://localhost:8080';
-    if (Platform.isAndroid) return 'http://10.0.2.2:8080';
-    return 'http://localhost:8080';
-  }
 
   static final String _base = _resolveBaseUrl();
 
@@ -20,7 +16,7 @@ abstract final class ApiEndpoints {
       return _normalizeForRuntime(normalized);
     }
 
-    return _defaultBase;
+    return _normalizeForRuntime(_localBase);
   }
 
   /// Fixes URLs that come from the backend (like Keycloak token URLs)
