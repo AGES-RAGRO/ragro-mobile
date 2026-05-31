@@ -23,8 +23,8 @@ class RouteCalculationState extends Equatable {
     this.selectedFuel = 'Gasolina',
     this.averageConsumption = '',
     this.confirmedDeliveries = const {},
-    this.totalDurationMins = 40,
-    this.totalDistanceKm = 10.2,
+    this.totalDurationMins = 0,
+    this.totalDistanceKm = 0.0,
     this.producerLat,
     this.producerLng,
   });
@@ -59,16 +59,16 @@ class RouteCalculationState extends Equatable {
 
   @override
   List<Object?> get props => [
-        status,
-        calculatedCo2,
-        errorMessage,
-        selectedVehicle,
-        selectedFuel,
-        averageConsumption,
-        confirmedDeliveries,
-        totalDurationMins,
-        totalDistanceKm,
-        producerLat,
-        producerLng,
-      ];
+    status,
+    calculatedCo2,
+    errorMessage,
+    selectedVehicle,
+    selectedFuel,
+    averageConsumption,
+    confirmedDeliveries,
+    totalDurationMins,
+    totalDistanceKm,
+    producerLat,
+    producerLng,
+  ];
 }

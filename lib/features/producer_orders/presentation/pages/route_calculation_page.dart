@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -51,7 +50,7 @@ class _RouteCalculationViewState extends State<_RouteCalculationView> {
   }
 
   void _showCo2BottomSheet(BuildContext context) {
-    showModalBottomSheet(
+    showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.white,
@@ -69,264 +68,287 @@ class _RouteCalculationViewState extends State<_RouteCalculationView> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.white,
-      body: Stack(
-        children: [
-          CustomScrollView(
-            slivers: [
-              SliverAppBar(
-                backgroundColor: AppColors.white,
-                leading: GestureDetector(
-                  onTap: () => context.pop(),
-                  child: const Icon(Icons.arrow_back, color: AppColors.black),
-                ),
-                title: const Text(
-                  'Rota Calculada',
-                  style: TextStyle(
-                    fontFamily: 'Figtree',
-                    fontWeight: FontWeight.w700,
-                    fontSize: 18,
-                    color: AppColors.black,
+    return BlocListener<RouteCalculationCubit, RouteCalculationState>(
+      listenWhen: (prev, curr) =>
+          curr.status == RouteCalculationStatus.error &&
+          prev.status != RouteCalculationStatus.error,
+      listener: (context, state) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              state.errorMessage ?? 'Erro ao calcular CO₂. Tente novamente.',
+            ),
+          ),
+        );
+      },
+      child: Scaffold(
+        backgroundColor: AppColors.white,
+        body: Stack(
+          children: [
+            CustomScrollView(
+              slivers: [
+                SliverAppBar(
+                  backgroundColor: AppColors.white,
+                  leading: GestureDetector(
+                    onTap: () => context.pop(),
+                    child: const Icon(Icons.arrow_back, color: AppColors.black),
+                  ),
+                  title: const Text(
+                    'Rota Calculada',
+                    style: TextStyle(
+                      fontFamily: 'Figtree',
+                      fontWeight: FontWeight.w700,
+                      fontSize: 18,
+                      color: AppColors.black,
+                    ),
+                  ),
+                  centerTitle: true,
+                  pinned: true,
+                  elevation: 0,
+                  bottom: PreferredSize(
+                    preferredSize: const Size.fromHeight(1),
+                    child: Container(color: const Color(0x1A2E5729), height: 1),
                   ),
                 ),
-                centerTitle: true,
-                pinned: true,
-                elevation: 0,
-                bottom: PreferredSize(
-                  preferredSize: const Size.fromHeight(1),
-                  child: Container(color: const Color(0x1A2E5729), height: 1),
-                ),
-              ),
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 20, 16, 100),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      BlocBuilder<RouteCalculationCubit, RouteCalculationState>(
-                        builder: (context, state) {
-                          return Row(
-                            children: [
-                              Expanded(
-                                child: _RouteStatCard(
-                                  label: 'Duração',
-                                  value: '${state.totalDurationMins} min',
-                                ),
-                              ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: _RouteStatCard(
-                                  label: 'Distância',
-                                  value:
-                                      '${state.totalDistanceKm.toStringAsFixed(1).replaceAll('.', ',')} km',
-                                ),
-                              ),
-                            ],
-                          );
-                        },
-                      ),
-                      const SizedBox(height: 16),
-
-                      // CO2 Card
-                      BlocBuilder<RouteCalculationCubit, RouteCalculationState>(
-                        builder: (context, state) {
-                          if (state.status ==
-                              RouteCalculationStatus.calculated) {
-                            return _Co2ResultCard(
-                              co2: state.calculatedCo2 ?? 0,
-                              vehicle: state.selectedVehicle,
-                              fuel: state.selectedFuel,
-                              consumption: state.averageConsumption,
-                              onRecalculate: () => _showCo2BottomSheet(context),
-                            );
-                          }
-
-                          return _Co2CalculateCard(
-                            onTap: () => _showCo2BottomSheet(context),
-                          );
-                        },
-                      ),
-
-                      const SizedBox(height: 20),
-                      const Text(
-                        'A rota abaixo foi otimizada para\neconomizar tempo, combustível e emissões de CO2.',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontFamily: 'Manrope',
-                          fontSize: 12,
-                          color: AppColors.black,
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-
-                      // Map Area
-                      BlocBuilder<RouteCalculationCubit, RouteCalculationState>(
-                        builder: (context, state) {
-                          final lat = state.producerLat ?? -16.6868;
-                          final lng = state.producerLng ?? -49.2647;
-                          final loc = LatLng(lat, lng);
-
-                          return ClipRRect(
-                            borderRadius: BorderRadius.circular(16),
-                            child: Container(
-                              height: 160,
-                              width: double.infinity,
-                              decoration: BoxDecoration(
-                                border: Border.all(
-                                  color: const Color(0xFFE2E8F0),
-                                ),
-                                borderRadius: BorderRadius.circular(16),
-                              ),
-                              child: Stack(
-                                children: [
-                                  GoogleMap(
-                                    initialCameraPosition: CameraPosition(
-                                      target: loc,
-                                      zoom: 13,
-                                    ),
-                                    zoomControlsEnabled: false,
-                                    scrollGesturesEnabled: false,
-                                    rotateGesturesEnabled: false,
-                                    tiltGesturesEnabled: false,
-                                    mapToolbarEnabled: false,
-                                    markers: {
-                                      Marker(
-                                        markerId: const MarkerId('producer'),
-                                        position: loc,
-                                        icon:
-                                            BitmapDescriptor.defaultMarkerWithHue(
-                                              BitmapDescriptor.hueGreen,
-                                            ),
-                                      ),
-                                    },
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 20, 16, 100),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        BlocBuilder<
+                          RouteCalculationCubit,
+                          RouteCalculationState
+                        >(
+                          builder: (context, state) {
+                            return Row(
+                              children: [
+                                Expanded(
+                                  child: _RouteStatCard(
+                                    label: 'Duração',
+                                    value: '${state.totalDurationMins} min',
                                   ),
-                                  Positioned(
-                                    bottom: 12,
-                                    left: 0,
-                                    right: 0,
-                                    child: Center(
-                                      child: GestureDetector(
-                                        onTap: _openGoogleMaps,
-                                        child: Container(
-                                          padding: const EdgeInsets.symmetric(
-                                            horizontal: 16,
-                                            vertical: 10,
-                                          ),
-                                          decoration: BoxDecoration(
-                                            color: AppColors.darkGreen,
-                                            borderRadius: BorderRadius.circular(
-                                              20,
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: _RouteStatCard(
+                                    label: 'Distância',
+                                    value:
+                                        '${state.totalDistanceKm.toStringAsFixed(1).replaceAll('.', ',')} km',
+                                  ),
+                                ),
+                              ],
+                            );
+                          },
+                        ),
+                        const SizedBox(height: 16),
+
+                        // CO2 Card
+                        BlocBuilder<
+                          RouteCalculationCubit,
+                          RouteCalculationState
+                        >(
+                          builder: (context, state) {
+                            if (state.status ==
+                                RouteCalculationStatus.calculated) {
+                              return _Co2ResultCard(
+                                co2: state.calculatedCo2 ?? 0,
+                                vehicle: state.selectedVehicle,
+                                fuel: state.selectedFuel,
+                                consumption: state.averageConsumption,
+                                onRecalculate: () =>
+                                    _showCo2BottomSheet(context),
+                              );
+                            }
+
+                            return _Co2CalculateCard(
+                              onTap: () => _showCo2BottomSheet(context),
+                            );
+                          },
+                        ),
+
+                        const SizedBox(height: 20),
+                        const Text(
+                          'A rota abaixo foi otimizada para\neconomizar tempo, combustível e emissões de CO2.',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontFamily: 'Manrope',
+                            fontSize: 12,
+                            color: AppColors.black,
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+
+                        // Map Area
+                        BlocBuilder<
+                          RouteCalculationCubit,
+                          RouteCalculationState
+                        >(
+                          builder: (context, state) {
+                            final lat = state.producerLat ?? -16.6868;
+                            final lng = state.producerLng ?? -49.2647;
+                            final loc = LatLng(lat, lng);
+
+                            return ClipRRect(
+                              borderRadius: BorderRadius.circular(16),
+                              child: Container(
+                                height: 160,
+                                width: double.infinity,
+                                decoration: BoxDecoration(
+                                  border: Border.all(
+                                    color: const Color(0xFFE2E8F0),
+                                  ),
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+                                child: Stack(
+                                  children: [
+                                    GoogleMap(
+                                      initialCameraPosition: CameraPosition(
+                                        target: loc,
+                                        zoom: 13,
+                                      ),
+                                      zoomControlsEnabled: false,
+                                      scrollGesturesEnabled: false,
+                                      rotateGesturesEnabled: false,
+                                      tiltGesturesEnabled: false,
+                                      mapToolbarEnabled: false,
+                                      markers: {
+                                        Marker(
+                                          markerId: const MarkerId('producer'),
+                                          position: loc,
+                                          icon:
+                                              BitmapDescriptor.defaultMarkerWithHue(
+                                                BitmapDescriptor.hueGreen,
+                                              ),
+                                        ),
+                                      },
+                                    ),
+                                    Positioned(
+                                      bottom: 12,
+                                      left: 0,
+                                      right: 0,
+                                      child: Center(
+                                        child: GestureDetector(
+                                          onTap: _openGoogleMaps,
+                                          child: Container(
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 16,
+                                              vertical: 10,
                                             ),
-                                          ),
-                                          child: const Row(
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: [
-                                              Icon(
-                                                Icons.location_on,
-                                                color: Colors.white,
-                                                size: 16,
-                                              ),
-                                              SizedBox(width: 8),
-                                              Text(
-                                                'Abrir com Google Maps',
-                                                style: TextStyle(
+                                            decoration: BoxDecoration(
+                                              color: AppColors.darkGreen,
+                                              borderRadius:
+                                                  BorderRadius.circular(20),
+                                            ),
+                                            child: const Row(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                Icon(
+                                                  Icons.location_on,
                                                   color: Colors.white,
-                                                  fontWeight: FontWeight.w600,
-                                                  fontSize: 13,
+                                                  size: 16,
                                                 ),
-                                              ),
-                                              SizedBox(width: 8),
-                                              Icon(
-                                                Icons.open_in_new,
-                                                color: Colors.white,
-                                                size: 14,
-                                              ),
-                                            ],
+                                                SizedBox(width: 8),
+                                                Text(
+                                                  'Abrir com Google Maps',
+                                                  style: TextStyle(
+                                                    color: Colors.white,
+                                                    fontWeight: FontWeight.w600,
+                                                    fontSize: 13,
+                                                  ),
+                                                ),
+                                                SizedBox(width: 8),
+                                                Icon(
+                                                  Icons.open_in_new,
+                                                  color: Colors.white,
+                                                  size: 14,
+                                                ),
+                                              ],
+                                            ),
                                           ),
                                         ),
                                       ),
                                     ),
-                                  ),
-                                ],
+                                  ],
+                                ),
                               ),
-                            ),
-                          );
-                        },
-                      ),
-
-                      const SizedBox(height: 24),
-                      const Text(
-                        'Sequência de Entregas',
-                        style: TextStyle(
-                          fontFamily: 'Figtree',
-                          fontWeight: FontWeight.w700,
-                          fontSize: 16,
-                          color: AppColors.black,
+                            );
+                          },
                         ),
-                      ),
-                      const SizedBox(height: 16),
 
-                      // Delivery sequence
-                      const _DeliveryItem(
-                        id: '1',
-                        number: 1,
-                        title: 'Fazenda Boa Vista',
-                        subtitle:
-                            'Rodovia BR-153, KM 45, Lote 12\nGoiânia - GO, 74000-000',
-                      ),
-                      const SizedBox(height: 16),
-                      const _DeliveryItem(
-                        id: '2',
-                        number: 2,
-                        title: 'Fazenda Boa Vista',
-                        subtitle:
-                            'Rodovia BR-153, KM 45, Lote 12\nGoiânia - GO, 74000-000',
-                      ),
-                      const SizedBox(height: 16),
-                      const _DeliveryItem(
-                        id: '3',
-                        number: 3,
-                        title: 'Fazenda Boa Vista',
-                        subtitle:
-                            'Rodovia BR-153, KM 45, Lote 12\nGoiânia - GO, 74000-000',
-                      ),
-                    ],
+                        const SizedBox(height: 24),
+                        const Text(
+                          'Sequência de Entregas',
+                          style: TextStyle(
+                            fontFamily: 'Figtree',
+                            fontWeight: FontWeight.w700,
+                            fontSize: 16,
+                            color: AppColors.black,
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+
+                        // Delivery sequence
+                        const _DeliveryItem(
+                          id: '1',
+                          number: 1,
+                          title: 'Fazenda Boa Vista',
+                          subtitle:
+                              'Rodovia BR-153, KM 45, Lote 12\nGoiânia - GO, 74000-000',
+                        ),
+                        const SizedBox(height: 16),
+                        const _DeliveryItem(
+                          id: '2',
+                          number: 2,
+                          title: 'Fazenda Boa Vista',
+                          subtitle:
+                              'Rodovia BR-153, KM 45, Lote 12\nGoiânia - GO, 74000-000',
+                        ),
+                        const SizedBox(height: 16),
+                        const _DeliveryItem(
+                          id: '3',
+                          number: 3,
+                          title: 'Fazenda Boa Vista',
+                          subtitle:
+                              'Rodovia BR-153, KM 45, Lote 12\nGoiânia - GO, 74000-000',
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-            ],
-          ),
-          Positioned(
-            left: 0,
-            right: 0,
-            bottom: 0,
-            child: Container(
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
-              color: Colors.white,
-              child: GestureDetector(
-                onTap: () => context.pop(),
-                child: Container(
-                  height: 50,
-                  decoration: BoxDecoration(
-                    color: AppColors.darkGreen,
-                    borderRadius: BorderRadius.circular(25),
-                  ),
-                  child: const Center(
-                    child: Text(
-                      'Finalizar Entrega',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w700,
-                        fontSize: 16,
+              ],
+            ),
+            Positioned(
+              left: 0,
+              right: 0,
+              bottom: 0,
+              child: Container(
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+                color: Colors.white,
+                child: GestureDetector(
+                  onTap: () => context.pop(),
+                  child: Container(
+                    height: 50,
+                    decoration: BoxDecoration(
+                      color: AppColors.darkGreen,
+                      borderRadius: BorderRadius.circular(25),
+                    ),
+                    child: const Center(
+                      child: Text(
+                        'Finalizar Entrega',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w700,
+                          fontSize: 16,
+                        ),
                       ),
                     ),
                   ),
                 ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -584,6 +606,7 @@ class _Co2BottomSheetContent extends StatefulWidget {
 
 class _Co2BottomSheetContentState extends State<_Co2BottomSheetContent> {
   final _consumptionController = TextEditingController();
+  String? _consumptionError;
 
   @override
   void initState() {
@@ -635,7 +658,9 @@ class _Co2BottomSheetContentState extends State<_Co2BottomSheetContent> {
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                items: ['Carro', 'Moto', 'Van', 'Caminhão'].map((e) {
+                items: RouteCalculationCubit.allowedFuelsByVehicle.keys.map((
+                  e,
+                ) {
                   return DropdownMenuItem(value: e, child: Text(e));
                 }).toList(),
                 onChanged: (val) => context
@@ -659,9 +684,14 @@ class _Co2BottomSheetContentState extends State<_Co2BottomSheetContent> {
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                items: ['Gasolina', 'Etanol', 'Diesel', 'Elétrico'].map((e) {
-                  return DropdownMenuItem(value: e, child: Text(e));
-                }).toList(),
+                items:
+                    (RouteCalculationCubit.allowedFuelsByVehicle[state
+                                .selectedVehicle] ??
+                            const ['Gasolina'])
+                        .map((e) {
+                          return DropdownMenuItem(value: e, child: Text(e));
+                        })
+                        .toList(),
                 onChanged: (val) => context
                     .read<RouteCalculationCubit>()
                     .updateFormData(fuel: val),
@@ -677,6 +707,7 @@ class _Co2BottomSheetContentState extends State<_Co2BottomSheetContent> {
                 keyboardType: TextInputType.number,
                 decoration: InputDecoration(
                   hintText: 'Digite o consumo médio',
+                  errorText: _consumptionError,
                   contentPadding: const EdgeInsets.symmetric(
                     horizontal: 16,
                     vertical: 12,
@@ -685,9 +716,14 @@ class _Co2BottomSheetContentState extends State<_Co2BottomSheetContent> {
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                onChanged: (val) => context
-                    .read<RouteCalculationCubit>()
-                    .updateFormData(consumption: val),
+                onChanged: (val) {
+                  if (_consumptionError != null) {
+                    setState(() => _consumptionError = null);
+                  }
+                  context.read<RouteCalculationCubit>().updateFormData(
+                    consumption: val,
+                  );
+                },
               ),
               const SizedBox(height: 32),
               Row(
@@ -715,9 +751,24 @@ class _Co2BottomSheetContentState extends State<_Co2BottomSheetContent> {
                           state.status == RouteCalculationStatus.calculating
                           ? null
                           : () {
+                              // O backend exige consumo médio (> 0) para
+                              // veículos não-elétricos; valida antes de enviar.
+                              final needsConsumption =
+                                  state.selectedFuel != 'Elétrico';
+                              final consumption = double.tryParse(
+                                state.averageConsumption.replaceAll(',', '.'),
+                              );
+                              if (needsConsumption &&
+                                  (consumption == null || consumption <= 0)) {
+                                setState(
+                                  () => _consumptionError =
+                                      'Informe o consumo médio (km/L).',
+                                );
+                                return;
+                              }
                               context
                                   .read<RouteCalculationCubit>()
-                                  .calculateCo2(10.2);
+                                  .calculateCo2(state.totalDistanceKm);
                               Navigator.pop(context);
                             },
                       style: ElevatedButton.styleFrom(
