@@ -163,6 +163,7 @@ import 'package:ragro_mobile/features/learning/domain/usecases/get_products.dart
     as _i20;
 import 'package:ragro_mobile/features/learning/presentation/bloc/learning_bloc.dart'
     as _i79;
+import 'package:ragro_mobile/features/map/data/map_repository.dart' as _i362;
 import 'package:ragro_mobile/features/orders/data/datasources/orders_remote_datasource.dart'
     as _i384;
 import 'package:ragro_mobile/features/orders/data/repositories/orders_repository_impl.dart'
@@ -213,6 +214,10 @@ import 'package:ragro_mobile/features/producer_management/presentation/bloc/prod
     as _i767;
 import 'package:ragro_mobile/features/producer_orders/data/datasources/producer_orders_remote_datasource.dart'
     as _i608;
+import 'package:ragro_mobile/features/producer_orders/data/repositories/co2_repository.dart'
+    as _i206;
+import 'package:ragro_mobile/features/producer_orders/data/repositories/directions_repository.dart'
+    as _i877;
 import 'package:ragro_mobile/features/producer_orders/data/repositories/producer_orders_repository_impl.dart'
     as _i182;
 import 'package:ragro_mobile/features/producer_orders/domain/repositories/producer_orders_repository.dart'
@@ -223,6 +228,8 @@ import 'package:ragro_mobile/features/producer_orders/domain/usecases/get_produc
     as _i181;
 import 'package:ragro_mobile/features/producer_orders/domain/usecases/get_producer_orders.dart'
     as _i935;
+import 'package:ragro_mobile/features/producer_orders/domain/usecases/mark_producer_order_seen.dart'
+    as _i367;
 import 'package:ragro_mobile/features/producer_orders/domain/usecases/refuse_producer_order.dart'
     as _i885;
 import 'package:ragro_mobile/features/producer_orders/domain/usecases/update_producer_order_status.dart'
@@ -231,6 +238,8 @@ import 'package:ragro_mobile/features/producer_orders/presentation/bloc/producer
     as _i921;
 import 'package:ragro_mobile/features/producer_orders/presentation/bloc/producer_orders_bloc.dart'
     as _i1;
+import 'package:ragro_mobile/features/producer_orders/presentation/bloc/route_calculation_cubit.dart'
+    as _i48;
 import 'package:ragro_mobile/features/producer_profile/data/datasources/producer_profile_remote_datasource.dart'
     as _i889;
 import 'package:ragro_mobile/features/producer_profile/data/repositories/producer_profile_repository_impl.dart'
@@ -306,6 +315,10 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i727.ProducerManagementRemoteDataSource>(
       () => _i727.ProducerManagementRemoteDataSource(),
     );
+    gh.lazySingleton<_i206.Co2Repository>(() => _i206.Co2Repository());
+    gh.lazySingleton<_i877.DirectionsRepository>(
+      () => _i877.DirectionsRepository(),
+    );
     gh.lazySingleton<_i276.InventoryRepository>(
       () =>
           _i601.InventoryRepositoryImpl(gh<_i870.InventoryRemoteDataSource>()),
@@ -340,6 +353,12 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i456.StockMovementRemoteDataSource>(),
       ),
     );
+    gh.factory<_i48.RouteCalculationCubit>(
+      () => _i48.RouteCalculationCubit(
+        gh<_i206.Co2Repository>(),
+        gh<_i877.DirectionsRepository>(),
+      ),
+    );
     gh.lazySingleton<_i291.CreateInventoryProduct>(
       () => _i291.CreateInventoryProduct(gh<_i276.InventoryRepository>()),
     );
@@ -354,6 +373,9 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i279.UploadProductPhoto>(
       () => _i279.UploadProductPhoto(gh<_i276.InventoryRepository>()),
+    );
+    gh.factory<_i362.MapRepository>(
+      () => _i362.MapRepository(gh<_i873.ApiClient>()),
     );
     gh.lazySingleton<_i16.AdminRemoteDataSource>(
       () => _i16.AdminRemoteDataSource(gh<_i873.ApiClient>()),
@@ -627,6 +649,9 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i935.GetProducerOrders>(
       () => _i935.GetProducerOrders(gh<_i649.ProducerOrdersRepository>()),
+    );
+    gh.lazySingleton<_i367.MarkProducerOrderSeen>(
+      () => _i367.MarkProducerOrderSeen(gh<_i649.ProducerOrdersRepository>()),
     );
     gh.lazySingleton<_i885.RefuseProducerOrder>(
       () => _i885.RefuseProducerOrder(gh<_i649.ProducerOrdersRepository>()),

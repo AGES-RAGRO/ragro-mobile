@@ -146,6 +146,29 @@ flutter run --dart-define-from-file=env/local.json --dart-define=API_BASE_URL=ht
 **Physical device (local backend):** the device must be on the same Wi-Fi as the dev machine.
 Use the machine's LAN IP instead of `localhost`, e.g. `http://192.168.1.10:8080`, either via `--dart-define=API_BASE_URL=http://192.168.1.10:8080` or by creating a custom env JSON file.
 
+### Google Maps API Key
+
+The app uses Google Maps. Each platform requires the key to be configured locally — **never commit the key to the repository**.
+
+**Android** — add to `android/local.properties` (file is gitignored):
+```
+MAPS_API_KEY=YOUR_KEY_HERE
+```
+The key is automatically read by `build.gradle.kts` and injected into `AndroidManifest.xml` at build time via `manifestPlaceholders`. No other changes needed.
+
+**iOS** — create the file `ios/Flutter/Env.xcconfig` (gitignored) with:
+```
+GOOGLE_MAPS_API_KEY = YOUR_KEY_HERE
+```
+This file is included by both `Debug.xcconfig` and `Release.xcconfig` and exposes the key to `Info.plist` at build time. After creating it, run `pod install` inside the `ios/` folder before running the app.
+
+**Chrome** — insert the key directly in `web/index.html` before running (do not commit):
+```html
+<script async defer
+  src="https://maps.googleapis.com/maps/api/js?key=YOUR_KEY_HERE">
+</script>
+```
+
 ### Run on Android
 
 ```bash

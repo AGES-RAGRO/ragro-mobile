@@ -1,314 +1,444 @@
-// Screen: Cálculo de Rota
-// User Story: US-33 / US-34 — View Today's Deliveries / View Delivery Route
-// Epic: EPIC 9 — Logistics and Routing
-// Routes: GET /orders/today (delivery route based on today's in-delivery orders)
-// TODO(dev): Integrate Google Maps SDK for real route visualization
-
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:ragro_mobile/core/di/injection.dart';
 import 'package:ragro_mobile/core/theme/app_colors.dart';
+import 'package:ragro_mobile/features/producer_orders/presentation/bloc/route_calculation_cubit.dart';
+import 'package:ragro_mobile/features/producer_orders/presentation/bloc/route_calculation_state.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class RouteCalculationPage extends StatelessWidget {
   const RouteCalculationPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.white,
-      body: Stack(
-        children: [
-          CustomScrollView(
-            slivers: [
-              // App bar
-              SliverAppBar(
-                backgroundColor: AppColors.white,
-                leading: GestureDetector(
-                  onTap: () => context.pop(),
-                  child: const Icon(Icons.arrow_back, color: AppColors.black),
-                ),
-                title: const Text(
-                  'Rota Calculada',
-                  style: TextStyle(
-                    fontFamily: 'Figtree',
-                    fontWeight: FontWeight.w700,
-                    fontSize: 18,
-                    color: AppColors.darkGreen,
+    return BlocProvider(
+      create: (context) => getIt<RouteCalculationCubit>(),
+      child: const _RouteCalculationView(),
+    );
+  }
+}
+
+class _RouteCalculationView extends StatefulWidget {
+  const _RouteCalculationView();
+
+  @override
+  State<_RouteCalculationView> createState() => _RouteCalculationViewState();
+}
+
+class _RouteCalculationViewState extends State<_RouteCalculationView> {
+  Future<void> _openGoogleMaps() async {
+    final state = context.read<RouteCalculationCubit>().state;
+    final lat = state.producerLat ?? -16.6868;
+    final lng = state.producerLng ?? -49.2647;
+
+    final uri = Uri.parse(
+      'https://www.google.com/maps/dir/?api=1&origin=$lat,$lng&destination=-16.7,-49.3&travelmode=driving',
+    );
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    } else {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Não foi possível abrir o Google Maps.'),
+          ),
+        );
+      }
+    }
+  }
+
+  void _showCo2BottomSheet(BuildContext context) {
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (bottomSheetContext) {
+        return BlocProvider.value(
+          value: context.read<RouteCalculationCubit>(),
+          child: const _Co2BottomSheetContent(),
+        );
+      },
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocListener<RouteCalculationCubit, RouteCalculationState>(
+      listenWhen: (prev, curr) =>
+          curr.status == RouteCalculationStatus.error &&
+          prev.status != RouteCalculationStatus.error,
+      listener: (context, state) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              state.errorMessage ?? 'Erro ao calcular CO₂. Tente novamente.',
+            ),
+          ),
+        );
+      },
+      child: Scaffold(
+        backgroundColor: AppColors.white,
+        body: Stack(
+          children: [
+            CustomScrollView(
+              slivers: [
+                SliverAppBar(
+                  backgroundColor: AppColors.white,
+                  leading: GestureDetector(
+                    onTap: () => context.pop(),
+                    child: const Icon(Icons.arrow_back, color: AppColors.black),
+                  ),
+                  title: const Text(
+                    'Rota Calculada',
+                    style: TextStyle(
+                      fontFamily: 'Figtree',
+                      fontWeight: FontWeight.w700,
+                      fontSize: 18,
+                      color: AppColors.black,
+                    ),
+                  ),
+                  centerTitle: true,
+                  pinned: true,
+                  elevation: 0,
+                  bottom: PreferredSize(
+                    preferredSize: const Size.fromHeight(1),
+                    child: Container(color: const Color(0x1A2E5729), height: 1),
                   ),
                 ),
-                centerTitle: true,
-                pinned: true,
-                elevation: 0,
-                bottom: PreferredSize(
-                  preferredSize: const Size.fromHeight(1),
-                  child: Container(color: const Color(0x1A2E5729), height: 1),
-                ),
-              ),
-
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 20, 16, 100),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Stats cards row
-                      const Row(
-                        children: [
-                          Expanded(
-                            child: _RouteStatCard(
-                              label: 'Duração',
-                              value: '40 min',
-                              icon: Icons.access_time_outlined,
-                            ),
-                          ),
-                          SizedBox(width: 12),
-                          Expanded(
-                            child: _RouteStatCard(
-                              label: 'Distância Total',
-                              value: '10.2km',
-                              icon: Icons.route_outlined,
-                            ),
-                          ),
-                        ],
-                      ),
-
-                      const SizedBox(height: 16),
-
-                      // Optimization description
-                      Container(
-                        padding: const EdgeInsets.all(14),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFF0FBF4),
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: AppColors.darkGreen.withValues(alpha: 0.15),
-                          ),
-                        ),
-                        child: const Row(
-                          children: [
-                            Icon(
-                              Icons.auto_awesome_outlined,
-                              size: 18,
-                              color: AppColors.darkGreen,
-                            ),
-                            SizedBox(width: 10),
-                            Expanded(
-                              child: Text(
-                                'Rota otimizada para menor tempo de entrega considerando o trânsito atual.',
-                                style: TextStyle(
-                                  fontFamily: 'Manrope',
-                                  fontSize: 13,
-                                  color: AppColors.darkGreen,
-                                  height: 1.5,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-
-                      const SizedBox(height: 20),
-
-                      // Map placeholder
-                      // TODO(dev): Replace with Google Maps widget when Maps SDK is integrated
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(16),
-                        child: Container(
-                          height: 128,
-                          width: double.infinity,
-                          color: const Color(0xFF1A432C),
-                          child: Stack(
-                            children: [
-                              // Map grid lines (decorative)
-                              CustomPaint(
-                                size: const Size(double.infinity, 128),
-                                painter: _MapGridPainter(),
-                              ),
-                              // Center pin
-                              const Center(
-                                child: Icon(
-                                  Icons.map_outlined,
-                                  size: 40,
-                                  color: Colors.white38,
-                                ),
-                              ),
-                              // Bottom label
-                              Positioned(
-                                bottom: 8,
-                                left: 0,
-                                right: 0,
-                                child: Center(
-                                  child: Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 12,
-                                      vertical: 4,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: Colors.black45,
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                    child: const Text(
-                                      'Mapa indisponível — integração em breve',
-                                      style: TextStyle(
-                                        fontFamily: 'Manrope',
-                                        fontSize: 11,
-                                        color: Colors.white70,
-                                      ),
-                                    ),
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 20, 16, 100),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        BlocBuilder<
+                          RouteCalculationCubit,
+                          RouteCalculationState
+                        >(
+                          builder: (context, state) {
+                            return Row(
+                              children: [
+                                Expanded(
+                                  child: _RouteStatCard(
+                                    label: 'Duração',
+                                    value: '${state.totalDurationMins} min',
                                   ),
                                 ),
-                              ),
-                            ],
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: _RouteStatCard(
+                                    label: 'Distância',
+                                    value:
+                                        '${state.totalDistanceKm.toStringAsFixed(1).replaceAll('.', ',')} km',
+                                  ),
+                                ),
+                              ],
+                            );
+                          },
+                        ),
+                        const SizedBox(height: 16),
+
+                        // CO2 Card
+                        BlocBuilder<
+                          RouteCalculationCubit,
+                          RouteCalculationState
+                        >(
+                          builder: (context, state) {
+                            if (state.status ==
+                                RouteCalculationStatus.calculated) {
+                              return _Co2ResultCard(
+                                co2: state.calculatedCo2 ?? 0,
+                                vehicle: state.selectedVehicle,
+                                fuel: state.selectedFuel,
+                                consumption: state.averageConsumption,
+                                onRecalculate: () =>
+                                    _showCo2BottomSheet(context),
+                              );
+                            }
+
+                            return _Co2CalculateCard(
+                              onTap: () => _showCo2BottomSheet(context),
+                            );
+                          },
+                        ),
+
+                        const SizedBox(height: 20),
+                        const Text(
+                          'A rota abaixo foi otimizada para\neconomizar tempo, combustível e emissões de CO2.',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontFamily: 'Manrope',
+                            fontSize: 12,
+                            color: AppColors.black,
                           ),
                         ),
-                      ),
+                        const SizedBox(height: 16),
 
-                      const SizedBox(height: 24),
+                        // Map Area
+                        BlocBuilder<
+                          RouteCalculationCubit,
+                          RouteCalculationState
+                        >(
+                          builder: (context, state) {
+                            final lat = state.producerLat ?? -16.6868;
+                            final lng = state.producerLng ?? -49.2647;
+                            final loc = LatLng(lat, lng);
 
-                      // Delivery sequence header
-                      const Text(
-                        'Sequência de Entregas',
-                        style: TextStyle(
-                          fontFamily: 'Figtree',
-                          fontWeight: FontWeight.w700,
-                          fontSize: 18,
-                          color: AppColors.black,
+                            return ClipRRect(
+                              borderRadius: BorderRadius.circular(16),
+                              child: Container(
+                                height: 160,
+                                width: double.infinity,
+                                decoration: BoxDecoration(
+                                  border: Border.all(
+                                    color: const Color(0xFFE2E8F0),
+                                  ),
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+                                child: Stack(
+                                  children: [
+                                    GoogleMap(
+                                      initialCameraPosition: CameraPosition(
+                                        target: loc,
+                                        zoom: 13,
+                                      ),
+                                      zoomControlsEnabled: false,
+                                      scrollGesturesEnabled: false,
+                                      rotateGesturesEnabled: false,
+                                      tiltGesturesEnabled: false,
+                                      mapToolbarEnabled: false,
+                                      markers: {
+                                        Marker(
+                                          markerId: const MarkerId('producer'),
+                                          position: loc,
+                                          icon:
+                                              BitmapDescriptor.defaultMarkerWithHue(
+                                                BitmapDescriptor.hueGreen,
+                                              ),
+                                        ),
+                                      },
+                                    ),
+                                    Positioned(
+                                      bottom: 12,
+                                      left: 0,
+                                      right: 0,
+                                      child: Center(
+                                        child: GestureDetector(
+                                          onTap: _openGoogleMaps,
+                                          child: Container(
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 16,
+                                              vertical: 10,
+                                            ),
+                                            decoration: BoxDecoration(
+                                              color: AppColors.darkGreen,
+                                              borderRadius:
+                                                  BorderRadius.circular(20),
+                                            ),
+                                            child: const Row(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                Icon(
+                                                  Icons.location_on,
+                                                  color: Colors.white,
+                                                  size: 16,
+                                                ),
+                                                SizedBox(width: 8),
+                                                Text(
+                                                  'Abrir com Google Maps',
+                                                  style: TextStyle(
+                                                    color: Colors.white,
+                                                    fontWeight: FontWeight.w600,
+                                                    fontSize: 13,
+                                                  ),
+                                                ),
+                                                SizedBox(width: 8),
+                                                Icon(
+                                                  Icons.open_in_new,
+                                                  color: Colors.white,
+                                                  size: 14,
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          },
                         ),
-                      ),
 
-                      const SizedBox(height: 12),
+                        const SizedBox(height: 24),
+                        const Text(
+                          'Sequência de Entregas',
+                          style: TextStyle(
+                            fontFamily: 'Figtree',
+                            fontWeight: FontWeight.w700,
+                            fontSize: 16,
+                            color: AppColors.black,
+                          ),
+                        ),
+                        const SizedBox(height: 16),
 
-                      // Delivery stops
-                      // TODO(dev): Replace with real stops from /orders/today response
-                      const _DeliveryStop(
-                        stopNumber: 1,
-                        placeName: 'Mercado Central',
-                        street: 'Rua dos Andradas, 1234',
-                        cityStateZip: 'Porto Alegre – RS, 90020-005',
-                      ),
-                      const SizedBox(height: 10),
-                      const _DeliveryStop(
-                        stopNumber: 2,
-                        placeName: 'Condomínio Verde',
-                        street: 'Av. Ipiranga, 6681',
-                        cityStateZip: 'Porto Alegre – RS, 90619-900',
-                      ),
-                      const SizedBox(height: 10),
-                      const _DeliveryStop(
-                        stopNumber: 3,
-                        placeName: 'Casa da Ana',
-                        street: 'Rua Comendador Coruja, 320',
-                        cityStateZip: 'Porto Alegre – RS, 90570-030',
-                      ),
-                    ],
+                        // Delivery sequence
+                        const _DeliveryItem(
+                          id: '1',
+                          number: 1,
+                          title: 'Fazenda Boa Vista',
+                          subtitle:
+                              'Rodovia BR-153, KM 45, Lote 12\nGoiânia - GO, 74000-000',
+                        ),
+                        const SizedBox(height: 16),
+                        const _DeliveryItem(
+                          id: '2',
+                          number: 2,
+                          title: 'Fazenda Boa Vista',
+                          subtitle:
+                              'Rodovia BR-153, KM 45, Lote 12\nGoiânia - GO, 74000-000',
+                        ),
+                        const SizedBox(height: 16),
+                        const _DeliveryItem(
+                          id: '3',
+                          number: 3,
+                          title: 'Fazenda Boa Vista',
+                          subtitle:
+                              'Rodovia BR-153, KM 45, Lote 12\nGoiânia - GO, 74000-000',
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-            ],
-          ),
-
-          // Sticky bottom button
-          Positioned(
-            left: 0,
-            right: 0,
-            bottom: 0,
-            child: Container(
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.97),
-                border: const Border(top: BorderSide(color: Color(0x1A2E5729))),
-              ),
-              child: GestureDetector(
-                onTap: () {
-                  // TODO(dev): Open Google Maps or in-app navigation when Maps SDK is integrated
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Navegação por mapa disponível em breve'),
+              ],
+            ),
+            Positioned(
+              left: 0,
+              right: 0,
+              bottom: 0,
+              child: Container(
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+                color: Colors.white,
+                child: GestureDetector(
+                  onTap: () => context.pop(),
+                  child: Container(
+                    height: 50,
+                    decoration: BoxDecoration(
+                      color: AppColors.darkGreen,
+                      borderRadius: BorderRadius.circular(25),
                     ),
-                  );
-                },
-                child: Container(
-                  height: 54,
-                  decoration: BoxDecoration(
-                    color: AppColors.darkGreen,
-                    borderRadius: BorderRadius.circular(27),
-                  ),
-                  child: const Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.navigation_outlined,
-                        color: AppColors.white,
-                        size: 20,
-                      ),
-                      SizedBox(width: 8),
-                      Text(
-                        'Visualizar Melhor Rota',
+                    child: const Center(
+                      child: Text(
+                        'Finalizar Entrega',
                         style: TextStyle(
-                          fontFamily: 'Figtree',
+                          color: Colors.white,
                           fontWeight: FontWeight.w700,
                           fontSize: 16,
-                          color: AppColors.white,
                         ),
                       ),
-                    ],
+                    ),
                   ),
                 ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
 }
 
 class _RouteStatCard extends StatelessWidget {
-  const _RouteStatCard({
-    required this.label,
-    required this.value,
-    required this.icon,
-  });
-
+  const _RouteStatCard({required this.label, required this.value});
   final String label;
   final String value;
-  final IconData icon;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 16),
+      decoration: BoxDecoration(
+        color: AppColors.darkGreen,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Column(
+        children: [
+          Text(
+            value,
+            style: const TextStyle(
+              fontFamily: 'Figtree',
+              fontWeight: FontWeight.w700,
+              fontSize: 20,
+              color: Colors.white,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            label,
+            style: const TextStyle(
+              fontFamily: 'Manrope',
+              fontSize: 12,
+              color: Colors.white70,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _Co2CalculateCard extends StatelessWidget {
+  const _Co2CalculateCard({required this.onTap});
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            AppColors.darkGreen,
-            AppColors.darkGreen.withValues(alpha: 0.8),
-          ],
-        ),
+        color: const Color(0xFFF0FBF4),
         borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.darkGreen.withValues(alpha: 0.15)),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Row(
         children: [
-          Icon(icon, size: 20, color: Colors.white60),
-          const SizedBox(height: 8),
-          Text(
-            value,
-            style: const TextStyle(
-              fontFamily: 'Figtree',
-              fontWeight: FontWeight.w700,
-              fontSize: 24,
-              color: AppColors.white,
+          const Icon(Icons.eco_outlined, color: AppColors.darkGreen),
+          const SizedBox(width: 12),
+          const Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Cálculo de CO₂',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.darkGreen,
+                  ),
+                ),
+                Text(
+                  'Calcule o CO₂ estimado',
+                  style: TextStyle(fontSize: 12, color: AppColors.darkGreen),
+                ),
+              ],
             ),
           ),
-          const SizedBox(height: 2),
-          Text(
-            label,
-            style: const TextStyle(
-              fontFamily: 'Manrope',
-              fontSize: 12,
-              color: Colors.white60,
+          OutlinedButton(
+            onPressed: onTap,
+            style: OutlinedButton.styleFrom(
+              side: const BorderSide(color: AppColors.darkGreen),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
+            ),
+            child: const Text(
+              'Calcular CO₂',
+              style: TextStyle(color: AppColors.darkGreen, fontSize: 12),
             ),
           ),
         ],
@@ -317,88 +447,68 @@ class _RouteStatCard extends StatelessWidget {
   }
 }
 
-class _DeliveryStop extends StatelessWidget {
-  const _DeliveryStop({
-    required this.stopNumber,
-    required this.placeName,
-    required this.street,
-    required this.cityStateZip,
+class _Co2ResultCard extends StatelessWidget {
+  const _Co2ResultCard({
+    required this.co2,
+    required this.vehicle,
+    required this.fuel,
+    required this.consumption,
+    required this.onRecalculate,
   });
 
-  final int stopNumber;
-  final String placeName;
-  final String street;
-  final String cityStateZip;
+  final double co2;
+  final String vehicle;
+  final String fuel;
+  final String consumption;
+  final VoidCallback onRecalculate;
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(14),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
+        color: const Color(0xFFF0FBF4),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.darkGreen.withValues(alpha: 0.15)),
       ),
       child: Row(
         children: [
-          // Stop number badge
-          Container(
-            width: 36,
-            height: 36,
-            decoration: BoxDecoration(
-              color: AppColors.darkGreen,
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Center(
-              child: Text(
-                '$stopNumber',
-                style: const TextStyle(
-                  fontFamily: 'Figtree',
-                  fontWeight: FontWeight.w700,
-                  fontSize: 16,
-                  color: AppColors.white,
-                ),
-              ),
-            ),
-          ),
+          const Icon(Icons.eco_outlined, color: AppColors.darkGreen),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  placeName,
+                  '${co2.toStringAsFixed(2)} kg',
                   style: const TextStyle(
-                    fontFamily: 'Figtree',
-                    fontWeight: FontWeight.w700,
-                    fontSize: 14,
-                    color: AppColors.black,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  street,
-                  style: const TextStyle(
-                    fontFamily: 'Manrope',
-                    fontSize: 13,
-                    color: AppColors.placeholder,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                    color: AppColors.darkGreen,
                   ),
                 ),
                 Text(
-                  cityStateZip,
+                  '$vehicle • $fuel • $consumption km/L',
                   style: const TextStyle(
-                    fontFamily: 'Manrope',
-                    fontSize: 12,
-                    color: AppColors.placeholder,
+                    fontSize: 11,
+                    color: AppColors.darkGreen,
                   ),
                 ),
               ],
             ),
           ),
-          const Icon(
-            Icons.location_on_outlined,
-            color: AppColors.darkGreen,
-            size: 18,
+          OutlinedButton(
+            onPressed: onRecalculate,
+            style: OutlinedButton.styleFrom(
+              side: const BorderSide(color: AppColors.darkGreen),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
+            ),
+            child: const Text(
+              'Recalcular CO₂',
+              style: TextStyle(color: AppColors.darkGreen, fontSize: 12),
+            ),
           ),
         ],
       ),
@@ -406,22 +516,289 @@ class _DeliveryStop extends StatelessWidget {
   }
 }
 
-class _MapGridPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = Colors.white.withValues(alpha: 0.05)
-      ..strokeWidth = 1;
+class _DeliveryItem extends StatelessWidget {
+  const _DeliveryItem({
+    required this.id,
+    required this.number,
+    required this.title,
+    required this.subtitle,
+  });
 
-    const spacing = 24.0;
-    for (double x = 0; x < size.width; x += spacing) {
-      canvas.drawLine(Offset(x, 0), Offset(x, size.height), paint);
-    }
-    for (double y = 0; y < size.height; y += spacing) {
-      canvas.drawLine(Offset(0, y), Offset(size.width, y), paint);
-    }
+  final String id;
+  final int number;
+  final String title;
+  final String subtitle;
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<RouteCalculationCubit, RouteCalculationState>(
+      builder: (context, state) {
+        final isConfirmed = state.confirmedDeliveries.contains(id);
+        return Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Text(
+              number.toString(),
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+            ),
+            const SizedBox(width: 16),
+            const Icon(Icons.location_on_outlined, color: AppColors.darkGreen),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                    ),
+                  ),
+                  Text(
+                    subtitle,
+                    style: const TextStyle(fontSize: 12, color: Colors.grey),
+                  ),
+                ],
+              ),
+            ),
+            GestureDetector(
+              onTap: isConfirmed
+                  ? null
+                  : () => context.read<RouteCalculationCubit>().confirmDelivery(
+                      id,
+                    ),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 300),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 6,
+                ),
+                decoration: BoxDecoration(
+                  color: isConfirmed ? AppColors.darkGreen : Colors.white,
+                  border: Border.all(color: AppColors.darkGreen),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Text(
+                  isConfirmed ? 'Entregue' : 'Confirmar\nEntrega',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: isConfirmed ? Colors.white : AppColors.darkGreen,
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+class _Co2BottomSheetContent extends StatefulWidget {
+  const _Co2BottomSheetContent();
+
+  @override
+  State<_Co2BottomSheetContent> createState() => _Co2BottomSheetContentState();
+}
+
+class _Co2BottomSheetContentState extends State<_Co2BottomSheetContent> {
+  final _consumptionController = TextEditingController();
+  String? _consumptionError;
+
+  @override
+  void initState() {
+    super.initState();
+    final state = context.read<RouteCalculationCubit>().state;
+    _consumptionController.text = state.averageConsumption;
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+  void dispose() {
+    _consumptionController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.only(
+        left: 24,
+        right: 24,
+        top: 24,
+        bottom: MediaQuery.of(context).viewInsets.bottom + 24,
+      ),
+      child: BlocBuilder<RouteCalculationCubit, RouteCalculationState>(
+        builder: (context, state) {
+          return Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const Text(
+                'Calcular CO₂ da rota',
+                textAlign: TextAlign.center,
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+              ),
+              const SizedBox(height: 24),
+              const Text(
+                'Veículo',
+                style: TextStyle(fontSize: 14, color: Colors.grey),
+              ),
+              const SizedBox(height: 8),
+              DropdownButtonFormField<String>(
+                value: state.selectedVehicle,
+                decoration: InputDecoration(
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 12,
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                items: RouteCalculationCubit.allowedFuelsByVehicle.keys.map((
+                  e,
+                ) {
+                  return DropdownMenuItem(value: e, child: Text(e));
+                }).toList(),
+                onChanged: (val) => context
+                    .read<RouteCalculationCubit>()
+                    .updateFormData(vehicle: val),
+              ),
+              const SizedBox(height: 16),
+              const Text(
+                'Combustível',
+                style: TextStyle(fontSize: 14, color: Colors.grey),
+              ),
+              const SizedBox(height: 8),
+              DropdownButtonFormField<String>(
+                value: state.selectedFuel,
+                decoration: InputDecoration(
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 12,
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                items:
+                    (RouteCalculationCubit.allowedFuelsByVehicle[state
+                                .selectedVehicle] ??
+                            const ['Gasolina'])
+                        .map((e) {
+                          return DropdownMenuItem(value: e, child: Text(e));
+                        })
+                        .toList(),
+                onChanged: (val) => context
+                    .read<RouteCalculationCubit>()
+                    .updateFormData(fuel: val),
+              ),
+              const SizedBox(height: 16),
+              const Text(
+                'Consumo médio (km/L)',
+                style: TextStyle(fontSize: 14, color: Colors.grey),
+              ),
+              const SizedBox(height: 8),
+              TextFormField(
+                controller: _consumptionController,
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(
+                  hintText: 'Digite o consumo médio',
+                  errorText: _consumptionError,
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 12,
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                onChanged: (val) {
+                  if (_consumptionError != null) {
+                    setState(() => _consumptionError = null);
+                  }
+                  context.read<RouteCalculationCubit>().updateFormData(
+                    consumption: val,
+                  );
+                },
+              ),
+              const SizedBox(height: 32),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () => Navigator.pop(context),
+                      style: OutlinedButton.styleFrom(
+                        side: const BorderSide(color: AppColors.darkGreen),
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(24),
+                        ),
+                      ),
+                      child: const Text(
+                        'Voltar',
+                        style: TextStyle(color: AppColors.darkGreen),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed:
+                          state.status == RouteCalculationStatus.calculating
+                          ? null
+                          : () {
+                              // O backend exige consumo médio (> 0) para
+                              // veículos não-elétricos; valida antes de enviar.
+                              final needsConsumption =
+                                  state.selectedFuel != 'Elétrico';
+                              final consumption = double.tryParse(
+                                state.averageConsumption.replaceAll(',', '.'),
+                              );
+                              if (needsConsumption &&
+                                  (consumption == null || consumption <= 0)) {
+                                setState(
+                                  () => _consumptionError =
+                                      'Informe o consumo médio (km/L).',
+                                );
+                                return;
+                              }
+                              context
+                                  .read<RouteCalculationCubit>()
+                                  .calculateCo2(state.totalDistanceKm);
+                              Navigator.pop(context);
+                            },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.darkGreen,
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(24),
+                        ),
+                      ),
+                      child: state.status == RouteCalculationStatus.calculating
+                          ? const SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(
+                                color: Colors.white,
+                                strokeWidth: 2,
+                              ),
+                            )
+                          : const Text(
+                              'Confirmar',
+                              style: TextStyle(color: Colors.white),
+                            ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
 }
