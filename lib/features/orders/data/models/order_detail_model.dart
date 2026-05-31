@@ -120,7 +120,6 @@ class OrderDetailItemModel extends OrderDetailItem {
 class OrderDetailModel extends OrderDetail {
   const OrderDetailModel({
     required super.id,
-    required super.orderNumber,
     required super.status,
     required super.statusLabel,
     required super.createdAt,
@@ -154,7 +153,6 @@ class OrderDetailModel extends OrderDetail {
 
     return OrderDetailModel(
       id: json['id'] as String? ?? '',
-      orderNumber: json['orderNumber'] as String?,
       status: _normalizeStatus(json['status'] as String?),
       statusLabel: json['statusLabel'] as String?,
       createdAt: DateTime.tryParse(json['createdAt'] as String? ?? ''),

@@ -44,8 +44,8 @@ class _ImpactDetailPageState extends State<ImpactDetailPage> {
         ),
       ]);
 
-      final co2Response = results[0] as Response<Map<String, dynamic>>;
-      final producersResponse = results[1] as Response<Map<String, dynamic>>;
+      final co2Response = results[0];
+      final producersResponse = results[1];
 
       final total =
           (co2Response.data?['totalCo2Saved'] as num?)?.toDouble() ?? 0;

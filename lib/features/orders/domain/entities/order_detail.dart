@@ -126,7 +126,6 @@ class OrderDetailItem extends Equatable {
 class OrderDetail extends Equatable {
   const OrderDetail({
     required this.id,
-    required this.orderNumber,
     required this.status,
     required this.statusLabel,
     required this.createdAt,
@@ -145,7 +144,6 @@ class OrderDetail extends Equatable {
   });
 
   final String id;
-  final String? orderNumber;
   final String status;
   final String? statusLabel;
   final DateTime? createdAt;
@@ -163,7 +161,6 @@ class OrderDetail extends Equatable {
   final String? cancellationDetails;
 
   String get displayNumber {
-    if (orderNumber != null && orderNumber!.isNotEmpty) return orderNumber!;
     final shortId = id.length > 4 ? id.substring(0, 4) : id;
     return '#$shortId';
   }
@@ -207,7 +204,6 @@ class OrderDetail extends Equatable {
   }) {
     return OrderDetail(
       id: id,
-      orderNumber: orderNumber,
       status: status ?? this.status,
       statusLabel: statusLabel ?? this.statusLabel,
       createdAt: createdAt,
@@ -229,7 +225,6 @@ class OrderDetail extends Equatable {
   @override
   List<Object?> get props => [
     id,
-    orderNumber,
     status,
     statusLabel,
     createdAt,

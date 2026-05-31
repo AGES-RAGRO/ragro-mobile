@@ -18,7 +18,6 @@ void main() {
 
   final OrderDetail tConfirmed = OrderDetail(
     id: 'order-1',
-    orderNumber: '#0001',
     status: 'DELIVERED',
     statusLabel: 'Entregue',
     createdAt: DateTime(2026, 5, 5),

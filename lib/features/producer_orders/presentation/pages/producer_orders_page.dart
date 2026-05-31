@@ -59,12 +59,10 @@ class _ProducerOrdersViewState extends State<_ProducerOrdersView> {
   });
 
   void _saveSelection(BuildContext context) {
-    final bloc = context.read<ProducerOrdersBloc>();
-    for (final id in _selectedIds) {
-      bloc.add(ProducerOrderMarkedInDelivery(id));
-    }
+    context.read<ProducerOrdersBloc>().add(
+      ProducerOrdersBulkMarkedInDelivery({..._selectedIds}),
+    );
     _exitSelectionMode();
-    bloc.add(const ProducerOrdersStarted(ProducerOrderStatus.inDelivery));
   }
 
   static const _tabs = [

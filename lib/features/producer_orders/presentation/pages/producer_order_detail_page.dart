@@ -123,9 +123,16 @@ class ProducerOrderDetailPage extends StatelessWidget {
 
           return WillPopScope(
             onWillPop: () async {
-              // When user navigates back (system or app), return 'seen' if the
-              // order was previously new so the list can update immediately.
-              context.pop(order.isNew ? 'seen' : null);
+              // Espelha o botão de voltar do header: sinaliza 'cancelled' para a
+              // lista mover o pedido p/ a aba Cancelados após um refuse, 'seen'
+              // se o pedido era novo, senão nada.
+              if (order.status == ProducerOrderStatus.cancelled) {
+                context.pop('cancelled');
+              } else if (order.isNew) {
+                context.pop('seen');
+              } else {
+                context.pop();
+              }
               return false;
             },
             child: _ProducerOrderDetailView(
@@ -255,9 +262,8 @@ class _Header extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final displayId = order.orderNumber > 0
-        ? '#${order.orderNumber}'
-        : '#${order.id.length > 4 ? order.id.substring(0, 4) : order.id}';
+    final displayId =
+        '#${order.id.length > 4 ? order.id.substring(0, 4) : order.id}';
 
     return Padding(
       padding: const EdgeInsets.all(16),
@@ -414,6 +420,10 @@ class _StatusBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final foreground =
+        ThemeData.estimateBrightnessForColor(_color) == Brightness.dark
+        ? AppColors.white
+        : AppColors.black;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
       decoration: BoxDecoration(
@@ -422,11 +432,11 @@ class _StatusBadge extends StatelessWidget {
       ),
       child: Text(
         status.label.toUpperCase(),
-        style: const TextStyle(
+        style: TextStyle(
           fontFamily: 'Manrope',
           fontWeight: FontWeight.w700,
           fontSize: 10,
-          color: AppColors.white,
+          color: foreground,
           letterSpacing: 0.6,
         ),
       ),
@@ -670,21 +680,11 @@ class _CancellationCard extends StatelessWidget {
 
   final ProducerOrder order;
 
-  static const _reasonLabels = <String, String>{
-    'OUT_OF_STOCK': 'Produto indisponível',
-    'PRICE_CHANGE': 'Alteração de preço',
-    'DELIVERY_ISSUE': 'Problema na entrega',
-    'OTHER': 'Outro motivo',
-    'CUSTOMER_CANCELLED': 'Cancelado pelo cliente',
-    'REFUSED_BY_FARMER': 'Recusado pelo produtor',
-  };
-
   @override
   Widget build(BuildContext context) {
-    final reason =
-        _reasonLabels[order.cancellationReason] ??
-        order.cancellationReason ??
-        '';
+    // O diálogo de cancelamento já envia texto em PT pronto para exibir; o
+    // backend persiste essa string verbatim, então mostramos direto.
+    final reason = order.cancellationReason ?? '';
     final details = order.cancellationDetails;
 
     return Container(
@@ -809,11 +809,11 @@ class _ActionFooter extends StatelessWidget {
                 onTap: isProcessing
                     ? null
                     : () => bloc.add(
-                          ProducerOrderDetailStatusUpdated(
-                            order.id,
-                            ProducerOrderStatus.delivered,
-                          ),
+                        ProducerOrderDetailStatusUpdated(
+                          order.id,
+                          ProducerOrderStatus.delivered,
                         ),
+                      ),
               ),
             ),
           ],

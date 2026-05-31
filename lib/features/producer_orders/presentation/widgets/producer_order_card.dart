@@ -9,7 +9,6 @@ class ProducerOrderCard extends StatelessWidget {
     required this.order,
     required this.onDetailTap,
     this.onActionTap,
-    this.onCancelTap,
     this.isSelected,
     this.onSelect,
     super.key,
@@ -18,7 +17,6 @@ class ProducerOrderCard extends StatelessWidget {
   final ProducerOrder order;
   final VoidCallback onDetailTap;
   final VoidCallback? onActionTap;
-  final VoidCallback? onCancelTap;
 
   /// When non-null the card is in selection mode; tapping selects/deselects.
   final bool? isSelected;
@@ -287,6 +285,12 @@ class _StatusBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     final color = _colorFor(status);
     final icon = _iconFor(status);
+    // Texto/ícone legíveis sobre a cor do badge (escuro em cores claras como
+    // amarelo/laranja, branco em cores escuras) para melhorar o contraste.
+    final foreground =
+        ThemeData.estimateBrightnessForColor(color) == Brightness.dark
+        ? AppColors.white
+        : AppColors.black;
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
@@ -298,16 +302,16 @@ class _StatusBadge extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           if (icon != null) ...[
-            Icon(icon, color: AppColors.white, size: 12),
+            Icon(icon, color: foreground, size: 12),
             const SizedBox(width: 4),
           ],
           Text(
             status.label.toUpperCase(),
-            style: const TextStyle(
+            style: TextStyle(
               fontFamily: 'Manrope',
               fontWeight: FontWeight.w700,
               fontSize: 11,
-              color: AppColors.white,
+              color: foreground,
               letterSpacing: 0.5,
             ),
           ),

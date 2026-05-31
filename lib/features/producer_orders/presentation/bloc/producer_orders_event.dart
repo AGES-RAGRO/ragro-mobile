@@ -58,13 +58,16 @@ class ProducerOrderLocallyRefused extends ProducerOrdersEvent {
   List<Object?> get props => [orderId];
 }
 
-class ProducerOrderMarkedInDelivery extends ProducerOrdersEvent {
-  const ProducerOrderMarkedInDelivery(this.orderId);
+/// Marca um conjunto de pedidos como "em entrega" de uma só vez (seleção
+/// múltipla). Faz um único reload + um único feedback, e reporta falhas
+/// parciais — diferente de disparar N eventos individuais.
+class ProducerOrdersBulkMarkedInDelivery extends ProducerOrdersEvent {
+  const ProducerOrdersBulkMarkedInDelivery(this.orderIds);
 
-  final String orderId;
+  final Set<String> orderIds;
 
   @override
-  List<Object?> get props => [orderId];
+  List<Object?> get props => [orderIds];
 }
 
 class ProducerOrderDeliveryConfirmed extends ProducerOrdersEvent {

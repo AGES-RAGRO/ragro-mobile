@@ -41,11 +41,13 @@ class ProducerOrderDetailBloc
         await getIt<ProducerOrdersRepository>().markAsSeen(event.orderId);
         emit(ProducerOrderDetailLoaded(initial.copyWith(isNew: false)));
       } catch (_) {}
-      // Cancelled orders need a full fetch to load cancellationReason from API.
-      if (initial.status != ProducerOrderStatus.cancelled) return;
-    } else {
-      emit(const ProducerOrderDetailLoading());
+      // O detalhe do produtor vem do mesmo payload da lista
+      // (GET /orders/producer): um re-fetch não traz campos novos e zeraria
+      // o cancellationReason/Details que o refuse desta sessão já preencheu.
+      // Mantém o pedido recebido.
+      return;
     }
+    emit(const ProducerOrderDetailLoading());
     try {
       final order = await _getDetail(event.orderId);
       // Mark as seen after loading details and update view
@@ -57,8 +59,6 @@ class ProducerOrderDetailBloc
         emit(ProducerOrderDetailLoaded(order));
       }
     } on Exception catch (e) {
-      if (initial != null)
-        return; // keep showing initial order on refresh failure
       emit(ProducerOrderDetailFailure(e.toString()));
     }
   }

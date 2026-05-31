@@ -25,7 +25,6 @@ class OrderCard extends StatelessWidget {
   }
 
   String get _displayNumber {
-    if (order.orderNumber.isNotEmpty) return 'Pedido ${order.orderNumber}';
     final short = order.id.length > 8
         ? order.id.substring(0, 8).toUpperCase()
         : order.id;
@@ -52,152 +51,152 @@ class OrderCard extends StatelessWidget {
       ),
       padding: const EdgeInsets.all(16),
       child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  _displayNumber,
-                  style: const TextStyle(
-                    fontFamily: 'Manrope',
-                    fontWeight: FontWeight.w600,
-                    fontSize: 13,
-                    color: AppColors.darkGreen,
-                  ),
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                _displayNumber,
+                style: const TextStyle(
+                  fontFamily: 'Manrope',
+                  fontWeight: FontWeight.w600,
+                  fontSize: 13,
+                  color: AppColors.darkGreen,
                 ),
-                Text(
-                  _formatDate(order.createdAt),
-                  style: const TextStyle(
-                    fontFamily: 'Manrope',
-                    fontSize: 11,
-                    color: AppColors.placeholder,
-                  ),
+              ),
+              Text(
+                _formatDate(order.createdAt),
+                style: const TextStyle(
+                  fontFamily: 'Manrope',
+                  fontSize: 11,
+                  color: AppColors.placeholder,
                 ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                Container(
-                  width: 44,
-                  height: 44,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: AppColors.lightGreen.withValues(alpha: 0.15),
-                  ),
-                  clipBehavior: Clip.antiAlias,
-                  child: order.farmAvatarUrl.isNotEmpty
-                      ? Image.network(
-                          order.farmAvatarUrl,
-                          fit: BoxFit.cover,
-                          errorBuilder: (_, __, ___) => const Center(
-                            child: Icon(
-                              Icons.storefront,
-                              size: 20,
-                              color: AppColors.lightGreen,
-                            ),
-                          ),
-                        )
-                      : const Center(
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: AppColors.lightGreen.withValues(alpha: 0.15),
+                ),
+                clipBehavior: Clip.antiAlias,
+                child: order.farmAvatarUrl.isNotEmpty
+                    ? Image.network(
+                        order.farmAvatarUrl,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, __, ___) => const Center(
                           child: Icon(
                             Icons.storefront,
                             size: 20,
                             color: AppColors.lightGreen,
                           ),
                         ),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        order.farmName,
-                        style: const TextStyle(
-                          fontFamily: 'Manrope',
-                          fontWeight: FontWeight.w700,
-                          fontSize: 15,
-                          color: AppColors.black,
+                      )
+                    : const Center(
+                        child: Icon(
+                          Icons.storefront,
+                          size: 20,
+                          color: AppColors.lightGreen,
                         ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
                       ),
-                      if (order.ownerName.isNotEmpty)
-                        Text(
-                          order.ownerName,
-                          style: const TextStyle(
-                            fontFamily: 'Manrope',
-                            fontWeight: FontWeight.w400,
-                            fontSize: 12,
-                            color: AppColors.placeholder,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: 8),
-                OrderStatusBadge(status: order.status),
-              ],
-            ),
-            if (order.shortItemsPreview.isNotEmpty) ...[
-              const SizedBox(height: 12),
-              Text(
-                order.shortItemsPreview,
-                style: const TextStyle(
-                  fontFamily: 'Manrope',
-                  fontSize: 13,
-                  color: AppColors.black,
-                ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
               ),
-            ],
-            const SizedBox(height: 14),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Column(
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      'Total do Pedido',
-                      style: TextStyle(
-                        fontFamily: 'Manrope',
-                        fontWeight: FontWeight.w400,
-                        fontSize: 12,
-                        color: AppColors.placeholder,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
                     Text(
-                      'R\$ ${order.totalAmount.toStringAsFixed(2).replaceAll('.', ',')}',
+                      order.farmName,
                       style: const TextStyle(
                         fontFamily: 'Manrope',
                         fontWeight: FontWeight.w700,
                         fontSize: 15,
-                        color: AppColors.darkGreen,
+                        color: AppColors.black,
                       ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
+                    if (order.ownerName.isNotEmpty)
+                      Text(
+                        order.ownerName,
+                        style: const TextStyle(
+                          fontFamily: 'Manrope',
+                          fontWeight: FontWeight.w400,
+                          fontSize: 12,
+                          color: AppColors.placeholder,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                   ],
                 ),
-                Row(
-                  children: [
-                    _ViewOrderButton(order: order),
-                    if (isDelivered && !isRated) ...[
-                      const SizedBox(width: 8),
-                      _RateOrderButton(order: order),
-                    ],
-                  ],
-                ),
-              ],
+              ),
+              const SizedBox(width: 8),
+              OrderStatusBadge(status: order.status),
+            ],
+          ),
+          if (order.shortItemsPreview.isNotEmpty) ...[
+            const SizedBox(height: 12),
+            Text(
+              order.shortItemsPreview,
+              style: const TextStyle(
+                fontFamily: 'Manrope',
+                fontSize: 13,
+                color: AppColors.black,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
           ],
-        ),
-      );
+          const SizedBox(height: 14),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Total do Pedido',
+                    style: TextStyle(
+                      fontFamily: 'Manrope',
+                      fontWeight: FontWeight.w400,
+                      fontSize: 12,
+                      color: AppColors.placeholder,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    'R\$ ${order.totalAmount.toStringAsFixed(2).replaceAll('.', ',')}',
+                    style: const TextStyle(
+                      fontFamily: 'Manrope',
+                      fontWeight: FontWeight.w700,
+                      fontSize: 15,
+                      color: AppColors.darkGreen,
+                    ),
+                  ),
+                ],
+              ),
+              Row(
+                children: [
+                  _ViewOrderButton(order: order),
+                  if (isDelivered && !isRated) ...[
+                    const SizedBox(width: 8),
+                    _RateOrderButton(order: order),
+                  ],
+                ],
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
   }
 }
 

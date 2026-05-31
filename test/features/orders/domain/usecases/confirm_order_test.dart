@@ -14,7 +14,6 @@ void main() {
 
   final tOrder = Order(
     id: 'order-new-1',
-    orderNumber: 'ORD-NEW-001',
     producerId: 'p1',
     producerPhone: '5199999999',
     farmName: 'Fazenda Teste',

@@ -420,6 +420,10 @@ class _StatusBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final foreground =
+        ThemeData.estimateBrightnessForColor(_color) == Brightness.dark
+        ? AppColors.white
+        : AppColors.black;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
       decoration: BoxDecoration(
@@ -428,11 +432,11 @@ class _StatusBadge extends StatelessWidget {
       ),
       child: Text(
         order.friendlyStatusLabel.toUpperCase(),
-        style: const TextStyle(
+        style: TextStyle(
           fontFamily: 'Manrope',
           fontWeight: FontWeight.w700,
           fontSize: 10,
-          color: AppColors.white,
+          color: foreground,
           letterSpacing: 0.6,
         ),
       ),
@@ -605,17 +609,10 @@ class _CancellationCard extends StatelessWidget {
 
   final OrderDetail order;
 
-  static const _reasonLabels = {
-    'REFUSED_BY_FARMER': 'Cancelado pelo produtor',
-    'CUSTOMER_CANCELLED': 'Cancelado pelo cliente',
-  };
-
   @override
   Widget build(BuildContext context) {
-    final reason =
-        _reasonLabels[order.cancellationReason] ??
-        order.cancellationReason ??
-        '';
+    // O motivo já é texto em PT pronto para exibir (vindo do diálogo / backend).
+    final reason = order.cancellationReason ?? '';
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16),

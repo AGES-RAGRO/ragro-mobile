@@ -24,7 +24,7 @@ class ProducerOrdersBloc
     on<ProducerOrderCancelled>(_onCancelled);
     on<ProducerOrderLocallyRefused>(_onLocallyRefused);
     on<ProducerOrderLocallySeen>(_onLocallySeen);
-    on<ProducerOrderMarkedInDelivery>(_onMarkedInDelivery);
+    on<ProducerOrdersBulkMarkedInDelivery>(_onBulkMarkedInDelivery);
     on<ProducerOrderDeliveryConfirmed>(_onDeliveryConfirmed);
     on<ProducerOrderLocallyDelivered>(_onLocallyDelivered);
   }
@@ -161,20 +161,34 @@ class ProducerOrdersBloc
     emit(ProducerOrdersLoaded(orders: updated, activeTab: _activeTab));
   }
 
-  Future<void> _onMarkedInDelivery(
-    ProducerOrderMarkedInDelivery event,
+  Future<void> _onBulkMarkedInDelivery(
+    ProducerOrdersBulkMarkedInDelivery event,
     Emitter<ProducerOrdersState> emit,
   ) async {
+    if (event.orderIds.isEmpty) return;
     emit(ProducerOrdersLoading(_activeTab));
+
+    var succeeded = 0;
+    var failed = 0;
+    for (final id in event.orderIds) {
+      try {
+        await _updateProducerOrderStatus(id, ProducerOrderStatus.inDelivery);
+        succeeded++;
+      } on Exception {
+        failed++;
+      }
+    }
+
+    // Após iniciar entregas, vai para a aba "A caminho" (como o fluxo anterior).
+    _activeTab = ProducerOrderStatus.inDelivery;
     try {
-      await _updateProducerOrderStatus(
-        event.orderId,
-        ProducerOrderStatus.inDelivery,
-      );
       final orders = await _getProducerOrders();
+      final message = failed == 0
+          ? 'Entrega(s) iniciada(s) com sucesso.'
+          : '$succeeded iniciada(s), $failed não puderam ser iniciadas.';
       emit(
         ProducerOrdersActionSuccess(
-          message: 'Entrega iniciada com sucesso.',
+          message: message,
           orders: orders,
           activeTab: _activeTab,
         ),
