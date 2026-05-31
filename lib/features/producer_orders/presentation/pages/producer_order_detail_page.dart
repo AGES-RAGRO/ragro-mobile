@@ -32,42 +32,63 @@ class ProducerOrderDetailPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) =>
-          getIt<ProducerOrderDetailBloc>()
-            ..add(
-              ProducerOrderDetailStarted(orderId, initialOrder: initialOrder),
-            ),
+      create: (_) => getIt<ProducerOrderDetailBloc>()
+        ..add(ProducerOrderDetailStarted(orderId, initialOrder: initialOrder)),
       child: BlocConsumer<ProducerOrderDetailBloc, ProducerOrderDetailState>(
-        listener: (context, state) {
-          if (state is ProducerOrderDetailSuccess) {
-            if (state.action == 'status_updated') {
-              if (state.order.status == ProducerOrderStatus.delivered) {
-                context.pop('delivered');
-              } else {
-                context.pop('in_delivery');
-              }
-              return;
-            }
-            if (state.action == 'refused') {
-              context.pop('cancelled');
-              return;
-            }
-            // When the producer performed actions except status updates, we still
-            // want to signal that the order was seen so the list updates.
-            if (state.action == 'confirmed' || state.action == 'refused' || state.action == 'viewed') {
-              context.pop('seen');
-              return;
-            }
-            final message = switch (state.action) {
-              'confirmed' => 'Pedido aceito com sucesso.',
-              _ => 'Ação concluída.',
-            };
+        listener: (context, state) async {
+          if (state is ProducerOrderDetailActionError) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text(message),
-                backgroundColor: AppColors.darkGreen,
+                content: Text(state.message),
+                backgroundColor: Colors.red.shade700,
               ),
             );
+          } else if (state is ProducerOrderDetailSuccess) {
+            if (state.action == 'refused') {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Pedido cancelado com sucesso.'),
+                  backgroundColor: Colors.black87,
+                ),
+              );
+              if (context.mounted) context.pop('cancelled');
+            } else if (state.action == 'confirmed') {
+              await showDialog<void>(
+                context: context,
+                barrierColor: Colors.black.withValues(alpha: 0.55),
+                builder: (_) => const _ProducerSuccessDialog(
+                  icon: Icons.check_circle_outline,
+                  title: 'Pedido confirmado\ncom sucesso!',
+                  description: 'O pedido foi aceito e está em andamento.',
+                ),
+              );
+            } else if (state.action == 'status_updated') {
+              if (state.order.status == ProducerOrderStatus.inDelivery) {
+                await showDialog<void>(
+                  context: context,
+                  barrierColor: Colors.black.withValues(alpha: 0.55),
+                  builder: (_) => const _ProducerSuccessDialog(
+                    icon: Icons.local_shipping_outlined,
+                    title: 'Entrega iniciada\ncom sucesso!',
+                    description:
+                        'Você iniciou a entrega do pedido. Boa entrega!',
+                  ),
+                );
+                if (context.mounted) context.pop('in_delivery');
+              } else if (state.order.status == ProducerOrderStatus.delivered) {
+                await showDialog<void>(
+                  context: context,
+                  barrierColor: Colors.black.withValues(alpha: 0.55),
+                  builder: (_) => const _ProducerSuccessDialog(
+                    icon: Icons.check_circle_outline,
+                    title: 'Entrega confirmada\ncom sucesso!',
+                    description:
+                        'O pedido foi entregue ao cliente e está concluído.',
+                  ),
+                );
+                if (context.mounted) context.pop('delivered');
+              }
+            }
           }
         },
         builder: (context, state) {
@@ -90,6 +111,7 @@ class ProducerOrderDetailPage extends StatelessWidget {
             ProducerOrderDetailRefusing(:final order) => order,
             ProducerOrderDetailUpdatingStatus(:final order) => order,
             ProducerOrderDetailSuccess(:final order) => order,
+            ProducerOrderDetailActionError(:final order) => order,
             _ => null,
           };
           if (order == null) return const Scaffold();
@@ -182,6 +204,7 @@ class _ProducerOrderDetailView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bloc = context.read<ProducerOrderDetailBloc>();
     return Scaffold(
       backgroundColor: AppColors.white,
       body: SafeArea(
@@ -199,6 +222,12 @@ class _ProducerOrderDetailView extends StatelessWidget {
                   const SizedBox(height: 18),
                   const _SectionTitle('ENTREGA'),
                   _DeliveryCard(order: order),
+                  if (order.status == ProducerOrderStatus.cancelled &&
+                      order.cancellationReason != null) ...[
+                    const SizedBox(height: 18),
+                    const _SectionTitle('CANCELAMENTO'),
+                    _CancellationCard(order: order),
+                  ],
                 ],
               ),
             ),
@@ -206,7 +235,11 @@ class _ProducerOrderDetailView extends StatelessWidget {
               left: 16,
               right: 16,
               bottom: 16,
-              child: _ActionFooter(order: order, isProcessing: isProcessing),
+              child: _ActionFooter(
+                order: order,
+                isProcessing: isProcessing,
+                bloc: bloc,
+              ),
             ),
           ],
         ),
@@ -222,14 +255,24 @@ class _Header extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final shortId = order.id.length > 4 ? order.id.substring(0, 4) : order.id;
+    final displayId = order.orderNumber > 0
+        ? '#${order.orderNumber}'
+        : '#${order.id.length > 4 ? order.id.substring(0, 4) : order.id}';
 
     return Padding(
       padding: const EdgeInsets.all(16),
       child: Row(
         children: [
           GestureDetector(
-            onTap: () => context.pop(order.isNew ? 'seen' : null),
+            onTap: () {
+              if (order.status == ProducerOrderStatus.cancelled) {
+                context.pop('cancelled');
+              } else if (order.isNew) {
+                context.pop('seen');
+              } else {
+                context.pop();
+              }
+            },
             child: const Padding(
               padding: EdgeInsets.all(8),
               child: Icon(Icons.arrow_back, size: 18),
@@ -250,7 +293,7 @@ class _Header extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  '#$shortId',
+                  displayId,
                   style: const TextStyle(
                     fontFamily: 'Manrope',
                     fontWeight: FontWeight.w600,
@@ -480,7 +523,8 @@ class _ProducerOrderItemRow extends StatelessWidget {
     symbol: r'R$',
   );
 
-  String get _quantity => 'Qtd: ${item.quantity} ${localizeUnityType(item.unityType)}';
+  String get _quantity =>
+      'Qtd: ${item.quantity} ${localizeUnityType(item.unityType)}';
 
   @override
   Widget build(BuildContext context) {
@@ -621,11 +665,92 @@ class _DeliveryCard extends StatelessWidget {
   }
 }
 
+class _CancellationCard extends StatelessWidget {
+  const _CancellationCard({required this.order});
+
+  final ProducerOrder order;
+
+  static const _reasonLabels = <String, String>{
+    'OUT_OF_STOCK': 'Produto indisponível',
+    'PRICE_CHANGE': 'Alteração de preço',
+    'DELIVERY_ISSUE': 'Problema na entrega',
+    'OTHER': 'Outro motivo',
+  };
+
+  @override
+  Widget build(BuildContext context) {
+    final reason = _reasonLabels[order.cancellationReason] ??
+        order.cancellationReason ??
+        '';
+    final details = order.cancellationDetails;
+
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16),
+      padding: const EdgeInsets.all(17),
+      decoration: BoxDecoration(
+        color: AppColors.red.withValues(alpha: 0.05),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: AppColors.red.withValues(alpha: 0.2)),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Icon(Icons.cancel_outlined, size: 20, color: AppColors.red),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Motivo do cancelamento',
+                  style: TextStyle(
+                    fontFamily: 'Manrope',
+                    fontWeight: FontWeight.w700,
+                    fontSize: 14,
+                    color: AppColors.black,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                if (reason.isNotEmpty)
+                  Text(
+                    reason,
+                    style: const TextStyle(
+                      fontFamily: 'Manrope',
+                      fontSize: 14,
+                      color: AppColors.red,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                if (details != null && details.isNotEmpty) ...[
+                  const SizedBox(height: 4),
+                  Text(
+                    details,
+                    style: const TextStyle(
+                      fontFamily: 'Manrope',
+                      fontSize: 13,
+                      color: AppColors.black,
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _ActionFooter extends StatelessWidget {
-  const _ActionFooter({required this.order, required this.isProcessing});
+  const _ActionFooter({
+    required this.order,
+    required this.isProcessing,
+    required this.bloc,
+  });
 
   final ProducerOrder order;
   final bool isProcessing;
+  final ProducerOrderDetailBloc bloc;
 
   @override
   Widget build(BuildContext context) {
@@ -635,10 +760,11 @@ class _ActionFooter extends StatelessWidget {
           children: [
             Expanded(
               child: _ActionButton(
-                label: 'Recusar Pedido',
+                label: 'Recusar pedido',
                 icon: Icons.cancel_outlined,
                 color: AppColors.red,
-                onTap: isProcessing ? null : () => _confirmCancel(context),
+                outlined: true,
+                onTap: isProcessing ? null : () => _confirmRefuse(context),
               ),
             ),
             const SizedBox(width: 8),
@@ -649,49 +775,26 @@ class _ActionFooter extends StatelessWidget {
                 color: AppColors.darkGreen,
                 onTap: isProcessing
                     ? null
-                    : () => context.read<ProducerOrderDetailBloc>().add(
-                        ProducerOrderDetailConfirmed(order.id),
-                      ),
+                    : () => bloc.add(ProducerOrderDetailConfirmed(order.id)),
               ),
             ),
           ],
         ),
-      if (order.status == ProducerOrderStatus.accepted) ...[
-        _ActionButton(
-          label: 'Iniciar Entrega',
-          icon: Icons.local_shipping_outlined,
-          color: AppColors.darkGreen,
-          onTap: isProcessing
-              ? null
-              : () => context.read<ProducerOrderDetailBloc>().add(
-                  ProducerOrderDetailStatusUpdated(
-                    order.id,
-                    ProducerOrderStatus.inDelivery,
-                  ),
-                ),
-        ),
+      if (order.status == ProducerOrderStatus.accepted ||
+          order.status == ProducerOrderStatus.inDelivery)
         _ActionButton(
           label: 'Cancelar Pedido',
           icon: Icons.cancel_outlined,
           color: AppColors.red,
-          onTap: isProcessing ? null : () => _confirmCancel(context),
+          outlined: true,
+          onTap: isProcessing ? null : () => _confirmRefuse(context),
         ),
-      ],
-      if (order.status == ProducerOrderStatus.inDelivery)
-        _ActionButton(
-          label: 'Confirmar Entrega',
-          icon: Icons.check_circle_outline,
-          color: AppColors.darkGreen,
-          onTap: isProcessing
-              ? null
-              : () => _confirmDelivery(context),
-        ),
-      if (order.consumerPhone.isNotEmpty &&
-          order.status != ProducerOrderStatus.cancelled)
+      if (order.consumerPhone.isNotEmpty)
         _ActionButton(
           label: 'Contatar Cliente',
           icon: Icons.chat,
           color: const Color(0xFF25D366),
+          outlined: true,
           onTap: isProcessing ? null : () => _contactCustomer(context),
         ),
     ];
@@ -729,44 +832,16 @@ class _ActionFooter extends StatelessWidget {
     );
   }
 
-  Future<void> _confirmCancel(BuildContext context) async {
-    final result = await CancelOrderDialog.showForProducer(context);
-    if (result != null && context.mounted) {
-      context.read<ProducerOrderDetailBloc>().add(
-        ProducerOrderDetailRefused(order.id, reason: result.reason, details: result.details),
-      );
-    }
-  }
-
-  Future<void> _confirmDelivery(BuildContext context) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: const Text('Confirmar entrega'),
-        content: const Text(
-          'Tem certeza que deseja confirmar a entrega deste pedido?',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: const Text('Voltar'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: const Text('Confirmar entrega'),
-          ),
-        ],
+  Future<void> _confirmRefuse(BuildContext context) async {
+    final cancelResult = await CancelOrderDialog.showForProducer(context);
+    if (cancelResult == null) return;
+    bloc.add(
+      ProducerOrderDetailRefused(
+        order.id,
+        reason: cancelResult.reason,
+        details: cancelResult.details,
       ),
     );
-
-    if ((confirmed ?? false) && context.mounted) {
-      context.read<ProducerOrderDetailBloc>().add(
-        ProducerOrderDetailStatusUpdated(
-          order.id,
-          ProducerOrderStatus.delivered,
-        ),
-      );
-    }
   }
 
   Future<void> _contactCustomer(BuildContext context) async {
@@ -792,41 +867,152 @@ class _ActionButton extends StatelessWidget {
     required this.icon,
     required this.color,
     required this.onTap,
+    this.outlined = false,
   });
 
   final String label;
   final IconData icon;
   final Color color;
   final VoidCallback? onTap;
+  final bool outlined;
 
   @override
   Widget build(BuildContext context) {
+    final effectiveColor = onTap == null ? color.withValues(alpha: 0.5) : color;
+    final iconColor = outlined ? effectiveColor : AppColors.white;
+    final textColor = outlined ? effectiveColor : AppColors.white;
+
     return GestureDetector(
       onTap: onTap,
       child: Container(
         height: 52,
         decoration: BoxDecoration(
-          color: onTap == null ? color.withValues(alpha: 0.6) : color,
+          color: outlined ? Colors.transparent : effectiveColor,
           borderRadius: BorderRadius.circular(24),
+          border: outlined ? Border.all(color: effectiveColor) : null,
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, color: AppColors.white, size: 20),
+            Icon(icon, color: iconColor, size: 20),
             const SizedBox(width: 8),
             Flexible(
               child: Text(
                 label,
                 overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
+                style: TextStyle(
                   fontFamily: 'Manrope',
                   fontWeight: FontWeight.w700,
                   fontSize: 15,
-                  color: AppColors.white,
+                  color: textColor,
                 ),
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ProducerSuccessDialog extends StatelessWidget {
+  const _ProducerSuccessDialog({
+    required this.icon,
+    required this.title,
+    required this.description,
+  });
+
+  final IconData icon;
+  final String title;
+  final String description;
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      backgroundColor: AppColors.white,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      insetPadding: const EdgeInsets.symmetric(horizontal: 40),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(24, 28, 24, 20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 56,
+              height: 56,
+              decoration: BoxDecoration(
+                color: AppColors.lightGreen.withValues(alpha: 0.15),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(icon, color: AppColors.lightGreen, size: 28),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              title,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontFamily: 'Figtree',
+                fontWeight: FontWeight.w700,
+                fontSize: 20,
+                color: AppColors.black,
+                height: 1.3,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              description,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontFamily: 'Manrope',
+                fontSize: 14,
+                color: AppColors.placeholder,
+              ),
+            ),
+            const SizedBox(height: 24),
+            _ProducerDialogButton(
+              label: 'Fechar',
+              color: AppColors.darkGreen,
+              onTap: () => Navigator.of(context).pop(),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ProducerDialogButton extends StatelessWidget {
+  const _ProducerDialogButton({
+    required this.label,
+    required this.color,
+    required this.onTap,
+  });
+
+  final String label;
+  final Color color;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: color,
+      borderRadius: BorderRadius.circular(12),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(vertical: 13),
+          alignment: Alignment.center,
+          child: Text(
+            label,
+            style: const TextStyle(
+              fontFamily: 'Manrope',
+              fontWeight: FontWeight.w700,
+              fontSize: 15,
+              color: AppColors.white,
+            ),
+          ),
         ),
       ),
     );

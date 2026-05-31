@@ -7,6 +7,13 @@ class CancelCustomerOrder {
 
   final OrdersRepository _repository;
 
-  Future<void> call(String orderId, {required String reason, String? details}) =>
-      _repository.cancelCustomerOrder(orderId, reason: reason, details: details);
+  Future<void> call(
+    String orderId, {
+    required String reason,
+    String? details,
+  }) => _repository.cancelCustomerOrder(
+    orderId,
+    reason: reason,
+    details: details,
+  );
 }

@@ -10,11 +10,13 @@ class GetHomeData {
 
   final HomeRepository _repository;
 
-  Future<({
-    PaginatedResponse<Producer> producers,
-    List<HomeProduct> products,
-    bool hasMoreProducts,
-  })>
+  Future<
+    ({
+      PaginatedResponse<Producer> producers,
+      List<HomeProduct> products,
+      bool hasMoreProducts,
+    })
+  >
   call() async {
     final (producersResponse, productsResult) = await (
       _repository.getProducers(),

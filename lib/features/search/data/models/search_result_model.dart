@@ -37,7 +37,9 @@ class SearchResultModel extends SearchResult {
       type: type,
       name: json['name'] as String? ?? '',
       subtitle: json['subtitle'] as String? ?? '',
-      imageUrl: ApiEndpoints.resolveMediaUrl(json['image_url'] as String? ?? ''),
+      imageUrl: ApiEndpoints.resolveMediaUrl(
+        json['image_url'] as String? ?? '',
+      ),
       producerId:
           json['producerId'] as String? ??
           json['farmerId'] as String? ??

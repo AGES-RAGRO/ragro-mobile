@@ -5,6 +5,7 @@ import 'package:ragro_mobile/features/producer_orders/domain/entities/producer_o
 class ProducerOrderModel extends ProducerOrder {
   const ProducerOrderModel({
     required super.id,
+    required super.orderNumber,
     required super.consumerName,
     required super.consumerAvatarUrl,
     required super.consumerSince,
@@ -18,6 +19,8 @@ class ProducerOrderModel extends ProducerOrder {
     required super.createdAt,
     required super.isNew,
     required super.consumerPhone,
+    super.cancellationReason,
+    super.cancellationDetails,
   });
 
   factory ProducerOrderModel.fromJson(Map<String, dynamic> json) {
@@ -34,6 +37,7 @@ class ProducerOrderModel extends ProducerOrder {
 
     return ProducerOrderModel(
       id: json['id'] as String? ?? '',
+      orderNumber: (json['orderNumber'] as num?)?.toInt() ?? 0,
       consumerName:
           json['consumerName'] as String? ??
           json['customerName'] as String? ??
@@ -70,6 +74,14 @@ class ProducerOrderModel extends ProducerOrder {
           json['customerPhone'] as String? ??
           consumer?['phone'] as String? ??
           '',
+      cancellationReason:
+          json['cancellationReason'] as String? ??
+          json['cancelReason'] as String? ??
+          json['reason'] as String?,
+      cancellationDetails:
+          json['cancellationDetails'] as String? ??
+          json['cancelDetails'] as String? ??
+          json['details'] as String?,
     );
   }
 

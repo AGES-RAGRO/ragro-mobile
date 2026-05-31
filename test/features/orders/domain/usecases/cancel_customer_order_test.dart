@@ -51,28 +51,28 @@ void main() {
       await useCase('order-2', reason: 'Outro');
 
       verify(
-        () => repo.cancelCustomerOrder(
-          'order-2',
-          reason: 'Outro',
-          details: null,
-        ),
+        () =>
+            repo.cancelCustomerOrder('order-2', reason: 'Outro', details: null),
       ).called(1);
     });
 
-    test('propaga NotFoundException do repository (bug C1: endpoint pode não existir)', () async {
-      when(
-        () => repo.cancelCustomerOrder(
-          any(),
-          reason: any(named: 'reason'),
-          details: any(named: 'details'),
-        ),
-      ).thenThrow(const NotFoundException());
+    test(
+      'propaga NotFoundException do repository (bug C1: endpoint pode não existir)',
+      () async {
+        when(
+          () => repo.cancelCustomerOrder(
+            any(),
+            reason: any(named: 'reason'),
+            details: any(named: 'details'),
+          ),
+        ).thenThrow(const NotFoundException());
 
-      expect(
-        () => useCase('order-3', reason: 'Mudei de ideia'),
-        throwsA(isA<NotFoundException>()),
-      );
-    });
+        expect(
+          () => useCase('order-3', reason: 'Mudei de ideia'),
+          throwsA(isA<NotFoundException>()),
+        );
+      },
+    );
   });
 
   // Sanity-check para evitar warning de import não usado quando entidades

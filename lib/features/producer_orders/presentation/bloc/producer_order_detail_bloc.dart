@@ -34,21 +34,18 @@ class ProducerOrderDetailBloc
     ProducerOrderDetailStarted event,
     Emitter<ProducerOrderDetailState> emit,
   ) async {
-    if (event.initialOrder != null) {
-      final initial = event.initialOrder!;
+    final initial = event.initialOrder;
+    if (initial != null) {
       emit(ProducerOrderDetailLoaded(initial));
-      // Mark as seen when producer opened the detail and update local view
       try {
         await getIt<ProducerOrdersRepository>().markAsSeen(event.orderId);
-        final updated = initial.copyWith(isNew: false);
-        emit(ProducerOrderDetailLoaded(updated));
-      } catch (_) {
-        // swallow: non-critical
-      }
-      return;
+        emit(ProducerOrderDetailLoaded(initial.copyWith(isNew: false)));
+      } catch (_) {}
+      // Cancelled orders need a full fetch to load cancellationReason from API.
+      if (initial.status != ProducerOrderStatus.cancelled) return;
+    } else {
+      emit(const ProducerOrderDetailLoading());
     }
-
-    emit(const ProducerOrderDetailLoading());
     try {
       final order = await _getDetail(event.orderId);
       // Mark as seen after loading details and update view
@@ -60,6 +57,7 @@ class ProducerOrderDetailBloc
         emit(ProducerOrderDetailLoaded(order));
       }
     } on Exception catch (e) {
+      if (initial != null) return; // keep showing initial order on refresh failure
       emit(ProducerOrderDetailFailure(e.toString()));
     }
   }
@@ -79,7 +77,8 @@ class ProducerOrderDetailBloc
       emit(ProducerOrderDetailSuccess(order: updated, action: 'confirmed'));
       emit(ProducerOrderDetailLoaded(updated));
     } on Exception catch (e) {
-      emit(ProducerOrderDetailFailure(e.toString()));
+      emit(ProducerOrderDetailActionError(current.order, e.toString()));
+      emit(ProducerOrderDetailLoaded(current.order));
     }
   }
 
@@ -91,14 +90,21 @@ class ProducerOrderDetailBloc
     if (current is! ProducerOrderDetailLoaded) return;
     emit(ProducerOrderDetailRefusing(current.order));
     try {
-      await _refuseOrder(event.orderId, reason: event.reason, details: event.details);
+      await _refuseOrder(
+        event.orderId,
+        reason: event.reason,
+        details: event.details,
+      );
       final updated = current.order.copyWith(
         status: ProducerOrderStatus.cancelled,
+        cancellationReason: event.reason,
+        cancellationDetails: event.details,
       );
       emit(ProducerOrderDetailSuccess(order: updated, action: 'refused'));
       emit(ProducerOrderDetailLoaded(updated));
     } on Exception catch (e) {
-      emit(ProducerOrderDetailFailure(e.toString()));
+      emit(ProducerOrderDetailActionError(current.order, e.toString()));
+      emit(ProducerOrderDetailLoaded(current.order));
     }
   }
 
@@ -125,7 +131,8 @@ class ProducerOrderDetailBloc
         emit(ProducerOrderDetailLoaded(updated));
       }
     } on Exception catch (e) {
-      emit(ProducerOrderDetailFailure(e.toString()));
+      emit(ProducerOrderDetailActionError(current.order, e.toString()));
+      emit(ProducerOrderDetailLoaded(current.order));
     }
   }
 }

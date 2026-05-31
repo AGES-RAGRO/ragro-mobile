@@ -379,7 +379,9 @@ class _CustomerRegisterViewState extends State<_CustomerRegisterView> {
                           if (value == null || value.trim().isEmpty) {
                             return 'Informe a UF';
                           }
-                          if (!_brazilianStates.contains(value.trim().toUpperCase())) {
+                          if (!_brazilianStates.contains(
+                            value.trim().toUpperCase(),
+                          )) {
                             return 'UF inválida';
                           }
                           return null;

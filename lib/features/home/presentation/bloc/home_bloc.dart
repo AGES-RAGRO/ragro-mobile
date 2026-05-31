@@ -88,10 +88,12 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
         await _favoriteRepository.favoriteProducer(event.producerId);
       }
       final favorites = await _favoriteRepository.getFavorites();
-      emit(current.copyWith(
-        favorites: favorites,
-        favoriteIds: {for (final f in favorites) f.producerId},
-      ));
+      emit(
+        current.copyWith(
+          favorites: favorites,
+          favoriteIds: {for (final f in favorites) f.producerId},
+        ),
+      );
     } on Object {
       emit(current.copyWith(favoriteIds: current.favoriteIds));
     }

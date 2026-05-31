@@ -161,9 +161,7 @@ class _MovementCard extends StatelessWidget {
               borderRadius: BorderRadius.circular(8),
             ),
             child: Icon(
-              isExit
-                  ? Icons.remove_circle_outline
-                  : Icons.add_circle_outline,
+              isExit ? Icons.remove_circle_outline : Icons.add_circle_outline,
               color: color,
               size: 20,
             ),

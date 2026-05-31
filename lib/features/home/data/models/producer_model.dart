@@ -18,9 +18,13 @@ class ProducerModel extends Producer {
       name: json['farm_name'] as String? ?? 'Fazenda sem nome',
       description: json['description'] as String? ?? '',
       avatarUrl: ApiEndpoints.resolveMediaUrl(
-          json['avatar_s3'] as String? ?? json['avatarUrl'] as String? ?? ''),
+        json['avatar_s3'] as String? ?? json['avatarUrl'] as String? ?? '',
+      ),
       coverUrl: ApiEndpoints.resolveMediaUrl(
-          json['display_photo_s3'] as String? ?? json['coverUrl'] as String? ?? ''),
+        json['display_photo_s3'] as String? ??
+            json['coverUrl'] as String? ??
+            '',
+      ),
       averageRating: (json['average_rating'] as num?)?.toDouble() ?? 0.0,
       ownerName: json['owner_name'] as String? ?? '',
     );

@@ -14,7 +14,11 @@ class OrderDetailStarted extends OrderDetailEvent {
 }
 
 class OrderDetailCancelled extends OrderDetailEvent {
-  const OrderDetailCancelled(this.orderId, {required this.reason, this.details});
+  const OrderDetailCancelled(
+    this.orderId, {
+    required this.reason,
+    this.details,
+  });
   final String orderId;
   final String reason;
   final String? details;

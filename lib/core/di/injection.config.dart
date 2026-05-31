@@ -214,6 +214,10 @@ import 'package:ragro_mobile/features/producer_management/presentation/bloc/prod
     as _i767;
 import 'package:ragro_mobile/features/producer_orders/data/datasources/producer_orders_remote_datasource.dart'
     as _i608;
+import 'package:ragro_mobile/features/producer_orders/data/repositories/co2_repository.dart'
+    as _i206;
+import 'package:ragro_mobile/features/producer_orders/data/repositories/directions_repository.dart'
+    as _i877;
 import 'package:ragro_mobile/features/producer_orders/data/repositories/producer_orders_repository_impl.dart'
     as _i182;
 import 'package:ragro_mobile/features/producer_orders/domain/repositories/producer_orders_repository.dart'
@@ -234,6 +238,8 @@ import 'package:ragro_mobile/features/producer_orders/presentation/bloc/producer
     as _i921;
 import 'package:ragro_mobile/features/producer_orders/presentation/bloc/producer_orders_bloc.dart'
     as _i1;
+import 'package:ragro_mobile/features/producer_orders/presentation/bloc/route_calculation_cubit.dart'
+    as _i48;
 import 'package:ragro_mobile/features/producer_profile/data/datasources/producer_profile_remote_datasource.dart'
     as _i889;
 import 'package:ragro_mobile/features/producer_profile/data/repositories/producer_profile_repository_impl.dart'
@@ -309,6 +315,10 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i727.ProducerManagementRemoteDataSource>(
       () => _i727.ProducerManagementRemoteDataSource(),
     );
+    gh.lazySingleton<_i206.Co2Repository>(() => _i206.Co2Repository());
+    gh.lazySingleton<_i877.DirectionsRepository>(
+      () => _i877.DirectionsRepository(),
+    );
     gh.lazySingleton<_i276.InventoryRepository>(
       () =>
           _i601.InventoryRepositoryImpl(gh<_i870.InventoryRemoteDataSource>()),
@@ -341,6 +351,12 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i1067.StockMovementRepository>(
       () => _i619.StockMovementRepositoryImpl(
         gh<_i456.StockMovementRemoteDataSource>(),
+      ),
+    );
+    gh.factory<_i48.RouteCalculationCubit>(
+      () => _i48.RouteCalculationCubit(
+        gh<_i206.Co2Repository>(),
+        gh<_i877.DirectionsRepository>(),
       ),
     );
     gh.lazySingleton<_i291.CreateInventoryProduct>(
