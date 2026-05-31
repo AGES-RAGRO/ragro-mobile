@@ -61,9 +61,7 @@ void main() {
     });
 
     test('retorna lista vazia quando não há recomendações', () async {
-      when(
-        () => repo.getRecommendations(),
-      ).thenAnswer((_) async => []);
+      when(() => repo.getRecommendations()).thenAnswer((_) async => []);
 
       final result = await useCase();
 
@@ -72,36 +70,26 @@ void main() {
     });
 
     test('propaga NetworkException em caso de erro de conectividade', () async {
-      when(
-        () => repo.getRecommendations(),
-      ).thenThrow(const NetworkException());
+      when(() => repo.getRecommendations()).thenThrow(const NetworkException());
 
-      expect(
-        () => useCase(),
-        throwsA(isA<NetworkException>()),
-      );
+      expect(() => useCase(), throwsA(isA<NetworkException>()));
     });
 
-    test('propaga UnauthorizedException quando usuário não autenticado', () async {
-      when(
-        () => repo.getRecommendations(),
-      ).thenThrow(const UnauthorizedException());
+    test(
+      'propaga UnauthorizedException quando usuário não autenticado',
+      () async {
+        when(
+          () => repo.getRecommendations(),
+        ).thenThrow(const UnauthorizedException());
 
-      expect(
-        () => useCase(),
-        throwsA(isA<UnauthorizedException>()),
-      );
-    });
+        expect(() => useCase(), throwsA(isA<UnauthorizedException>()));
+      },
+    );
 
     test('propaga ServerException em erro do servidor', () async {
-      when(
-        () => repo.getRecommendations(),
-      ).thenThrow(const ServerException());
+      when(() => repo.getRecommendations()).thenThrow(const ServerException());
 
-      expect(
-        () => useCase(),
-        throwsA(isA<ServerException>()),
-      );
+      expect(() => useCase(), throwsA(isA<ServerException>()));
     });
   });
 }

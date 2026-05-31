@@ -126,7 +126,6 @@ class OrderDetailItem extends Equatable {
 class OrderDetail extends Equatable {
   const OrderDetail({
     required this.id,
-    required this.orderNumber,
     required this.status,
     required this.statusLabel,
     required this.createdAt,
@@ -140,10 +139,11 @@ class OrderDetail extends Equatable {
     required this.actions,
     this.bankInfo,
     this.reviewed = false,
+    this.cancellationReason,
+    this.cancellationDetails,
   });
 
   final String id;
-  final String? orderNumber;
   final String status;
   final String? statusLabel;
   final DateTime? createdAt;
@@ -157,9 +157,10 @@ class OrderDetail extends Equatable {
   final OrderDetailActions? actions;
   final OrderDetailBankInfo? bankInfo;
   final bool reviewed;
+  final String? cancellationReason;
+  final String? cancellationDetails;
 
   String get displayNumber {
-    if (orderNumber != null && orderNumber!.isNotEmpty) return orderNumber!;
     final shortId = id.length > 4 ? id.substring(0, 4) : id;
     return '#$shortId';
   }
@@ -167,14 +168,17 @@ class OrderDetail extends Equatable {
   bool get isPending => _normalizedStatus == 'PENDING';
   bool get isAccepted => _normalizedStatus == 'CONFIRMED';
   bool get isInDelivery => _normalizedStatus == 'IN_DELIVERY';
+  bool get isDelivered => _normalizedStatus == 'DELIVERED';
+  bool get isCancelled => _normalizedStatus == 'CANCELLED';
 
-  bool get canConfirmDelivery => actions?.canConfirmDelivery ?? isInDelivery;
+  bool get canConfirmDelivery => actions?.canConfirmDelivery ?? false;
 
-  bool get canCancel => actions?.canCancel ?? (isPending || isAccepted);
+  bool get canCancel => isPending || isAccepted;
 
   bool get canContactProducer =>
-      actions?.canContactProducer ??
-      (producerPhone?.trim().isNotEmpty ?? false);
+      (producerPhone?.trim().isNotEmpty ?? false) &&
+      !isDelivered &&
+      !isCancelled;
 
   String get friendlyStatusLabel {
     if (statusLabel != null && statusLabel!.isNotEmpty) return statusLabel!;
@@ -195,10 +199,11 @@ class OrderDetail extends Equatable {
     String? statusLabel,
     OrderDetailActions? actions,
     bool? reviewed,
+    String? cancellationReason,
+    String? cancellationDetails,
   }) {
     return OrderDetail(
       id: id,
-      orderNumber: orderNumber,
       status: status ?? this.status,
       statusLabel: statusLabel ?? this.statusLabel,
       createdAt: createdAt,
@@ -212,13 +217,14 @@ class OrderDetail extends Equatable {
       actions: actions ?? this.actions,
       bankInfo: bankInfo,
       reviewed: reviewed ?? this.reviewed,
+      cancellationReason: cancellationReason ?? this.cancellationReason,
+      cancellationDetails: cancellationDetails ?? this.cancellationDetails,
     );
   }
 
   @override
   List<Object?> get props => [
     id,
-    orderNumber,
     status,
     statusLabel,
     createdAt,
@@ -232,5 +238,7 @@ class OrderDetail extends Equatable {
     actions,
     bankInfo,
     reviewed,
+    cancellationReason,
+    cancellationDetails,
   ];
 }

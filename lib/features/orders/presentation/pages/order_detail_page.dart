@@ -173,33 +173,31 @@ class _OrderDetailView extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(width: 8),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Text(
-                                'Detalhes do Pedido',
-                                style: TextStyle(
-                                  fontFamily: 'Manrope',
-                                  fontWeight: FontWeight.w700,
-                                  fontSize: 18,
-                                  color: AppColors.black,
-                                ),
-                              ),
-                              Text(
-                                order.displayNumber,
-                                style: const TextStyle(
-                                  fontFamily: 'Manrope',
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 14,
-                                  color: AppColors.placeholder,
-                                ),
-                              ),
-                            ],
+                        const Expanded(
+                          child: Text(
+                            'Detalhes do Pedido',
+                            style: TextStyle(
+                              fontFamily: 'Manrope',
+                              fontWeight: FontWeight.w700,
+                              fontSize: 18,
+                              color: AppColors.black,
+                            ),
                           ),
                         ),
                         _StatusBadge(order: order),
                       ],
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(24, 0, 24, 12),
+                    child: Text(
+                      order.displayNumber,
+                      style: const TextStyle(
+                        fontFamily: 'Manrope',
+                        fontWeight: FontWeight.w600,
+                        fontSize: 13,
+                        color: AppColors.placeholder,
+                      ),
                     ),
                   ),
                   if (order.producerName.isNotEmpty) _ProducerHeader(order),
@@ -275,6 +273,12 @@ class _OrderDetailView extends StatelessWidget {
                   const SizedBox(height: 18),
                   const _SectionTitle('ENTREGA'),
                   _DeliveryCard(address: order.deliveryAddress),
+                  if (order.isCancelled &&
+                      (order.cancellationReason?.isNotEmpty ?? false)) ...[
+                    const SizedBox(height: 18),
+                    const _SectionTitle('MOTIVO DE CANCELAMENTO'),
+                    _CancellationCard(order: order),
+                  ],
                   if (order.bankInfo != null && order.bankInfo!.hasAnyInfo) ...[
                     const SizedBox(height: 18),
                     const _SectionTitle('PAGAMENTO'),
@@ -405,10 +409,10 @@ class _StatusBadge extends StatelessWidget {
 
   Color get _color {
     return switch (order.status) {
-      'PENDING' => const Color(0xFFFFB413),
+      'PENDING' => AppColors.yellow,
       'CONFIRMED' => AppColors.lightGreen,
-      'IN_DELIVERY' => AppColors.lightGreen,
-      'DELIVERED' => const Color(0xFF3B82F6),
+      'IN_DELIVERY' => AppColors.orange,
+      'DELIVERED' => AppColors.blue,
       'CANCELLED' => AppColors.red,
       _ => AppColors.placeholder,
     };
@@ -416,6 +420,10 @@ class _StatusBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final foreground =
+        ThemeData.estimateBrightnessForColor(_color) == Brightness.dark
+        ? AppColors.white
+        : AppColors.black;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
       decoration: BoxDecoration(
@@ -424,11 +432,11 @@ class _StatusBadge extends StatelessWidget {
       ),
       child: Text(
         order.friendlyStatusLabel.toUpperCase(),
-        style: const TextStyle(
+        style: TextStyle(
           fontFamily: 'Manrope',
           fontWeight: FontWeight.w700,
           fontSize: 10,
-          color: AppColors.white,
+          color: foreground,
           letterSpacing: 0.6,
         ),
       ),
@@ -450,7 +458,8 @@ class _OrderDetailItemRow extends StatelessWidget {
     final value = item.quantity % 1 == 0
         ? item.quantity.toInt().toString()
         : item.quantity.toStringAsFixed(2).replaceAll('.', ',');
-    return 'Qtd: $value ${localizeUnityType(item.unityType)}';
+    final unit = localizeUnityType(item.unityType);
+    return unit.isNotEmpty ? '$value $unit' : value;
   }
 
   @override
@@ -586,6 +595,72 @@ class _DeliveryCard extends StatelessWidget {
                     ),
                   ),
                 ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _CancellationCard extends StatelessWidget {
+  const _CancellationCard({required this.order});
+
+  final OrderDetail order;
+
+  @override
+  Widget build(BuildContext context) {
+    // O motivo já é texto em PT pronto para exibir (vindo do diálogo / backend).
+    final reason = order.cancellationReason ?? '';
+
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16),
+      padding: const EdgeInsets.all(17),
+      decoration: BoxDecoration(
+        color: AppColors.red.withValues(alpha: 0.05),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: AppColors.red.withValues(alpha: 0.2)),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Icon(Icons.cancel_outlined, size: 20, color: AppColors.red),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Motivo',
+                  style: TextStyle(
+                    fontFamily: 'Manrope',
+                    fontWeight: FontWeight.w700,
+                    fontSize: 14,
+                    color: AppColors.red,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  reason,
+                  style: const TextStyle(
+                    fontFamily: 'Manrope',
+                    fontSize: 14,
+                    color: AppColors.black,
+                  ),
+                ),
+                if (order.cancellationDetails != null &&
+                    order.cancellationDetails!.isNotEmpty) ...[
+                  const SizedBox(height: 6),
+                  Text(
+                    order.cancellationDetails!,
+                    style: const TextStyle(
+                      fontFamily: 'Manrope',
+                      fontSize: 13,
+                      color: AppColors.placeholder,
+                    ),
+                  ),
+                ],
               ],
             ),
           ),
@@ -791,19 +866,19 @@ class _ActionFooter extends StatelessWidget {
                   OrderDetailDeliveryConfirmed(order.id),
                 ),
         ),
-      if (order.canCancel)
-        _ActionButton(
-          label: 'Cancelar Pedido',
-          icon: Icons.cancel_outlined,
-          color: AppColors.red,
-          onTap: isUpdating ? null : () => _confirmCancel(context),
-        ),
       if (order.canContactProducer)
         _ActionButton(
           label: 'Contatar Produtor',
           icon: Icons.chat,
           color: const Color(0xFF25D366),
           onTap: isUpdating ? null : () => _contactProducer(context),
+        ),
+      if (order.canCancel)
+        _ActionButton(
+          label: 'Cancelar Pedido',
+          icon: Icons.cancel_outlined,
+          color: AppColors.red,
+          onTap: isUpdating ? null : () => _confirmCancel(context),
         ),
     ];
 
@@ -888,12 +963,14 @@ class _ActionButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final effectiveColor = onTap == null ? color.withValues(alpha: 0.5) : color;
+
     return GestureDetector(
       onTap: onTap,
       child: Container(
         height: 52,
         decoration: BoxDecoration(
-          color: onTap == null ? color.withValues(alpha: 0.6) : color,
+          color: effectiveColor,
           borderRadius: BorderRadius.circular(24),
         ),
         child: Row(
@@ -901,13 +978,16 @@ class _ActionButton extends StatelessWidget {
           children: [
             Icon(icon, color: AppColors.white, size: 20),
             const SizedBox(width: 8),
-            Text(
-              label,
-              style: const TextStyle(
-                fontFamily: 'Manrope',
-                fontWeight: FontWeight.w700,
-                fontSize: 16,
-                color: AppColors.white,
+            Flexible(
+              child: Text(
+                label,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  fontFamily: 'Manrope',
+                  fontWeight: FontWeight.w700,
+                  fontSize: 15,
+                  color: AppColors.white,
+                ),
               ),
             ),
           ],

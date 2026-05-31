@@ -11,27 +11,34 @@ abstract final class ApiEndpoints {
   static String _resolveBaseUrl() {
     const rawBase = String.fromEnvironment('API_BASE_URL');
 
-        if (rawBase.trim().isNotEmpty) {
-            final normalized = rawBase.trim().replaceFirst(RegExp(r'\/+$'), '');
-            return _normalizeForRuntime(normalized);
+    if (rawBase.trim().isNotEmpty) {
+      final normalized = rawBase.trim().replaceFirst(RegExp(r'\/+$'), '');
+      return _normalizeForRuntime(normalized);
     }
 
     return _normalizeForRuntime(_localBase);
   }
 
-    static String _normalizeForRuntime(String baseUrl) {
-        if (kIsWeb) return baseUrl;
+  /// Fixes URLs that come from the backend (like Keycloak token URLs)
+  /// to be reachable from the emulator.
+  static String fixUrl(String url) {
+    return _normalizeForRuntime(url);
+  }
 
-        final apiUri = Uri.tryParse(baseUrl);
-        if (apiUri == null) return baseUrl;
+  static String _normalizeForRuntime(String url) {
+    if (url.isEmpty) return url;
+    if (kIsWeb) return url;
 
-        if (Platform.isAndroid &&
-                (apiUri.host == 'localhost' || apiUri.host == '127.0.0.1')) {
-            return apiUri.replace(host: '10.0.2.2').toString();
-        }
+    final uri = Uri.tryParse(url);
+    if (uri == null) return url;
 
-        return baseUrl;
+    if (Platform.isAndroid &&
+        (uri.host == 'localhost' || uri.host == '127.0.0.1')) {
+      return uri.replace(host: '10.0.2.2').toString();
     }
+
+    return url;
+  }
 
   // Auth
   static String get authConfig => '$_base/auth/config';
@@ -123,9 +130,9 @@ abstract final class ApiEndpoints {
   static String get adminProducers => '$_base/admin/producers';
   static String adminProducer(String id) => '$_base/admin/producers/$id';
 
-    /// Rewrites a media URL that came from the backend (e.g. MinIO public URL).
-    /// This keeps local backend URLs reachable on emulators by matching the
-    /// host used by the configured API base URL.
+  /// Rewrites a media URL that came from the backend (e.g. MinIO public URL).
+  /// This keeps local backend URLs reachable on emulators by matching the
+  /// host used by the configured API base URL.
   static String resolveMediaUrl(String url) {
     if (url.isEmpty) return url;
     final mediaUri = Uri.tryParse(url);

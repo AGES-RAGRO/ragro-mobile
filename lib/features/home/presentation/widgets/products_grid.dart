@@ -23,20 +23,20 @@ class ProductsGrid extends StatelessWidget {
   List<({HomeProduct product, bool isRecommended})> _buildItems() {
     final recommended = recommendations
         .take(20)
-        .map((r) => (
-              product: HomeProduct(
-                id: r.id,
-                name: r.name,
-                price: r.price,
-                imageUrl: r.imageS3 ?? '',
-                farmName: r.farmName,
-                category: r.categoryNames.isNotEmpty
-                    ? r.categoryNames.first
-                    : '',
-                producerId: r.farmerId,
-              ),
-              isRecommended: true,
-            ))
+        .map(
+          (r) => (
+            product: HomeProduct(
+              id: r.id,
+              name: r.name,
+              price: r.price,
+              imageUrl: r.imageS3 ?? '',
+              farmName: r.farmName,
+              category: r.categoryNames.isNotEmpty ? r.categoryNames.first : '',
+              producerId: r.farmerId,
+            ),
+            isRecommended: true,
+          ),
+        )
         .toList();
 
     final regular = products

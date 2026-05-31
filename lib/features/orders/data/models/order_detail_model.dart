@@ -120,7 +120,6 @@ class OrderDetailItemModel extends OrderDetailItem {
 class OrderDetailModel extends OrderDetail {
   const OrderDetailModel({
     required super.id,
-    required super.orderNumber,
     required super.status,
     required super.statusLabel,
     required super.createdAt,
@@ -134,6 +133,8 @@ class OrderDetailModel extends OrderDetail {
     required super.actions,
     super.bankInfo,
     super.reviewed,
+    super.cancellationReason,
+    super.cancellationDetails,
   });
 
   factory OrderDetailModel.fromJson(Map<String, dynamic> json) {
@@ -152,7 +153,6 @@ class OrderDetailModel extends OrderDetail {
 
     return OrderDetailModel(
       id: json['id'] as String? ?? '',
-      orderNumber: json['orderNumber'] as String?,
       status: _normalizeStatus(json['status'] as String?),
       statusLabel: json['statusLabel'] as String?,
       createdAt: DateTime.tryParse(json['createdAt'] as String? ?? ''),
@@ -192,6 +192,14 @@ class OrderDetailModel extends OrderDetail {
           ? null
           : OrderDetailBankInfoModel.fromJson(bankJson),
       reviewed: _parseReviewed(json),
+      cancellationReason:
+          json['cancellationReason'] as String? ??
+          json['cancelReason'] as String? ??
+          json['reason'] as String?,
+      cancellationDetails:
+          json['cancellationDetails'] as String? ??
+          json['cancelDetails'] as String? ??
+          json['details'] as String?,
     );
   }
 

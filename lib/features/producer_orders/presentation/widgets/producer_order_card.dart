@@ -9,8 +9,6 @@ class ProducerOrderCard extends StatelessWidget {
     required this.order,
     required this.onDetailTap,
     this.onActionTap,
-    this.onCancelTap,
-    this.onDeliveryConfirmTap,
     this.isSelected,
     this.onSelect,
     super.key,
@@ -19,8 +17,6 @@ class ProducerOrderCard extends StatelessWidget {
   final ProducerOrder order;
   final VoidCallback onDetailTap;
   final VoidCallback? onActionTap;
-  final VoidCallback? onCancelTap;
-  final VoidCallback? onDeliveryConfirmTap;
 
   /// When non-null the card is in selection mode; tapping selects/deselects.
   final bool? isSelected;
@@ -250,31 +246,6 @@ class ProducerOrderCard extends StatelessWidget {
                     ),
                   ),
                 ],
-                if (order.status == ProducerOrderStatus.inDelivery &&
-                    onDeliveryConfirmTap != null) ...[
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: onDeliveryConfirmTap,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.darkGreen,
-                        foregroundColor: AppColors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(24),
-                        ),
-                        padding: const EdgeInsets.symmetric(vertical: 10),
-                      ),
-                      child: const Text(
-                        'Entregue',
-                        style: TextStyle(
-                          fontFamily: 'Manrope',
-                          fontWeight: FontWeight.w600,
-                          fontSize: 14,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
               ],
             ),
           ],
@@ -295,59 +266,56 @@ class _StatusBadge extends StatelessWidget {
   final ProducerOrderStatus status;
 
   static Color _colorFor(ProducerOrderStatus s) => switch (s) {
-    ProducerOrderStatus.pending => const Color(0xFFB45309),
+    ProducerOrderStatus.pending => AppColors.yellow,
     ProducerOrderStatus.accepted => AppColors.darkGreen,
-    ProducerOrderStatus.inDelivery => const Color(0xFFEA580C),
-    ProducerOrderStatus.delivered => AppColors.darkGreen,
+    ProducerOrderStatus.inDelivery => AppColors.orange,
+    ProducerOrderStatus.delivered => AppColors.blue,
     ProducerOrderStatus.cancelled => AppColors.red,
+  };
+
+  static IconData? _iconFor(ProducerOrderStatus s) => switch (s) {
+    ProducerOrderStatus.pending => Icons.schedule,
+    ProducerOrderStatus.accepted => Icons.check_circle_outline,
+    ProducerOrderStatus.inDelivery => Icons.local_shipping_outlined,
+    ProducerOrderStatus.delivered => Icons.check_circle_outline,
+    ProducerOrderStatus.cancelled => null,
   };
 
   @override
   Widget build(BuildContext context) {
     final color = _colorFor(status);
-
-    if (status == ProducerOrderStatus.accepted) {
-      return Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-        decoration: BoxDecoration(
-          color: AppColors.darkGreen,
-          borderRadius: BorderRadius.circular(20),
-        ),
-        child: const Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.check_circle_outline, color: AppColors.white, size: 12),
-            SizedBox(width: 4),
-            Text(
-              'ACEITO',
-              style: TextStyle(
-                fontFamily: 'Manrope',
-                fontWeight: FontWeight.w700,
-                fontSize: 11,
-                color: AppColors.white,
-                letterSpacing: 0.5,
-              ),
-            ),
-          ],
-        ),
-      );
-    }
+    final icon = _iconFor(status);
+    // Texto/ícone legíveis sobre a cor do badge (escuro em cores claras como
+    // amarelo/laranja, branco em cores escuras) para melhorar o contraste.
+    final foreground =
+        ThemeData.estimateBrightnessForColor(color) == Brightness.dark
+        ? AppColors.white
+        : AppColors.black;
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(6),
+        color: color,
+        borderRadius: BorderRadius.circular(20),
       ),
-      child: Text(
-        status.label.toUpperCase(),
-        style: TextStyle(
-          fontFamily: 'Manrope',
-          fontWeight: FontWeight.w700,
-          fontSize: 11,
-          color: color,
-          letterSpacing: 0.5,
-        ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (icon != null) ...[
+            Icon(icon, color: foreground, size: 12),
+            const SizedBox(width: 4),
+          ],
+          Text(
+            status.label.toUpperCase(),
+            style: TextStyle(
+              fontFamily: 'Manrope',
+              fontWeight: FontWeight.w700,
+              fontSize: 11,
+              color: foreground,
+              letterSpacing: 0.5,
+            ),
+          ),
+        ],
       ),
     );
   }

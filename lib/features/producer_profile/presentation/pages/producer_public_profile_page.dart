@@ -31,7 +31,7 @@ class ProducerPublicProfilePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (_) =>
-      getIt<ProducerProfileBloc>()..add(ProducerProfileStarted(producerId)),
+          getIt<ProducerProfileBloc>()..add(ProducerProfileStarted(producerId)),
       child: _ProducerPublicProfileView(producerId: producerId),
     );
   }
@@ -58,12 +58,10 @@ class _ProducerPublicProfileViewState
   }
 
   Future<void> _checkFavorite() async {
-    final favorites =
-    await getIt<FavoriteProducerRepository>().getFavorites();
+    final favorites = await getIt<FavoriteProducerRepository>().getFavorites();
     if (mounted) {
       setState(() {
-        _isFavorite =
-            favorites.any((f) => f.producerId == widget.producerId);
+        _isFavorite = favorites.any((f) => f.producerId == widget.producerId);
       });
     }
   }

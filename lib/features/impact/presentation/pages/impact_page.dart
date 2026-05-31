@@ -26,7 +26,6 @@ const _kLogoSvg = '''
 </svg>
 ''';
 
-
 class ImpactPage extends StatefulWidget {
   const ImpactPage({super.key});
 
@@ -77,11 +76,7 @@ class _ImpactPageState extends State<ImpactPage> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               const Spacer(),
-              SvgPicture.string(
-                _kLogoSvg,
-                width: 110,
-                height: 110,
-              ),
+              SvgPicture.string(_kLogoSvg, width: 110, height: 110),
               const SizedBox(height: 48),
               const Text(
                 'Juntos já\npoupamos',
@@ -97,15 +92,15 @@ class _ImpactPageState extends State<ImpactPage> {
               _loading
                   ? const CircularProgressIndicator(color: AppColors.darkGreen)
                   : Text(
-                '$co2InTons',
-                style: const TextStyle(
-                  fontFamily: 'Figtree',
-                  fontWeight: FontWeight.w700,
-                  fontSize: 96,
-                  color: AppColors.darkGreen,
-                  height: 1,
-                ),
-              ),
+                      '$co2InTons',
+                      style: const TextStyle(
+                        fontFamily: 'Figtree',
+                        fontWeight: FontWeight.w700,
+                        fontSize: 96,
+                        color: AppColors.darkGreen,
+                        height: 1,
+                      ),
+                    ),
               const SizedBox(height: 8),
               const Text(
                 'toneladas de CO₂',

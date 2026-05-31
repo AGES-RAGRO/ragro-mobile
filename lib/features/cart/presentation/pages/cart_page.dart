@@ -145,9 +145,9 @@ class CartPage extends StatelessWidget {
                                     confirmColor: AppColors.red,
                                   );
                                   if ((confirmed ?? false) && context.mounted) {
-                                    context
-                                        .read<CartBloc>()
-                                        .add(const CartCleared());
+                                    context.read<CartBloc>().add(
+                                      const CartCleared(),
+                                    );
                                   }
                                 },
                           child: Text(

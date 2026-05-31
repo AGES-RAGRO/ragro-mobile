@@ -123,9 +123,16 @@ class ProducerOrderDetailPage extends StatelessWidget {
 
           return WillPopScope(
             onWillPop: () async {
-              // When user navigates back (system or app), return 'seen' if the
-              // order was previously new so the list can update immediately.
-              context.pop(order.isNew ? 'seen' : null);
+              // Espelha o botão de voltar do header: sinaliza 'cancelled' para a
+              // lista mover o pedido p/ a aba Cancelados após um refuse, 'seen'
+              // se o pedido era novo, senão nada.
+              if (order.status == ProducerOrderStatus.cancelled) {
+                context.pop('cancelled');
+              } else if (order.isNew) {
+                context.pop('seen');
+              } else {
+                context.pop();
+              }
               return false;
             },
             child: _ProducerOrderDetailView(
@@ -255,9 +262,8 @@ class _Header extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final displayId = order.orderNumber > 0
-        ? '#${order.orderNumber}'
-        : '#${order.id.length > 4 ? order.id.substring(0, 4) : order.id}';
+    final displayId =
+        '#${order.id.length > 4 ? order.id.substring(0, 4) : order.id}';
 
     return Padding(
       padding: const EdgeInsets.all(16),
@@ -405,15 +411,19 @@ class _StatusBadge extends StatelessWidget {
   final ProducerOrderStatus status;
 
   Color get _color => switch (status) {
-    ProducerOrderStatus.pending => const Color(0xFFFFB413),
-    ProducerOrderStatus.accepted => AppColors.lightGreen,
-    ProducerOrderStatus.inDelivery => AppColors.lightGreen,
-    ProducerOrderStatus.delivered => const Color(0xFF3B82F6),
+    ProducerOrderStatus.pending => AppColors.yellow,
+    ProducerOrderStatus.accepted => AppColors.darkGreen,
+    ProducerOrderStatus.inDelivery => AppColors.orange,
+    ProducerOrderStatus.delivered => AppColors.blue,
     ProducerOrderStatus.cancelled => AppColors.red,
   };
 
   @override
   Widget build(BuildContext context) {
+    final foreground =
+        ThemeData.estimateBrightnessForColor(_color) == Brightness.dark
+        ? AppColors.white
+        : AppColors.black;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
       decoration: BoxDecoration(
@@ -422,11 +432,11 @@ class _StatusBadge extends StatelessWidget {
       ),
       child: Text(
         status.label.toUpperCase(),
-        style: const TextStyle(
+        style: TextStyle(
           fontFamily: 'Manrope',
           fontWeight: FontWeight.w700,
           fontSize: 10,
-          color: AppColors.white,
+          color: foreground,
           letterSpacing: 0.6,
         ),
       ),
@@ -670,18 +680,11 @@ class _CancellationCard extends StatelessWidget {
 
   final ProducerOrder order;
 
-  static const _reasonLabels = <String, String>{
-    'OUT_OF_STOCK': 'Produto indisponível',
-    'PRICE_CHANGE': 'Alteração de preço',
-    'DELIVERY_ISSUE': 'Problema na entrega',
-    'OTHER': 'Outro motivo',
-  };
-
   @override
   Widget build(BuildContext context) {
-    final reason = _reasonLabels[order.cancellationReason] ??
-        order.cancellationReason ??
-        '';
+    // O diálogo de cancelamento já envia texto em PT pronto para exibir; o
+    // backend persiste essa string verbatim, então mostramos direto.
+    final reason = order.cancellationReason ?? '';
     final details = order.cancellationDetails;
 
     return Container(
@@ -763,7 +766,6 @@ class _ActionFooter extends StatelessWidget {
                 label: 'Recusar pedido',
                 icon: Icons.cancel_outlined,
                 color: AppColors.red,
-                outlined: true,
                 onTap: isProcessing ? null : () => _confirmRefuse(context),
               ),
             ),
@@ -780,21 +782,47 @@ class _ActionFooter extends StatelessWidget {
             ),
           ],
         ),
-      if (order.status == ProducerOrderStatus.accepted ||
-          order.status == ProducerOrderStatus.inDelivery)
+      if (order.status == ProducerOrderStatus.accepted)
         _ActionButton(
           label: 'Cancelar Pedido',
           icon: Icons.cancel_outlined,
           color: AppColors.red,
-          outlined: true,
           onTap: isProcessing ? null : () => _confirmRefuse(context),
+        ),
+      if (order.status == ProducerOrderStatus.inDelivery)
+        Row(
+          children: [
+            Expanded(
+              child: _ActionButton(
+                label: 'Cancelar Pedido',
+                icon: Icons.cancel_outlined,
+                color: AppColors.red,
+                onTap: isProcessing ? null : () => _confirmRefuse(context),
+              ),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: _ActionButton(
+                label: 'Entregue',
+                icon: Icons.check_circle_outline,
+                color: AppColors.darkGreen,
+                onTap: isProcessing
+                    ? null
+                    : () => bloc.add(
+                        ProducerOrderDetailStatusUpdated(
+                          order.id,
+                          ProducerOrderStatus.delivered,
+                        ),
+                      ),
+              ),
+            ),
+          ],
         ),
       if (order.consumerPhone.isNotEmpty)
         _ActionButton(
           label: 'Contatar Cliente',
           icon: Icons.chat,
           color: const Color(0xFF25D366),
-          outlined: true,
           onTap: isProcessing ? null : () => _contactCustomer(context),
         ),
     ];
@@ -867,44 +895,39 @@ class _ActionButton extends StatelessWidget {
     required this.icon,
     required this.color,
     required this.onTap,
-    this.outlined = false,
   });
 
   final String label;
   final IconData icon;
   final Color color;
   final VoidCallback? onTap;
-  final bool outlined;
 
   @override
   Widget build(BuildContext context) {
     final effectiveColor = onTap == null ? color.withValues(alpha: 0.5) : color;
-    final iconColor = outlined ? effectiveColor : AppColors.white;
-    final textColor = outlined ? effectiveColor : AppColors.white;
 
     return GestureDetector(
       onTap: onTap,
       child: Container(
         height: 52,
         decoration: BoxDecoration(
-          color: outlined ? Colors.transparent : effectiveColor,
+          color: effectiveColor,
           borderRadius: BorderRadius.circular(24),
-          border: outlined ? Border.all(color: effectiveColor) : null,
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, color: iconColor, size: 20),
+            Icon(icon, color: AppColors.white, size: 20),
             const SizedBox(width: 8),
             Flexible(
               child: Text(
                 label,
                 overflow: TextOverflow.ellipsis,
-                style: TextStyle(
+                style: const TextStyle(
                   fontFamily: 'Manrope',
                   fontWeight: FontWeight.w700,
                   fontSize: 15,
-                  color: textColor,
+                  color: AppColors.white,
                 ),
               ),
             ),

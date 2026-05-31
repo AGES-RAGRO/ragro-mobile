@@ -44,8 +44,8 @@ class _ImpactDetailPageState extends State<ImpactDetailPage> {
         ),
       ]);
 
-      final co2Response = results[0] as Response<Map<String, dynamic>>;
-      final producersResponse = results[1] as Response<Map<String, dynamic>>;
+      final co2Response = results[0];
+      final producersResponse = results[1];
 
       final total =
           (co2Response.data?['totalCo2Saved'] as num?)?.toDouble() ?? 0;
@@ -61,7 +61,9 @@ class _ImpactDetailPageState extends State<ImpactDetailPage> {
         });
       }
     } on DioException catch (e) {
-      debugPrint('[ImpactDetail] DioException: ${e.response?.statusCode} ${e.message}');
+      debugPrint(
+        '[ImpactDetail] DioException: ${e.response?.statusCode} ${e.message}',
+      );
       if (mounted) setState(() => _loading = false);
     } on Object catch (e) {
       debugPrint('[ImpactDetail] Error: $e');
@@ -82,338 +84,347 @@ class _ImpactDetailPageState extends State<ImpactDetailPage> {
       ),
       body: _loading
           ? const Center(
-        child: CircularProgressIndicator(color: AppColors.darkGreen),
-      )
+              child: CircularProgressIndicator(color: AppColors.darkGreen),
+            )
           : Column(
-        children: [
-          Expanded(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Entender o impacto',
-                    style: TextStyle(
-                      fontFamily: 'Figtree',
-                      fontWeight: FontWeight.w700,
-                      fontSize: 26,
-                      color: AppColors.darkGreen,
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(20),
-                    decoration: BoxDecoration(
-                      color: AppColors.white,
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: const Color(0xFFE2E8F0)),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Padding(
-                          padding: const EdgeInsets.only(bottom: 16, right: 24),
-                          child: Container(
-                            width: 84,
-                            height: 84,
-                            decoration: const BoxDecoration(
-                              color: _kIconBg,
-                              shape: BoxShape.circle,
-                            ),
-                            child: Center(
-                              child: Column(
+                        const Text(
+                          'Entender o impacto',
+                          style: TextStyle(
+                            fontFamily: 'Figtree',
+                            fontWeight: FontWeight.w700,
+                            fontSize: 26,
+                            color: AppColors.darkGreen,
+                          ),
+                        ),
+                        const SizedBox(height: 24),
+
+                        Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.all(20),
+                          decoration: BoxDecoration(
+                            color: AppColors.white,
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(color: const Color(0xFFE2E8F0)),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.only(
+                                  bottom: 16,
+                                  right: 24,
+                                ),
+                                child: Container(
+                                  width: 84,
+                                  height: 84,
+                                  decoration: const BoxDecoration(
+                                    color: _kIconBg,
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: Center(
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        SvgPicture.string(
+                                          _kCloudSvg,
+                                          width: 44,
+                                          height: 33,
+                                        ),
+                                        const SizedBox(height: 2),
+                                        const Text(
+                                          'CO₂',
+                                          style: TextStyle(
+                                            fontFamily: 'Figtree',
+                                            fontWeight: FontWeight.w600,
+                                            fontSize: 11,
+                                            color: AppColors.darkGreen,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 16),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  SvgPicture.string(
-                                    _kCloudSvg,
-                                    width: 44,
-                                    height: 33,
-                                  ),
-                                  const SizedBox(height: 2),
                                   const Text(
-                                    'CO₂',
+                                    'Mais de',
                                     style: TextStyle(
                                       fontFamily: 'Figtree',
-                                      fontWeight: FontWeight.w600,
-                                      fontSize: 11,
-                                      color: AppColors.darkGreen,
+                                      fontSize: 14,
+                                      color: Color(0xFF64748B),
                                     ),
                                   ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Text(
-                              'Mais de',
-                              style: TextStyle(
-                                fontFamily: 'Figtree',
-                                fontSize: 14,
-                                color: Color(0xFF64748B),
-                              ),
-                            ),
-                            const SizedBox(height: 2),
-                            Row(
-                              crossAxisAlignment:
-                              CrossAxisAlignment.baseline,
-                              textBaseline: TextBaseline.alphabetic,
-                              children: [
-                                Text(
-                                  '$co2InTons',
-                                  style: const TextStyle(
-                                    fontFamily: 'Figtree',
-                                    fontWeight: FontWeight.w700,
-                                    fontSize: 56,
-                                    color: AppColors.darkGreen,
-                                    height: 1,
+                                  const SizedBox(height: 2),
+                                  Row(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.baseline,
+                                    textBaseline: TextBaseline.alphabetic,
+                                    children: [
+                                      Text(
+                                        '$co2InTons',
+                                        style: const TextStyle(
+                                          fontFamily: 'Figtree',
+                                          fontWeight: FontWeight.w700,
+                                          fontSize: 56,
+                                          color: AppColors.darkGreen,
+                                          height: 1,
+                                        ),
+                                      ),
+                                      const Text(
+                                        't de CO',
+                                        style: TextStyle(
+                                          fontFamily: 'Figtree',
+                                          fontWeight: FontWeight.w500,
+                                          fontSize: 18,
+                                          color: AppColors.darkGreen,
+                                        ),
+                                      ),
+                                      const Text(
+                                        '₂',
+                                        style: TextStyle(
+                                          fontFamily: 'Figtree',
+                                          fontSize: 12,
+                                          color: AppColors.darkGreen,
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                ),
-                                const Text(
-                                  't de CO',
-                                  style: TextStyle(
-                                    fontFamily: 'Figtree',
-                                    fontWeight: FontWeight.w500,
-                                    fontSize: 18,
-                                    color: AppColors.darkGreen,
-                                  ),
-                                ),
-                                const Text(
-                                  '₂',
-                                  style: TextStyle(
-                                    fontFamily: 'Figtree',
-                                    fontSize: 12,
-                                    color: AppColors.darkGreen,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 4),
-                            const Text(
-                              'poupadas com a Ragro',
-                              style: TextStyle(
-                                fontFamily: 'Figtree',
-                                fontSize: 13,
-                                color: Color(0xFF64748B),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  const SizedBox(height: 36),
-
-                  const Text(
-                    'Como fazemos isso acontecer',
-                    style: TextStyle(
-                      fontFamily: 'Figtree',
-                      fontWeight: FontWeight.w700,
-                      fontSize: 16,
-                      color: AppColors.darkGreen,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-
-                  IntrinsicHeight(
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        Expanded(
-                          child: _ImpactCard(
-                            icon: Icons.location_on_outlined,
-                            title: 'Consumo local',
-                            description:
-                            'Conectamos você a produtores da sua região',
-                          ),
-                        ),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: _ImpactCard(
-                            icon: Icons.local_shipping_outlined,
-                            title: 'Rotas eficientes',
-                            description:
-                            'Menor distância, menos emissões',
-                          ),
-                        ),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: _ImpactCard(
-                            icon: Icons.eco_outlined,
-                            title: 'Menos desperdício',
-                            description:
-                            'Produtos frescos e bem aproveitados',
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  const SizedBox(height: 36),
-
-                  const Text(
-                    'Nosso impacto juntos',
-                    style: TextStyle(
-                      fontFamily: 'Figtree',
-                      fontWeight: FontWeight.w700,
-                      fontSize: 16,
-                      color: AppColors.darkGreen,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-
-                  IntrinsicHeight(
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        Expanded(
-                          child: Container(
-                            padding: const EdgeInsets.all(12),
-                            decoration: BoxDecoration(
-                              color: AppColors.white,
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(
-                                  color: const Color(0xFFE2E8F0)),
-                            ),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              crossAxisAlignment:
-                              CrossAxisAlignment.center,
-                              children: [
-                                Text(
-                                  '$_totalProducers',
-                                  style: const TextStyle(
-                                    fontFamily: 'Figtree',
-                                    fontWeight: FontWeight.w700,
-                                    fontSize: 32,
-                                    color: AppColors.darkGreen,
-                                  ),
-                                ),
-                                const Text(
-                                  'Produtores\nlocais',
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(
-                                    fontFamily: 'Figtree',
-                                    fontSize: 12,
-                                    color: Color(0xFF475569),
-                                    height: 1.3,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: Container(
-                            padding: const EdgeInsets.all(12),
-                            decoration: BoxDecoration(
-                              color: AppColors.white,
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(
-                                  color: const Color(0xFFE2E8F0)),
-                            ),
-                            child: RichText(
-                              text: const TextSpan(
-                                style: TextStyle(
-                                  fontFamily: 'Figtree',
-                                  fontSize: 13,
-                                  color: Color(0xFF475569),
-                                  height: 1.4,
-                                ),
-                                children: [
-                                  TextSpan(
-                                      text: 'Grande\nvariedade de\nprodutos '),
-                                  TextSpan(
-                                    text: 'orgânicos',
+                                  const SizedBox(height: 4),
+                                  const Text(
+                                    'poupadas com a Ragro',
                                     style: TextStyle(
-                                      fontWeight: FontWeight.w700,
-                                      color: AppColors.darkGreen,
+                                      fontFamily: 'Figtree',
+                                      fontSize: 13,
+                                      color: Color(0xFF64748B),
                                     ),
                                   ),
                                 ],
                               ),
-                            ),
+                            ],
                           ),
                         ),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: Container(
-                            padding: const EdgeInsets.all(12),
-                            decoration: BoxDecoration(
-                              color: AppColors.white,
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(
-                                  color: const Color(0xFFE2E8F0)),
-                            ),
-                            child: RichText(
-                              text: const TextSpan(
-                                style: TextStyle(
-                                  fontFamily: 'Figtree',
-                                  fontSize: 13,
-                                  color: Color(0xFF475569),
-                                  height: 1.4,
+
+                        const SizedBox(height: 36),
+
+                        const Text(
+                          'Como fazemos isso acontecer',
+                          style: TextStyle(
+                            fontFamily: 'Figtree',
+                            fontWeight: FontWeight.w700,
+                            fontSize: 16,
+                            color: AppColors.darkGreen,
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+
+                        IntrinsicHeight(
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              Expanded(
+                                child: _ImpactCard(
+                                  icon: Icons.location_on_outlined,
+                                  title: 'Consumo local',
+                                  description:
+                                      'Conectamos você a produtores da sua região',
                                 ),
-                                children: [
-                                  TextSpan(
-                                      text:
-                                      'Ajuda o\nambiente com\nnossas rotas '),
-                                  TextSpan(
-                                    text: 'otimizadas',
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.w700,
-                                      color: AppColors.darkGreen,
+                              ),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: _ImpactCard(
+                                  icon: Icons.local_shipping_outlined,
+                                  title: 'Rotas eficientes',
+                                  description:
+                                      'Menor distância, menos emissões',
+                                ),
+                              ),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: _ImpactCard(
+                                  icon: Icons.eco_outlined,
+                                  title: 'Menos desperdício',
+                                  description:
+                                      'Produtos frescos e bem aproveitados',
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+
+                        const SizedBox(height: 36),
+
+                        const Text(
+                          'Nosso impacto juntos',
+                          style: TextStyle(
+                            fontFamily: 'Figtree',
+                            fontWeight: FontWeight.w700,
+                            fontSize: 16,
+                            color: AppColors.darkGreen,
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+
+                        IntrinsicHeight(
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              Expanded(
+                                child: Container(
+                                  padding: const EdgeInsets.all(12),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.white,
+                                    borderRadius: BorderRadius.circular(12),
+                                    border: Border.all(
+                                      color: const Color(0xFFE2E8F0),
                                     ),
                                   ),
-                                ],
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.center,
+                                    children: [
+                                      Text(
+                                        '$_totalProducers',
+                                        style: const TextStyle(
+                                          fontFamily: 'Figtree',
+                                          fontWeight: FontWeight.w700,
+                                          fontSize: 32,
+                                          color: AppColors.darkGreen,
+                                        ),
+                                      ),
+                                      const Text(
+                                        'Produtores\nlocais',
+                                        textAlign: TextAlign.center,
+                                        style: TextStyle(
+                                          fontFamily: 'Figtree',
+                                          fontSize: 12,
+                                          color: Color(0xFF475569),
+                                          height: 1.3,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
                               ),
-                            ),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: Container(
+                                  padding: const EdgeInsets.all(12),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.white,
+                                    borderRadius: BorderRadius.circular(12),
+                                    border: Border.all(
+                                      color: const Color(0xFFE2E8F0),
+                                    ),
+                                  ),
+                                  child: RichText(
+                                    text: const TextSpan(
+                                      style: TextStyle(
+                                        fontFamily: 'Figtree',
+                                        fontSize: 13,
+                                        color: Color(0xFF475569),
+                                        height: 1.4,
+                                      ),
+                                      children: [
+                                        TextSpan(
+                                          text:
+                                              'Grande\nvariedade de\nprodutos ',
+                                        ),
+                                        TextSpan(
+                                          text: 'orgânicos',
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.w700,
+                                            color: AppColors.darkGreen,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: Container(
+                                  padding: const EdgeInsets.all(12),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.white,
+                                    borderRadius: BorderRadius.circular(12),
+                                    border: Border.all(
+                                      color: const Color(0xFFE2E8F0),
+                                    ),
+                                  ),
+                                  child: RichText(
+                                    text: const TextSpan(
+                                      style: TextStyle(
+                                        fontFamily: 'Figtree',
+                                        fontSize: 13,
+                                        color: Color(0xFF475569),
+                                        height: 1.4,
+                                      ),
+                                      children: [
+                                        TextSpan(
+                                          text:
+                                              'Ajuda o\nambiente com\nnossas rotas ',
+                                        ),
+                                        TextSpan(
+                                          text: 'otimizadas',
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.w700,
+                                            color: AppColors.darkGreen,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ],
                     ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-
-          Padding(
-            padding: const EdgeInsets.fromLTRB(24, 0, 24, 32),
-            child: SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () => context.go('/customer/home'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.darkGreen,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(32),
                   ),
                 ),
-                child: const Text(
-                  'Entrar no marketplace',
-                  style: TextStyle(
-                    fontFamily: 'Figtree',
-                    fontWeight: FontWeight.w700,
-                    fontSize: 16,
-                    color: AppColors.white,
+
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(24, 0, 24, 32),
+                  child: SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () => context.go('/customer/home'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.darkGreen,
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(32),
+                        ),
+                      ),
+                      child: const Text(
+                        'Entrar no marketplace',
+                        style: TextStyle(
+                          fontFamily: 'Figtree',
+                          fontWeight: FontWeight.w700,
+                          fontSize: 16,
+                          color: AppColors.white,
+                        ),
+                      ),
+                    ),
                   ),
                 ),
-              ),
+              ],
             ),
-          ),
-        ],
-      ),
     );
   }
 }

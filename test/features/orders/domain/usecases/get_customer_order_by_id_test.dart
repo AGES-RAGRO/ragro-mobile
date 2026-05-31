@@ -13,7 +13,6 @@ void main() {
 
   final tOrderDetail = OrderDetail(
     id: 'order-detail-1',
-    orderNumber: '#0001',
     status: 'PENDING',
     statusLabel: 'Pendente',
     createdAt: DateTime(2026, 5, 5),
@@ -55,7 +54,6 @@ void main() {
         final result = await useCase('order-detail-1');
 
         expect(result.id, 'order-detail-1');
-        expect(result.orderNumber, '#0001');
         expect(result.status, 'PENDING');
         expect(result.producerName, 'Fazenda Teste');
         expect(result.deliveryAddress.city, 'Porto Alegre');
@@ -69,7 +67,6 @@ void main() {
       () async {
         final orderWithItems = OrderDetail(
           id: 'order-detail-2',
-          orderNumber: '#0002',
           status: 'PENDING',
           statusLabel: 'Pendente',
           createdAt: DateTime(2026, 5, 5),

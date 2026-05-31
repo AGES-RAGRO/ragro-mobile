@@ -25,7 +25,7 @@ class RateProducerCommentChanged extends RateProducerEvent {
   final String comment;
   @override
   List<Object?> get props => [comment];
-} 
+}
 
 class RateProducerSubmitted extends RateProducerEvent {
   const RateProducerSubmitted(this.orderId, this.rating, this.comment);

@@ -190,9 +190,9 @@ class CartItemTile extends StatelessWidget {
                             confirmColor: AppColors.red,
                           );
                           if ((confirmed ?? false) && context.mounted) {
-                            context
-                                .read<CartBloc>()
-                                .add(CartItemRemoved(item.id));
+                            context.read<CartBloc>().add(
+                              CartItemRemoved(item.id),
+                            );
                           }
                         },
                         child: const Icon(

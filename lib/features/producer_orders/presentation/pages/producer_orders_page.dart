@@ -14,7 +14,6 @@ import 'package:ragro_mobile/features/producer_orders/presentation/bloc/producer
 import 'package:ragro_mobile/features/producer_orders/presentation/bloc/producer_orders_event.dart';
 import 'package:ragro_mobile/features/producer_orders/presentation/bloc/producer_orders_state.dart';
 import 'package:ragro_mobile/features/producer_orders/presentation/widgets/producer_order_card.dart';
-import 'package:ragro_mobile/shared/widgets/confirm_dialog.dart';
 
 class ProducerOrdersPage extends StatelessWidget {
   const ProducerOrdersPage({super.key});
@@ -60,12 +59,10 @@ class _ProducerOrdersViewState extends State<_ProducerOrdersView> {
   });
 
   void _saveSelection(BuildContext context) {
-    final bloc = context.read<ProducerOrdersBloc>();
-    for (final id in _selectedIds) {
-      bloc.add(ProducerOrderMarkedInDelivery(id));
-    }
+    context.read<ProducerOrdersBloc>().add(
+      ProducerOrdersBulkMarkedInDelivery({..._selectedIds}),
+    );
     _exitSelectionMode();
-    bloc.add(const ProducerOrdersStarted(ProducerOrderStatus.inDelivery));
   }
 
   static const _tabs = [
@@ -257,40 +254,6 @@ class _ProducerOrdersViewState extends State<_ProducerOrdersView> {
                     return Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        if (activeTab == ProducerOrderStatus.inDelivery)
-                          Padding(
-                            padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
-                            child: GestureDetector(
-                              onTap: () => context.push('/producer/home/route'),
-                              child: Container(
-                                height: 44,
-                                decoration: BoxDecoration(
-                                  color: AppColors.darkGreen,
-                                  borderRadius: BorderRadius.circular(22),
-                                ),
-                                child: const Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Icon(
-                                      Icons.route_outlined,
-                                      color: AppColors.white,
-                                      size: 18,
-                                    ),
-                                    SizedBox(width: 8),
-                                    Text(
-                                      'Calcular Rota',
-                                      style: TextStyle(
-                                        fontFamily: 'Figtree',
-                                        fontWeight: FontWeight.w700,
-                                        fontSize: 14,
-                                        color: AppColors.white,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ),
                         if (newCount > 0)
                           Padding(
                             padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
@@ -310,7 +273,9 @@ class _ProducerOrdersViewState extends State<_ProducerOrdersView> {
                               16,
                               12,
                               16,
-                              activeTab == ProducerOrderStatus.accepted
+                              (activeTab == ProducerOrderStatus.accepted ||
+                                      activeTab ==
+                                          ProducerOrderStatus.inDelivery)
                                   ? 80
                                   : 16,
                             ),
@@ -363,11 +328,6 @@ class _ProducerOrdersViewState extends State<_ProducerOrdersView> {
                                           .read<ProducerOrdersBloc>()
                                           .add(ProducerOrderAccepted(order.id))
                                     : null,
-                                onDeliveryConfirmTap:
-                                    order.status ==
-                                        ProducerOrderStatus.inDelivery
-                                    ? () => _confirmDelivery(context, order.id)
-                                    : null,
                                 isSelected: inAcceptedSelection
                                     ? _selectedIds.contains(order.id)
                                     : null,
@@ -378,6 +338,40 @@ class _ProducerOrdersViewState extends State<_ProducerOrdersView> {
                             },
                           ),
                         ),
+                        if (activeTab == ProducerOrderStatus.inDelivery)
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
+                            child: GestureDetector(
+                              onTap: () => context.push('/producer/home/route'),
+                              child: Container(
+                                height: 52,
+                                decoration: BoxDecoration(
+                                  color: AppColors.darkGreen,
+                                  borderRadius: BorderRadius.circular(26),
+                                ),
+                                child: const Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                      Icons.route_outlined,
+                                      color: AppColors.white,
+                                      size: 20,
+                                    ),
+                                    SizedBox(width: 8),
+                                    Text(
+                                      'Calcular Melhor Rota',
+                                      style: TextStyle(
+                                        fontFamily: 'Figtree',
+                                        fontWeight: FontWeight.w700,
+                                        fontSize: 15,
+                                        color: AppColors.white,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
                         if (activeTab == ProducerOrderStatus.accepted)
                           Padding(
                             padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
@@ -481,20 +475,5 @@ class _ProducerOrdersViewState extends State<_ProducerOrdersView> {
         ),
       ),
     );
-  }
-
-  Future<void> _confirmDelivery(BuildContext context, String orderId) async {
-    final confirmed = await ConfirmDialog.show(
-      context: context,
-      title: 'Confirmar a entrega deste pedido?',
-      confirmLabel: 'Sim',
-      confirmColor: const Color(0xFF3B82F6),
-      cancelLabel: 'Não',
-    );
-    if ((confirmed ?? false) && context.mounted) {
-      context.read<ProducerOrdersBloc>().add(
-        ProducerOrderDeliveryConfirmed(orderId),
-      );
-    }
   }
 }

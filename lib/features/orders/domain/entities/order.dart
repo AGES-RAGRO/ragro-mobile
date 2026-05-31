@@ -45,7 +45,6 @@ class DeliveryAddress extends Equatable {
 class Order extends Equatable {
   const Order({
     required this.id,
-    required this.orderNumber,
     required this.producerId,
     required this.producerPhone,
     required this.farmName,
@@ -61,7 +60,6 @@ class Order extends Equatable {
   });
 
   final String id;
-  final String orderNumber;
   final String producerId;
   final String producerPhone;
   final String farmName;
@@ -77,7 +75,6 @@ class Order extends Equatable {
 
   Order copyWith({
     String? id,
-    String? orderNumber,
     String? producerId,
     String? producerPhone,
     String? farmName,
@@ -93,7 +90,6 @@ class Order extends Equatable {
   }) {
     return Order(
       id: id ?? this.id,
-      orderNumber: orderNumber ?? this.orderNumber,
       producerId: producerId ?? this.producerId,
       producerPhone: producerPhone ?? this.producerPhone,
       farmName: farmName ?? this.farmName,
@@ -129,7 +125,6 @@ class Order extends Equatable {
   @override
   List<Object?> get props => [
     id,
-    orderNumber,
     producerId,
     producerPhone,
     farmName,

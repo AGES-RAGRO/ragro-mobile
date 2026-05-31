@@ -74,7 +74,9 @@ class _ErrorInterceptor extends Interceptor {
     } else if (err.type == DioExceptionType.connectionError) {
       exception = const NetworkException();
     } else {
-      debugPrint('[ApiClient] DioExceptionType: ${err.type} | message: ${err.message} | error: ${err.error}');
+      debugPrint(
+        '[ApiClient] DioExceptionType: ${err.type} | message: ${err.message} | error: ${err.error}',
+      );
       exception = const UnknownApiException();
     }
     handler.reject(
