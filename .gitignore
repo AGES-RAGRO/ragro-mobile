@@ -63,3 +63,10 @@ playwright/screenshots/
 # Visual regression / ad-hoc test screenshots
 playwright-live-*.png
 test-*.png
+
+# Environment files with real secrets (prod, staging, etc.)
+# Commite apenas env/local.json e env/*.example.json
+env/prod.json
+env/staging.json
+
+Env.xcconfig

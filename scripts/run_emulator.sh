@@ -1,17 +1,22 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-API_BASE_URL="${API_BASE_URL:-http://10.0.2.2:8080}"
+# Arquivo de environment a usar (padrão: env/local.json — localhost, sem segredos).
+# Para prod: ENV_FILE=env/prod.json ./scripts/run_emulator.sh
+# Para outro env: ENV_FILE=env/staging.json ./scripts/run_emulator.sh
+ENV_FILE="${ENV_FILE:-env/local.json}"
+
 DEVICE="${DEVICE:-emulator-5554}"
 KEYCLOAK_PORT="${KEYCLOAK_PORT:-8180}"
 ADB="${ADB:-$HOME/Android/Sdk/platform-tools/adb}"
 
 cd "$(dirname "$0")/.."
 
-# Maps key is kept ONLY in the git-ignored android/local.properties (the same
-# single source the Android build reads). We forward it to Dart via --dart-define
-# so the Directions API call can use it without the key ever living in tracked
-# source. Override by exporting MAPS_API_KEY before running.
+# A chave do Google Maps fica APENAS no git-ignored android/local.properties
+# (mesma fonte que o build Android lê), nunca no env JSON commitado. Encaminhamos
+# para o Dart via --dart-define para a chamada da Directions API funcionar sem a
+# chave viver em arquivo versionado. Sobrescreva exportando MAPS_API_KEY antes de
+# rodar.
 MAPS_API_KEY="${MAPS_API_KEY:-$(grep -E '^MAPS_API_KEY=' android/local.properties 2>/dev/null | cut -d '=' -f2- | tr -d '[:space:]')}"
 
 if [ -x "$ADB" ]; then
@@ -23,6 +28,6 @@ fi
 
 exec flutter run \
   -d "$DEVICE" \
-  --dart-define=API_BASE_URL="$API_BASE_URL" \
+  --dart-define-from-file="$ENV_FILE" \
   --dart-define=MAPS_API_KEY="$MAPS_API_KEY" \
   "$@"
