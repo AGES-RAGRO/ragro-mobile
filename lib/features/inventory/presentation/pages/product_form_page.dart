@@ -11,6 +11,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
+import 'package:ragro_mobile/shared/utils/unity_type_label.dart';
 import 'package:ragro_mobile/core/di/injection.dart';
 import 'package:ragro_mobile/core/formatters/input_masks.dart';
 import 'package:ragro_mobile/core/theme/app_colors.dart';
@@ -383,7 +384,7 @@ class _ProductFormViewState extends State<_ProductFormView> {
                                     (u) => DropdownMenuItem(
                                       value: u,
                                       child: Text(
-                                        u,
+                                        unityTypeFullLabel(u),
                                         style: const TextStyle(
                                           fontFamily: 'Manrope',
                                           fontSize: 15,

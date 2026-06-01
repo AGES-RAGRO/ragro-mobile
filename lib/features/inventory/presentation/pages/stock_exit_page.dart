@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:ragro_mobile/core/di/injection.dart';
 import 'package:ragro_mobile/core/theme/app_colors.dart';
 import 'package:ragro_mobile/features/inventory/presentation/bloc/stock_exit_bloc.dart';
+import 'package:ragro_mobile/shared/utils/unity_type_label.dart';
 import 'package:ragro_mobile/features/inventory/presentation/bloc/stock_exit_event.dart';
 import 'package:ragro_mobile/features/inventory/presentation/bloc/stock_exit_state.dart';
 
@@ -184,7 +185,7 @@ class _StockExitViewState extends State<_StockExitView> {
                                 ),
                               ),
                               Text(
-                                'Saldo atual: ${widget.currentStock % 1 == 0 ? widget.currentStock.toInt() : widget.currentStock.toStringAsFixed(2)} ${widget.unit}',
+                                'Saldo atual: ${widget.currentStock % 1 == 0 ? widget.currentStock.toInt() : widget.currentStock.toStringAsFixed(2)} ${localizeUnityType(widget.unit)}',
                                 style: TextStyle(
                                   fontFamily: 'Manrope',
                                   fontSize: 13,
@@ -215,7 +216,7 @@ class _StockExitViewState extends State<_StockExitView> {
                     enabled: !isLoading,
                     decoration: InputDecoration(
                       hintText: '0',
-                      suffixText: widget.unit,
+                      suffixText: localizeUnityType(widget.unit),
                       hintStyle: const TextStyle(
                         fontFamily: 'Manrope',
                         fontSize: 15,
