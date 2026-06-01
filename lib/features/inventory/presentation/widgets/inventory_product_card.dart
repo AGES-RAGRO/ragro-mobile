@@ -44,7 +44,6 @@ class InventoryProductCard extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Product image
           Container(
             width: 96,
             height: 96,
@@ -79,12 +78,10 @@ class InventoryProductCard extends StatelessWidget {
           ),
           const SizedBox(width: 12),
 
-          // Details
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Name + status badge row
                 Row(
                   children: [
                     Expanded(
@@ -130,7 +127,6 @@ class InventoryProductCard extends StatelessWidget {
 
                 const SizedBox(height: 4),
 
-                // Stock
                 Text(
                   '${product.stock % 1 == 0 ? product.stock.toInt() : product.stock.toStringAsFixed(2)} ${localizeUnityType(product.unit)} em estoque',
                   style: const TextStyle(
@@ -142,7 +138,6 @@ class InventoryProductCard extends StatelessWidget {
 
                 const SizedBox(height: 4),
 
-                // Price + unit
                 Text(
                   '${_formatPrice(product.price)} / ${localizeUnityType(product.unit)}',
                   style: const TextStyle(
@@ -155,7 +150,6 @@ class InventoryProductCard extends StatelessWidget {
 
                 const SizedBox(height: 10),
 
-                // Action buttons
                 Wrap(
                   spacing: 6,
                   runSpacing: 6,

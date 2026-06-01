@@ -31,7 +31,7 @@ void main() {
       });
 
       test('aplica defaults quando campos opcionais vêm ausentes', () {
-        // unityType, productName e imageS3 são tolerantes a ausência
+        // unityType, productName and imageS3 tolerate missing values
         final json = <String, dynamic>{
           'id': 'cart-item-uuid-2',
           'productId': 'product-uuid-2',
@@ -119,8 +119,7 @@ void main() {
       });
 
       test('deserializa bankInfo (banco, agência, conta, pix)', () {
-        // Chaves conferidas contra o backend BankInfoResponse:
-        // bankName, agency, account, pixKey.
+        // Keys verified against the backend BankInfoResponse: bankName, agency, account, pixKey.
         final json = <String, dynamic>{
           'id': 'cart-bank',
           'farmerId': 'farmer-1',

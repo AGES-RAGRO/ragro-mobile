@@ -25,8 +25,8 @@ class OrderStatusBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Texto/ícone legíveis sobre a cor do badge (escuro em cores claras como
-    // amarelo/laranja, branco em cores escuras) para melhorar o contraste.
+    // Pick a foreground that contrasts with the badge color (dark on light
+    // colors like yellow/orange, white on dark ones).
     final foreground =
         ThemeData.estimateBrightnessForColor(_backgroundColor) ==
             Brightness.dark

@@ -1,7 +1,4 @@
-// Screen: Producer Profile & Dashboard (Perfil do Produtor)
-// User Story: US-24 â€” View Producer Profile and Dashboard
-// Epic: EPIC 4 â€” Producer Features
-// Routes: GET /producers/me/dashboard
+// Producer Profile & Dashboard screen (US-24). Route: GET /producers/me/dashboard.
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -20,8 +17,9 @@ class ProducerProfilePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Bloc é singleton (ver ProducerManagementBloc): o shell dispara refresh ao
-    // reabrir a aba Perfil. Aqui só provê o valor; o loader faz a carga inicial.
+    // Bloc is a singleton (see ProducerManagementBloc): the shell triggers a
+    // refresh when the Profile tab is reopened. Here we only provide the value;
+    // the loader handles the initial load.
     return BlocProvider.value(
       value: getIt<ProducerManagementBloc>(),
       child: const _ProducerProfileLoader(),
@@ -225,7 +223,6 @@ class _ProducerProfileView extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header row
           Padding(
             padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
             child: Row(
@@ -250,7 +247,6 @@ class _ProducerProfileView extends StatelessWidget {
 
           const SizedBox(height: 12),
 
-          // Cover photo + overlapping avatar
           SizedBox(
             height: 210,
             child: Stack(
@@ -329,7 +325,6 @@ class _ProducerProfileView extends StatelessWidget {
             ),
           ),
 
-          // Name + edit button
           Center(
             child: Padding(
               padding: const EdgeInsets.symmetric(vertical: 12),
@@ -416,7 +411,6 @@ class _ProducerProfileView extends StatelessWidget {
             ),
           ),
 
-          // Weekly schedule
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Container(
@@ -432,7 +426,6 @@ class _ProducerProfileView extends StatelessWidget {
 
           const SizedBox(height: 24),
 
-          // Dashboard title + month selector
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20),
             child: Row(
@@ -484,7 +477,6 @@ class _ProducerProfileView extends StatelessWidget {
 
           const SizedBox(height: 16),
 
-          // Total Sales card (dark green)
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: _SalesCard(
@@ -497,7 +489,6 @@ class _ProducerProfileView extends StatelessWidget {
 
           const SizedBox(height: 12),
 
-          // Two stat cards
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Row(
@@ -548,7 +539,7 @@ class _ScheduleSection extends StatelessWidget {
 
   final List<DashboardAvailabilitySlot> availability;
 
-  // UI order: Seg(1), Ter(2), Qua(3), Qui(4), Sex(5), Sáb(6), Dom(0)
+  // UI order: Mon(1), Tue(2), Wed(3), Thu(4), Fri(5), Sat(6), Sun(0)
   static const _days = [
     (label: 'Seg', weekday: 1),
     (label: 'Ter', weekday: 2),

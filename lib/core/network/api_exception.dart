@@ -1,4 +1,3 @@
-// lib/core/network/api_exception.dart
 sealed class ApiException implements Exception {
   const ApiException(this.message);
   final String message;
@@ -10,10 +9,9 @@ class UnauthorizedException extends ApiException {
   const UnauthorizedException([super.message = 'Credenciais inválidas']);
 }
 
-/// Lançada quando o backend retorna 401 com body indicando que a
-/// conta do produtor está marcada como inativa (ex:
-/// `{"error": "Produtor inativo"}`). Diferenciada de
-/// [UnauthorizedException] para permitir mensagem de UI específica.
+/// Thrown when the backend returns 401 with a body indicating the producer
+/// account is deactivated (e.g. `{"error": "Produtor inativo"}`). Separate from
+/// [UnauthorizedException] so the UI can show a specific message.
 class DeactivatedAccountException extends ApiException {
   const DeactivatedAccountException([
     super.message =

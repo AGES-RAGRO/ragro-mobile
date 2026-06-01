@@ -1,7 +1,4 @@
-// DOMAIN/USECASES — Uma "ação" do cardápio.
-// Representa uma ação de negócio: "buscar lista de produtos".
-// O UseCase chama o Repository (contrato), sem saber se os dados vêm de API, cache ou mock.
-// @lazySingleton: o injectable cria UMA instância e reutiliza sempre (UseCase não tem estado).
+// Use case: fetches the product list via the repository contract.
 
 import 'package:injectable/injectable.dart';
 import 'package:ragro_mobile/features/learning/domain/entities/product.dart';

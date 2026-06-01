@@ -1,12 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:ragro_mobile/core/theme/app_colors.dart';
 
-/// Reusable confirmation dialog.
-///
-/// Renders a bold [title] with an optional inline [highlight] span
-/// (commonly used to emphasize a resource name). Optionally accepts a
-/// secondary [description] line, an [icon], and customizable confirm
-/// and cancel actions.
+/// Reusable confirmation dialog with an optional inline [highlight] span,
+/// [description], [icon], and customizable confirm/cancel actions.
 class ConfirmDialog extends StatelessWidget {
   const ConfirmDialog({
     required this.title,

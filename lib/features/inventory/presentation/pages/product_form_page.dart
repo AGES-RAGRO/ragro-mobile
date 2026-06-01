@@ -1,7 +1,5 @@
-// Screen: Product Form (Criar/Editar Produto)
-// User Story: US-23 — Create and Edit Products
-// Epic: EPIC 4 — Producer Features
-// Routes: POST /products | PUT /products/:id
+// Screen: Product Form (create/edit product).
+// US-23 — Create and Edit Products. Routes: POST /products, PUT /products/:id.
 
 import 'dart:io';
 import 'package:flutter/foundation.dart';
@@ -214,7 +212,6 @@ class _ProductFormViewState extends State<_ProductFormView> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Image picker placeholder
                 Container(
                   width: double.infinity,
                   height: 210,
@@ -315,7 +312,6 @@ class _ProductFormViewState extends State<_ProductFormView> {
 
                 const SizedBox(height: 24),
 
-                // Nome
                 const _FieldLabel('Nome do Produto'),
                 const SizedBox(height: 8),
                 _TextField(
@@ -326,7 +322,6 @@ class _ProductFormViewState extends State<_ProductFormView> {
 
                 const SizedBox(height: 16),
 
-                // Descrição
                 const _FieldLabel('Descrição do Produto'),
                 const SizedBox(height: 8),
                 _TextField(
@@ -338,7 +333,6 @@ class _ProductFormViewState extends State<_ProductFormView> {
 
                 const SizedBox(height: 16),
 
-                // Preço + Unidade
                 Row(
                   children: [
                     Expanded(
@@ -411,7 +405,6 @@ class _ProductFormViewState extends State<_ProductFormView> {
 
                 const SizedBox(height: 16),
 
-                // Estoque
                 const _FieldLabel('Quantidade em Estoque'),
                 const SizedBox(height: 8),
                 _StockStepper(
@@ -481,7 +474,6 @@ class _ProductFormViewState extends State<_ProductFormView> {
 
                 const SizedBox(height: 32),
 
-                // Save button
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(

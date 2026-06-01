@@ -1,7 +1,4 @@
-// Screen: Producer Order Detail (Detalhes do Pedido - Produtor)
-// User Story: US-21 - View and Manage Order Detail
-// Epic: EPIC 4 - Producer Features
-// Routes: GET /orders/producer/:id
+// Producer Order Detail screen (US-21). Route: GET /orders/producer/:id.
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -123,9 +120,9 @@ class ProducerOrderDetailPage extends StatelessWidget {
 
           return WillPopScope(
             onWillPop: () async {
-              // Espelha o botão de voltar do header: sinaliza 'cancelled' para a
-              // lista mover o pedido p/ a aba Cancelados após um refuse, 'seen'
-              // se o pedido era novo, senão nada.
+              // Mirrors the header back button: signal 'cancelled' so the list
+              // moves the order to the Cancelled tab after a refuse, 'seen' if
+              // the order was new, otherwise nothing.
               if (order.status == ProducerOrderStatus.cancelled) {
                 context.pop('cancelled');
               } else if (order.isNew) {
@@ -682,8 +679,8 @@ class _CancellationCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // O diálogo de cancelamento já envia texto em PT pronto para exibir; o
-    // backend persiste essa string verbatim, então mostramos direto.
+    // The cancel dialog already sends display-ready text and the backend
+    // persists it verbatim, so we show it directly.
     final reason = order.cancellationReason ?? '';
     final details = order.cancellationDetails;
 

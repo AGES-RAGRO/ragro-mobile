@@ -65,7 +65,7 @@ class AppRouter {
         if (authState is AuthAuthenticated && isAuthRoute) {
           return switch (authState.user.type) {
             UserType.customer =>
-              '/customer/impact', // ← redireciona para impact
+              '/customer/impact',
             UserType.producer => '/producer/home',
             UserType.admin => '/admin/producers',
           };

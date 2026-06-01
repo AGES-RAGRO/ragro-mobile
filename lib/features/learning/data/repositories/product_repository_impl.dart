@@ -1,9 +1,4 @@
-// DATA/REPOSITORIES — A "cozinha real" que implementa o contrato.
-// O domain/ define O QUE pode ser feito (ProductRepository abstrato).
-// Este arquivo define COMO é feito (delega pro DataSource).
-//
-// @LazySingleton(as: ProductRepository): registra esta classe como a implementação
-// de ProductRepository. Quando alguém pedir getIt<ProductRepository>(), recebe esta classe.
+// Implements the ProductRepository contract by delegating to the data source.
 
 import 'package:injectable/injectable.dart';
 import 'package:ragro_mobile/features/learning/data/datasources/product_mock_datasource.dart';

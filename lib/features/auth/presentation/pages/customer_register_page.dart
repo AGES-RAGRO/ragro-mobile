@@ -1,7 +1,4 @@
-// Screen: Customer Registration
-// User Story: US-01 — Customer Registration
-// Epic: EPIC 1 — Authentication
-// Routes: POST /auth/register/customer
+// Customer registration screen (US-01). Backed by POST /auth/register/customer.
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';

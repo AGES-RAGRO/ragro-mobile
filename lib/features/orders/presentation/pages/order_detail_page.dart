@@ -1,4 +1,4 @@
-// Screen: Detalhes do Pedido
+// Screen: Order Details
 // User Story: US-12 - View Order Details
 // Epic: EPIC 3 - Shopping & Orders
 // Routes: GET /orders/customer/:id
@@ -611,7 +611,7 @@ class _CancellationCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // O motivo já é texto em PT pronto para exibir (vindo do diálogo / backend).
+    // Reason is already display-ready text (from the dialog or backend).
     final reason = order.cancellationReason ?? '';
 
     return Container(

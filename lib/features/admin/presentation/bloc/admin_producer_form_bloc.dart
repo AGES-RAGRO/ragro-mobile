@@ -26,9 +26,9 @@ class AdminProducerFormBloc
   ) async {
     emit(const AdminProducerFormLoading());
     try {
-      // Mapeamento UI → backend weekday:
-      //   UI index 0..5 = Seg..Sáb  → backend 1..6
-      //   UI index 6    = Dom       → backend 0
+      // Map UI weekday to backend weekday:
+      //   UI index 0..5 = Mon..Sat -> backend 1..6
+      //   UI index 6    = Sun      -> backend 0
       final selectedDays = <AdminAvailability>[];
       for (var i = 0; i < event.scheduleWeekdays.length; i++) {
         if (event.scheduleWeekdays[i]) {
@@ -42,8 +42,8 @@ class AdminProducerFormBloc
         }
       }
 
-      // Backend exige os 2 payment methods (pix + bank_account) —
-      // a page valida antes de disparar o evento.
+      // Backend requires both payment methods (pix + bank_account); the page
+      // validates this before dispatching the event.
       final paymentMethods = <AdminPaymentMethod>[
         AdminPaymentMethod(
           type: 'pix',
@@ -73,7 +73,7 @@ class AdminProducerFormBloc
           lng = locations.first.longitude;
         }
       } catch (e) {
-        // Ignorar erro de geocoding para não bloquear a criação
+        // Ignore geocoding errors so they don't block creation
       }
 
       final producer = AdminProducer(

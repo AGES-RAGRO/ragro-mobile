@@ -48,9 +48,9 @@ class _RouteCalculationViewState extends State<_RouteCalculationView> {
         ? stops.sublist(0, stops.length - 1)
         : const <String>[];
 
-    // Deep-link de navegação (não exige API key). As paradas já vêm na ordem
-    // otimizada pelo backend. `dir_action=navigate` entra direto no modo
-    // navegação turn-by-turn de carro.
+    // Navigation deep-link (no API key needed). Stops already come in the
+    // backend's optimized order; `dir_action=navigate` opens directly into
+    // turn-by-turn driving navigation.
     final uri = Uri.https('www.google.com', '/maps/dir/', {
       'api': '1',
       'origin': '$lat,$lng',
@@ -173,7 +173,6 @@ class _RouteCalculationViewState extends State<_RouteCalculationView> {
                         ),
                         const SizedBox(height: 16),
 
-                        // CO2 Card
                         BlocBuilder<
                           RouteCalculationCubit,
                           RouteCalculationState
@@ -209,7 +208,6 @@ class _RouteCalculationViewState extends State<_RouteCalculationView> {
                         ),
                         const SizedBox(height: 16),
 
-                        // Map Area
                         BlocBuilder<
                           RouteCalculationCubit,
                           RouteCalculationState
@@ -318,7 +316,6 @@ class _RouteCalculationViewState extends State<_RouteCalculationView> {
                         ),
                         const SizedBox(height: 16),
 
-                        // Delivery sequence (real accepted/in-delivery orders)
                         BlocBuilder<
                           RouteCalculationCubit,
                           RouteCalculationState
@@ -717,8 +714,8 @@ class _Co2BottomSheetContentState extends State<_Co2BottomSheetContent> {
                   context.read<RouteCalculationCubit>().updateFormData(
                     vehicle: val,
                   );
-                  // Sincroniza o campo com o consumo padrão do novo veículo
-                  // quando ainda não foi informado um valor.
+                  // Sync the field with the new vehicle's default consumption
+                  // when no value has been entered yet.
                   final preset =
                       RouteCalculationCubit.defaultConsumptionByVehicle[val];
                   if (preset != null &&
@@ -811,8 +808,8 @@ class _Co2BottomSheetContentState extends State<_Co2BottomSheetContent> {
                           state.status == RouteCalculationStatus.calculating
                           ? null
                           : () {
-                              // O backend exige consumo médio (> 0) para
-                              // veículos não-elétricos; valida antes de enviar.
+                              // Backend requires consumption (> 0) for
+                              // non-electric vehicles; validate before sending.
                               final needsConsumption =
                                   state.selectedFuel != 'Elétrico';
                               final consumption = double.tryParse(

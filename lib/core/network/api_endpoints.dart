@@ -2,8 +2,8 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 
 abstract final class ApiEndpoints {
-  // Default para dev local. Em prod, passe --dart-define-from-file=env/prod.json
-  // (ou --dart-define=API_BASE_URL=https://...) via CI.
+  // Default for local dev. In prod, pass --dart-define-from-file=env/prod.json
+  // (or --dart-define=API_BASE_URL=https://...) via CI.
   static const String _localBase = 'http://localhost:8080';
 
   static final String _base = _resolveBaseUrl();
@@ -72,7 +72,7 @@ abstract final class ApiEndpoints {
   static String get co2RecordSavings => '$_base/co2/record-savings';
   static String get co2Options => '$_base/co2/options';
 
-  // Routes (otimização via backend; a chave do Google fica no servidor)
+  // Routes (optimized via backend; the Google key stays on the server)
   static String get routesOptimize => '$_base/routes/optimize';
 
   // Orders

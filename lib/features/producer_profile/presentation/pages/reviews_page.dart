@@ -144,7 +144,7 @@ class _ReviewsPageState extends State<ReviewsPage> {
                   Container(
                     padding: const EdgeInsets.all(20),
                     decoration: BoxDecoration(
-                      color: const Color(0x1A64748B), // #64748B1A do Figma
+                      color: const Color(0x1A64748B),
                       borderRadius: BorderRadius.circular(16),
                     ),
                     child: Column(

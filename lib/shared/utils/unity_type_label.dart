@@ -1,18 +1,5 @@
-/// Traduz o `unityType` retornado pelo backend para a forma curta em
-/// português usada na UI.
-///
-/// Backend (products.unity_type): `kg | g | un | maço | pacote | box | liter |
-/// ml | dozen`.
-/// Mapeamento:
-///   - kg / g / ml / maço  → mantém (já curtos em pt-BR)
-///   - un / unit           → un
-///   - pacote              → pct
-///   - box                 → caixa
-///   - liter               → L
-///   - dozen               → dz
-///
-/// Valores desconhecidos são retornados como vieram. Strings vazias retornam
-/// vazias (caller decide se mostra ou não).
+/// Maps the backend `unityType` to the short pt-BR form shown in the UI.
+/// Unknown values are returned unchanged; empty strings return empty.
 String localizeUnityType(String unityType) {
   switch (unityType.toLowerCase().trim()) {
     case '':
@@ -45,10 +32,9 @@ String localizeUnityType(String unityType) {
   }
 }
 
-/// Rótulo completo em português para SELEÇÃO de unidade (ex.: dropdown do
-/// cadastro de produto). O valor submetido continua sendo o código do backend
-/// (kg, liter, box, dozen…); só o texto exibido muda. Desconhecidos voltam como
-/// vieram.
+/// Full pt-BR label for unit selection (e.g. the product form dropdown). The
+/// submitted value stays the backend code (kg, liter, box...); only the
+/// displayed text changes. Unknown values are returned unchanged.
 String unityTypeFullLabel(String unityType) {
   switch (unityType.toLowerCase().trim()) {
     case 'kg':

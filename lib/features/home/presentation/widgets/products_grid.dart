@@ -36,8 +36,8 @@ class ProductsGrid extends StatelessWidget {
               producerId: r.farmerId,
             ),
             isRecommended: true,
-            // Só é "IA recomenda" quando o reranker LLM reordenou (LLM_RERANKED);
-            // demais reasons são heurísticos (selo neutro "Para você").
+            // Only "AI recommends" when the LLM reranker reordered it
+            // (LLM_RERANKED); other reasons are heuristic ("Para você" badge).
             aiRanked: r.reason == 'LLM_RERANKED',
             score: r.score,
           ),

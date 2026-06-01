@@ -65,8 +65,8 @@ class _ImpactPageState extends State<ImpactPage> {
 
   @override
   Widget build(BuildContext context) {
-    // _totalCo2Saved está em kg → toneladas, com 2 casas decimais (vírgula),
-    // para mostrar valores parciais (< 1 t) em vez de arredondar para 0.
+    // _totalCo2Saved is in kg -> tonnes, 2 decimals (comma), so partial values
+    // (< 1 t) show instead of rounding to 0.
     final co2Value = (_totalCo2Saved / 1000)
         .toStringAsFixed(2)
         .replaceAll('.', ',');

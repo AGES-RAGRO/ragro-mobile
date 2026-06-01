@@ -1,4 +1,3 @@
-// lib/core/network/api_client.dart
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:injectable/injectable.dart';
@@ -27,12 +26,10 @@ class ApiClient {
   }
 }
 
-/// Backend retorna 401 em dois cenários distintos:
-///   1. Credenciais inválidas (Keycloak / invalid_grant)
-///   2. Usuário autenticado porém com `active=false` no banco,
-///      via `FarmerAuthInterceptor` — body:
-///      `{"error": "Produtor inativo", ...}`
-/// Diferenciamos inspecionando o campo `error` da resposta.
+/// The backend returns 401 for two cases: invalid credentials
+/// (Keycloak / invalid_grant) and an authenticated but deactivated account
+/// (FarmerAuthInterceptor, body `{"error": "Produtor inativo", ...}`).
+/// We tell them apart by inspecting the response `error` field.
 ApiException _map401(dynamic data) {
   if (data is Map && data['error'] is String) {
     final error = (data['error'] as String).toLowerCase();

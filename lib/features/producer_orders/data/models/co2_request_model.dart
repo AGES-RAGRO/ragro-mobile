@@ -26,13 +26,13 @@ class Co2CalculationRequest extends Equatable {
   List<Object?> get props => [distanceKm, vehicleType, fuelType, averageConsumption];
 }
 
-/// Registra a economia de CO2 de uma rota otimizada (POST /co2/record-savings).
-/// O backend calcula a economia = emissão(soma ida/volta) − emissão(otimizada).
+/// Records an optimized route's CO2 savings (POST /co2/record-savings). The
+/// backend computes savings = emission(round-trip sum) − emission(optimized).
 class Co2SavingRequest extends Equatable {
   final double distanceOptimized;
 
-  /// Distâncias origem→cada parada (km); o backend dobra cada uma (ida/volta)
-  /// como baseline de "entregas separadas".
+  /// Origin→each-stop distances (km); the backend doubles each (round-trip) as
+  /// the "separate deliveries" baseline.
   final List<double> separateDeliveryDistances;
   final String vehicleType;
   final String fuelType;

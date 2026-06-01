@@ -87,8 +87,8 @@ class _CustomerEditAddressViewState extends State<_CustomerEditAddressView> {
               backgroundColor: AppColors.lightGreen,
             ),
           );
-          // Sinaliza para a tela anterior que houve mudança no endereço,
-          // permitindo recarregar dados dependentes (ex.: order_confirmation).
+          // Signal the previous screen that the address changed so it can
+          // reload dependent data (e.g. order_confirmation).
           context.pop(true);
         } else if (state is CustomerProfileUpdateFailure) {
           ScaffoldMessenger.of(context).showSnackBar(

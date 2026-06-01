@@ -1,7 +1,5 @@
-// Screen: Inventory (Estoque do Produtor)
-// User Story: US-22 — Manage Product Inventory
-// Epic: EPIC 4 — Producer Features
-// Routes: GET /products
+// Screen: Inventory (producer's stock).
+// US-22 — Manage Product Inventory. Route: GET /products.
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -47,7 +45,6 @@ class _InventoryView extends StatelessWidget {
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Header
                 Padding(
                   padding: const EdgeInsets.fromLTRB(20, 16, 20, 4),
                   child: Row(
@@ -106,7 +103,6 @@ class _InventoryView extends StatelessWidget {
                   ),
                 ),
 
-                // Summary cards
                 if (state is InventoryLoaded) ...[
                   Padding(
                     padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
@@ -132,7 +128,6 @@ class _InventoryView extends StatelessWidget {
                   ),
                   const SizedBox(height: 16),
 
-                  // Meus Produtos label
                   const Padding(
                     padding: EdgeInsets.fromLTRB(20, 0, 20, 12),
                     child: Text(
@@ -146,7 +141,6 @@ class _InventoryView extends StatelessWidget {
                     ),
                   ),
 
-                  // Filter pills
                   SingleChildScrollView(
                     scrollDirection: Axis.horizontal,
                     padding: const EdgeInsets.only(left: 16),
@@ -202,7 +196,6 @@ class _InventoryView extends StatelessWidget {
 
                   const SizedBox(height: 12),
 
-                  // Product list
                   Expanded(
                     child: state.products.isEmpty
                         ? const Center(

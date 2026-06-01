@@ -2,7 +2,7 @@ import 'package:equatable/equatable.dart';
 
 enum RouteCalculationStatus { initial, calculating, calculated, error }
 
-/// Uma parada de entrega da rota, derivada de um pedido aceito/em entrega.
+/// A route delivery stop, derived from an accepted/in-delivery order.
 class RouteDelivery extends Equatable {
   const RouteDelivery({
     required this.id,
@@ -11,16 +11,16 @@ class RouteDelivery extends Equatable {
     required this.stop,
   });
 
-  /// Id do pedido.
+  /// Order id.
   final String id;
 
-  /// Nome do cliente.
+  /// Customer name.
   final String title;
 
-  /// Endereço legível para exibição.
+  /// Human-readable address for display.
   final String subtitle;
 
-  /// Ponto para roteamento: "lat,lng" quando há coordenadas; senão o endereço.
+  /// Routing point: "lat,lng" when coordinates exist, otherwise the address.
   final String stop;
 
   @override
@@ -40,11 +40,10 @@ class RouteCalculationState extends Equatable {
   final double? producerLat;
   final double? producerLng;
 
-  /// Entregas exibidas, já na ordem otimizada (não confirmadas primeiro).
+  /// Displayed deliveries, already in optimized order (unconfirmed first).
   final List<RouteDelivery> deliveries;
 
-  /// Pontos de parada (não confirmados) na ordem otimizada, usados para montar
-  /// o deep-link do Google Maps.
+  /// Unconfirmed stops in optimized order, used to build the Google Maps deep-link.
   final List<String> orderedStops;
 
   const RouteCalculationState({
@@ -63,7 +62,7 @@ class RouteCalculationState extends Equatable {
     this.orderedStops = const [],
   });
 
-  /// Há entregas pendentes (não confirmadas) para rotear.
+  /// Whether there are pending (unconfirmed) deliveries to route.
   bool get hasPendingDeliveries =>
       deliveries.any((d) => !confirmedDeliveries.contains(d.id));
 

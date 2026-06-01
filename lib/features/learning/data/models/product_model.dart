@@ -1,7 +1,4 @@
-// DATA/MODELS — O "tradutor" da cozinha.
-// O Model sabe converter JSON (que vem da API) em um objeto Dart.
-// Extends Product (Entity) — ou seja, um ProductModel É um Product, mas com superpoderes de parsing.
-// Fica no data/ porque depende de JSON. O domain/ nunca sabe que isso existe.
+// Data model: extends the Product entity and adds JSON parsing.
 
 import 'package:ragro_mobile/features/learning/domain/entities/product.dart';
 

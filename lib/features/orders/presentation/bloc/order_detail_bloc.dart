@@ -55,8 +55,8 @@ class OrderDetailBloc extends Bloc<OrderDetailEvent, OrderDetailState> {
       );
       final cancelled = current.order.copyWith(
         status: OrderStatus.cancelled.backendValue,
-        // Preenche o motivo localmente para o card de cancelamento aparecer
-        // já nesta sessão (o backend ainda não devolve esses campos no detalhe).
+        // Fill the reason locally so the cancellation card shows up this
+        // session (the backend doesn't yet return these fields on the detail).
         cancellationReason: event.reason,
         cancellationDetails: event.details,
         actions: const OrderDetailActions(

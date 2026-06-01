@@ -9,10 +9,8 @@ import 'package:ragro_mobile/features/auth/presentation/bloc/login_state.dart';
 import 'package:ragro_mobile/features/auth/presentation/widgets/auth_submit_button.dart';
 import 'package:ragro_mobile/features/auth/presentation/widgets/auth_text_field.dart';
 
-/// Login form widget — composes email/password fields, submit button,
-/// and optional links for password recovery and account registration.
-///
-/// Requires [LoginBloc] to be available above this widget in the tree.
+/// Login form: email/password fields, submit button, and recovery/registration
+/// links. Requires a [LoginBloc] ancestor in the widget tree.
 class LoginForm extends StatefulWidget {
   const LoginForm({
     super.key,

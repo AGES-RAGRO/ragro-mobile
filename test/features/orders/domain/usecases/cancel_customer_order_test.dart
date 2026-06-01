@@ -75,8 +75,7 @@ void main() {
     );
   });
 
-  // Sanity-check para evitar warning de import não usado quando entidades
-  // forem necessárias em testes futuros (ex.: validar tipo de retorno).
+  // Sanity check to avoid unused-import warnings for entities needed in future tests.
   test('entidades de orders permanecem importáveis', () {
     expect(Order, isNotNull);
     expect(OrderDetail, isNotNull);

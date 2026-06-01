@@ -9,8 +9,7 @@ extension OrderStatusLabel on OrderStatus {
     OrderStatus.cancelled => 'CANCELADO',
   };
 
-  /// Valor enviado/recebido pelo backend (Java OrderStatus, UPPERCASE).
-  /// Ver ragro-backend/src/main/java/br/com/ragro/domain/enums/OrderStatus.java
+  /// Value exchanged with the backend (Java OrderStatus enum, UPPERCASE).
   String get backendValue => switch (this) {
     OrderStatus.pending => 'PENDING',
     OrderStatus.accepted => 'CONFIRMED',

@@ -24,10 +24,10 @@ class AdminProducerFormSubmitted extends AdminProducerFormEvent {
     required this.scheduleWeekdays,
     required this.scheduleStart,
     required this.scheduleEnd,
-    // ── PIX (obrigatório) ────────────────────────────────────────────────
+    // PIX (required)
     required this.pixKeyType,
     required this.pixKey,
-    // ── Conta Bancária (obrigatória) ─────────────────────────────────────
+    // Bank account (required)
     required this.bankName,
     required this.agency,
     required this.accountNumber,
@@ -56,11 +56,11 @@ class AdminProducerFormSubmitted extends AdminProducerFormEvent {
   final String scheduleStart;
   final String scheduleEnd;
 
-  // PIX (obrigatório)
+  // PIX (required)
   final String pixKeyType;
   final String pixKey;
 
-  // Conta Bancária (obrigatória)
+  // Bank account (required)
   final String bankName;
   final String agency;
   final String accountNumber;

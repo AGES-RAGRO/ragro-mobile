@@ -39,16 +39,16 @@ class ProducerOrder extends Equatable {
   final bool isNew;
   final String consumerPhone;
 
-  /// Coordenadas do endereço de entrega (snapshot do pedido). Podem ser nulas
-  /// se o endereço do cliente não foi geocodado; nesse caso o cálculo de rota
-  /// usa a string de endereço como fallback.
+  /// Delivery address coordinates (order snapshot). Null if the customer's
+  /// address was not geocoded; route calculation then falls back to the
+  /// address string.
   final double? deliveryLatitude;
   final double? deliveryLongitude;
 
   final String? cancellationReason;
   final String? cancellationDetails;
 
-  /// Endereço completo legível para fallback de geocoding e exibição.
+  /// Full readable address for display and geocoding fallback.
   String get fullDeliveryAddress {
     final parts = <String>[
       if (deliveryAddress.isNotEmpty) deliveryAddress,
@@ -58,8 +58,8 @@ class ProducerOrder extends Equatable {
     return parts.join(', ');
   }
 
-  /// Ponto "lat,lng" quando há coordenadas; senão o endereço textual.
-  /// O backend (Directions API) aceita ambos como origem/destino/waypoint.
+  /// "lat,lng" when coordinates exist, otherwise the textual address. The
+  /// backend (Directions API) accepts both as origin/destination/waypoint.
   String get routeStop {
     if (deliveryLatitude != null && deliveryLongitude != null) {
       return '$deliveryLatitude,$deliveryLongitude';

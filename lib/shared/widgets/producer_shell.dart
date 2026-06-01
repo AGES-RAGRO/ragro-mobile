@@ -65,9 +65,9 @@ class ProducerShell extends StatelessWidget {
       index,
       initialLocation: index == navigationShell.currentIndex,
     );
-    // Aba Perfil (2): recarrega o dashboard ao reabrir, evitando ter que
-    // fechar/reabrir o app para ver dados novos (ex.: após uma entrega). A
-    // carga inicial é feita pelo loader da própria página.
+    // Profile tab (2): reload the dashboard on reopen so fresh data shows up
+    // (e.g. after a delivery) without restarting the app. The initial load is
+    // handled by the page's own loader.
     if (index == 2) {
       final bloc = getIt<ProducerManagementBloc>();
       if (bloc.state is! ProducerManagementInitial) {

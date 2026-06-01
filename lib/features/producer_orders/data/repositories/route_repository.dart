@@ -4,8 +4,8 @@ import 'package:ragro_mobile/core/network/api_client.dart';
 import 'package:ragro_mobile/core/network/api_endpoints.dart';
 import 'package:ragro_mobile/core/network/api_exception.dart';
 
-/// Resultado da otimização de rota retornado pelo backend (`POST /routes/optimize`),
-/// que por sua vez chama o Google Directions API com `optimizeWaypoints=true`.
+/// Route optimization result from the backend (`POST /routes/optimize`), which
+/// calls the Google Directions API with `optimizeWaypoints=true`.
 class OptimizedRoute {
   const OptimizedRoute({
     required this.distanceKm,
@@ -18,7 +18,7 @@ class OptimizedRoute {
   final int durationMins;
   final String? overviewPolyline;
 
-  /// Ordem otimizada dos waypoints enviados (índices no array original).
+  /// Optimized order of the sent waypoints (indices into the original array).
   final List<int> waypointOrder;
 
   factory OptimizedRoute.fromJson(Map<String, dynamic> json) {
@@ -35,16 +35,16 @@ class OptimizedRoute {
   }
 }
 
-/// Calcula rotas chamando o endpoint autenticado do backend, mantendo a chave
-/// do Google Maps no servidor (não embarcada no app).
+/// Calculates routes via the backend's authenticated endpoint, keeping the
+/// Google Maps key on the server (not embedded in the app).
 @lazySingleton
 class RouteRepository {
   const RouteRepository(this._apiClient);
 
   final ApiClient _apiClient;
 
-  /// [origin]/[destination] e cada waypoint podem ser "lat,lng" ou um endereço
-  /// textual — o backend repassa ao Google, que geocoda texto quando preciso.
+  /// [origin]/[destination] and each waypoint may be "lat,lng" or a textual
+  /// address — the backend forwards them to Google, which geocodes text as needed.
   Future<OptimizedRoute> optimize({
     required String origin,
     required String destination,

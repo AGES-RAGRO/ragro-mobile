@@ -183,7 +183,7 @@ class ProducerOrdersBloc
       }
     }
 
-    // Após iniciar entregas, vai para a aba "A caminho" (como o fluxo anterior).
+    // After starting deliveries, switch to the "A caminho" tab.
     _activeTab = ProducerOrderStatus.inDelivery;
     try {
       final orders = await _getProducerOrders();
@@ -220,7 +220,7 @@ class ProducerOrdersBloc
         event.orderId,
         ProducerOrderStatus.delivered,
       );
-      // Entrega concluída → recarrega o dashboard (só entregues).
+      // Delivery completed: reload the dashboard (delivered only).
       _refreshProducerDashboard();
       final updated = currentOrders
           .map(
@@ -264,7 +264,7 @@ class ProducerOrdersBloc
     emit(ProducerOrdersLoaded(orders: updated, activeTab: _activeTab));
   }
 
-  /// Recarrega o dashboard do produtor (bloc singleton) após uma entrega.
+  /// Reloads the producer dashboard (singleton bloc) after a delivery.
   void _refreshProducerDashboard() {
     final dashboard = getIt<ProducerManagementBloc>();
     if (dashboard.state is! ProducerManagementInitial) {

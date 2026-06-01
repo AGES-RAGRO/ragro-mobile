@@ -94,7 +94,6 @@ class ReviewCard extends StatelessWidget {
                   ],
                 ),
               ),
-              // Date — top right
               Text(
                 _formatDate(review.createdAt),
                 style: const TextStyle(
@@ -107,7 +106,6 @@ class ReviewCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 10),
-          // Comment
           Text(
             review.comment,
             style: const TextStyle(

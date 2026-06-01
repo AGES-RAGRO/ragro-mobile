@@ -18,7 +18,7 @@ class CartRemoteDataSource {
       );
       return CartModel.fromJson(response.data!);
     } on DioException catch (e) {
-      // Backend retorna 404 quando o consumidor não tem carrinho ativo.
+      // Backend returns 404 when the customer has no active cart.
       if (e.error is NotFoundException) {
         return const CartModel.empty();
       }

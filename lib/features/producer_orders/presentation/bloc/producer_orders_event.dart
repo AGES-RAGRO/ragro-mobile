@@ -58,9 +58,9 @@ class ProducerOrderLocallyRefused extends ProducerOrdersEvent {
   List<Object?> get props => [orderId];
 }
 
-/// Marca um conjunto de pedidos como "em entrega" de uma só vez (seleção
-/// múltipla). Faz um único reload + um único feedback, e reporta falhas
-/// parciais — diferente de disparar N eventos individuais.
+/// Marks a set of orders as "in delivery" at once (multi-select). Does a single
+/// reload and feedback and reports partial failures, unlike firing N individual
+/// events.
 class ProducerOrdersBulkMarkedInDelivery extends ProducerOrdersEvent {
   const ProducerOrdersBulkMarkedInDelivery(this.orderIds);
 
