@@ -6,6 +6,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:ragro_mobile/core/di/injection.dart';
 import 'package:ragro_mobile/core/theme/app_colors.dart';
 import 'package:ragro_mobile/features/auth/domain/entities/address.dart';
@@ -479,36 +480,7 @@ class _CheckoutView extends StatelessWidget {
                         const SizedBox(height: 16),
                         const _DeliveryAddressCard(),
                         const SizedBox(height: 16),
-                        // Map placeholder
-                        Container(
-                          height: 128,
-                          decoration: BoxDecoration(
-                            color: AppColors.lightGreen.withValues(alpha: 0.1),
-                            borderRadius: BorderRadius.circular(24),
-                            border: Border.all(color: AppColors.black),
-                          ),
-                          child: const Center(
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(
-                                  Icons.map_outlined,
-                                  color: AppColors.darkGreen,
-                                  size: 24,
-                                ),
-                                SizedBox(width: 8),
-                                Text(
-                                  'Mapa de Entrega',
-                                  style: TextStyle(
-                                    fontFamily: 'Manrope',
-                                    fontSize: 14,
-                                    color: AppColors.darkGreen,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
+                        const _DeliveryMap(),
                         const SizedBox(height: 24),
                         // Delivery type
                         const Text(
@@ -832,6 +804,86 @@ class _CartItemRow extends StatelessWidget {
 
 /// Card que exibe o endereço primário do customer logado.
 /// Lê do [CustomerProfileBloc] já provido pela página.
+/// Mapa de entrega: mostra a localização do endereço do consumidor.
+/// Usa as coordenadas do endereço primário (geocodadas no cadastro). Se não
+/// houver coordenadas, mantém um placeholder.
+class _DeliveryMap extends StatelessWidget {
+  const _DeliveryMap();
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<CustomerProfileBloc, CustomerProfileState>(
+      builder: (context, state) {
+        final profile = switch (state) {
+          CustomerProfileLoaded(:final profile) => profile,
+          CustomerProfileUpdating(:final profile) => profile,
+          CustomerProfileUpdateSuccess(:final profile) => profile,
+          CustomerProfileUpdateFailure(:final profile) => profile,
+          _ => null,
+        };
+        final address = profile?.primaryAddress;
+        final lat = address?.latitude;
+        final lng = address?.longitude;
+
+        if (lat == null || lng == null) {
+          return _placeholder();
+        }
+
+        final position = LatLng(lat, lng);
+        return ClipRRect(
+          borderRadius: BorderRadius.circular(24),
+          child: SizedBox(
+            height: 128,
+            child: GoogleMap(
+              initialCameraPosition: CameraPosition(target: position, zoom: 15),
+              markers: {
+                Marker(
+                  markerId: const MarkerId('delivery'),
+                  position: position,
+                ),
+              },
+              zoomControlsEnabled: false,
+              scrollGesturesEnabled: false,
+              rotateGesturesEnabled: false,
+              tiltGesturesEnabled: false,
+              myLocationButtonEnabled: false,
+              liteModeEnabled: true,
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _placeholder() {
+    return Container(
+      height: 128,
+      decoration: BoxDecoration(
+        color: AppColors.lightGreen.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: AppColors.black),
+      ),
+      child: const Center(
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.map_outlined, color: AppColors.darkGreen, size: 24),
+            SizedBox(width: 8),
+            Text(
+              'Mapa de Entrega',
+              style: TextStyle(
+                fontFamily: 'Manrope',
+                fontSize: 14,
+                color: AppColors.darkGreen,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class _DeliveryAddressCard extends StatelessWidget {
   const _DeliveryAddressCard();
 

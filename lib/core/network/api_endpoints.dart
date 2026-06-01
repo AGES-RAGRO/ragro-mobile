@@ -71,6 +71,9 @@ abstract final class ApiEndpoints {
   static String get co2Calculate => '$_base/co2/calculate';
   static String get co2Options => '$_base/co2/options';
 
+  // Routes (otimização via backend; a chave do Google fica no servidor)
+  static String get routesOptimize => '$_base/routes/optimize';
+
   // Orders
   static String get orders => '$_base/orders';
   static String get consumerOrders => '$_base/orders/consumer';

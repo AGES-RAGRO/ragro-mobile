@@ -1,3 +1,4 @@
+import 'package:ragro_mobile/core/network/api_endpoints.dart';
 import 'package:ragro_mobile/features/recommendations/domain/entities/recommendation.dart';
 
 class RecommendationModel extends Recommendation {
@@ -27,7 +28,9 @@ class RecommendationModel extends Recommendation {
           .toList(),
       score: json['score'] as int,
       reason: json['reason'] as String,
-      imageS3: json['imageS3'] as String?,
+      imageS3: json['imageS3'] != null
+          ? ApiEndpoints.resolveMediaUrl(json['imageS3'] as String)
+          : null,
     );
   }
 }

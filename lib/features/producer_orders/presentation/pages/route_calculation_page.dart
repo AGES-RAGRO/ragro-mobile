@@ -30,12 +30,36 @@ class _RouteCalculationView extends StatefulWidget {
 class _RouteCalculationViewState extends State<_RouteCalculationView> {
   Future<void> _openGoogleMaps() async {
     final state = context.read<RouteCalculationCubit>().state;
+    final stops = state.orderedStops;
+
+    if (stops.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Nenhuma entrega pendente para abrir no mapa.'),
+        ),
+      );
+      return;
+    }
+
     final lat = state.producerLat ?? -16.6868;
     final lng = state.producerLng ?? -49.2647;
+    final destination = stops.last;
+    final waypoints = stops.length > 1
+        ? stops.sublist(0, stops.length - 1)
+        : const <String>[];
 
-    final uri = Uri.parse(
-      'https://www.google.com/maps/dir/?api=1&origin=$lat,$lng&destination=-16.7,-49.3&travelmode=driving',
-    );
+    // Deep-link de navegação (não exige API key). As paradas já vêm na ordem
+    // otimizada pelo backend. `dir_action=navigate` entra direto no modo
+    // navegação turn-by-turn de carro.
+    final uri = Uri.https('www.google.com', '/maps/dir/', {
+      'api': '1',
+      'origin': '$lat,$lng',
+      'destination': destination,
+      if (waypoints.isNotEmpty) 'waypoints': waypoints.join('|'),
+      'travelmode': 'driving',
+      'dir_action': 'navigate',
+    });
+
     if (await canLaunchUrl(uri)) {
       await launchUrl(uri, mode: LaunchMode.externalApplication);
     } else {
@@ -90,7 +114,13 @@ class _RouteCalculationViewState extends State<_RouteCalculationView> {
                 SliverAppBar(
                   backgroundColor: AppColors.white,
                   leading: GestureDetector(
-                    onTap: () => context.pop(),
+                    onTap: () => context.pop(
+                      context
+                          .read<RouteCalculationCubit>()
+                          .state
+                          .confirmedDeliveries
+                          .toList(),
+                    ),
                     child: const Icon(Icons.arrow_back, color: AppColors.black),
                   ),
                   title: const Text(
@@ -288,29 +318,43 @@ class _RouteCalculationViewState extends State<_RouteCalculationView> {
                         ),
                         const SizedBox(height: 16),
 
-                        // Delivery sequence
-                        const _DeliveryItem(
-                          id: '1',
-                          number: 1,
-                          title: 'Fazenda Boa Vista',
-                          subtitle:
-                              'Rodovia BR-153, KM 45, Lote 12\nGoiânia - GO, 74000-000',
-                        ),
-                        const SizedBox(height: 16),
-                        const _DeliveryItem(
-                          id: '2',
-                          number: 2,
-                          title: 'Fazenda Boa Vista',
-                          subtitle:
-                              'Rodovia BR-153, KM 45, Lote 12\nGoiânia - GO, 74000-000',
-                        ),
-                        const SizedBox(height: 16),
-                        const _DeliveryItem(
-                          id: '3',
-                          number: 3,
-                          title: 'Fazenda Boa Vista',
-                          subtitle:
-                              'Rodovia BR-153, KM 45, Lote 12\nGoiânia - GO, 74000-000',
+                        // Delivery sequence (real accepted/in-delivery orders)
+                        BlocBuilder<
+                          RouteCalculationCubit,
+                          RouteCalculationState
+                        >(
+                          builder: (context, state) {
+                            if (state.deliveries.isEmpty) {
+                              return const Padding(
+                                padding: EdgeInsets.symmetric(vertical: 12),
+                                child: Text(
+                                  'Nenhuma entrega pendente no momento.',
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    color: Colors.grey,
+                                  ),
+                                ),
+                              );
+                            }
+                            return Column(
+                              children: [
+                                for (
+                                  var i = 0;
+                                  i < state.deliveries.length;
+                                  i++
+                                ) ...[
+                                  _DeliveryItem(
+                                    id: state.deliveries[i].id,
+                                    number: i + 1,
+                                    title: state.deliveries[i].title,
+                                    subtitle: state.deliveries[i].subtitle,
+                                  ),
+                                  if (i != state.deliveries.length - 1)
+                                    const SizedBox(height: 16),
+                                ],
+                              ],
+                            );
+                          },
                         ),
                       ],
                     ),
@@ -326,7 +370,13 @@ class _RouteCalculationViewState extends State<_RouteCalculationView> {
                 padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
                 color: Colors.white,
                 child: GestureDetector(
-                  onTap: () => context.pop(),
+                  onTap: () => context.pop(
+                    context
+                        .read<RouteCalculationCubit>()
+                        .state
+                        .confirmedDeliveries
+                        .toList(),
+                  ),
                   child: Container(
                     height: 50,
                     decoration: BoxDecoration(
@@ -663,9 +713,19 @@ class _Co2BottomSheetContentState extends State<_Co2BottomSheetContent> {
                 ) {
                   return DropdownMenuItem(value: e, child: Text(e));
                 }).toList(),
-                onChanged: (val) => context
-                    .read<RouteCalculationCubit>()
-                    .updateFormData(vehicle: val),
+                onChanged: (val) {
+                  context.read<RouteCalculationCubit>().updateFormData(
+                    vehicle: val,
+                  );
+                  // Sincroniza o campo com o consumo padrão do novo veículo
+                  // quando ainda não foi informado um valor.
+                  final preset =
+                      RouteCalculationCubit.defaultConsumptionByVehicle[val];
+                  if (preset != null &&
+                      _consumptionController.text.trim().isEmpty) {
+                    _consumptionController.text = preset;
+                  }
+                },
               ),
               const SizedBox(height: 16),
               const Text(

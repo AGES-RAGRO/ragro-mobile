@@ -82,7 +82,7 @@ class _ProducersSectionState extends State<ProducersSection> {
                   name: fav.farmName,
                   description: fav.producerName,
                   avatarUrl: fav.avatarUrl,
-                  coverUrl: '',
+                  coverUrl: fav.coverUrl,
                   averageRating: fav.averageRating,
                   ownerName: fav.producerName,
                 );

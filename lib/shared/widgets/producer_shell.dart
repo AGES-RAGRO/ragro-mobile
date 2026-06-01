@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:ragro_mobile/core/di/injection.dart';
 import 'package:ragro_mobile/core/theme/app_colors.dart';
+import 'package:ragro_mobile/features/producer_management/presentation/bloc/producer_management_bloc.dart';
+import 'package:ragro_mobile/features/producer_management/presentation/bloc/producer_management_event.dart';
+import 'package:ragro_mobile/features/producer_management/presentation/bloc/producer_management_state.dart';
 
 class ProducerShell extends StatelessWidget {
   const ProducerShell({required this.navigationShell, super.key});
@@ -61,6 +65,15 @@ class ProducerShell extends StatelessWidget {
       index,
       initialLocation: index == navigationShell.currentIndex,
     );
+    // Aba Perfil (2): recarrega o dashboard ao reabrir, evitando ter que
+    // fechar/reabrir o app para ver dados novos (ex.: após uma entrega). A
+    // carga inicial é feita pelo loader da própria página.
+    if (index == 2) {
+      final bloc = getIt<ProducerManagementBloc>();
+      if (bloc.state is! ProducerManagementInitial) {
+        bloc.add(const ProducerManagementRefreshed());
+      }
+    }
   }
 }
 

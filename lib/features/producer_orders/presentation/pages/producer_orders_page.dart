@@ -342,7 +342,23 @@ class _ProducerOrdersViewState extends State<_ProducerOrdersView> {
                           Padding(
                             padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
                             child: GestureDetector(
-                              onTap: () => context.push('/producer/home/route'),
+                              onTap: () async {
+                                final delivered = await context
+                                    .push<List<String>?>(
+                                      '/producer/home/route',
+                                    );
+                                if (!context.mounted) return;
+                                final bloc = context
+                                    .read<ProducerOrdersBloc>();
+                                // Atualização otimista imediata: entregas
+                                // confirmadas saem de "A caminho" na hora.
+                                for (final id
+                                    in delivered ?? const <String>[]) {
+                                  bloc.add(ProducerOrderLocallyDelivered(id));
+                                }
+                                // Re-sincroniza com o backend.
+                                bloc.add(const ProducerOrdersRefreshed());
+                              },
                               child: Container(
                                 height: 52,
                                 decoration: BoxDecoration(

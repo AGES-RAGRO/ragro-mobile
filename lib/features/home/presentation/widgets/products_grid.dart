@@ -20,7 +20,8 @@ class ProductsGrid extends StatelessWidget {
   final void Function(HomeProduct) onAddToCart;
   final bool isLoadingMore;
 
-  List<({HomeProduct product, bool isRecommended})> _buildItems() {
+  List<({HomeProduct product, bool isRecommended, bool aiRanked, int score})>
+  _buildItems() {
     final recommended = recommendations
         .take(20)
         .map(
@@ -35,12 +36,18 @@ class ProductsGrid extends StatelessWidget {
               producerId: r.farmerId,
             ),
             isRecommended: true,
+            // Só é "IA recomenda" quando o reranker LLM reordenou (LLM_RERANKED);
+            // demais reasons são heurísticos (selo neutro "Para você").
+            aiRanked: r.reason == 'LLM_RERANKED',
+            score: r.score,
           ),
         )
         .toList();
 
     final regular = products
-        .map((p) => (product: p, isRecommended: false))
+        .map(
+          (p) => (product: p, isRecommended: false, aiRanked: false, score: 0),
+        )
         .toList();
 
     return [...recommended, ...regular];
@@ -82,6 +89,8 @@ class ProductsGrid extends StatelessWidget {
               return HomeProductCard(
                 product: item.product,
                 isRecommended: item.isRecommended,
+                aiRanked: item.aiRanked,
+                aiScore: item.score,
                 onTap: () => onProductTap(item.product),
                 onAddToCart: () => onAddToCart(item.product),
               );

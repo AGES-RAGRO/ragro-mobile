@@ -20,13 +20,34 @@ class ProducerProfilePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (_) =>
-          getIt<ProducerManagementBloc>()
-            ..add(const ProducerManagementStarted()),
-      child: const _ProducerProfileView(),
+    // Bloc é singleton (ver ProducerManagementBloc): o shell dispara refresh ao
+    // reabrir a aba Perfil. Aqui só provê o valor; o loader faz a carga inicial.
+    return BlocProvider.value(
+      value: getIt<ProducerManagementBloc>(),
+      child: const _ProducerProfileLoader(),
     );
   }
+}
+
+class _ProducerProfileLoader extends StatefulWidget {
+  const _ProducerProfileLoader();
+
+  @override
+  State<_ProducerProfileLoader> createState() => _ProducerProfileLoaderState();
+}
+
+class _ProducerProfileLoaderState extends State<_ProducerProfileLoader> {
+  @override
+  void initState() {
+    super.initState();
+    final bloc = context.read<ProducerManagementBloc>();
+    if (bloc.state is ProducerManagementInitial) {
+      bloc.add(const ProducerManagementStarted());
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) => const _ProducerProfileView();
 }
 
 class _ProducerProfileView extends StatelessWidget {
@@ -178,7 +199,19 @@ class _ProducerProfileView extends StatelessWidget {
             if (state is! ProducerManagementLoaded) {
               return const SizedBox.shrink();
             }
-            return _buildContent(context, state);
+            return RefreshIndicator(
+              color: AppColors.darkGreen,
+              onRefresh: () async {
+                final bloc = context.read<ProducerManagementBloc>();
+                bloc.add(const ProducerManagementRefreshed());
+                await bloc.stream.firstWhere(
+                  (s) =>
+                      s is ProducerManagementLoaded ||
+                      s is ProducerManagementFailure,
+                );
+              },
+              child: _buildContent(context, state),
+            );
           },
         ),
       ),
@@ -188,6 +221,7 @@ class _ProducerProfileView extends StatelessWidget {
   Widget _buildContent(BuildContext context, ProducerManagementLoaded state) {
     final dashboard = state.dashboard;
     return SingleChildScrollView(
+      physics: const AlwaysScrollableScrollPhysics(),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
