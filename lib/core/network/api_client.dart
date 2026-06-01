@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:injectable/injectable.dart';
+import 'package:ragro_mobile/core/network/api_endpoints.dart';
 import 'package:ragro_mobile/core/network/api_exception.dart';
 
 @lazySingleton
@@ -11,18 +12,44 @@ class ApiClient {
       ..receiveTimeout = const Duration(seconds: 10)
       ..sendTimeout = const Duration(seconds: 10)
       ..headers = {'Content-Type': 'application/json'};
+    _dio.interceptors.add(_AuthInterceptor(() => _accessToken));
     _dio.interceptors.add(_ErrorInterceptor());
   }
 
   final Dio _dio;
   Dio get dio => _dio;
 
+  String? _accessToken;
+
   void setAuthToken(String token) {
-    _dio.options.headers['Authorization'] = 'Bearer $token';
+    _accessToken = token.isEmpty ? null : token;
   }
 
   void clearAuthToken() {
-    _dio.options.headers.remove('Authorization');
+    _accessToken = null;
+  }
+}
+
+/// Attaches the bearer token per request, except on public endpoints
+/// ([ApiEndpoints.isPublic]), which must go out unauthenticated.
+class _AuthInterceptor extends Interceptor {
+  _AuthInterceptor(this._tokenProvider);
+
+  final String? Function() _tokenProvider;
+
+  @override
+  void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
+    if (ApiEndpoints.isPublic(options.uri.path)) {
+      options.headers.remove('Authorization');
+    } else {
+      final token = _tokenProvider();
+      if (token != null && token.isNotEmpty) {
+        options.headers['Authorization'] = 'Bearer $token';
+      } else {
+        options.headers.remove('Authorization');
+      }
+    }
+    handler.next(options);
   }
 }
 

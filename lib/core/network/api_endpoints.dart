@@ -47,6 +47,15 @@ abstract final class ApiEndpoints {
   static String get resetPasswordEmail => '$_base/auth/password/reset';
   static String get forgotPassword => '$_base/auth/password/forgot';
 
+  /// Public endpoints that must never carry an `Authorization` header.
+  static const Set<String> _publicPathSuffixes = {
+    '/auth/register/customer',
+    '/auth/password/forgot',
+    '/auth/config',
+  };
+
+  static bool isPublic(String path) => _publicPathSuffixes.any(path.endsWith);
+
   // Customers
   static String get customers => '$_base/customers';
   static String get customerMe => '$_base/customers/me';
