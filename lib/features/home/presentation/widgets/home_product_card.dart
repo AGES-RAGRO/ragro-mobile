@@ -18,12 +18,12 @@ class HomeProductCard extends StatelessWidget {
   final VoidCallback onAddToCart;
   final bool isRecommended;
 
-  /// `true` quando a IA (reranker LLM) de fato reordenou este item
-  /// (reason == LLM_RERANKED). Diferencia recomendação por IA de recomendação
-  /// heurística — evita o selo "IA recomenda" enganoso para todos.
+  /// `true` when the AI reranker actually reordered this item
+  /// (reason == LLM_RERANKED). Distinguishes AI from heuristic recommendations
+  /// so the "AI recommends" badge isn't shown misleadingly for all items.
   final bool aiRanked;
 
-  /// Score de relevância (0–100) atribuído pela IA, quando disponível.
+  /// Relevance score (0-100) assigned by the AI, when available.
   final int? aiScore;
 
   @override
@@ -154,8 +154,8 @@ class HomeProductCard extends StatelessWidget {
   }
 }
 
-/// Selo de recomendação. Mostra "IA recomenda" + score apenas quando a IA
-/// realmente reordenou o item; caso contrário mostra um selo neutro "Para você".
+/// Shows "IA recomenda" + score only when the AI actually reordered the item;
+/// otherwise shows a neutral "Para você" badge.
 class _RecommendationBadge extends StatelessWidget {
   const _RecommendationBadge({required this.aiRanked, this.score});
 

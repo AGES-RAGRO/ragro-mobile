@@ -22,9 +22,8 @@ class AdminProducersLoaded extends AdminProducersState {
   List<Object?> get props => [producers];
 }
 
-/// State emitted while an activate/deactivate mutation is in-flight.
-/// Preserves the previous list so the UI can keep rendering it with
-/// a loading overlay instead of going blank.
+/// Activate/deactivate in flight; keeps the previous list so the UI can show a
+/// loading overlay instead of going blank.
 class AdminProducersMutating extends AdminProducersState {
   const AdminProducersMutating(this.previousProducers);
   final List<AdminProducerSummary> previousProducers;
@@ -39,9 +38,8 @@ class AdminProducersFailure extends AdminProducersState {
   List<Object?> get props => [message];
 }
 
-/// Mutation failure that preserves the list that was loaded before the
-/// failed mutation, so the UI can surface a snackbar without wiping
-/// the screen.
+/// Mutation failure that keeps the previously loaded list so the UI can show a
+/// snackbar without wiping the screen.
 class AdminProducerMutationFailure extends AdminProducersState {
   const AdminProducerMutationFailure({
     required this.previousProducers,

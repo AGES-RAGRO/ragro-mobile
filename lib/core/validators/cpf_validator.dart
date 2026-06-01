@@ -1,4 +1,4 @@
-// Validação aritmética de CPF — mesmo algoritmo usado no backend
+// Arithmetic CPF validation; mirrors the backend
 // (br.com.ragro.validation.FiscalNumberValidator).
 class CpfValidator {
   const CpfValidator._();

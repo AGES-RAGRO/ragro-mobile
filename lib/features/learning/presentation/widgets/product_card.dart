@@ -1,6 +1,4 @@
-// PRESENTATION/WIDGETS — Pedaços de tela reutilizáveis.
-// O ProductCard é um widget que recebe um Product (Entity pura do domain/)
-// e renderiza as informações visuais. Ele não sabe de onde os dados vieram.
+// Reusable card that renders a Product entity.
 
 import 'package:flutter/material.dart';
 import 'package:ragro_mobile/features/learning/domain/entities/product.dart';

@@ -1,7 +1,4 @@
-// Screen: Admin Edit Producer (Editar Conta Produtor)
-// User Story: US-30 — Admin Manage Producers
-// Epic: EPIC 5 — Admin Features
-// Routes: PUT /admin/producers/{id}
+// Admin edit-producer screen (US-30). Backed by PUT /admin/producers/{id}.
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -79,10 +76,9 @@ class _AdminEditProducerView extends StatefulWidget {
 }
 
 class _AdminEditProducerViewState extends State<_AdminEditProducerView> {
-  // ── Formulário ─────────────────────────────────────────────────────────
   final _formKey = GlobalKey<FormState>();
 
-  // ── Dados Pessoais ─────────────────────────────────────────────────────
+  // Personal data
   final _nameController = TextEditingController();
   final _phoneController = TextEditingController();
   final _emailController = TextEditingController();
@@ -90,7 +86,7 @@ class _AdminEditProducerViewState extends State<_AdminEditProducerView> {
   final _farmNameController = TextEditingController();
   final _descriptionController = TextEditingController();
 
-  // ── Endereço ───────────────────────────────────────────────────────────
+  // Address
   final _cepController = TextEditingController();
   final _addressController = TextEditingController();
   final _numberController = TextEditingController();
@@ -98,11 +94,11 @@ class _AdminEditProducerViewState extends State<_AdminEditProducerView> {
   final _cityController = TextEditingController();
   final _stateController = TextEditingController();
 
-  // ── PIX (opcional no update — partial) ────────────────────────────────
+  // PIX (optional on partial update)
   String? _pixKeyType;
   final _pixKeyController = TextEditingController();
 
-  // ── Conta Bancária (opcional no update — partial) ──────────────────────
+  // Bank account (optional on partial update)
   final _bankNameController = TextEditingController();
   final _bankCodeController = TextEditingController();
   final _agencyController = TextEditingController();
@@ -110,12 +106,12 @@ class _AdminEditProducerViewState extends State<_AdminEditProducerView> {
   final _holderController = TextEditingController();
   final _bankFiscalController = TextEditingController();
 
-  // ── Horário ────────────────────────────────────────────────────────────
+  // Business hours
   final _scheduleStartController = TextEditingController();
   final _scheduleEndController = TextEditingController();
   final List<bool> _weekdays = List.filled(7, false);
 
-  // ── Snapshot para detecção de alterações ──────────────────────────────
+  // Snapshot used to detect changes
   late AdminProducer _original;
   bool _controllersInitialized = false;
 
@@ -244,7 +240,7 @@ class _AdminEditProducerViewState extends State<_AdminEditProducerView> {
       }
     }
 
-    // Pre-fill Conta Bancária
+    // Pre-fill bank account
     final bank = producer.paymentMethods
         ?.where((pm) => pm.type == 'bank_account')
         .firstOrNull;
@@ -263,7 +259,7 @@ class _AdminEditProducerViewState extends State<_AdminEditProducerView> {
       );
     }
 
-    // Pre-fill horário
+    // Pre-fill business hours
     _scheduleStartController.text =
         producer.availability?.firstOrNull?.opensAt ?? '';
     _scheduleEndController.text =
@@ -366,7 +362,7 @@ class _AdminEditProducerViewState extends State<_AdminEditProducerView> {
   void _submit() {
     if (!_formKey.currentState!.validate()) return;
 
-    // PIX: inclui apenas se o admin preencheu tipo e chave
+    // Include PIX only if the admin filled in both type and key
     final hasPix =
         _pixKeyType != null && _pixKeyController.text.trim().isNotEmpty;
     String? pixKey;
@@ -377,7 +373,7 @@ class _AdminEditProducerViewState extends State<_AdminEditProducerView> {
           : raw;
     }
 
-    // Conta Bancária: inclui apenas se o admin preencheu banco, agência, conta e titular
+    // Include the bank account only if bank, agency, account and holder are filled
     final hasBank =
         _bankNameController.text.trim().isNotEmpty &&
         _agencyController.text.trim().isNotEmpty &&
@@ -408,10 +404,10 @@ class _AdminEditProducerViewState extends State<_AdminEditProducerView> {
         scheduleWeekdays: List.from(_weekdays),
         scheduleStart: _scheduleStartController.text.trim(),
         scheduleEnd: _scheduleEndController.text.trim(),
-        // PIX (opcional)
+        // PIX (optional)
         pixKeyType: hasPix ? _pixKeyType : null,
         pixKey: hasPix ? pixKey : null,
-        // Conta Bancária (opcional)
+        // Bank account (optional)
         bankName: hasBank ? _bankNameController.text.trim() : null,
         bankCode: _bankCodeController.text.trim().isNotEmpty
             ? _bankCodeController.text.trim()
@@ -518,7 +514,6 @@ class _AdminEditProducerViewState extends State<_AdminEditProducerView> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // ── Dados Pessoais ─────────────────────────────────────────
             _sectionTitle('Dados Pessoais'),
             const SizedBox(height: 12),
             const _FieldLabel('Nome Completo'),
@@ -606,7 +601,6 @@ class _AdminEditProducerViewState extends State<_AdminEditProducerView> {
               maxLength: 1000,
             ),
 
-            // ── Endereço ───────────────────────────────────────────────
             const SizedBox(height: 20),
             _sectionTitle('Endereço'),
             const SizedBox(height: 12),
@@ -724,7 +718,7 @@ class _AdminEditProducerViewState extends State<_AdminEditProducerView> {
               ],
             ),
 
-            // ── Forma de Recebimento (parcial — opcional) ──────────────
+            // Payment method (partial — optional)
             const SizedBox(height: 20),
             _sectionTitle('Forma de Recebimento'),
             const SizedBox(height: 4),
@@ -814,7 +808,7 @@ class _AdminEditProducerViewState extends State<_AdminEditProducerView> {
 
             const SizedBox(height: 12),
 
-            // Conta Bancária
+            // Bank account
             Card(
               elevation: 0,
               shape: RoundedRectangleBorder(
@@ -923,7 +917,6 @@ class _AdminEditProducerViewState extends State<_AdminEditProducerView> {
               ),
             ),
 
-            // ── Horário de Atendimento ─────────────────────────────────
             const SizedBox(height: 20),
             _sectionTitle('Horário de atendimento'),
             const SizedBox(height: 12),

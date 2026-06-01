@@ -23,7 +23,7 @@ class CartItemTile extends StatelessWidget {
   }
 
   void _decrement(BuildContext context) {
-    // Backend exige PATCH com quantity ≥ 1; se cair abaixo disso, removemos.
+    // Backend PATCH requires quantity >= 1; below that, remove the item instead.
     if (item.quantity - 1 >= 1) {
       context.read<CartBloc>().add(
         CartItemQuantityUpdated(
@@ -46,11 +46,10 @@ class CartItemTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
-      // Usamos go (não push) porque o destino é sub-rota de StatefulShellRoute
-      // — push de fora da shell causa colisão de page keys no Navigator
-      // (`!keyReservation.contains(key)`). Como a barra "Ver carrinho"
-      // continua visível na tela do produto, o usuário pode voltar ao
-      // carrinho clicando nela.
+      // Use go (not push): the target is a StatefulShellRoute sub-route, and
+      // pushing from outside the shell causes a Navigator page-key collision
+      // (`!keyReservation.contains(key)`). The "View cart" bar stays visible on
+      // the product screen, so the user can return to the cart from there.
       onTap: producerId.isEmpty
           ? null
           : () => context.go(
@@ -74,7 +73,6 @@ class CartItemTile extends StatelessWidget {
         ),
         child: Row(
           children: [
-            // Image
             ClipRRect(
               borderRadius: BorderRadius.circular(16),
               child: SizedBox(
@@ -96,7 +94,6 @@ class CartItemTile extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 16),
-            // Info
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -143,7 +140,6 @@ class CartItemTile extends StatelessWidget {
                   const SizedBox(height: 8),
                   Row(
                     children: [
-                      // Quantity selector
                       Container(
                         padding: const EdgeInsets.symmetric(
                           horizontal: 12,
@@ -177,7 +173,6 @@ class CartItemTile extends StatelessWidget {
                         ),
                       ),
                       const Spacer(),
-                      // Delete
                       GestureDetector(
                         onTap: () async {
                           final confirmed = await ConfirmDialog.show(

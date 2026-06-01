@@ -1,4 +1,4 @@
-/// Payload de endereço para POST /auth/register/customer (alinhado ao [AddressRequest] do backend).
+/// Address payload for POST /auth/register/customer (mirrors the backend [AddressRequest]).
 class AddressRequest {
   const AddressRequest({
     required this.street,

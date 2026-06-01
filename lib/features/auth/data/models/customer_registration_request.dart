@@ -1,8 +1,7 @@
 import 'package:ragro_mobile/features/auth/data/models/address_request.dart';
 
-/// Payload para POST /auth/register/customer.
-///
-/// O backend usa [fiscalNumber] para CPF (11 dígitos, sem pontuação).
+/// Payload for POST /auth/register/customer. The backend expects
+/// [fiscalNumber] as an 11-digit CPF without punctuation.
 class CustomerRegistrationRequest {
   const CustomerRegistrationRequest({
     required this.name,

@@ -1,15 +1,5 @@
-// 🍽️ PRESENTATION/BLOC — O "garçom" do restaurante.
-// Recebe eventos (pedidos) da tela, chama o UseCase (cozinha), e emite estados (respostas).
-//
-// @injectable: o injectable cria uma instância NOVA do BLoC toda vez que alguém pedir.
-// Isso é importante porque o BLoC tem estado interno — cada tela precisa do seu próprio BLoC.
-//
-// Fluxo:
-// 1. Tela dispara LearningProductsRequested
-// 2. BLoC emite LearningLoading (mostra spinner)
-// 3. BLoC chama GetProducts (UseCase)
-// 4. Se deu certo → emite LearningSuccess(products)
-// 5. Se deu erro → emite LearningFailure(mensagem)
+// Receives events from the screen, calls the GetProducts use case, and emits
+// loading/success/failure states.
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';

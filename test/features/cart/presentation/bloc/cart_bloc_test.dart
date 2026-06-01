@@ -77,7 +77,7 @@ void main() {
     blocTest<CartBloc, CartState>(
       'emite [Loading, Loaded(empty)] quando backend retorna 404 '
       '(carrinho vazio)',
-      // O datasource já trata 404 como CartModel.empty(); aqui simulamos isso
+      // The datasource already maps 404 to CartModel.empty(); simulated here
       build: () {
         when(() => getCart()).thenAnswer((_) async => tEmptyCart);
         return buildBloc();

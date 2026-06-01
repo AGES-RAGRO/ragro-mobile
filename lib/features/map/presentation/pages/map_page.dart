@@ -67,18 +67,17 @@ class _MapPageState extends State<MapPage> {
       setState(() {
         _currentPosition = position;
       });
-      // Não centraliza apenas na posição atual: o enquadramento real
-      // (fitBounds) acontece em _fitCamera(), garantindo que os pinos dos
-      // produtores fiquem visíveis mesmo que o usuário/emulador esteja longe.
+      // Don't just center on the current position: the actual framing
+      // (fitBounds) happens in _fitCamera(), keeping the producer pins
+      // visible even if the user/emulator is far away.
       await _fitCamera();
     } on Exception catch (_) {
       // Ignore location error
     }
   }
 
-  /// Enquadra a câmera para mostrar todos os produtores (e a posição atual,
-  /// se disponível). Sem isto, a câmera fica na localização atual do
-  /// dispositivo/emulador e os pinos podem cair fora da tela.
+  /// Frames the camera to show all producers (and the current position, if
+  /// available); otherwise pins may fall off-screen.
   Future<void> _fitCamera() async {
     final controller = _mapController;
     if (controller == null) return;
@@ -106,15 +105,15 @@ class _MapPageState extends State<MapPage> {
         CameraUpdate.newLatLngBounds(bounds, 64),
       );
     } on Exception {
-      // O mapa pode ainda não estar dimensionado na primeira chamada;
-      // tenta novamente após o primeiro frame.
+      // The map may not be sized yet on the first call; retry after the
+      // first frame.
       await Future<void>.delayed(const Duration(milliseconds: 300));
       try {
         await controller.animateCamera(
           CameraUpdate.newLatLngBounds(bounds, 64),
         );
       } on Exception {
-        // Ignora: mantém o enquadramento inicial.
+        // Ignore: keep the initial framing.
       }
     }
   }
@@ -146,7 +145,7 @@ class _MapPageState extends State<MapPage> {
         _isLoading = false;
       });
 
-      // Carregar os marcadores customizados em background para não travar a tela
+      // Load custom markers in the background so the screen doesn't freeze.
       for (final producer in producers) {
         final imageUrl =
             (producer.coverUrl != null && producer.coverUrl!.isNotEmpty)
@@ -177,7 +176,7 @@ class _MapPageState extends State<MapPage> {
     final ui.PictureRecorder pictureRecorder = ui.PictureRecorder();
     final Canvas canvas = Canvas(pictureRecorder);
 
-    // Fundo do pino (Gota verde escuro)
+    // Pin background (dark green teardrop)
     final Paint paint = Paint()..color = AppColors.darkGreen;
     final Path path = Path()
       ..moveTo(size / 2, size.toDouble())
@@ -191,7 +190,7 @@ class _MapPageState extends State<MapPage> {
 
     canvas.drawPath(path, paint);
 
-    // Círculo branco interno
+    // Inner white circle
     final Paint whitePaint = Paint()..color = Colors.white;
     final Offset circleCenter = Offset(size / 2, size * 0.4);
     final double circleRadius = size * 0.32;
@@ -200,7 +199,7 @@ class _MapPageState extends State<MapPage> {
     ui.Image? profileImage;
     if (avatarUrl != null && avatarUrl.isNotEmpty) {
       try {
-        // Corrige o localhost para o emulador Android
+        // Rewrite localhost for the Android emulator.
         String resolvedUrl = avatarUrl;
         if (Theme.of(context).platform == TargetPlatform.android &&
             resolvedUrl.contains('localhost')) {
@@ -231,7 +230,7 @@ class _MapPageState extends State<MapPage> {
     }
 
     if (profileImage != null) {
-      // Desenha a foto de perfil recortada
+      // Draw the clipped profile photo.
       canvas.save();
       canvas.clipPath(
         Path()..addOval(
@@ -248,7 +247,7 @@ class _MapPageState extends State<MapPage> {
       );
       canvas.restore();
     } else {
-      // Ícone genérico
+      // Generic icon
       final TextPainter textPainter = TextPainter(
         textDirection: TextDirection.ltr,
       );
@@ -270,7 +269,7 @@ class _MapPageState extends State<MapPage> {
       );
     }
 
-    // Borda fina
+    // Thin border
     final Paint borderPaint = Paint()
       ..color = AppColors.darkGreen
       ..style = PaintingStyle.stroke

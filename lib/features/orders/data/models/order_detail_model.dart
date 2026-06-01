@@ -27,8 +27,8 @@ class OrderDetailBankInfoModel extends OrderDetailBankInfo {
 
   factory OrderDetailBankInfoModel.fromJson(Map<String, dynamic> json) {
     return OrderDetailBankInfoModel(
-      // Backend BankInfoResponse envia `bankName`. Mantém fallbacks para
-      // compatibilidade com payloads antigos / variantes snake_case.
+      // Backend BankInfoResponse sends `bankName`; keep fallbacks for older
+      // payloads and snake_case variants.
       bank:
           json['bankName'] as String? ??
           json['bank_name'] as String? ??

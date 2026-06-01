@@ -1,7 +1,4 @@
-// Screen: Producer Orders (Pedidos do Produtor)
-// User Story: US-20 — Manage Received Orders
-// Epic: EPIC 4 — Producer Features
-// Routes: GET /orders/producer
+// Producer Orders screen (US-20). Route: GET /orders/producer.
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -119,7 +116,6 @@ class _ProducerOrdersViewState extends State<_ProducerOrdersView> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Title
               const Padding(
                 padding: EdgeInsets.fromLTRB(20, 16, 20, 4),
                 child: Text(
@@ -132,7 +128,6 @@ class _ProducerOrdersViewState extends State<_ProducerOrdersView> {
                   ),
                 ),
               ),
-              // Date subtitle
               Padding(
                 padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
                 child: Text(
@@ -146,7 +141,6 @@ class _ProducerOrdersViewState extends State<_ProducerOrdersView> {
               ),
               const SizedBox(height: 8),
 
-              // Tab bar
               BlocBuilder<ProducerOrdersBloc, ProducerOrdersState>(
                 builder: (context, state) {
                   final activeTab = _activeTabFrom(state);
@@ -196,7 +190,6 @@ class _ProducerOrdersViewState extends State<_ProducerOrdersView> {
                 },
               ),
 
-              // Content
               Expanded(
                 child: BlocBuilder<ProducerOrdersBloc, ProducerOrdersState>(
                   builder: (context, state) {
@@ -350,13 +343,13 @@ class _ProducerOrdersViewState extends State<_ProducerOrdersView> {
                                 if (!context.mounted) return;
                                 final bloc = context
                                     .read<ProducerOrdersBloc>();
-                                // Atualização otimista imediata: entregas
-                                // confirmadas saem de "A caminho" na hora.
+                                // Optimistic update: confirmed deliveries leave
+                                // "A caminho" immediately.
                                 for (final id
                                     in delivered ?? const <String>[]) {
                                   bloc.add(ProducerOrderLocallyDelivered(id));
                                 }
-                                // Re-sincroniza com o backend.
+                                // Resync with the backend.
                                 bloc.add(const ProducerOrdersRefreshed());
                               },
                               child: Container(

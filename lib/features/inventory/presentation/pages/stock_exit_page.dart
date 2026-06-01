@@ -149,7 +149,6 @@ class _StockExitViewState extends State<_StockExitView> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Product info
                   Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(

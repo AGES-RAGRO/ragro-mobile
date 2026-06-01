@@ -17,7 +17,6 @@ class OrderItemRow extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: Row(
         children: [
-          // Image
           ClipRRect(
             borderRadius: BorderRadius.circular(16),
             child: Container(
@@ -35,7 +34,6 @@ class OrderItemRow extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 16),
-          // Info
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,

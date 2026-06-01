@@ -1,11 +1,5 @@
-// 🍽️ PRESENTATION/PAGES — A tela que o usuário vê.
-// LearningPage é o ponto de entrada da feature. Ela:
-// 1. Cria o BLoC via getIt (injeção de dependência)
-// 2. Dispara o evento LearningProductsRequested ao carregar
-// 3. Reage aos estados do BLoC para mostrar loading, lista ou erro
-//
-// BlocProvider: fornece o BLoC para toda a árvore de widgets abaixo dele.
-// BlocBuilder: reconstroi o widget sempre que o estado do BLoC muda.
+// Entry point of the learning feature: creates the BLoC via getIt, dispatches
+// LearningProductsRequested on load, and renders loading/list/error states.
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -20,8 +14,6 @@ class LearningPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // BlocProvider cria o BLoC e já dispara o primeiro evento
-    // O operador ".." (cascade) chama add() e retorna o próprio BLoC
     return BlocProvider(
       create: (_) =>
           getIt<LearningBloc>()..add(const LearningProductsRequested()),
@@ -39,7 +31,6 @@ class _LearningView extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Aprendendo Flutter'),
         actions: [
-          // Botão de refresh para recarregar os dados (e demonstrar o erro a cada 3 chamadas)
           IconButton(
             icon: const Icon(Icons.refresh),
             onPressed: () => context.read<LearningBloc>().add(
@@ -48,7 +39,6 @@ class _LearningView extends StatelessWidget {
           ),
         ],
       ),
-      // BlocBuilder reconstroi o body baseado no estado atual do BLoC
       body: BlocBuilder<LearningBloc, LearningState>(
         builder: (context, state) {
           return switch (state) {

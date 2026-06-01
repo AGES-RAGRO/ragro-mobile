@@ -62,10 +62,8 @@ class ProducerOrderCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header row
           Row(
             children: [
-              // Avatar
               CircleAvatar(
                 radius: 20,
                 backgroundColor: AppColors.darkGreen.withValues(alpha: 0.1),
@@ -149,7 +147,6 @@ class ProducerOrderCard extends StatelessWidget {
           const Divider(color: Color(0xFFE2E8F0), height: 1),
           const SizedBox(height: 12),
 
-          // Date
           Row(
             children: [
               const Icon(
@@ -171,7 +168,6 @@ class ProducerOrderCard extends StatelessWidget {
 
           const SizedBox(height: 8),
 
-          // Total
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -198,7 +194,6 @@ class ProducerOrderCard extends StatelessWidget {
           if (!inSelectionMode) ...[
             const SizedBox(height: 12),
 
-            // Actions
             Row(
               children: [
                 Expanded(
@@ -285,8 +280,8 @@ class _StatusBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     final color = _colorFor(status);
     final icon = _iconFor(status);
-    // Texto/ícone legíveis sobre a cor do badge (escuro em cores claras como
-    // amarelo/laranja, branco em cores escuras) para melhorar o contraste.
+    // Pick a readable foreground over the badge color: dark on light colors
+    // (yellow/orange), white on dark colors.
     final foreground =
         ThemeData.estimateBrightnessForColor(color) == Brightness.dark
         ? AppColors.white

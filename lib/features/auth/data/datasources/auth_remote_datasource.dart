@@ -143,7 +143,7 @@ class AuthRemoteDataSource {
     }
   }
 
-  /// Cadastro de consumidor — POST /auth/register/customer (201 + corpo do cliente).
+  /// Registers a customer — POST /auth/register/customer (201 + customer body).
   Future<UserModel> registerCustomer(
     CustomerRegistrationRequest request,
   ) async {
@@ -158,7 +158,7 @@ class AuthRemoteDataSource {
     }
   }
 
-  /// Solicita redefinição de senha via e-mail — POST /auth/password/reset-email (204 No Content).
+  /// Requests a password reset by email — POST /auth/password/reset-email (204).
   Future<void> requestPasswordReset() async {
     try {
       await _apiClient.dio.post<void>(ApiEndpoints.resetPasswordEmail);
@@ -167,7 +167,7 @@ class AuthRemoteDataSource {
     }
   }
 
-  /// Esqueceu a senha — POST /auth/password/forgot (204 No Content).
+  /// Forgot password — POST /auth/password/forgot (204 No Content).
   Future<void> forgotPassword(String email) async {
     try {
       await _apiClient.dio.post<void>(

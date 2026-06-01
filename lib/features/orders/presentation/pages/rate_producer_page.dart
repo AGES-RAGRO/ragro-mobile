@@ -1,4 +1,4 @@
-// Screen: Avaliar Produtor
+// Screen: Rate Producer
 // User Story: US-13 — Rate Producer
 // Epic: EPIC 3 — Shopping & Orders
 // Routes: POST /reviews
@@ -145,7 +145,6 @@ class RateProducerPage extends StatelessWidget {
                   return Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      // Skip button
                       Align(
                         alignment: Alignment.topRight,
                         child: Material(
@@ -169,7 +168,6 @@ class RateProducerPage extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 8),
-                      // Title
                       const Text(
                         'Avalie o Produtor',
                         style: TextStyle(
@@ -180,7 +178,6 @@ class RateProducerPage extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 16),
-                      // Avatar + producer info
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
@@ -220,7 +217,6 @@ class RateProducerPage extends StatelessWidget {
                         ],
                       ),
                       const SizedBox(height: 20),
-                      // Stars
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: List.generate(5, (index) {
@@ -245,7 +241,6 @@ class RateProducerPage extends StatelessWidget {
                         }),
                       ),
                       const SizedBox(height: 24),
-                      // Comment
                       TextFormField(
                         initialValue: comment,
                         enabled: !isSubmitting,
@@ -269,7 +264,6 @@ class RateProducerPage extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 20),
-                      // Send button
                       Material(
                         color: Colors.transparent,
                         child: InkWell(

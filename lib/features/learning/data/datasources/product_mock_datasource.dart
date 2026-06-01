@@ -1,11 +1,6 @@
-// DATA/DATASOURCES — De onde vêm os "ingredientes" da cozinha.
-// Em produção, aqui ficaria a chamada HTTP real (ex: dio.get('/products')).
-// Neste exemplo, usamos dados fake com Future.delayed para simular latência de API.
-//
-// O contador _callCount simula erros a cada 3 chamadas, para que seja possivel ver
-// o estado de Failure e o botão "Tentar novamente" funcionando na tela.
-//
-// @lazySingleton: uma instância só (mantém o contador entre chamadas).
+// Mock data source: returns fake products with a simulated delay. _callCount
+// forces an error every 3rd call to exercise the failure/retry UI. Kept as a
+// lazySingleton so the counter persists across calls.
 
 import 'package:injectable/injectable.dart';
 import 'package:ragro_mobile/features/learning/data/models/product_model.dart';
@@ -15,12 +10,11 @@ class ProductMockDataSource {
   int _callCount = 0;
 
   Future<List<ProductModel>> getProducts() async {
-    // Simula latência de rede (1 segundo)
     await Future<void>.delayed(const Duration(seconds: 1));
 
     _callCount++;
 
-    // A cada 3 chamadas, simula um erro de rede
+    // Simulate a network error every 3rd call.
     if (_callCount % 3 == 0) {
       throw Exception(
         'Erro simulado: falha na conexão com o servidor. '
@@ -28,7 +22,6 @@ class ProductMockDataSource {
       );
     }
 
-    // Dados fake que simulam resposta da API
     return const [
       ProductModel(
         id: '1',

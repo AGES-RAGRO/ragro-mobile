@@ -1,4 +1,4 @@
-// Screen: Confirmação de Pedido - Dados Bancários
+// Screen: Order Confirmation - Bank Details
 // User Story: US-10 — Checkout
 // Epic: EPIC 3 — Shopping & Orders
 // Routes: POST /orders (confirm)
@@ -35,9 +35,9 @@ class OrderConfirmationPage extends StatelessWidget {
           create: (_) =>
               getIt<CheckoutBloc>()..add(const CheckoutStarted('cart')),
         ),
-        // CustomerProfileBloc é factory no DI; o BlocProvider mantém uma única
-        // instância no subtree, então context.read<CustomerProfileBloc>() em
-        // callbacks (ex.: botão "Alterar") referencia o mesmo bloc do BlocBuilder.
+        // CustomerProfileBloc is a DI factory; this BlocProvider keeps a single
+        // instance in the subtree, so context.read<CustomerProfileBloc>() in
+        // callbacks (e.g. "Alterar") points to the same bloc as the BlocBuilder.
         BlocProvider(
           create: (_) =>
               getIt<CustomerProfileBloc>()..add(const CustomerProfileStarted()),
@@ -171,7 +171,6 @@ class _CheckoutView extends StatelessWidget {
       body: SafeArea(
         child: Column(
           children: [
-            // Top app bar
             Padding(
               padding: const EdgeInsets.all(16),
               child: Row(
@@ -199,11 +198,9 @@ class _CheckoutView extends StatelessWidget {
               ),
             ),
 
-            // Scrollable content
             Expanded(
               child: ListView(
                 children: [
-                  // Order items summary
                   Padding(
                     padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
                     child: Column(
@@ -251,18 +248,16 @@ class _CheckoutView extends StatelessWidget {
                     ),
                   ),
 
-                  // Divider
                   Container(height: 8, color: const Color(0xFFF6F7F6)),
 
-                  // Payment & Delivery info
                   Padding(
                     padding: const EdgeInsets.fromLTRB(16, 24, 16, 24),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Bank info — só renderiza quando há dados bancários
-                        // (evita card vazio quando o produtor não tem
-                        // PaymentMethod e o backend devolve bankInfo nulo).
+                        // Render bank info only when present, to avoid an empty
+                        // card when the producer has no PaymentMethod and the
+                        // backend returns a null bankInfo.
                         if (cart.bankName.isNotEmpty ||
                             cart.bankAgency.isNotEmpty ||
                             cart.bankAccount.isNotEmpty ||
@@ -437,7 +432,6 @@ class _CheckoutView extends StatelessWidget {
                           ),
                           const SizedBox(height: 24),
                         ],
-                        // Delivery address
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
@@ -456,8 +450,8 @@ class _CheckoutView extends StatelessWidget {
                                   '/customer/edit-address',
                                 );
                                 if ((updated ?? false) && context.mounted) {
-                                  // Recarrega checkout + perfil para refletir
-                                  // o endereço atualizado.
+                                  // Reload checkout and profile to reflect the
+                                  // updated address.
                                   context.read<CheckoutBloc>().add(
                                     const CheckoutStarted('cart'),
                                   );
@@ -483,7 +477,6 @@ class _CheckoutView extends StatelessWidget {
                         const SizedBox(height: 16),
                         const _DeliveryMap(),
                         const SizedBox(height: 24),
-                        // Delivery type
                         const Text(
                           'Tipo de Entrega',
                           style: TextStyle(
@@ -536,7 +529,6 @@ class _CheckoutView extends StatelessWidget {
               ),
             ),
 
-            // Sticky footer
             Container(
               padding: const EdgeInsets.fromLTRB(24, 25, 24, 24),
               decoration: const BoxDecoration(
@@ -552,7 +544,6 @@ class _CheckoutView extends StatelessWidget {
               ),
               child: Column(
                 children: [
-                  // Subtotal row
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -575,7 +566,6 @@ class _CheckoutView extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 8),
-                  // Frete row
                   const Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -599,7 +589,6 @@ class _CheckoutView extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 8),
-                  // Total row
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -624,7 +613,6 @@ class _CheckoutView extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 16),
-                  // Confirm button
                   GestureDetector(
                     onTap: isConfirming
                         ? null
@@ -803,12 +791,9 @@ class _CartItemRow extends StatelessWidget {
   }
 }
 
-/// Card que exibe o endereço primário do customer logado.
-/// Lê do [CustomerProfileBloc] já provido pela página.
-/// Mapa de entrega: mostra a localização do endereço do consumidor.
-/// Usa as coordenadas do endereço primário quando existem; senão, geocoda o
-/// endereço no próprio dispositivo (geocoder nativo, sem API key) — assim
-/// funciona mesmo para endereços antigos com coordenadas nulas.
+/// Delivery map for the customer's primary address. Uses the address
+/// coordinates when present; otherwise geocodes on-device (native geocoder, no
+/// API key) so it still works for older addresses with null coordinates.
 class _DeliveryMap extends StatefulWidget {
   const _DeliveryMap();
 
@@ -879,12 +864,12 @@ class _DeliveryMapState extends State<_DeliveryMap> {
         final lat = address?.latitude;
         final lng = address?.longitude;
 
-        // Coordenadas diretas do endereço: renderiza imediatamente.
+        // Address has coordinates: render immediately.
         if (lat != null && lng != null) {
           return _map(LatLng(lat, lng));
         }
 
-        // Sem coordenadas: geocoda no dispositivo (uma vez por endereço).
+        // No coordinates: geocode on-device (once per address).
         if (address != null) _maybeGeocode(address);
         if (_geocoded != null) return _map(_geocoded!);
 

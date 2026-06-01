@@ -1,7 +1,7 @@
 import 'package:equatable/equatable.dart';
 
-/// Representa um método de pagamento do produtor (pix ou bank_account).
-/// Espelha o contrato do backend: POST /admin/producers → paymentMethods[].
+/// A producer payment method (pix or bank_account); mirrors the backend
+/// POST /admin/producers paymentMethods[] contract.
 class AdminPaymentMethod extends Equatable {
   const AdminPaymentMethod({
     required this.type,
@@ -16,15 +16,15 @@ class AdminPaymentMethod extends Equatable {
     this.fiscalNumber,
   });
 
-  /// 'pix' ou 'bank_account'
+  /// 'pix' or 'bank_account'
   final String type;
 
-  // ── PIX ──────────────────────────────────────────────────────────────
+  // PIX
   /// 'cpf' | 'cnpj' | 'email' | 'phone' | 'random'
   final String? pixKeyType;
   final String? pixKey;
 
-  // ── Conta Bancária ────────────────────────────────────────────────────
+  // Bank account
   final String? bankCode;
   final String? bankName;
   final String? agency;

@@ -1,4 +1,4 @@
-// Screen: Tela de Pedidos (Pendentes/Aceitos/Entregues/Cancelados)
+// Screen: Orders (Pending/Accepted/Delivered/Cancelled)
 // User Story: US-11 — View Orders
 // Epic: EPIC 3 — Shopping & Orders
 // Routes: GET /orders?status=...

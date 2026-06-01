@@ -29,8 +29,8 @@ class Co2Repository {
     }
   }
 
-  /// Registra a economia de CO2 de uma rota otimizada. Best-effort: não deve
-  /// bloquear o fluxo da rota se falhar.
+  /// Records an optimized route's CO2 savings. Best-effort: must not block the
+  /// route flow on failure.
   Future<void> recordSavings(Co2SavingRequest request) async {
     try {
       await _apiClient.dio.post<void>(

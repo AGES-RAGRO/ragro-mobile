@@ -30,10 +30,10 @@ class AdminEditProducerSubmitted extends AdminEditProducerEvent {
     required this.scheduleStart,
     required this.scheduleEnd,
     this.neighborhood,
-    // ── PIX (opcional no update — partial) ──────────────────────────────
+    // PIX (optional on partial update)
     this.pixKeyType,
     this.pixKey,
-    // ── Conta Bancária (opcional no update — partial) ────────────────────
+    // Bank account (optional on partial update)
     this.bankName,
     this.bankCode,
     this.agency,
@@ -59,11 +59,11 @@ class AdminEditProducerSubmitted extends AdminEditProducerEvent {
   final String scheduleStart;
   final String scheduleEnd;
 
-  // PIX (opcional no update)
+  // PIX (optional on update)
   final String? pixKeyType;
   final String? pixKey;
 
-  // Conta Bancária (opcional no update)
+  // Bank account (optional on update)
   final String? bankName;
   final String? bankCode;
   final String? agency;
