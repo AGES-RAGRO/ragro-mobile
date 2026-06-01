@@ -6,13 +6,6 @@ sealed class RateProducerEvent extends Equatable {
   List<Object?> get props => [];
 }
 
-class RateProducerStarted extends RateProducerEvent {
-  const RateProducerStarted(this.orderId);
-  final String orderId;
-  @override
-  List<Object?> get props => [orderId];
-}
-
 class RateProducerStarSelected extends RateProducerEvent {
   const RateProducerStarSelected(this.rating);
   final int rating;

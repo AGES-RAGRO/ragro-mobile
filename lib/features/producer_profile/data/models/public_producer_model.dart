@@ -94,7 +94,7 @@ class PublicProducerModel extends PublicProducer {
     return raw.map((a) {
       final slot = a as Map<String, dynamic>;
       return AvailabilitySlot(
-        weekday: slot['weekday'] as int,
+        weekday: (slot['weekday'] as num?)?.toInt() ?? 0,
         opensAt: slot['opensAt'] as String? ?? '',
         closesAt: slot['closesAt'] as String? ?? '',
       );

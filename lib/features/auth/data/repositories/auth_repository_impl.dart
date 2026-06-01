@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:injectable/injectable.dart';
 import 'package:ragro_mobile/core/network/api_client.dart';
 import 'package:ragro_mobile/features/auth/data/datasources/auth_local_datasource.dart';
@@ -99,12 +100,14 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<User?> getCurrentUser() async {
     // DEMO_MODE: bypass auth — used for Playwright visual testing only.
     // Run with: flutter run -d chrome --dart-define=DEMO_MODE=true
+    // Hard-gated behind !kReleaseMode so a production (release) build can never honor it,
+    // even if someone passes --dart-define=DEMO_MODE=true.
     const demoMode = bool.fromEnvironment('DEMO_MODE');
     const demoRole = String.fromEnvironment(
       'DEMO_ROLE',
       defaultValue: 'producer',
     );
-    if (demoMode) {
+    if (demoMode && !kReleaseMode) {
       final (id, name, email) = switch (demoRole) {
         'customer' || 'consumer' => (
           'demo_customer_001',
@@ -132,12 +135,12 @@ class AuthRepositoryImpl implements AuthRepository {
       );
     }
 
-    final token = _local.getToken();
+    final token = await _local.getToken();
     if (token == null) return null;
 
-    final refreshToken = _local.getRefreshToken();
-    final tokenUrl = _local.getTokenUrl();
-    final clientId = _local.getClientId();
+    final refreshToken = await _local.getRefreshToken();
+    final tokenUrl = await _local.getTokenUrl();
+    final clientId = await _local.getClientId();
 
     // Try to refresh the access token if we have the Keycloak data saved
     if (refreshToken != null && tokenUrl != null && clientId != null) {

@@ -31,18 +31,6 @@ class OrdersRemoteDatasource {
     }
   }
 
-  Future<Order> getOrderById(String id) async {
-    try {
-      final response = await _apiClient.dio.get<Map<String, dynamic>>(
-        ApiEndpoints.customerOrder(id),
-      );
-
-      return OrderModel.fromJson(response.data!);
-    } on DioException catch (e) {
-      throw e.error as ApiException? ?? const UnknownApiException();
-    }
-  }
-
   Future<OrderDetail> getCustomerOrderById(String id) async {
     try {
       final response = await _apiClient.dio.get<Map<String, dynamic>>(
@@ -59,18 +47,6 @@ class OrdersRemoteDatasource {
     try {
       final response = await _apiClient.dio.post<Map<String, dynamic>>(
         ApiEndpoints.orders,
-      );
-
-      return OrderModel.fromJson(response.data!);
-    } on DioException catch (e) {
-      throw e.error as ApiException? ?? const UnknownApiException();
-    }
-  }
-
-  Future<Order> cancelOrder(String id) async {
-    try {
-      final response = await _apiClient.dio.patch<Map<String, dynamic>>(
-        ApiEndpoints.orderCancel(id),
       );
 
       return OrderModel.fromJson(response.data!);
@@ -101,54 +77,6 @@ class OrdersRemoteDatasource {
       );
 
       return OrderDetailModel.fromJson(response.data!);
-    } on DioException catch (e) {
-      throw e.error as ApiException? ?? const UnknownApiException();
-    }
-  }
-
-  Future<Order> updateStatus(String id, OrderStatus status) async {
-    try {
-      final response = await _apiClient.dio.patch<Map<String, dynamic>>(
-        ApiEndpoints.orderStatus(id),
-        data: {'status': _statusQueryValue(status)},
-      );
-
-      return OrderModel.fromJson(response.data!);
-    } on DioException catch (e) {
-      throw e.error as ApiException? ?? const UnknownApiException();
-    }
-  }
-
-  Future<Order> confirmOrder(String id) async {
-    try {
-      final response = await _apiClient.dio.patch<Map<String, dynamic>>(
-        ApiEndpoints.orderConfirm(id),
-      );
-
-      return OrderModel.fromJson(response.data!);
-    } on DioException catch (e) {
-      throw e.error as ApiException? ?? const UnknownApiException();
-    }
-  }
-
-  Future<Order> repeatOrder(String id) async {
-    try {
-      final response = await _apiClient.dio.post<Map<String, dynamic>>(
-        ApiEndpoints.orderRepeat(id),
-      );
-
-      return OrderModel.fromJson(response.data!);
-    } on DioException catch (e) {
-      throw e.error as ApiException? ?? const UnknownApiException();
-    }
-  }
-
-  Future<void> rateProducer(String orderId, int rating) async {
-    try {
-      await _apiClient.dio.post<void>(
-        ApiEndpoints.orderRating(orderId),
-        data: {'rating': rating},
-      );
     } on DioException catch (e) {
       throw e.error as ApiException? ?? const UnknownApiException();
     }
