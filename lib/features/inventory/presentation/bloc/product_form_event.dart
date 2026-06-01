@@ -44,10 +44,3 @@ class ProductFormSaved extends ProductFormEvent {
     photo,
   ];
 }
-
-class ProductFormPhotoPicked extends ProductFormEvent {
-  const ProductFormPhotoPicked(this.photo);
-  final XFile photo;
-  @override
-  List<Object?> get props => [photo];
-}

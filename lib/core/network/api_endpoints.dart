@@ -87,8 +87,6 @@ abstract final class ApiEndpoints {
   static String orderCancel(String id) => '$_base/orders/$id/cancel';
   static String orderStatus(String id) => '$_base/orders/$id/status';
   static String orderConfirm(String id) => '$_base/orders/$id/confirm';
-  static String orderRepeat(String id) => '$_base/orders/$id/repeat';
-  static String orderRating(String id) => '$_base/orders/$id/rating';
   static String orderSeen(String id) => '$_base/orders/$id/seen';
   static String get reviews => '$_base/reviews';
 
@@ -124,8 +122,6 @@ abstract final class ApiEndpoints {
 
   // Producer orders
   static String get producerOrders => '$_base/orders/producer';
-  static String producerOrder(String id) => '$_base/orders/producer/$id';
-  static String get producerOrdersToday => '$_base/orders/today';
   static String producerOrderConfirm(String id) => orderConfirm(id);
   static String producerOrderStatus(String id) => orderStatus(id);
   static String producerOrderCancel(String id) => orderCancel(id);

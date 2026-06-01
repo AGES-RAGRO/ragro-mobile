@@ -15,17 +15,11 @@ class OrdersRepositoryImpl implements OrdersRepository {
       _datasource.getOrders(status: status);
 
   @override
-  Future<Order> getOrderById(String id) => _datasource.getOrderById(id);
-
-  @override
   Future<OrderDetail> getCustomerOrderById(String id) =>
       _datasource.getCustomerOrderById(id);
 
   @override
   Future<Order> createOrderFromCart() => _datasource.createOrderFromCart();
-
-  @override
-  Future<Order> cancelOrder(String id) => _datasource.cancelOrder(id);
 
   @override
   Future<void> cancelCustomerOrder(
@@ -37,20 +31,6 @@ class OrdersRepositoryImpl implements OrdersRepository {
   @override
   Future<OrderDetail> confirmCustomerDelivery(String id) =>
       _datasource.confirmCustomerDelivery(id);
-
-  @override
-  Future<Order> updateStatus(String id, OrderStatus status) =>
-      _datasource.updateStatus(id, status);
-
-  @override
-  Future<Order> confirmOrder(String id) => _datasource.confirmOrder(id);
-
-  @override
-  Future<Order> repeatOrder(String id) => _datasource.repeatOrder(id);
-
-  @override
-  Future<void> rateProducer(String orderId, int rating) =>
-      _datasource.rateProducer(orderId, rating);
 
   @override
   Future<void> createReview(String orderId, int rating, String comment) =>
