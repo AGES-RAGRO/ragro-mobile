@@ -69,6 +69,7 @@ abstract final class ApiEndpoints {
   static String producerReviews(String id) => '$_base/producers/$id/reviews';
   static String get co2TotalSaved => '$_base/co2/total-saved';
   static String get co2Calculate => '$_base/co2/calculate';
+  static String get co2RecordSavings => '$_base/co2/record-savings';
   static String get co2Options => '$_base/co2/options';
 
   // Routes (otimização via backend; a chave do Google fica no servidor)

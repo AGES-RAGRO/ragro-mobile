@@ -1,5 +1,9 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
+import 'package:ragro_mobile/core/di/injection.dart';
+import 'package:ragro_mobile/features/producer_management/presentation/bloc/producer_management_bloc.dart';
+import 'package:ragro_mobile/features/producer_management/presentation/bloc/producer_management_event.dart';
+import 'package:ragro_mobile/features/producer_management/presentation/bloc/producer_management_state.dart';
 import 'package:ragro_mobile/features/producer_orders/domain/entities/producer_order_status.dart';
 import 'package:ragro_mobile/features/producer_orders/domain/usecases/confirm_producer_order.dart';
 import 'package:ragro_mobile/features/producer_orders/domain/usecases/get_producer_orders.dart';
@@ -216,6 +220,8 @@ class ProducerOrdersBloc
         event.orderId,
         ProducerOrderStatus.delivered,
       );
+      // Entrega concluída → recarrega o dashboard (só entregues).
+      _refreshProducerDashboard();
       final updated = currentOrders
           .map(
             (o) => o.id == event.orderId
@@ -256,6 +262,14 @@ class ProducerOrdersBloc
         )
         .toList();
     emit(ProducerOrdersLoaded(orders: updated, activeTab: _activeTab));
+  }
+
+  /// Recarrega o dashboard do produtor (bloc singleton) após uma entrega.
+  void _refreshProducerDashboard() {
+    final dashboard = getIt<ProducerManagementBloc>();
+    if (dashboard.state is! ProducerManagementInitial) {
+      dashboard.add(const ProducerManagementRefreshed());
+    }
   }
 
   Future<void> _reload(Emitter<ProducerOrdersState> emit) async {

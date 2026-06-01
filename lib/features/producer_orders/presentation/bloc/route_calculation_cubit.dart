@@ -1,6 +1,12 @@
+import 'dart:async';
+
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:ragro_mobile/core/di/injection.dart';
+import 'package:ragro_mobile/features/producer_management/presentation/bloc/producer_management_bloc.dart';
+import 'package:ragro_mobile/features/producer_management/presentation/bloc/producer_management_event.dart';
+import 'package:ragro_mobile/features/producer_management/presentation/bloc/producer_management_state.dart';
 import 'package:ragro_mobile/features/producer_orders/data/models/co2_request_model.dart';
 import 'package:ragro_mobile/features/producer_orders/data/repositories/co2_repository.dart';
 import 'package:ragro_mobile/features/producer_orders/data/repositories/route_repository.dart';
@@ -18,6 +24,9 @@ class RouteCalculationCubit extends Cubit<RouteCalculationState> {
   /// Todas as entregas roteáveis carregadas (fonte da verdade); a lista exibida
   /// no state é derivada desta + das entregas já confirmadas.
   List<RouteDelivery> _allDeliveries = const [];
+
+  /// Garante que a economia de CO2 seja gravada uma única vez por sessão de rota.
+  bool _savingsRecorded = false;
 
   RouteCalculationCubit(
     this._co2Repository,
@@ -165,6 +174,9 @@ class RouteCalculationCubit extends Cubit<RouteCalculationState> {
         ..add(deliveryId);
       emit(state.copyWith(confirmedDeliveries: updatedDeliveries));
 
+      // Entrega concluída → o dashboard (só entregues) precisa recarregar.
+      _refreshProducerDashboard();
+
       // Recalcula a rota sem as entregas já confirmadas.
       await _recalculateRoute();
     } catch (e) {
@@ -242,6 +254,60 @@ class RouteCalculationCubit extends Cubit<RouteCalculationState> {
     return (lat, lng);
   }
 
+  /// Recarrega o dashboard do produtor (bloc singleton) após uma entrega, para
+  /// as métricas de "entregues" refletirem sem precisar reabrir o app.
+  void _refreshProducerDashboard() {
+    final dashboard = getIt<ProducerManagementBloc>();
+    if (dashboard.state is! ProducerManagementInitial) {
+      dashboard.add(const ProducerManagementRefreshed());
+    }
+  }
+
+  /// Grava a economia de CO2 da rota: baseline = somatório das distâncias
+  /// origem→cada parada (ida/volta, calculado pelo backend) vs. a rota
+  /// otimizada. Best-effort: não bloqueia o fluxo da rota.
+  void _recordCo2Savings(List<RouteDelivery> deliveries, double optimizedKm) {
+    final fuel = _mapFuelType(state.selectedFuel);
+    if (fuel == 'ELECTRIC') return; // economia de CO2 = 0
+
+    final originLat = state.producerLat;
+    final originLng = state.producerLng;
+    if (originLat == null || originLng == null) return;
+
+    final distances = <double>[];
+    for (final d in deliveries) {
+      final coords = _parseLatLng(d.stop);
+      if (coords == null) continue;
+      final meters = Geolocator.distanceBetween(
+        originLat,
+        originLng,
+        coords.$1,
+        coords.$2,
+      );
+      final km = meters / 1000.0;
+      if (km > 0) distances.add(km); // backend exige distância > 0
+    }
+    if (distances.isEmpty) return;
+
+    final consumption = double.tryParse(
+      state.averageConsumption.replaceAll(',', '.'),
+    );
+
+    unawaited(
+      _co2Repository
+          .recordSavings(
+            Co2SavingRequest(
+              distanceOptimized: optimizedKm,
+              separateDeliveryDistances: distances,
+              vehicleType: _mapVehicleType(state.selectedVehicle),
+              fuelType: fuel,
+              averageConsumption: consumption,
+            ),
+          )
+          .catchError((_) {}),
+    );
+  }
+
   Future<void> _recalculateRoute() async {
     final pending = _allDeliveries
         .where((d) => !state.confirmedDeliveries.contains(d.id))
@@ -306,6 +372,12 @@ class RouteCalculationCubit extends Cubit<RouteCalculationState> {
           totalDurationMins: route.durationMins,
         ),
       );
+
+      // Grava a economia de CO2 da rota otimizada (uma vez por sessão).
+      if (!_savingsRecorded && route.distanceKm > 0) {
+        _savingsRecorded = true;
+        _recordCo2Savings(pending, route.distanceKm);
+      }
 
       // Se o CO2 já foi calculado, recalcula com a nova distância.
       if (state.status == RouteCalculationStatus.calculated) {
