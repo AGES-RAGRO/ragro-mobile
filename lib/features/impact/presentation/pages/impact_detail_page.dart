@@ -73,7 +73,11 @@ class _ImpactDetailPageState extends State<ImpactDetailPage> {
 
   @override
   Widget build(BuildContext context) {
-    final co2InTons = (_totalCo2Saved / 1000).round();
+    // _totalCo2Saved está em kg → toneladas, com 2 casas decimais (vírgula),
+    // para mostrar valores parciais (< 1 t) em vez de arredondar para 0.
+    final co2Value = (_totalCo2Saved / 1000)
+        .toStringAsFixed(2)
+        .replaceAll('.', ',');
 
     return Scaffold(
       backgroundColor: AppColors.white,
@@ -173,7 +177,7 @@ class _ImpactDetailPageState extends State<ImpactDetailPage> {
                                     textBaseline: TextBaseline.alphabetic,
                                     children: [
                                       Text(
-                                        '$co2InTons',
+                                        co2Value,
                                         style: const TextStyle(
                                           fontFamily: 'Figtree',
                                           fontWeight: FontWeight.w700,

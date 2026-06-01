@@ -8,6 +8,8 @@ class HomeProductCard extends StatelessWidget {
     required this.onTap,
     required this.onAddToCart,
     this.isRecommended = false,
+    this.aiRanked = false,
+    this.aiScore,
     super.key,
   });
 
@@ -15,6 +17,14 @@ class HomeProductCard extends StatelessWidget {
   final VoidCallback onTap;
   final VoidCallback onAddToCart;
   final bool isRecommended;
+
+  /// `true` quando a IA (reranker LLM) de fato reordenou este item
+  /// (reason == LLM_RERANKED). Diferencia recomendação por IA de recomendação
+  /// heurística — evita o selo "IA recomenda" enganoso para todos.
+  final bool aiRanked;
+
+  /// Score de relevância (0–100) atribuído pela IA, quando disponível.
+  final int? aiScore;
 
   @override
   Widget build(BuildContext context) {
@@ -54,35 +64,9 @@ class HomeProductCard extends StatelessWidget {
                   Positioned(
                     top: 8,
                     left: 8,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 4,
-                      ),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF98FFBD),
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: const Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            Icons.auto_awesome,
-                            color: AppColors.darkGreen,
-                            size: 11,
-                          ),
-                          SizedBox(width: 4),
-                          Text(
-                            'IA recomenda',
-                            style: TextStyle(
-                              fontFamily: 'Figtree',
-                              fontWeight: FontWeight.w600,
-                              fontSize: 10,
-                              color: AppColors.darkGreen,
-                            ),
-                          ),
-                        ],
-                      ),
+                    child: _RecommendationBadge(
+                      aiRanked: aiRanked,
+                      score: aiScore,
                     ),
                   ),
               ],
@@ -165,6 +149,49 @@ class HomeProductCard extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// Selo de recomendação. Mostra "IA recomenda" + score apenas quando a IA
+/// realmente reordenou o item; caso contrário mostra um selo neutro "Para você".
+class _RecommendationBadge extends StatelessWidget {
+  const _RecommendationBadge({required this.aiRanked, this.score});
+
+  final bool aiRanked;
+  final int? score;
+
+  @override
+  Widget build(BuildContext context) {
+    final label = aiRanked
+        ? (score != null && score! > 0 ? 'IA recomenda · $score%' : 'IA recomenda')
+        : 'Para você';
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: aiRanked ? const Color(0xFF98FFBD) : const Color(0xFFE2F0E6),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            aiRanked ? Icons.auto_awesome : Icons.favorite_border,
+            color: AppColors.darkGreen,
+            size: 11,
+          ),
+          const SizedBox(width: 4),
+          Text(
+            label,
+            style: const TextStyle(
+              fontFamily: 'Figtree',
+              fontWeight: FontWeight.w600,
+              fontSize: 10,
+              color: AppColors.darkGreen,
+            ),
+          ),
+        ],
       ),
     );
   }

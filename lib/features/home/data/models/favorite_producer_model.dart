@@ -8,6 +8,7 @@ class FavoriteProducerModel extends FavoriteProducer {
     required super.farmName,
     required super.avatarUrl,
     required super.averageRating,
+    super.coverUrl,
   });
 
   factory FavoriteProducerModel.fromJson(Map<String, dynamic> json) {
@@ -18,6 +19,7 @@ class FavoriteProducerModel extends FavoriteProducer {
       avatarUrl: ApiEndpoints.resolveMediaUrl(
         json['avatarUrl'] as String? ?? '',
       ),
+      coverUrl: ApiEndpoints.resolveMediaUrl(json['coverUrl'] as String? ?? ''),
       averageRating: (json['averageRating'] as num?)?.toDouble() ?? 0.0,
     );
   }

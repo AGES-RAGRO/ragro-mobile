@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:ragro_mobile/core/theme/app_colors.dart';
 import 'package:ragro_mobile/features/search/domain/entities/search_result.dart';
+import 'package:ragro_mobile/shared/utils/unity_type_label.dart';
 
 class ProductTile extends StatelessWidget {
   const ProductTile({
@@ -88,7 +89,7 @@ class ProductTile extends StatelessWidget {
                       ),
                       if (result.unit != null)
                         Text(
-                          ' /${result.unit}',
+                          ' /${localizeUnityType(result.unit!)}',
                           style: const TextStyle(
                             fontFamily: 'Manrope',
                             fontSize: 12,

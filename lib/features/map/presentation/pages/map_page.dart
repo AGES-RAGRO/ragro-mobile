@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
@@ -66,19 +67,73 @@ class _MapPageState extends State<MapPage> {
       setState(() {
         _currentPosition = position;
       });
-      if (_mapController != null) {
-        await _mapController!.animateCamera(
-          CameraUpdate.newCameraPosition(
-            CameraPosition(
-              target: LatLng(position.latitude, position.longitude),
-              zoom: 12,
-            ),
-          ),
-        );
-      }
+      // Não centraliza apenas na posição atual: o enquadramento real
+      // (fitBounds) acontece em _fitCamera(), garantindo que os pinos dos
+      // produtores fiquem visíveis mesmo que o usuário/emulador esteja longe.
+      await _fitCamera();
     } on Exception catch (_) {
       // Ignore location error
     }
+  }
+
+  /// Enquadra a câmera para mostrar todos os produtores (e a posição atual,
+  /// se disponível). Sem isto, a câmera fica na localização atual do
+  /// dispositivo/emulador e os pinos podem cair fora da tela.
+  Future<void> _fitCamera() async {
+    final controller = _mapController;
+    if (controller == null) return;
+
+    final points = _producers
+        .map((p) => LatLng(p.latitude, p.longitude))
+        .toList();
+    if (_currentPosition != null) {
+      points.add(
+        LatLng(_currentPosition!.latitude, _currentPosition!.longitude),
+      );
+    }
+    if (points.isEmpty) return;
+
+    if (points.length == 1) {
+      await controller.animateCamera(
+        CameraUpdate.newLatLngZoom(points.first, 13),
+      );
+      return;
+    }
+
+    final bounds = _boundsFromPoints(points);
+    try {
+      await controller.animateCamera(
+        CameraUpdate.newLatLngBounds(bounds, 64),
+      );
+    } on Exception {
+      // O mapa pode ainda não estar dimensionado na primeira chamada;
+      // tenta novamente após o primeiro frame.
+      await Future<void>.delayed(const Duration(milliseconds: 300));
+      try {
+        await controller.animateCamera(
+          CameraUpdate.newLatLngBounds(bounds, 64),
+        );
+      } on Exception {
+        // Ignora: mantém o enquadramento inicial.
+      }
+    }
+  }
+
+  LatLngBounds _boundsFromPoints(List<LatLng> points) {
+    var minLat = points.first.latitude;
+    var maxLat = points.first.latitude;
+    var minLng = points.first.longitude;
+    var maxLng = points.first.longitude;
+    for (final p in points) {
+      minLat = math.min(minLat, p.latitude);
+      maxLat = math.max(maxLat, p.latitude);
+      minLng = math.min(minLng, p.longitude);
+      maxLng = math.max(maxLng, p.longitude);
+    }
+    return LatLngBounds(
+      southwest: LatLng(minLat, minLng),
+      northeast: LatLng(maxLat, maxLng),
+    );
   }
 
   Future<void> _loadProducers() async {
@@ -267,22 +322,56 @@ class _MapPageState extends State<MapPage> {
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
-          : GoogleMap(
-              initialCameraPosition: CameraPosition(
-                target: _currentPosition != null
-                    ? LatLng(
-                        _currentPosition!.latitude,
-                        _currentPosition!.longitude,
-                      )
-                    : _defaultLocation,
-                zoom: _currentPosition != null ? 12.0 : 10.0,
-              ),
-              onMapCreated: (controller) {
-                _mapController = controller;
-              },
-              markers: _buildMarkers(),
-              myLocationEnabled: true,
+          : Stack(
+              children: [
+                GoogleMap(
+                  initialCameraPosition: CameraPosition(
+                    target: _currentPosition != null
+                        ? LatLng(
+                            _currentPosition!.latitude,
+                            _currentPosition!.longitude,
+                          )
+                        : _defaultLocation,
+                    zoom: _currentPosition != null ? 12.0 : 10.0,
+                  ),
+                  onMapCreated: (controller) {
+                    _mapController = controller;
+                    _fitCamera();
+                  },
+                  markers: _buildMarkers(),
+                  myLocationEnabled: true,
+                ),
+                if (_producers.isEmpty) _buildEmptyState(),
+              ],
             ),
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return Positioned(
+      top: 16,
+      left: 16,
+      right: 16,
+      child: Material(
+        elevation: 2,
+        borderRadius: BorderRadius.circular(12),
+        color: Colors.white,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          child: Row(
+            children: [
+              const Icon(Icons.location_off_outlined, color: AppColors.darkGreen),
+              const SizedBox(width: 12),
+              const Expanded(
+                child: Text(
+                  'Nenhum produtor com localização disponível no momento.',
+                  style: TextStyle(fontSize: 13, color: AppColors.black),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

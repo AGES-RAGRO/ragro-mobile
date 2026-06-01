@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:ragro_mobile/core/di/injection.dart';
 import 'package:ragro_mobile/core/theme/app_colors.dart';
 import 'package:ragro_mobile/features/inventory/presentation/bloc/stock_entry_bloc.dart';
+import 'package:ragro_mobile/shared/utils/unity_type_label.dart';
 import 'package:ragro_mobile/features/inventory/presentation/bloc/stock_entry_event.dart';
 import 'package:ragro_mobile/features/inventory/presentation/bloc/stock_entry_state.dart';
 
@@ -181,7 +182,7 @@ class _StockEntryViewState extends State<_StockEntryView> {
                     enabled: !isLoading,
                     decoration: InputDecoration(
                       hintText: '0',
-                      suffixText: widget.unit,
+                      suffixText: localizeUnityType(widget.unit),
                       hintStyle: const TextStyle(
                         fontFamily: 'Manrope',
                         fontSize: 15,

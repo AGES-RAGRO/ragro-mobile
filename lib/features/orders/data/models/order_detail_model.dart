@@ -1,3 +1,4 @@
+import 'package:ragro_mobile/core/network/api_endpoints.dart';
 import 'package:ragro_mobile/features/orders/domain/entities/order_detail.dart';
 
 class OrderDetailActionsModel extends OrderDetailActions {
@@ -93,12 +94,13 @@ class OrderDetailItemModel extends OrderDetailItem {
           json['productId'] as String? ?? json['product_id'] as String? ?? '',
       productName:
           json['productName'] as String? ?? json['name'] as String? ?? '',
-      productPhoto:
-          json['productPhoto'] as String? ??
-          json['productPhotoUrl'] as String? ??
-          json['imageUrl'] as String? ??
-          json['imageS3'] as String? ??
-          '',
+      productPhoto: ApiEndpoints.resolveMediaUrl(
+        json['productPhoto'] as String? ??
+            json['productPhotoUrl'] as String? ??
+            json['imageUrl'] as String? ??
+            json['imageS3'] as String? ??
+            '',
+      ),
       quantity: (json['quantity'] as num? ?? 0).toDouble(),
       unityType:
           json['unityType'] as String? ??
@@ -167,13 +169,15 @@ class OrderDetailModel extends OrderDetail {
           json['producerPhone'] as String? ??
           json['producerWhatsapp'] as String? ??
           producerJson?['phone'] as String?,
-      producerPicture:
-          json['producerPicture'] as String? ??
+      producerPicture: switch (json['producerPicture'] as String? ??
           json['producerPhoto'] as String? ??
           json['producerPhotoUrl'] as String? ??
           json['producerAvatarUrl'] as String? ??
           producerJson?['photoUrl'] as String? ??
-          producerJson?['picture'] as String?,
+          producerJson?['picture'] as String?) {
+        final String s when s.isNotEmpty => ApiEndpoints.resolveMediaUrl(s),
+        _ => null,
+      },
       items: items,
       totalAmount:
           (json['totalAmount'] as num? ??

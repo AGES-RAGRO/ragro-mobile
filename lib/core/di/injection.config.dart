@@ -216,10 +216,10 @@ import 'package:ragro_mobile/features/producer_orders/data/datasources/producer_
     as _i608;
 import 'package:ragro_mobile/features/producer_orders/data/repositories/co2_repository.dart'
     as _i206;
-import 'package:ragro_mobile/features/producer_orders/data/repositories/directions_repository.dart'
-    as _i877;
 import 'package:ragro_mobile/features/producer_orders/data/repositories/producer_orders_repository_impl.dart'
     as _i182;
+import 'package:ragro_mobile/features/producer_orders/data/repositories/route_repository.dart'
+    as _i609;
 import 'package:ragro_mobile/features/producer_orders/domain/repositories/producer_orders_repository.dart'
     as _i649;
 import 'package:ragro_mobile/features/producer_orders/domain/usecases/confirm_producer_order.dart'
@@ -316,9 +316,6 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i727.ProducerManagementRemoteDataSource(),
     );
     gh.lazySingleton<_i206.Co2Repository>(() => _i206.Co2Repository());
-    gh.lazySingleton<_i877.DirectionsRepository>(
-      () => _i877.DirectionsRepository(),
-    );
     gh.lazySingleton<_i276.InventoryRepository>(
       () =>
           _i601.InventoryRepositoryImpl(gh<_i870.InventoryRemoteDataSource>()),
@@ -351,12 +348,6 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i1067.StockMovementRepository>(
       () => _i619.StockMovementRepositoryImpl(
         gh<_i456.StockMovementRemoteDataSource>(),
-      ),
-    );
-    gh.factory<_i48.RouteCalculationCubit>(
-      () => _i48.RouteCalculationCubit(
-        gh<_i206.Co2Repository>(),
-        gh<_i877.DirectionsRepository>(),
       ),
     );
     gh.lazySingleton<_i291.CreateInventoryProduct>(
@@ -398,6 +389,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i608.ProducerOrdersRemoteDataSource>(
       () => _i608.ProducerOrdersRemoteDataSource(gh<_i873.ApiClient>()),
     );
+    gh.lazySingleton<_i609.RouteRepository>(
+      () => _i609.RouteRepository(gh<_i873.ApiClient>()),
+    );
     gh.lazySingleton<_i889.ProducerProfileRemoteDataSource>(
       () => _i889.ProducerProfileRemoteDataSource(gh<_i873.ApiClient>()),
     );
@@ -410,7 +404,7 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i987.SearchRemoteDataSource>(
       () => _i987.SearchRemoteDataSource(gh<_i873.ApiClient>()),
     );
-    gh.factory<_i767.ProducerManagementBloc>(
+    gh.lazySingleton<_i767.ProducerManagementBloc>(
       () => _i767.ProducerManagementBloc(gh<_i805.GetProducerDashboard>()),
     );
     gh.lazySingleton<_i104.FavoriteProducerRepository>(
@@ -583,6 +577,13 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i436.UpdateCustomerProfile>(
       () => _i436.UpdateCustomerProfile(gh<_i788.CustomerProfileRepository>()),
+    );
+    gh.factory<_i48.RouteCalculationCubit>(
+      () => _i48.RouteCalculationCubit(
+        gh<_i206.Co2Repository>(),
+        gh<_i649.ProducerOrdersRepository>(),
+        gh<_i609.RouteRepository>(),
+      ),
     );
     gh.lazySingleton<_i1071.CreateReview>(
       () => _i1071.CreateReview(gh<_i165.OrdersRepository>()),

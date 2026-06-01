@@ -18,6 +18,8 @@ class ProducerOrder extends Equatable {
     required this.createdAt,
     required this.isNew,
     required this.consumerPhone,
+    this.deliveryLatitude,
+    this.deliveryLongitude,
     this.cancellationReason,
     this.cancellationDetails,
   });
@@ -36,8 +38,34 @@ class ProducerOrder extends Equatable {
   final DateTime createdAt;
   final bool isNew;
   final String consumerPhone;
+
+  /// Coordenadas do endereço de entrega (snapshot do pedido). Podem ser nulas
+  /// se o endereço do cliente não foi geocodado; nesse caso o cálculo de rota
+  /// usa a string de endereço como fallback.
+  final double? deliveryLatitude;
+  final double? deliveryLongitude;
+
   final String? cancellationReason;
   final String? cancellationDetails;
+
+  /// Endereço completo legível para fallback de geocoding e exibição.
+  String get fullDeliveryAddress {
+    final parts = <String>[
+      if (deliveryAddress.isNotEmpty) deliveryAddress,
+      if (deliveryNeighborhood.isNotEmpty) deliveryNeighborhood,
+      if (deliveryCityState.isNotEmpty) deliveryCityState,
+    ];
+    return parts.join(', ');
+  }
+
+  /// Ponto "lat,lng" quando há coordenadas; senão o endereço textual.
+  /// O backend (Directions API) aceita ambos como origem/destino/waypoint.
+  String get routeStop {
+    if (deliveryLatitude != null && deliveryLongitude != null) {
+      return '$deliveryLatitude,$deliveryLongitude';
+    }
+    return fullDeliveryAddress;
+  }
 
   ProducerOrder copyWith({
     ProducerOrderStatus? status,
@@ -60,6 +88,8 @@ class ProducerOrder extends Equatable {
       createdAt: createdAt,
       isNew: isNew ?? this.isNew,
       consumerPhone: consumerPhone,
+      deliveryLatitude: deliveryLatitude,
+      deliveryLongitude: deliveryLongitude,
       cancellationReason: cancellationReason ?? this.cancellationReason,
       cancellationDetails: cancellationDetails ?? this.cancellationDetails,
     );
@@ -81,6 +111,8 @@ class ProducerOrder extends Equatable {
     createdAt,
     isNew,
     consumerPhone,
+    deliveryLatitude,
+    deliveryLongitude,
     cancellationReason,
     cancellationDetails,
   ];

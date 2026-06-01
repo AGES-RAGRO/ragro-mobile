@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:ragro_mobile/core/theme/app_colors.dart';
 import 'package:ragro_mobile/features/inventory/domain/entities/inventory_product.dart';
+import 'package:ragro_mobile/shared/utils/unity_type_label.dart';
 
 class InventoryProductCard extends StatelessWidget {
   const InventoryProductCard({
@@ -131,7 +132,7 @@ class InventoryProductCard extends StatelessWidget {
 
                 // Stock
                 Text(
-                  '${product.stock % 1 == 0 ? product.stock.toInt() : product.stock.toStringAsFixed(2)} ${product.unit} em estoque',
+                  '${product.stock % 1 == 0 ? product.stock.toInt() : product.stock.toStringAsFixed(2)} ${localizeUnityType(product.unit)} em estoque',
                   style: const TextStyle(
                     fontFamily: 'Manrope',
                     fontSize: 13,
@@ -143,7 +144,7 @@ class InventoryProductCard extends StatelessWidget {
 
                 // Price + unit
                 Text(
-                  '${_formatPrice(product.price)} / ${product.unit}',
+                  '${_formatPrice(product.price)} / ${localizeUnityType(product.unit)}',
                   style: const TextStyle(
                     fontFamily: 'Figtree',
                     fontWeight: FontWeight.w700,

@@ -1,3 +1,4 @@
+import 'package:ragro_mobile/core/network/api_endpoints.dart';
 import 'package:ragro_mobile/features/producer_orders/domain/entities/producer_order_item.dart';
 
 class ProducerOrderItemModel extends ProducerOrderItem {
@@ -18,11 +19,12 @@ class ProducerOrderItemModel extends ProducerOrderItem {
       productId:
           json['productId'] as String? ?? json['product_id'] as String? ?? '',
       name: json['productName'] as String? ?? json['name'] as String? ?? '',
-      imageUrl:
-          json['imageUrl'] as String? ??
-          json['imageS3'] as String? ??
-          json['productPhoto'] as String? ??
-          '',
+      imageUrl: ApiEndpoints.resolveMediaUrl(
+        json['imageUrl'] as String? ??
+            json['imageS3'] as String? ??
+            json['productPhoto'] as String? ??
+            '',
+      ),
       unitPrice: (json['unitPrice'] as num? ?? json['unit_price'] as num? ?? 0)
           .toDouble(),
       totalPrice:

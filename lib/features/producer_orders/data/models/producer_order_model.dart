@@ -18,6 +18,8 @@ class ProducerOrderModel extends ProducerOrder {
     required super.createdAt,
     required super.isNew,
     required super.consumerPhone,
+    super.deliveryLatitude,
+    super.deliveryLongitude,
     super.cancellationReason,
     super.cancellationDetails,
   });
@@ -72,6 +74,8 @@ class ProducerOrderModel extends ProducerOrder {
           json['customerPhone'] as String? ??
           consumer?['phone'] as String? ??
           '',
+      deliveryLatitude: (address['latitude'] as num?)?.toDouble(),
+      deliveryLongitude: (address['longitude'] as num?)?.toDouble(),
       cancellationReason:
           json['cancellationReason'] as String? ??
           json['cancelReason'] as String? ??

@@ -28,4 +28,17 @@ class Co2Repository {
       throw e.error as ApiException? ?? const UnknownApiException();
     }
   }
+
+  /// Registra a economia de CO2 de uma rota otimizada. Best-effort: não deve
+  /// bloquear o fluxo da rota se falhar.
+  Future<void> recordSavings(Co2SavingRequest request) async {
+    try {
+      await _apiClient.dio.post<void>(
+        ApiEndpoints.co2RecordSavings,
+        data: request.toJson(),
+      );
+    } on DioException catch (e) {
+      throw e.error as ApiException? ?? const UnknownApiException();
+    }
+  }
 }
