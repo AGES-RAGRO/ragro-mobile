@@ -29,10 +29,16 @@ class ReviewCard extends StatelessWidget {
     }
   }
 
+  String get _authorInitial {
+    final name = review.authorName.trim();
+    if (name.isEmpty) return '?';
+    return name[0].toUpperCase();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 16),
+      margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: AppColors.white,
@@ -42,96 +48,70 @@ class ReviewCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Author and rating row
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Avatar and author info
+              CircleAvatar(
+                radius: 18,
+
+                backgroundColor: const Color(0x26008148),
+                backgroundImage: review.authorAvatarUrl != null
+                    ? NetworkImage(review.authorAvatarUrl!)
+                    : null,
+                onBackgroundImageError: review.authorAvatarUrl != null
+                    ? (_, __) {}
+                    : null,
+                child: review.authorAvatarUrl == null
+                    ? Text(
+                        _authorInitial,
+                        style: const TextStyle(
+                          fontFamily: 'Figtree',
+                          fontWeight: FontWeight.w700,
+                          fontSize: 14,
+                          color: AppColors.darkGreen,
+                        ),
+                      )
+                    : null,
+              ),
+              const SizedBox(width: 12),
+
               Expanded(
-                child: Row(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Avatar
-                    CircleAvatar(
-                      radius: 20,
-                      backgroundColor: AppColors.mintGreen.withValues(
-                        alpha: 0.3,
+                    Text(
+                      review.authorName,
+                      style: const TextStyle(
+                        fontFamily: 'Figtree',
+                        fontWeight: FontWeight.w600,
+                        fontSize: 14,
+                        color: AppColors.black,
                       ),
-                      backgroundImage: review.authorAvatarUrl != null
-                          ? NetworkImage(review.authorAvatarUrl!)
-                          : null,
-                      onBackgroundImageError: review.authorAvatarUrl != null
-                          ? (_, __) {}
-                          : null,
-                      child: review.authorAvatarUrl == null
-                          ? const Icon(
-                              Icons.person,
-                              size: 20,
-                              color: AppColors.darkGreen,
-                            )
-                          : null,
+                      overflow: TextOverflow.ellipsis,
                     ),
-                    const SizedBox(width: 12),
-                    // Name and date
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            review.authorName,
-                            style: const TextStyle(
-                              fontFamily: 'Figtree',
-                              fontWeight: FontWeight.w600,
-                              fontSize: 14,
-                              color: AppColors.black,
-                            ),
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            _formatDate(review.createdAt),
-                            style: const TextStyle(
-                              fontFamily: 'Figtree',
-                              fontWeight: FontWeight.w500,
-                              fontSize: 12,
-                              color: Color(0xFF94A3B8),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
+                    const SizedBox(height: 4),
+                    _StarRow(rating: review.rating),
                   ],
                 ),
               ),
-              // Rating stars
-              Row(
-                children: [
-                  const Icon(
-                    Icons.star_rate,
-                    size: 16,
-                    color: Color(0xFFFBB040),
-                  ),
-                  const SizedBox(width: 4),
-                  Text(
-                    review.rating.toStringAsFixed(1),
-                    style: const TextStyle(
-                      fontFamily: 'Figtree',
-                      fontWeight: FontWeight.w600,
-                      fontSize: 14,
-                      color: AppColors.black,
-                    ),
-                  ),
-                ],
+              Text(
+                _formatDate(review.createdAt),
+                style: const TextStyle(
+                  fontFamily: 'Figtree',
+                  fontWeight: FontWeight.w400,
+                  fontSize: 12,
+                  color: Color(0xFF94A3B8),
+                ),
               ),
             ],
           ),
-          const SizedBox(height: 12),
-          // Comment
+          const SizedBox(height: 10),
           Text(
             review.comment,
             style: const TextStyle(
               fontFamily: 'Figtree',
-              fontWeight: FontWeight.w500,
-              fontSize: 14,
+              fontWeight: FontWeight.w400,
+              fontSize: 13,
               color: Color(0xFF475569),
               height: 1.5,
             ),
@@ -140,6 +120,28 @@ class ReviewCard extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _StarRow extends StatelessWidget {
+  const _StarRow({required this.rating});
+  final double rating;
+
+  static const _starColor = AppColors.darkGreen;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: List.generate(5, (i) {
+        if (i < rating.floor()) {
+          return const Icon(Icons.star, size: 15, color: _starColor);
+        } else if (i < rating) {
+          return const Icon(Icons.star_half, size: 15, color: _starColor);
+        }
+        return const Icon(Icons.star_border, size: 15, color: _starColor);
+      }),
     );
   }
 }

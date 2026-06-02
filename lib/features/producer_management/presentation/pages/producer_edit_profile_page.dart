@@ -1,7 +1,4 @@
-// Screen: Producer Edit Profile (Editar Perfil do Produtor)
-// User Story: US-25 — Edit Producer Profile
-// Epic: EPIC 4 — Producer Features
-// Routes: GET /producers/:id, PUT /producers/:id
+// Producer Edit Profile screen (US-25). Routes: GET /producers/:id, PUT /producers/:id.
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -60,13 +57,13 @@ class _ProducerEditProfileView extends StatefulWidget {
 class _ProducerEditProfileViewState extends State<_ProducerEditProfileView> {
   final _formKey = GlobalKey<FormState>();
 
-  // ── Dados Pessoais ─────────────────────────────────────────────────────
+  // Personal data
   final _nameController = TextEditingController();
   final _bioController = TextEditingController();
   final _phoneController = TextEditingController();
   final _farmNameController = TextEditingController();
 
-  // ── Endereço ───────────────────────────────────────────────────────────
+  // Address
   final _cepController = TextEditingController();
   final _addressController = TextEditingController();
   final _numberController = TextEditingController();
@@ -74,7 +71,7 @@ class _ProducerEditProfileViewState extends State<_ProducerEditProfileView> {
   final _cityController = TextEditingController();
   final _stateController = TextEditingController();
 
-  // ── Forma de Recebimento ──────────────────────────────────────────────
+  // Payment details
   String? _pixKeyType;
   final _pixKeyController = TextEditingController();
 
@@ -85,8 +82,7 @@ class _ProducerEditProfileViewState extends State<_ProducerEditProfileView> {
   final _holderController = TextEditingController();
   final _bankFiscalController = TextEditingController();
 
-  // ── Horário ────────────────────────────────────────────────────────────
-  // Assuming simple availability where we pick typical open/close times
+  // Schedule: a single open/close window applied to the selected weekdays.
   final _scheduleStartController = TextEditingController();
   final _scheduleEndController = TextEditingController();
   final List<bool> _weekdays = List.filled(7, false);
@@ -195,7 +191,6 @@ class _ProducerEditProfileViewState extends State<_ProducerEditProfileView> {
       _stateController.text = addr.state;
     }
 
-    // Payment Methods
     if (producer.paymentMethods != null) {
       final pix = producer.paymentMethods!
           .where((pm) => pm.type == 'pix')
@@ -236,7 +231,6 @@ class _ProducerEditProfileViewState extends State<_ProducerEditProfileView> {
       }
     }
 
-    // Schedule
     if (producer.availability.isNotEmpty) {
       _scheduleStartController.text = producer.availability.first.opensAt;
       _scheduleEndController.text = producer.availability.first.closesAt;
@@ -324,7 +318,7 @@ class _ProducerEditProfileViewState extends State<_ProducerEditProfileView> {
     final sEnd = _scheduleEndController.text.trim();
     for (var i = 0; i < 7; i++) {
       if (_weekdays[i]) {
-        // UI weekday: 0=Mon..6=Sun. API weekday: 0=Sun, 1=Mon..
+        // UI weekday: 0=Mon..6=Sun. API weekday: 0=Sun, 1=Mon..6=Sat.
         final apiWeekday = (i == 6) ? 0 : i + 1;
         availability.add({
           'weekday': apiWeekday,
@@ -678,7 +672,6 @@ class _ProducerEditProfileViewState extends State<_ProducerEditProfileView> {
                           },
                         ),
 
-                        // ── Endereço ───────────────────────────────────────────────
                         const SizedBox(height: 24),
                         _sectionTitle('Endereço'),
                         const SizedBox(height: 12),
@@ -784,7 +777,6 @@ class _ProducerEditProfileViewState extends State<_ProducerEditProfileView> {
                           ],
                         ),
 
-                        // ── Forma de Recebimento ──────────────────────────────
                         const SizedBox(height: 24),
                         _sectionTitle('Forma de Recebimento'),
                         const SizedBox(height: 4),
@@ -984,7 +976,6 @@ class _ProducerEditProfileViewState extends State<_ProducerEditProfileView> {
                           ),
                         ),
 
-                        // ── Horário de Atendimento ─────────────────────────────
                         const SizedBox(height: 24),
                         _sectionTitle('Horário de atendimento'),
                         const SizedBox(height: 12),

@@ -7,14 +7,26 @@ sealed class RateProducerState extends Equatable {
 }
 
 class RateProducerInitial extends RateProducerState {
-  const RateProducerInitial({this.selectedRating = 0});
+  const RateProducerInitial({this.selectedRating = 0, this.comment = ''});
+
   final int selectedRating;
+  final String comment;
+
   @override
-  List<Object?> get props => [selectedRating];
+  List<Object?> get props => [selectedRating, comment];
 }
 
 class RateProducerSubmitting extends RateProducerState {
-  const RateProducerSubmitting();
+  const RateProducerSubmitting({
+    required this.selectedRating,
+    required this.comment,
+  });
+
+  final int selectedRating;
+  final String comment;
+
+  @override
+  List<Object?> get props => [selectedRating, comment];
 }
 
 class RateProducerSuccess extends RateProducerState {
@@ -22,8 +34,16 @@ class RateProducerSuccess extends RateProducerState {
 }
 
 class RateProducerFailure extends RateProducerState {
-  const RateProducerFailure(this.message);
+  const RateProducerFailure(
+    this.message, {
+    required this.selectedRating,
+    required this.comment,
+  });
+
   final String message;
+  final int selectedRating;
+  final String comment;
+
   @override
-  List<Object?> get props => [message];
+  List<Object?> get props => [message, selectedRating, comment];
 }

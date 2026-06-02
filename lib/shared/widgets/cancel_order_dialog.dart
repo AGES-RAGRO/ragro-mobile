@@ -66,9 +66,9 @@ class _CancelOrderDialogState extends State<CancelOrderDialog> {
     final details = _isOther && _detailsController.text.trim().isNotEmpty
         ? _detailsController.text.trim()
         : null;
-    Navigator.of(context).pop<CancelResult>(
-      (reason: _selectedReason!, details: details),
-    );
+    Navigator.of(
+      context,
+    ).pop<CancelResult>((reason: _selectedReason!, details: details));
   }
 
   @override

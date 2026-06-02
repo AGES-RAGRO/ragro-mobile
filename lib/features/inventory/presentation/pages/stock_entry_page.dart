@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:ragro_mobile/core/di/injection.dart';
 import 'package:ragro_mobile/core/theme/app_colors.dart';
 import 'package:ragro_mobile/features/inventory/presentation/bloc/stock_entry_bloc.dart';
+import 'package:ragro_mobile/shared/utils/unity_type_label.dart';
 import 'package:ragro_mobile/features/inventory/presentation/bloc/stock_entry_event.dart';
 import 'package:ragro_mobile/features/inventory/presentation/bloc/stock_entry_state.dart';
 
@@ -181,7 +182,7 @@ class _StockEntryViewState extends State<_StockEntryView> {
                     enabled: !isLoading,
                     decoration: InputDecoration(
                       hintText: '0',
-                      suffixText: widget.unit,
+                      suffixText: localizeUnityType(widget.unit),
                       hintStyle: const TextStyle(
                         fontFamily: 'Manrope',
                         fontSize: 15,
@@ -195,13 +196,15 @@ class _StockEntryViewState extends State<_StockEntryView> {
                       ),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide:
-                            const BorderSide(color: AppColors.inputBorder),
+                        borderSide: const BorderSide(
+                          color: AppColors.inputBorder,
+                        ),
                       ),
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide:
-                            const BorderSide(color: AppColors.inputBorder),
+                        borderSide: const BorderSide(
+                          color: AppColors.inputBorder,
+                        ),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
@@ -242,13 +245,15 @@ class _StockEntryViewState extends State<_StockEntryView> {
                       ),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide:
-                            const BorderSide(color: AppColors.inputBorder),
+                        borderSide: const BorderSide(
+                          color: AppColors.inputBorder,
+                        ),
                       ),
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide:
-                            const BorderSide(color: AppColors.inputBorder),
+                        borderSide: const BorderSide(
+                          color: AppColors.inputBorder,
+                        ),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
@@ -274,8 +279,8 @@ class _StockEntryViewState extends State<_StockEntryView> {
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.lightGreen,
                         foregroundColor: AppColors.white,
-                        disabledBackgroundColor:
-                            AppColors.lightGreen.withValues(alpha: 0.5),
+                        disabledBackgroundColor: AppColors.lightGreen
+                            .withValues(alpha: 0.5),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(24),
                         ),

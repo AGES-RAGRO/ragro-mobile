@@ -56,9 +56,7 @@ class InventoryRemoteDataSource {
 
   Future<void> deleteProduct(String id) async {
     try {
-      await _apiClient.dio.delete<void>(
-        ApiEndpoints.producerInventoryItem(id),
-      );
+      await _apiClient.dio.delete<void>(ApiEndpoints.producerInventoryItem(id));
     } on DioException catch (e) {
       throw e.error as ApiException? ?? const UnknownApiException();
     }
@@ -75,7 +73,10 @@ class InventoryRemoteDataSource {
     }
   }
 
-  Future<InventoryProduct> uploadProductPhoto(String productId, XFile file) async {
+  Future<InventoryProduct> uploadProductPhoto(
+    String productId,
+    XFile file,
+  ) async {
     try {
       final formData = FormData.fromMap({
         'file': await multipartFromXFile(file),

@@ -20,11 +20,14 @@ import 'package:ragro_mobile/features/customer_profile/presentation/pages/custom
 import 'package:ragro_mobile/features/customer_profile/presentation/pages/customer_edit_profile_page.dart';
 import 'package:ragro_mobile/features/customer_profile/presentation/pages/customer_profile_page.dart';
 import 'package:ragro_mobile/features/home/presentation/pages/customer_home_page.dart';
+import 'package:ragro_mobile/features/impact/presentation/pages/impact_detail_page.dart';
+import 'package:ragro_mobile/features/impact/presentation/pages/impact_page.dart';
 import 'package:ragro_mobile/features/inventory/presentation/pages/inventory_page.dart';
 import 'package:ragro_mobile/features/inventory/presentation/pages/product_form_page.dart';
 import 'package:ragro_mobile/features/inventory/presentation/pages/stock_entry_page.dart';
 import 'package:ragro_mobile/features/inventory/presentation/pages/stock_exit_page.dart';
 import 'package:ragro_mobile/features/inventory/presentation/pages/stock_movements_page.dart';
+import 'package:ragro_mobile/features/map/presentation/pages/map_page.dart';
 import 'package:ragro_mobile/features/orders/presentation/pages/customer_orders_page.dart';
 import 'package:ragro_mobile/features/orders/presentation/pages/order_confirmation_page.dart';
 import 'package:ragro_mobile/features/orders/presentation/pages/order_detail_page.dart';
@@ -37,6 +40,7 @@ import 'package:ragro_mobile/features/producer_orders/presentation/pages/produce
 import 'package:ragro_mobile/features/producer_orders/presentation/pages/producer_orders_page.dart';
 import 'package:ragro_mobile/features/producer_orders/presentation/pages/route_calculation_page.dart';
 import 'package:ragro_mobile/features/producer_profile/presentation/pages/producer_public_profile_page.dart';
+import 'package:ragro_mobile/features/producer_profile/presentation/pages/reviews_page.dart';
 import 'package:ragro_mobile/features/product_detail/presentation/pages/product_detail_page.dart';
 import 'package:ragro_mobile/features/search/presentation/pages/search_page.dart';
 import 'package:ragro_mobile/features/search/presentation/pages/search_result_page.dart';
@@ -60,7 +64,8 @@ class AppRouter {
         }
         if (authState is AuthAuthenticated && isAuthRoute) {
           return switch (authState.user.type) {
-            UserType.customer => '/customer/home',
+            UserType.customer =>
+              '/customer/impact',
             UserType.producer => '/producer/home',
             UserType.admin => '/admin/producers',
           };
@@ -73,6 +78,16 @@ class AppRouter {
         GoRoute(
           path: '/register',
           builder: (_, __) => const CustomerRegisterPage(),
+        ),
+
+        // Impact routes
+        GoRoute(
+          path: '/customer/impact',
+          builder: (_, __) => const ImpactPage(),
+        ),
+        GoRoute(
+          path: '/customer/impact/detail',
+          builder: (_, __) => const ImpactDetailPage(),
         ),
 
         // Customer shell with bottom nav
@@ -90,6 +105,27 @@ class AppRouter {
                       builder: (context, state) => ProducerPublicProfilePage(
                         producerId: state.pathParameters['producerId']!,
                       ),
+                      routes: [
+                        GoRoute(
+                          path: 'reviews',
+                          builder: (context, state) {
+                            final extra =
+                                state.extra as Map<String, dynamic>? ?? {};
+                            return ReviewsPage(
+                              producerId: state.pathParameters['producerId']!,
+                              producerName:
+                                  extra['producerName'] as String? ?? '',
+                              producerLocation:
+                                  extra['producerLocation'] as String? ?? '',
+                              averageRating:
+                                  (extra['averageRating'] as num?)
+                                      ?.toDouble() ??
+                                  0.0,
+                              totalReviews: extra['totalReviews'] as int? ?? 0,
+                            );
+                          },
+                        ),
+                      ],
                     ),
                     GoRoute(
                       path: 'product/:productId',
@@ -122,11 +158,21 @@ class AppRouter {
                                 state.uri.queryParameters['farmName'] ?? '',
                             ownerName:
                                 state.uri.queryParameters['ownerName'] ?? '',
+                            isRated:
+                                state.uri.queryParameters['isRated'] == 'true',
                           ),
                         ),
                       ],
                     ),
                   ],
+                ),
+              ],
+            ),
+            StatefulShellBranch(
+              routes: [
+                GoRoute(
+                  path: '/customer/map',
+                  builder: (_, __) => const MapPage(),
                 ),
               ],
             ),
@@ -190,9 +236,7 @@ class AppRouter {
           builder: (_, __) => const CustomerEditAddressPage(),
         ),
 
-        // Top-level producer profile (fullscreen) — used from outside the
-        // customer shell (e.g. cart). The shell-nested version at
-        // /customer/home/producer/:id keeps the bottom nav.
+        // Top-level producer profile (fullscreen)
         GoRoute(
           path: '/customer/producer/:producerId',
           builder: (context, state) => ProducerPublicProfilePage(
@@ -248,8 +292,7 @@ class AppRouter {
                             state.extra as Map<String, dynamic>? ?? {};
                         return StockEntryPage(
                           productId: state.pathParameters['productId']!,
-                          productName:
-                              extra['productName'] as String? ?? '',
+                          productName: extra['productName'] as String? ?? '',
                           unit: extra['unit'] as String? ?? 'un',
                         );
                       },
@@ -264,7 +307,8 @@ class AppRouter {
                           productName: extra['productName'] as String? ?? '',
                           unit: extra['unit'] as String? ?? 'un',
                           currentStock:
-                              (extra['currentStock'] as num?)?.toDouble() ?? 0.0,
+                              (extra['currentStock'] as num?)?.toDouble() ??
+                              0.0,
                         );
                       },
                     ),
@@ -275,8 +319,7 @@ class AppRouter {
                             state.extra as Map<String, dynamic>? ?? {};
                         return StockMovementsPage(
                           productId: state.pathParameters['productId']!,
-                          productName:
-                              extra['productName'] as String? ?? '',
+                          productName: extra['productName'] as String? ?? '',
                         );
                       },
                     ),
@@ -297,6 +340,23 @@ class AppRouter {
                     GoRoute(
                       path: 'settings',
                       builder: (_, __) => const ProducerSettingsPage(),
+                    ),
+                    GoRoute(
+                      path: 'reviews',
+                      builder: (context, state) {
+                        final extra =
+                            state.extra as Map<String, dynamic>? ?? {};
+                        return ReviewsPage(
+                          producerId: extra['producerId'] as String? ?? '',
+                          producerName: extra['producerName'] as String? ?? '',
+                          producerLocation:
+                              extra['producerLocation'] as String? ?? '',
+                          averageRating:
+                              (extra['averageRating'] as num?)?.toDouble() ??
+                              0.0,
+                          totalReviews: extra['totalReviews'] as int? ?? 0,
+                        );
+                      },
                     ),
                   ],
                 ),

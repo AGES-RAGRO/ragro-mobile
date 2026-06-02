@@ -1,6 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
-import 'package:ragro_mobile/features/orders/domain/usecases/rate_producer.dart';
+import 'package:ragro_mobile/core/network/api_exception.dart';
+import 'package:ragro_mobile/features/orders/domain/usecases/create_review.dart';
 import 'package:ragro_mobile/features/orders/presentation/bloc/rate_producer_event.dart';
 import 'package:ragro_mobile/features/orders/presentation/bloc/rate_producer_state.dart';
 
@@ -8,21 +9,49 @@ import 'package:ragro_mobile/features/orders/presentation/bloc/rate_producer_sta
 class RateProducerBloc extends Bloc<RateProducerEvent, RateProducerState> {
   RateProducerBloc(this._rateProducer) : super(const RateProducerInitial()) {
     on<RateProducerStarSelected>(_onStarSelected);
+    on<RateProducerCommentChanged>(_onCommentChanged);
     on<RateProducerSubmitted>(_onSubmitted);
   }
 
-  final RateProducer _rateProducer;
+  final CreateReview _rateProducer;
 
   void _onStarSelected(
     RateProducerStarSelected event,
     Emitter<RateProducerState> emit,
   ) {
-    final current = state is RateProducerInitial
-        ? (state as RateProducerInitial).selectedRating
+    final currentState = state;
+    final current = currentState is RateProducerInitial
+        ? currentState.selectedRating
+        : currentState is RateProducerSubmitting
+        ? currentState.selectedRating
         : 0;
+    final currentComment = currentState is RateProducerInitial
+        ? currentState.comment
+        : currentState is RateProducerSubmitting
+        ? currentState.comment
+        : '';
     emit(
       RateProducerInitial(
         selectedRating: event.rating == current ? 0 : event.rating,
+        comment: currentComment,
+      ),
+    );
+  }
+
+  void _onCommentChanged(
+    RateProducerCommentChanged event,
+    Emitter<RateProducerState> emit,
+  ) {
+    final currentState = state;
+    final currentRating = currentState is RateProducerInitial
+        ? currentState.selectedRating
+        : currentState is RateProducerSubmitting
+        ? currentState.selectedRating
+        : 0;
+    emit(
+      RateProducerInitial(
+        selectedRating: currentRating,
+        comment: event.comment,
       ),
     );
   }
@@ -31,12 +60,24 @@ class RateProducerBloc extends Bloc<RateProducerEvent, RateProducerState> {
     RateProducerSubmitted event,
     Emitter<RateProducerState> emit,
   ) async {
-    emit(const RateProducerSubmitting());
+    emit(
+      RateProducerSubmitting(
+        selectedRating: event.rating,
+        comment: event.comment,
+      ),
+    );
     try {
-      await _rateProducer(event.orderId, event.rating);
+      await _rateProducer(event.orderId, event.rating, event.comment);
       emit(const RateProducerSuccess());
     } on Exception catch (e) {
-      emit(RateProducerFailure(e.toString()));
+      final message = e is ApiException ? e.message : e.toString();
+      emit(
+        RateProducerFailure(
+          message,
+          selectedRating: event.rating,
+          comment: event.comment,
+        ),
+      );
     }
   }
 }

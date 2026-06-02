@@ -17,10 +17,13 @@ class DashboardAvailabilitySlot extends Equatable {
 
 class ProducerDashboard extends Equatable {
   const ProducerDashboard({
+    required this.producerId,
     required this.producerName,
     required this.producerTitle,
     required this.avatarUrl,
     required this.coverUrl,
+    required this.averageRating,
+    required this.totalReviews,
     required this.totalSales,
     required this.salesGrowthPercent,
     required this.totalOrders,
@@ -32,17 +35,20 @@ class ProducerDashboard extends Equatable {
     required this.availability,
   });
 
+  final String producerId;
   final String producerName;
   final String producerTitle;
   final String avatarUrl;
   final String coverUrl;
+  final double averageRating;
+  final int totalReviews;
   final double totalSales;
   final double salesGrowthPercent;
   final int totalOrders;
   final double ordersGrowthPercent;
   final double stockPercentage;
   final double stockChangePercent;
-  final List<double> weeklyChartData; // 7 values: S,T,Q,Q,S,S,D
+  final List<double> weeklyChartData; // 7 values: Mon..Sun
   final String currentMonth;
   final List<DashboardAvailabilitySlot> availability;
 

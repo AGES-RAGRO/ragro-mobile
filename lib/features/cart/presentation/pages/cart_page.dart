@@ -1,4 +1,4 @@
-// Screen: Carrinho de Compras
+// Screen: Shopping Cart
 // User Story: US-09 — Manage Cart
 // Epic: EPIC 3 — Shopping & Orders
 // Routes: GET /customers/carts, DELETE /customers/carts,
@@ -18,6 +18,7 @@ import 'package:ragro_mobile/features/cart/presentation/bloc/cart_state.dart';
 import 'package:ragro_mobile/features/cart/presentation/widgets/cart_item_tile.dart';
 import 'package:ragro_mobile/features/cart/presentation/widgets/producer_cart_header.dart';
 import 'package:ragro_mobile/shared/widgets/app_notification.dart';
+import 'package:ragro_mobile/shared/widgets/confirm_dialog.dart';
 
 class CartPage extends StatelessWidget {
   const CartPage({super.key});
@@ -101,7 +102,6 @@ class CartPage extends StatelessWidget {
             body: SafeArea(
               child: Column(
                 children: [
-                  // Header
                   Container(
                     padding: const EdgeInsets.fromLTRB(16, 16, 20, 17),
                     decoration: const BoxDecoration(
@@ -133,9 +133,22 @@ class CartPage extends StatelessWidget {
                         GestureDetector(
                           onTap: isEmpty || isMutating
                               ? null
-                              : () => context.read<CartBloc>().add(
-                                  const CartCleared(),
-                                ),
+                              : () async {
+                                  final confirmed = await ConfirmDialog.show(
+                                    context: context,
+                                    title: 'Tem certeza que deseja excluir ',
+                                    highlight: 'todo o carrinho',
+                                    highlightColor: AppColors.red,
+                                    trailingTitle: '?',
+                                    confirmLabel: 'Excluir',
+                                    confirmColor: AppColors.red,
+                                  );
+                                  if ((confirmed ?? false) && context.mounted) {
+                                    context.read<CartBloc>().add(
+                                      const CartCleared(),
+                                    );
+                                  }
+                                },
                           child: Text(
                             'Limpar',
                             style: TextStyle(
@@ -183,7 +196,6 @@ class CartPage extends StatelessWidget {
                           ListView(
                             padding: const EdgeInsets.symmetric(vertical: 16),
                             children: [
-                              // Info banner
                               Container(
                                 margin: const EdgeInsets.fromLTRB(
                                   16,
@@ -240,14 +252,12 @@ class CartPage extends StatelessWidget {
                                 ),
                               ),
 
-                              // Producer header
                               ProducerCartHeader(
                                 farmName: cart.farmName,
                                 producerId: cart.producerId,
                               ),
                               const SizedBox(height: 16),
 
-                              // Items
                               ...cart.items.map(
                                 (item) => Padding(
                                   padding: const EdgeInsets.only(bottom: 12),
@@ -274,7 +284,6 @@ class CartPage extends StatelessWidget {
                       ),
                     ),
 
-                  // Bottom section
                   if (!isEmpty)
                     Container(
                       padding: const EdgeInsets.fromLTRB(24, 9, 24, 24),

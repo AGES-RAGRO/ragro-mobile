@@ -17,7 +17,8 @@ class StockMovement extends Equatable {
   final String productId;
   final String productName;
   final String type; // 'ENTRY' | 'EXIT'
-  final String reason; // 'SALE' | 'LOSS' | 'DISPOSAL' | 'MANUAL_ENTRY' | 'CANCELED_SALE'
+  final String
+  reason; // 'SALE' | 'LOSS' | 'DISPOSAL' | 'MANUAL_ENTRY' | 'CANCELED_SALE'
   final double quantity;
   final String? notes;
   final DateTime createdAt;

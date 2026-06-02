@@ -1,7 +1,4 @@
-// Screen: Producer Public Profile (Consumer View)
-// User Story: US-14 — View Producer Profile
-// Epic: EPIC 3 — Producer Profile and Catalog
-// Routes: GET /producers/:id
+// Producer public profile (consumer view, US-14). Route: GET /producers/:id.
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -10,13 +7,16 @@ import 'package:ragro_mobile/core/di/injection.dart';
 import 'package:ragro_mobile/core/theme/app_colors.dart';
 import 'package:ragro_mobile/features/cart/presentation/bloc/cart_bloc.dart';
 import 'package:ragro_mobile/features/cart/presentation/bloc/cart_event.dart';
+import 'package:ragro_mobile/features/home/domain/repositories/favorite_producer_repository.dart';
+import 'package:ragro_mobile/features/home/presentation/bloc/home_bloc.dart';
+import 'package:ragro_mobile/features/home/presentation/bloc/home_event.dart';
 import 'package:ragro_mobile/features/home/presentation/widgets/home_product_card.dart';
 import 'package:ragro_mobile/features/producer_profile/presentation/bloc/producer_profile_bloc.dart';
 import 'package:ragro_mobile/features/producer_profile/presentation/bloc/producer_profile_event.dart';
 import 'package:ragro_mobile/features/producer_profile/presentation/bloc/producer_profile_state.dart';
 import 'package:ragro_mobile/features/producer_profile/presentation/widgets/availability_section.dart';
 import 'package:ragro_mobile/features/producer_profile/presentation/widgets/producer_stats_row.dart';
-import 'package:ragro_mobile/features/producer_profile/presentation/widgets/review_card.dart';
+import 'package:ragro_mobile/shared/widgets/confirm_dialog.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class ProducerPublicProfilePage extends StatelessWidget {
@@ -29,13 +29,66 @@ class ProducerPublicProfilePage extends StatelessWidget {
     return BlocProvider(
       create: (_) =>
           getIt<ProducerProfileBloc>()..add(ProducerProfileStarted(producerId)),
-      child: const _ProducerPublicProfileView(),
+      child: _ProducerPublicProfileView(producerId: producerId),
     );
   }
 }
 
-class _ProducerPublicProfileView extends StatelessWidget {
-  const _ProducerPublicProfileView();
+class _ProducerPublicProfileView extends StatefulWidget {
+  const _ProducerPublicProfileView({required this.producerId});
+
+  final String producerId;
+
+  @override
+  State<_ProducerPublicProfileView> createState() =>
+      _ProducerPublicProfileViewState();
+}
+
+class _ProducerPublicProfileViewState
+    extends State<_ProducerPublicProfileView> {
+  bool _isFavorite = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkFavorite();
+  }
+
+  Future<void> _checkFavorite() async {
+    final favorites = await getIt<FavoriteProducerRepository>().getFavorites();
+    if (mounted) {
+      setState(() {
+        _isFavorite = favorites.any((f) => f.producerId == widget.producerId);
+      });
+    }
+  }
+
+  Future<void> _toggleFavorite() async {
+    if (_isFavorite) {
+      final confirmed = await ConfirmDialog.show(
+        context: context,
+        title: 'Tem certeza que quer tirar o produtor dos seus favoritos?',
+        confirmLabel: 'Tirar dos favoritos',
+        confirmColor: AppColors.red,
+      );
+      if (!(confirmed ?? false)) return;
+    }
+
+    final wasAdding = !_isFavorite;
+    getIt<HomeBloc>().add(HomeFavoriteToggled(widget.producerId));
+
+    if (mounted) {
+      setState(() => _isFavorite = !_isFavorite);
+      if (wasAdding) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Produtor adicionado aos favoritos'),
+            backgroundColor: AppColors.lightGreen,
+          ),
+        );
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -56,7 +109,6 @@ class _ProducerPublicProfileView extends StatelessWidget {
             ),
             ProducerProfileLoaded(:final producer) => CustomScrollView(
               slivers: [
-                // Header with blur background
                 SliverAppBar(
                   backgroundColor: Colors.white.withValues(alpha: 0.85),
                   leading: GestureDetector(
@@ -75,7 +127,6 @@ class _ProducerPublicProfileView extends StatelessWidget {
                   pinned: true,
                   expandedHeight: kToolbarHeight,
                 ),
-                // Producer info
                 SliverToBoxAdapter(
                   child: Column(
                     children: [
@@ -104,7 +155,7 @@ class _ProducerPublicProfileView extends StatelessWidget {
                                   backgroundColor: AppColors.white,
                                   child: CircleAvatar(
                                     radius: 60,
-                                    backgroundColor: AppColors.mintGreen
+                                    backgroundColor: AppColors.darkGreen
                                         .withValues(alpha: 0.3),
                                     backgroundImage:
                                         producer.avatarUrl.isNotEmpty
@@ -115,10 +166,16 @@ class _ProducerPublicProfileView extends StatelessWidget {
                                         ? (_, __) {}
                                         : null,
                                     child: producer.avatarUrl.isEmpty
-                                        ? const Icon(
-                                            Icons.person,
-                                            size: 48,
-                                            color: AppColors.darkGreen,
+                                        ? Text(
+                                            producer.name.isNotEmpty
+                                                ? producer.name[0].toUpperCase()
+                                                : '?',
+                                            style: const TextStyle(
+                                              fontFamily: 'Figtree',
+                                              fontWeight: FontWeight.w700,
+                                              fontSize: 40,
+                                              color: AppColors.darkGreen,
+                                            ),
                                           )
                                         : null,
                                   ),
@@ -132,39 +189,104 @@ class _ProducerPublicProfileView extends StatelessWidget {
                         padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
                         child: Column(
                           children: [
-                            Text(
-                              producer.name,
-                              style: const TextStyle(
-                                fontFamily: 'Figtree',
-                                fontWeight: FontWeight.w500,
-                                fontSize: 24,
-                                color: AppColors.darkGreen,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                            const SizedBox(height: 4),
                             Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                const Icon(
-                                  Icons.location_on,
-                                  size: 14,
-                                  color: Color(0xFF64748B),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        producer.name,
+                                        style: const TextStyle(
+                                          fontFamily: 'Figtree',
+                                          fontWeight: FontWeight.w500,
+                                          fontSize: 24,
+                                          color: AppColors.darkGreen,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Row(
+                                        children: [
+                                          const Icon(
+                                            Icons.location_on,
+                                            size: 14,
+                                            color: Color(0xFF64748B),
+                                          ),
+                                          const SizedBox(width: 4),
+                                          Expanded(
+                                            child: Text(
+                                              producer.location,
+                                              style: const TextStyle(
+                                                fontFamily: 'Figtree',
+                                                fontWeight: FontWeight.w500,
+                                                fontSize: 14,
+                                                color: Color(0xFF64748B),
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      const SizedBox(height: 8),
+                                      GestureDetector(
+                                        onTap: () => context.push(
+                                          '/customer/home/producer/${producer.id}/reviews',
+                                          extra: {
+                                            'producerName': producer.name,
+                                            'producerLocation':
+                                                producer.location,
+                                            'averageRating':
+                                                producer.averageRating,
+                                            'totalReviews':
+                                                producer.totalReviews,
+                                          },
+                                        ),
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            const Icon(
+                                              Icons.star,
+                                              size: 16,
+                                              color: AppColors.darkGreen,
+                                            ),
+                                            const SizedBox(width: 4),
+                                            Text(
+                                              '${producer.averageRating.toStringAsFixed(1)} (${producer.totalReviews} Avaliações)',
+                                              style: const TextStyle(
+                                                fontFamily: 'Figtree',
+                                                fontWeight: FontWeight.w600,
+                                                fontSize: 14,
+                                                color: AppColors.darkGreen,
+                                              ),
+                                            ),
+                                            const SizedBox(width: 4),
+                                            const Icon(
+                                              Icons.chevron_right,
+                                              size: 16,
+                                              color: AppColors.darkGreen,
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 ),
-                                const SizedBox(width: 4),
-                                Text(
-                                  producer.location,
-                                  style: const TextStyle(
-                                    fontFamily: 'Figtree',
-                                    fontWeight: FontWeight.w500,
-                                    fontSize: 14,
-                                    color: Color(0xFF64748B),
+                                const SizedBox(width: 12),
+                                IconButton(
+                                  onPressed: _toggleFavorite,
+                                  splashRadius: 24,
+                                  icon: Icon(
+                                    _isFavorite
+                                        ? Icons.favorite
+                                        : Icons.favorite_border,
+                                    size: 38,
+                                    color: AppColors.darkGreen,
                                   ),
                                 ),
                               ],
                             ),
                             const SizedBox(height: 24),
-                            // Contact button
                             SizedBox(
                               width: double.infinity,
                               child: ElevatedButton.icon(
@@ -195,7 +317,6 @@ class _ProducerPublicProfileView extends StatelessWidget {
                               ),
                             ),
                             const SizedBox(height: 16),
-                            // Descrição
                             if (producer.description.isNotEmpty)
                               Padding(
                                 padding: const EdgeInsets.only(bottom: 16),
@@ -211,7 +332,6 @@ class _ProducerPublicProfileView extends StatelessWidget {
                                   textAlign: TextAlign.center,
                                 ),
                               ),
-                            // Story
                             Text(
                               producer.story,
                               style: const TextStyle(
@@ -224,19 +344,16 @@ class _ProducerPublicProfileView extends StatelessWidget {
                               textAlign: TextAlign.center,
                             ),
                             const SizedBox(height: 32),
-                            // Availability section
                             AvailabilitySection(
                               availability: producer.availability,
                             ),
                             const SizedBox(height: 32),
-                            // Stats
                             ProducerStatsRow(
                               productCount: producer.products?.length ?? 0,
                               rating: producer.averageRating,
                               yearsOnPlatform: producer.yearsOnPlatform,
                             ),
                             const SizedBox(height: 32),
-                            // Products section header
                             if ((producer.products ?? const []).isNotEmpty)
                               const Align(
                                 alignment: Alignment.centerLeft,
@@ -252,7 +369,6 @@ class _ProducerPublicProfileView extends StatelessWidget {
                               ),
                             if ((producer.products ?? const []).isNotEmpty)
                               const SizedBox(height: 16),
-                            // Products grid
                             if ((producer.products ?? const []).isNotEmpty)
                               GridView.builder(
                                 shrinkWrap: true,
@@ -287,63 +403,6 @@ class _ProducerPublicProfileView extends StatelessWidget {
                                   );
                                 },
                               ),
-                            const SizedBox(height: 40),
-                            // Reviews section header
-                            const Align(
-                              alignment: Alignment.centerLeft,
-                              child: Text(
-                                'Avaliações Recentes',
-                                style: TextStyle(
-                                  fontFamily: 'Figtree',
-                                  fontWeight: FontWeight.w700,
-                                  fontSize: 22,
-                                  color: AppColors.black,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 16),
-                            // Reviews list or empty state
-                            if ((producer.reviews ?? const []).isEmpty)
-                              Center(
-                                child: Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                    vertical: 24,
-                                  ),
-                                  child: Column(
-                                    children: [
-                                      Icon(
-                                        Icons.rate_review_outlined,
-                                        size: 48,
-                                        color: AppColors.darkGreen.withValues(
-                                          alpha: 0.3,
-                                        ),
-                                      ),
-                                      const SizedBox(height: 12),
-                                      Text(
-                                        'Nenhuma avaliação ainda',
-                                        style: TextStyle(
-                                          fontFamily: 'Figtree',
-                                          fontWeight: FontWeight.w500,
-                                          fontSize: 16,
-                                          color: AppColors.darkGreen.withValues(
-                                            alpha: 0.6,
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              )
-                            else
-                              ListView.builder(
-                                shrinkWrap: true,
-                                physics: const NeverScrollableScrollPhysics(),
-                                itemCount:
-                                    (producer.reviews ?? const []).length,
-                                itemBuilder: (_, i) => ReviewCard(
-                                  review: (producer.reviews ?? const [])[i],
-                                ),
-                              ),
                             const SizedBox(height: 24),
                           ],
                         ),
@@ -360,39 +419,20 @@ class _ProducerPublicProfileView extends StatelessWidget {
   }
 
   Future<void> _openWhatsApp(BuildContext context, String phoneNumber) async {
+    final cleanPhone = phoneNumber.replaceAll(RegExp(r'[^\d+]'), '');
+    final formattedPhone = cleanPhone.startsWith('+')
+        ? cleanPhone.replaceFirst('+', '')
+        : cleanPhone;
+    final uri = Uri.parse('https://wa.me/$formattedPhone');
+
     try {
-      // Remove caracteres especiais (parênteses, hífens, espaços)
-      final cleanPhone = phoneNumber.replaceAll(RegExp(r'[^\d+]'), '');
-
-      // Garante que tem o código de país
-      final formattedPhone = cleanPhone.startsWith('+')
-          ? cleanPhone.replaceFirst('+', '')
-          : cleanPhone;
-
-      final whatsappUrl = 'https://wa.me/$formattedPhone';
-
-      if (await canLaunchUrl(Uri.parse(whatsappUrl))) {
-        await launchUrl(
-          Uri.parse(whatsappUrl),
-          mode: LaunchMode.externalApplication,
-        );
-      } else {
-        if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Não foi possível abrir o WhatsApp'),
-              duration: Duration(seconds: 2),
-            ),
-          );
-        }
-      }
-    } on Object catch (e) {
-      debugPrint('Erro ao abrir WhatsApp: $e');
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    } on Object {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Erro: $e'),
-            duration: const Duration(seconds: 2),
+          const SnackBar(
+            content: Text('Não foi possível abrir o WhatsApp'),
+            duration: Duration(seconds: 2),
           ),
         );
       }

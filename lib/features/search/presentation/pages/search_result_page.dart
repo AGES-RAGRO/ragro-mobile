@@ -5,6 +5,8 @@ import 'package:ragro_mobile/core/di/injection.dart';
 import 'package:ragro_mobile/core/theme/app_colors.dart';
 import 'package:ragro_mobile/features/cart/presentation/bloc/cart_bloc.dart';
 import 'package:ragro_mobile/features/cart/presentation/bloc/cart_event.dart';
+import 'package:ragro_mobile/features/home/presentation/bloc/home_bloc.dart';
+import 'package:ragro_mobile/features/home/presentation/bloc/home_event.dart';
 import 'package:ragro_mobile/features/search/domain/entities/search_result.dart';
 import 'package:ragro_mobile/features/search/presentation/bloc/search_bloc.dart';
 import 'package:ragro_mobile/features/search/presentation/bloc/search_event.dart';
@@ -298,7 +300,7 @@ class _SearchResultsViewState extends State<_SearchResultsView> {
     );
   }
 
-  void _onResultTap(SearchResult result) {
+  Future<void> _onResultTap(SearchResult result) async {
     if (result.type == SearchResultType.product) {
       final producerId = _resolveProducerId(result);
       if (producerId == null) {
@@ -308,7 +310,7 @@ class _SearchResultsViewState extends State<_SearchResultsView> {
         return;
       }
 
-      context.push(
+      await context.push(
         '/customer/home/product/${result.id}',
         extra: producerId,
       );
@@ -316,7 +318,10 @@ class _SearchResultsViewState extends State<_SearchResultsView> {
     }
 
     final producerId = _resolveProducerId(result) ?? result.id;
-    context.push('/customer/home/producer/$producerId');
+    await context.push('/customer/home/producer/$producerId');
+    if (context.mounted) {
+      getIt<HomeBloc>().add(const HomeRefreshed());
+    }
   }
 
   void _onAddToCart(SearchResult result) {
@@ -337,10 +342,7 @@ class _SearchResultsViewState extends State<_SearchResultsView> {
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
       ..showSnackBar(
-        SnackBar(
-          content: Text(message),
-          backgroundColor: AppColors.darkGreen,
-        ),
+        SnackBar(content: Text(message), backgroundColor: AppColors.darkGreen),
       );
   }
 

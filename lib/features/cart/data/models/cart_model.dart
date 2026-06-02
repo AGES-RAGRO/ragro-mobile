@@ -28,13 +28,8 @@ class CartModel extends Cart {
         .whereType<Map<String, dynamic>>()
         .toList();
 
-    final producer =
-        json['producer'] as Map<String, dynamic>? ??
-        json['farmer'] as Map<String, dynamic>?;
-    final bankJson =
-        json['bankInfo'] as Map<String, dynamic>? ??
-        producer?['bankInfo'] as Map<String, dynamic>? ??
-        const <String, dynamic>{};
+    final bankInfo =
+        json['bankInfo'] as Map<String, dynamic>? ?? const <String, dynamic>{};
 
     return CartModel(
       id: json['id'] as String? ?? '',
@@ -43,19 +38,10 @@ class CartModel extends Cart {
       farmName: json['farmName'] as String? ?? '',
       items: itemsJson.map(CartItemModel.fromJson).toList(),
       totalAmount: (json['totalAmount'] as num?)?.toDouble() ?? 0.0,
-      // Backend BankInfoResponse envia `bankName`. Fallback p/ `bank` mantém
-      // compat com payloads antigos.
-      bankName:
-          bankJson['bankName'] as String? ??
-          bankJson['bank'] as String? ??
-          '',
-      bankAgency: bankJson['agency'] as String? ?? '',
-      bankAccount:
-          bankJson['account'] as String? ??
-          bankJson['accountNumber'] as String? ??
-          '',
-      bankPixKey:
-          bankJson['pixKey'] as String? ?? bankJson['pix_key'] as String? ?? '',
+      bankName: bankInfo['bankName'] as String? ?? '',
+      bankAgency: bankInfo['agency'] as String? ?? '',
+      bankAccount: bankInfo['account'] as String? ?? '',
+      bankPixKey: bankInfo['pixKey'] as String? ?? '',
     );
   }
 }

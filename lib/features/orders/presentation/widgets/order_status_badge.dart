@@ -8,10 +8,10 @@ class OrderStatusBadge extends StatelessWidget {
   final OrderStatus status;
 
   Color get _backgroundColor => switch (status) {
-    OrderStatus.pending => const Color(0xFFFFB413),
+    OrderStatus.pending => AppColors.yellow,
     OrderStatus.accepted => AppColors.lightGreen,
-    OrderStatus.inDelivery => AppColors.lightGreen,
-    OrderStatus.delivered => const Color(0xFF3B82F6),
+    OrderStatus.inDelivery => AppColors.orange,
+    OrderStatus.delivered => AppColors.blue,
     OrderStatus.cancelled => AppColors.red,
   };
 
@@ -25,6 +25,13 @@ class OrderStatusBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Pick a foreground that contrasts with the badge color (dark on light
+    // colors like yellow/orange, white on dark ones).
+    final foreground =
+        ThemeData.estimateBrightnessForColor(_backgroundColor) ==
+            Brightness.dark
+        ? Colors.white
+        : AppColors.black;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
@@ -34,15 +41,15 @@ class OrderStatusBadge extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(_icon, color: Colors.white, size: 13),
+          Icon(_icon, color: foreground, size: 13),
           const SizedBox(width: 5),
           Text(
             status.label.toUpperCase(),
-            style: const TextStyle(
+            style: TextStyle(
               fontFamily: 'Manrope',
               fontWeight: FontWeight.w700,
               fontSize: 11,
-              color: Colors.white,
+              color: foreground,
               letterSpacing: 0.5,
             ),
           ),

@@ -26,6 +26,7 @@ migrate_working_dir/
 # Flutter/Dart/Pub related
 **/doc/api/
 **/ios/Flutter/.last_build_id
+**/ios/Flutter/Env.xcconfig
 .dart_tool/
 .flutter-plugins-dependencies
 .pub-cache/
@@ -62,3 +63,10 @@ playwright/screenshots/
 # Visual regression / ad-hoc test screenshots
 playwright-live-*.png
 test-*.png
+
+# Environment files with real secrets (prod, staging, etc.)
+# Commite apenas env/local.json e env/*.example.json
+env/prod.json
+env/staging.json
+
+Env.xcconfig

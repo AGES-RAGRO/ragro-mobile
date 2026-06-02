@@ -23,9 +23,7 @@ void main() {
 
   group('UpdateProducerOrderStatus', () {
     test('repassa orderId e status (in_delivery) para o repository', () async {
-      when(
-        () => repo.updateStatus(any(), any()),
-      ).thenAnswer((_) async {});
+      when(() => repo.updateStatus(any(), any())).thenAnswer((_) async {});
 
       await useCase('order-1', ProducerOrderStatus.inDelivery);
 
@@ -35,9 +33,7 @@ void main() {
     });
 
     test('repassa status (delivered) corretamente', () async {
-      when(
-        () => repo.updateStatus(any(), any()),
-      ).thenAnswer((_) async {});
+      when(() => repo.updateStatus(any(), any())).thenAnswer((_) async {});
 
       await useCase('order-2', ProducerOrderStatus.delivered);
 
@@ -46,15 +42,18 @@ void main() {
       ).called(1);
     });
 
-    test('propaga ForbiddenException do repository (producer sem permissão)', () async {
-      when(
-        () => repo.updateStatus(any(), any()),
-      ).thenThrow(const ForbiddenException());
+    test(
+      'propaga ForbiddenException do repository (producer sem permissão)',
+      () async {
+        when(
+          () => repo.updateStatus(any(), any()),
+        ).thenThrow(const ForbiddenException());
 
-      expect(
-        () => useCase('order-3', ProducerOrderStatus.delivered),
-        throwsA(isA<ForbiddenException>()),
-      );
-    });
+        expect(
+          () => useCase('order-3', ProducerOrderStatus.delivered),
+          throwsA(isA<ForbiddenException>()),
+        );
+      },
+    );
   });
 }

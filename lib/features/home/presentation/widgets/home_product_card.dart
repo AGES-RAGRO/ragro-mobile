@@ -7,12 +7,24 @@ class HomeProductCard extends StatelessWidget {
     required this.product,
     required this.onTap,
     required this.onAddToCart,
+    this.isRecommended = false,
+    this.aiRanked = false,
+    this.aiScore,
     super.key,
   });
 
   final HomeProduct product;
   final VoidCallback onTap;
   final VoidCallback onAddToCart;
+  final bool isRecommended;
+
+  /// `true` when the AI reranker actually reordered this item
+  /// (reason == LLM_RERANKED). Distinguishes AI from heuristic recommendations
+  /// so the "AI recommends" badge isn't shown misleadingly for all items.
+  final bool aiRanked;
+
+  /// Relevance score (0-100) assigned by the AI, when available.
+  final int? aiScore;
 
   @override
   Widget build(BuildContext context) {
@@ -35,18 +47,30 @@ class HomeProductCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Product image
-            AspectRatio(
-              aspectRatio: 1,
-              child: product.imageUrl.isNotEmpty
-                  ? Image.network(
-                      product.imageUrl,
-                      fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => const _ProductPlaceholder(),
-                    )
-                  : const _ProductPlaceholder(),
+            Stack(
+              children: [
+                AspectRatio(
+                  aspectRatio: 1,
+                  child: product.imageUrl.isNotEmpty
+                      ? Image.network(
+                          product.imageUrl,
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, __, ___) =>
+                              const _ProductPlaceholder(),
+                        )
+                      : const _ProductPlaceholder(),
+                ),
+                if (isRecommended)
+                  Positioned(
+                    top: 8,
+                    left: 8,
+                    child: _RecommendationBadge(
+                      aiRanked: aiRanked,
+                      score: aiScore,
+                    ),
+                  ),
+              ],
             ),
-            // Product info
             Padding(
               padding: const EdgeInsets.fromLTRB(4, 4, 4, 0),
               child: Column(
@@ -125,6 +149,49 @@ class HomeProductCard extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// Shows "IA recomenda" + score only when the AI actually reordered the item;
+/// otherwise shows a neutral "Para você" badge.
+class _RecommendationBadge extends StatelessWidget {
+  const _RecommendationBadge({required this.aiRanked, this.score});
+
+  final bool aiRanked;
+  final int? score;
+
+  @override
+  Widget build(BuildContext context) {
+    final label = aiRanked
+        ? (score != null && score! > 0 ? 'IA recomenda · $score%' : 'IA recomenda')
+        : 'Para você';
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: aiRanked ? const Color(0xFF98FFBD) : const Color(0xFFE2F0E6),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            aiRanked ? Icons.auto_awesome : Icons.favorite_border,
+            color: AppColors.darkGreen,
+            size: 11,
+          ),
+          const SizedBox(width: 4),
+          Text(
+            label,
+            style: const TextStyle(
+              fontFamily: 'Figtree',
+              fontWeight: FontWeight.w600,
+              fontSize: 10,
+              color: AppColors.darkGreen,
+            ),
+          ),
+        ],
       ),
     );
   }

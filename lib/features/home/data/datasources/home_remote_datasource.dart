@@ -30,12 +30,13 @@ class HomeRemoteDataSource {
     }
   }
 
-  /// Gets recommended products by loading products from the first active producers.
-  Future<List<HomeProductModel>> getRecommendedProducts() async {
+  /// Gets recommended products by loading products from producers at [producerPage].
+  Future<({List<HomeProductModel> products, bool hasMore})>
+  getRecommendedProducts({int producerPage = 0}) async {
     try {
       final producersResp = await _apiClient.dio.get<Map<String, dynamic>>(
         ApiEndpoints.producers,
-        queryParameters: {'page': 0, 'size': 4},
+        queryParameters: {'page': producerPage, 'size': 4},
       );
       final paged = PaginatedResponse.fromJson(
         producersResp.data!,
@@ -47,25 +48,26 @@ class HomeRemoteDataSource {
         final resp = await _apiClient.dio.get<dynamic>(
           ApiEndpoints.producerProducts(producer.id),
         );
-        final raw = resp.data;
-        final list = raw is List
-            ? raw.cast<Map<String, dynamic>>()
-            : ((raw as Map<String, dynamic>?))?['content']
-                  as List<dynamic>? ??
-              [];
+        final Object? raw = resp.data;
+        final List<Map<String, dynamic>> list;
+        if (raw is List) {
+          list = raw.cast<Map<String, dynamic>>();
+        } else if (raw is Map) {
+          list = (raw['content'] as List?)?.cast<Map<String, dynamic>>() ?? [];
+        } else {
+          list = [];
+        }
         products.addAll(
-          list
-              .cast<Map<String, dynamic>>()
-              .map(
-                (json) => HomeProductModel.fromJson(
-                  json,
-                  fallbackFarmName: producer.name,
-                ),
-              ),
+          list.cast<Map<String, dynamic>>().map(
+            (json) => HomeProductModel.fromJson(
+              json,
+              fallbackFarmName: producer.name,
+            ),
+          ),
         );
-        if (products.length >= 8) break;
       }
-      return products.take(8).toList();
+
+      return (products: products, hasMore: producerPage < paged.totalPages - 1);
     } on DioException catch (e) {
       throw e.error as ApiException? ?? const UnknownApiException();
     }

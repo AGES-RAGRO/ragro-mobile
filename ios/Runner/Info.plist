@@ -63,6 +63,12 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<key>GoogleMapsApiKey</key>
+	<string>$(GOOGLE_MAPS_API_KEY)</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Necessário para mostrar o mapa de produtores próximos a você.</string>
+	<key>NSLocationAlwaysUsageDescription</key>
+	<string>Necessário para mostrar o mapa de produtores próximos a você.</string>
 	<key>UISupportedInterfaceOrientations~ipad</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>

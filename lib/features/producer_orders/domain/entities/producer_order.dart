@@ -18,6 +18,10 @@ class ProducerOrder extends Equatable {
     required this.createdAt,
     required this.isNew,
     required this.consumerPhone,
+    this.deliveryLatitude,
+    this.deliveryLongitude,
+    this.cancellationReason,
+    this.cancellationDetails,
   });
 
   final String id;
@@ -35,7 +39,40 @@ class ProducerOrder extends Equatable {
   final bool isNew;
   final String consumerPhone;
 
-  ProducerOrder copyWith({ProducerOrderStatus? status, bool? isNew}) {
+  /// Delivery address coordinates (order snapshot). Null if the customer's
+  /// address was not geocoded; route calculation then falls back to the
+  /// address string.
+  final double? deliveryLatitude;
+  final double? deliveryLongitude;
+
+  final String? cancellationReason;
+  final String? cancellationDetails;
+
+  /// Full readable address for display and geocoding fallback.
+  String get fullDeliveryAddress {
+    final parts = <String>[
+      if (deliveryAddress.isNotEmpty) deliveryAddress,
+      if (deliveryNeighborhood.isNotEmpty) deliveryNeighborhood,
+      if (deliveryCityState.isNotEmpty) deliveryCityState,
+    ];
+    return parts.join(', ');
+  }
+
+  /// "lat,lng" when coordinates exist, otherwise the textual address. The
+  /// backend (Directions API) accepts both as origin/destination/waypoint.
+  String get routeStop {
+    if (deliveryLatitude != null && deliveryLongitude != null) {
+      return '$deliveryLatitude,$deliveryLongitude';
+    }
+    return fullDeliveryAddress;
+  }
+
+  ProducerOrder copyWith({
+    ProducerOrderStatus? status,
+    bool? isNew,
+    String? cancellationReason,
+    String? cancellationDetails,
+  }) {
     return ProducerOrder(
       id: id,
       consumerName: consumerName,
@@ -51,6 +88,10 @@ class ProducerOrder extends Equatable {
       createdAt: createdAt,
       isNew: isNew ?? this.isNew,
       consumerPhone: consumerPhone,
+      deliveryLatitude: deliveryLatitude,
+      deliveryLongitude: deliveryLongitude,
+      cancellationReason: cancellationReason ?? this.cancellationReason,
+      cancellationDetails: cancellationDetails ?? this.cancellationDetails,
     );
   }
 
@@ -70,5 +111,9 @@ class ProducerOrder extends Equatable {
     createdAt,
     isNew,
     consumerPhone,
+    deliveryLatitude,
+    deliveryLongitude,
+    cancellationReason,
+    cancellationDetails,
   ];
 }

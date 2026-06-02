@@ -1,7 +1,4 @@
-// Screen: Admin Create Producer (Criar Conta Produtor)
-// User Story: US-31 — Admin Create Producer Account
-// Epic: EPIC 5 — Admin Features
-// Routes: POST /admin/producers
+// Admin create-producer screen (US-31). Backed by POST /admin/producers.
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -77,7 +74,7 @@ class _AdminCreateProducerView extends StatefulWidget {
 }
 
 class _AdminCreateProducerViewState extends State<_AdminCreateProducerView> {
-  // ── Dados Pessoais ─────────────────────────────────────────────────────
+  // Personal data
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _phoneController = TextEditingController();
@@ -88,7 +85,7 @@ class _AdminCreateProducerViewState extends State<_AdminCreateProducerView> {
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
 
-  // ── Endereço ───────────────────────────────────────────────────────────
+  // Address
   final _cepController = TextEditingController();
   final _addressController = TextEditingController();
   final _numberController = TextEditingController();
@@ -96,16 +93,16 @@ class _AdminCreateProducerViewState extends State<_AdminCreateProducerView> {
   final _cityController = TextEditingController();
   final _stateController = TextEditingController();
 
-  // ── Horário ────────────────────────────────────────────────────────────
+  // Business hours
   final _scheduleStartController = TextEditingController(text: '08:00');
   final _scheduleEndController = TextEditingController(text: '18:00');
   final List<bool> _weekdays = List.filled(7, false);
 
-  // ── Pix (sempre obrigatório) ──────────────────────────────────────────
+  // PIX (always required)
   String? _pixKeyType;
   final _pixKeyController = TextEditingController();
 
-  // ── Conta Bancária (sempre obrigatório) ───────────────────────────────
+  // Bank account (always required)
   final _bankNameController = TextEditingController();
   final _bankCodeController = TextEditingController();
   final _agencyController = TextEditingController();
@@ -133,7 +130,7 @@ class _AdminCreateProducerViewState extends State<_AdminCreateProducerView> {
 
   String _digitsOnly(String v) => v.replaceAll(RegExp(r'\D'), '');
 
-  // Retorna o formatter adequado para a chave pix conforme o tipo selecionado
+  // Formatters for the pix key, depending on the selected key type
   List<TextInputFormatter> _pixKeyFormatters() {
     switch (_pixKeyType) {
       case 'cpf':
@@ -205,7 +202,7 @@ class _AdminCreateProducerViewState extends State<_AdminCreateProducerView> {
     final cleanFiscal = _digitsOnly(_fiscalController.text);
     final fiscalType = cleanFiscal.length == 11 ? 'CPF' : 'CNPJ';
 
-    // PIX sempre obrigatório
+    // PIX is always required
     if (_pixKeyType == null) {
       _showError('Selecione o tipo de chave Pix.');
       return;
@@ -221,7 +218,7 @@ class _AdminCreateProducerViewState extends State<_AdminCreateProducerView> {
         ? _digitsOnly(rawPixKey)
         : rawPixKey;
 
-    // Conta Bancária sempre obrigatória
+    // Bank account is always required
     if (_bankNameController.text.trim().isEmpty ||
         _agencyController.text.trim().isEmpty ||
         _accountController.text.trim().isEmpty ||
@@ -242,7 +239,7 @@ class _AdminCreateProducerViewState extends State<_AdminCreateProducerView> {
         ? _digitsOnly(rawBankFiscal)
         : null;
 
-    // Disponibilidade
+    // Availability
     if (!_weekdays.any((d) => d)) {
       _showError('Selecione pelo menos um dia de atendimento.');
       return;
@@ -338,7 +335,6 @@ class _AdminCreateProducerViewState extends State<_AdminCreateProducerView> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // ── Dados Pessoais ─────────────────────────────────────
                   _sectionTitle('Dados Pessoais'),
                   const SizedBox(height: 12),
                   const _FieldLabel('Nome Completo'),
@@ -492,7 +488,6 @@ class _AdminCreateProducerViewState extends State<_AdminCreateProducerView> {
                     },
                   ),
 
-                  // ── Endereço ───────────────────────────────────────────
                   const SizedBox(height: 20),
                   _sectionTitle('Endereço'),
                   const SizedBox(height: 12),
@@ -615,12 +610,11 @@ class _AdminCreateProducerViewState extends State<_AdminCreateProducerView> {
                     ],
                   ),
 
-                  // ── Forma de Recebimento ───────────────────────────────
                   const SizedBox(height: 20),
                   _sectionTitle('Forma de Recebimento'),
                   const SizedBox(height: 8),
 
-                  // PIX (obrigatório)
+                  // PIX (required)
                   Card(
                     elevation: 0,
                     shape: RoundedRectangleBorder(
@@ -696,7 +690,7 @@ class _AdminCreateProducerViewState extends State<_AdminCreateProducerView> {
 
                   const SizedBox(height: 12),
 
-                  // Conta Bancária (obrigatória)
+                  // Bank account (required)
                   Card(
                     elevation: 0,
                     shape: RoundedRectangleBorder(
@@ -805,7 +799,6 @@ class _AdminCreateProducerViewState extends State<_AdminCreateProducerView> {
                     ),
                   ),
 
-                  // ── Horário de Atendimento ─────────────────────────────
                   const SizedBox(height: 20),
                   _sectionTitle('Horário de atendimento'),
                   const SizedBox(height: 12),
@@ -890,7 +883,7 @@ class _AdminCreateProducerViewState extends State<_AdminCreateProducerView> {
 
                   const SizedBox(height: 20),
 
-                  // Termos
+                  // Terms
                   GestureDetector(
                     onTap: () =>
                         setState(() => _termsAccepted = !_termsAccepted),

@@ -4,10 +4,17 @@ import 'package:ragro_mobile/shared/utils/unity_type_label.dart';
 void main() {
   group('localizeUnityType', () {
     test('traduz unidades em inglês para abreviações pt-BR', () {
-      expect(localizeUnityType('unit'), 'unidade');
+      expect(localizeUnityType('unit'), 'un');
       expect(localizeUnityType('box'), 'caixa');
-      expect(localizeUnityType('liter'), 'litro');
-      expect(localizeUnityType('dozen'), 'dúzia');
+      expect(localizeUnityType('liter'), 'L');
+      expect(localizeUnityType('dozen'), 'dz');
+    });
+
+    test('aceita variantes já abreviadas', () {
+      expect(localizeUnityType('un'), 'un');
+      expect(localizeUnityType('cx'), 'caixa');
+      expect(localizeUnityType('l'), 'L');
+      expect(localizeUnityType('dz'), 'dz');
     });
 
     test('mantém unidades já universais', () {
@@ -16,14 +23,28 @@ void main() {
       expect(localizeUnityType('ml'), 'ml');
     });
 
+    test('traduz maço e pacote', () {
+      expect(localizeUnityType('maço'), 'maço');
+      expect(localizeUnityType('pacote'), 'pct');
+    });
+
+    test('aceita pct como variante já abreviada de pacote', () {
+      expect(localizeUnityType('pct'), 'pct');
+    });
+
+    test('maço/pacote são case-insensitive e ignoram espaços', () {
+      expect(localizeUnityType(' MAÇO '), 'maço');
+      expect(localizeUnityType('Pacote'), 'pct');
+    });
+
     test('é case-insensitive', () {
-      expect(localizeUnityType('UNIT'), 'unidade');
+      expect(localizeUnityType('UNIT'), 'un');
       expect(localizeUnityType('Box'), 'caixa');
-      expect(localizeUnityType('LITER'), 'litro');
+      expect(localizeUnityType('LITER'), 'L');
     });
 
     test('ignora espaços ao redor', () {
-      expect(localizeUnityType('  unit  '), 'unidade');
+      expect(localizeUnityType('  unit  '), 'un');
     });
 
     test('retorna vazio para entrada vazia', () {

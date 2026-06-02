@@ -66,7 +66,8 @@ class AuthRemoteDataSource {
           'Resposta inválida ao carregar configuração de autenticação.',
         );
       }
-      config = AuthConfigModel.fromJson(data);
+      final raw = AuthConfigModel.fromJson(data);
+      config = raw.copyWith(tokenUrl: ApiEndpoints.fixUrl(raw.tokenUrl));
     } on DioException catch (e) {
       throw e.error as ApiException? ?? const UnknownApiException();
     }
@@ -77,8 +78,9 @@ class AuthRemoteDataSource {
     final keycloakDio = Dio();
     final KeycloakTokenModel keycloakToken;
     try {
+      final resolvedTokenUrl = ApiEndpoints.resolveMediaUrl(config.tokenUrl);
       final tokenResponse = await keycloakDio.post<Map<String, dynamic>>(
-        config.tokenUrl,
+        resolvedTokenUrl,
         data: {
           'grant_type': 'password',
           'client_id': config.clientId,
@@ -123,8 +125,9 @@ class AuthRemoteDataSource {
   }) async {
     final keycloakDio = Dio();
     try {
+      final resolvedTokenUrl = ApiEndpoints.resolveMediaUrl(tokenUrl);
       final response = await keycloakDio.post<Map<String, dynamic>>(
-        tokenUrl,
+        resolvedTokenUrl,
         data: {
           'grant_type': 'refresh_token',
           'client_id': clientId,
@@ -140,7 +143,7 @@ class AuthRemoteDataSource {
     }
   }
 
-  /// Cadastro de consumidor — POST /auth/register/customer (201 + corpo do cliente).
+  /// Registers a customer — POST /auth/register/customer (201 + customer body).
   Future<UserModel> registerCustomer(
     CustomerRegistrationRequest request,
   ) async {
@@ -155,7 +158,7 @@ class AuthRemoteDataSource {
     }
   }
 
-  /// Solicita redefinição de senha via e-mail — POST /auth/password/reset-email (204 No Content).
+  /// Requests a password reset by email — POST /auth/password/reset-email (204).
   Future<void> requestPasswordReset() async {
     try {
       await _apiClient.dio.post<void>(ApiEndpoints.resetPasswordEmail);
@@ -164,7 +167,7 @@ class AuthRemoteDataSource {
     }
   }
 
-  /// Esqueceu a senha — POST /auth/password/forgot (204 No Content).
+  /// Forgot password — POST /auth/password/forgot (204 No Content).
   Future<void> forgotPassword(String email) async {
     try {
       await _apiClient.dio.post<void>(

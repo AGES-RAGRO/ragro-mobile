@@ -14,7 +14,6 @@ void main() {
 
   final tOrder = Order(
     id: 'order-new-1',
-    orderNumber: 'ORD-NEW-001',
     producerId: 'p1',
     producerPhone: '5199999999',
     farmName: 'Fazenda Teste',
@@ -46,9 +45,7 @@ void main() {
 
   group('ConfirmOrder', () {
     test('chama createOrderFromCart e retorna nova Order', () async {
-      when(
-        () => repo.createOrderFromCart(),
-      ).thenAnswer((_) async => tOrder);
+      when(() => repo.createOrderFromCart()).thenAnswer((_) async => tOrder);
 
       final result = await useCase();
 
@@ -58,48 +55,44 @@ void main() {
       verify(() => repo.createOrderFromCart()).called(1);
     });
 
-    test('ignora cartId quando fornecido (parâmetro opcional não usado)', () async {
-      when(
-        () => repo.createOrderFromCart(),
-      ).thenAnswer((_) async => tOrder);
+    test(
+      'ignora cartId quando fornecido (parâmetro opcional não usado)',
+      () async {
+        when(() => repo.createOrderFromCart()).thenAnswer((_) async => tOrder);
 
-      final result = await useCase('cart-123');
+        final result = await useCase('cart-123');
 
-      expect(result.id, 'order-new-1');
-      verify(() => repo.createOrderFromCart()).called(1);
-    });
+        expect(result.id, 'order-new-1');
+        verify(() => repo.createOrderFromCart()).called(1);
+      },
+    );
 
-    test('propaga ConflictException quando carrinho vazio ou inválido', () async {
-      when(
-        () => repo.createOrderFromCart(),
-      ).thenThrow(const ConflictException());
+    test(
+      'propaga ConflictException quando carrinho vazio ou inválido',
+      () async {
+        when(
+          () => repo.createOrderFromCart(),
+        ).thenThrow(const ConflictException());
 
-      expect(
-        () => useCase(),
-        throwsA(isA<ConflictException>()),
-      );
-    });
+        expect(() => useCase(), throwsA(isA<ConflictException>()));
+      },
+    );
 
-    test('propaga UnauthorizedException quando usuário não autenticado', () async {
-      when(
-        () => repo.createOrderFromCart(),
-      ).thenThrow(const UnauthorizedException());
+    test(
+      'propaga UnauthorizedException quando usuário não autenticado',
+      () async {
+        when(
+          () => repo.createOrderFromCart(),
+        ).thenThrow(const UnauthorizedException());
 
-      expect(
-        () => useCase(),
-        throwsA(isA<UnauthorizedException>()),
-      );
-    });
+        expect(() => useCase(), throwsA(isA<UnauthorizedException>()));
+      },
+    );
 
     test('propaga ServerException em erro do servidor', () async {
-      when(
-        () => repo.createOrderFromCart(),
-      ).thenThrow(const ServerException());
+      when(() => repo.createOrderFromCart()).thenThrow(const ServerException());
 
-      expect(
-        () => useCase(),
-        throwsA(isA<ServerException>()),
-      );
+      expect(() => useCase(), throwsA(isA<ServerException>()));
     });
   });
 }

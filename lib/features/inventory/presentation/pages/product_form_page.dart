@@ -1,7 +1,5 @@
-// Screen: Product Form (Criar/Editar Produto)
-// User Story: US-23 — Create and Edit Products
-// Epic: EPIC 4 — Producer Features
-// Routes: POST /products | PUT /products/:id
+// Screen: Product Form (create/edit product).
+// US-23 — Create and Edit Products. Routes: POST /products, PUT /products/:id.
 
 import 'dart:io';
 import 'package:flutter/foundation.dart';
@@ -11,6 +9,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
+import 'package:ragro_mobile/shared/utils/unity_type_label.dart';
 import 'package:ragro_mobile/core/di/injection.dart';
 import 'package:ragro_mobile/core/formatters/input_masks.dart';
 import 'package:ragro_mobile/core/theme/app_colors.dart';
@@ -54,7 +53,17 @@ class _ProductFormViewState extends State<_ProductFormView> {
   List<int> _selectedCategoryIds = [];
   List<Map<String, dynamic>> _availableCategories = [];
 
-  static const _units = ['kg', 'g', 'un', 'maço', 'pacote', 'box', 'liter', 'ml', 'dozen'];
+  static const _units = [
+    'kg',
+    'g',
+    'un',
+    'maço',
+    'pacote',
+    'box',
+    'liter',
+    'ml',
+    'dozen',
+  ];
 
   @override
   void dispose() {
@@ -203,7 +212,6 @@ class _ProductFormViewState extends State<_ProductFormView> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Image picker placeholder
                 Container(
                   width: double.infinity,
                   height: 210,
@@ -221,7 +229,7 @@ class _ProductFormViewState extends State<_ProductFormView> {
                                 image: kIsWeb
                                     ? NetworkImage(_pickedPhoto!.path)
                                     : FileImage(File(_pickedPhoto!.path))
-                                        as ImageProvider,
+                                          as ImageProvider,
                                 width: double.infinity,
                                 height: 210,
                                 fit: BoxFit.cover,
@@ -234,27 +242,27 @@ class _ProductFormViewState extends State<_ProductFormView> {
                                 ),
                               )
                             : (_existingImageUrl != null &&
-                                    _existingImageUrl!.isNotEmpty)
-                                ? Image.network(
-                                    _existingImageUrl!,
-                                    width: double.infinity,
-                                    height: 210,
-                                    fit: BoxFit.cover,
-                                    errorBuilder: (_, __, ___) => const Center(
-                                      child: Icon(
-                                        Icons.eco_outlined,
-                                        size: 64,
-                                        color: AppColors.darkGreen,
-                                      ),
-                                    ),
-                                  )
-                                : const Center(
-                                    child: Icon(
-                                      Icons.eco_outlined,
-                                      size: 64,
-                                      color: AppColors.darkGreen,
-                                    ),
+                                  _existingImageUrl!.isNotEmpty)
+                            ? Image.network(
+                                _existingImageUrl!,
+                                width: double.infinity,
+                                height: 210,
+                                fit: BoxFit.cover,
+                                errorBuilder: (_, __, ___) => const Center(
+                                  child: Icon(
+                                    Icons.eco_outlined,
+                                    size: 64,
+                                    color: AppColors.darkGreen,
                                   ),
+                                ),
+                              )
+                            : const Center(
+                                child: Icon(
+                                  Icons.eco_outlined,
+                                  size: 64,
+                                  color: AppColors.darkGreen,
+                                ),
+                              ),
                       ),
                       Positioned(
                         bottom: 12,
@@ -304,7 +312,6 @@ class _ProductFormViewState extends State<_ProductFormView> {
 
                 const SizedBox(height: 24),
 
-                // Nome
                 const _FieldLabel('Nome do Produto'),
                 const SizedBox(height: 8),
                 _TextField(
@@ -315,7 +322,6 @@ class _ProductFormViewState extends State<_ProductFormView> {
 
                 const SizedBox(height: 16),
 
-                // Descrição
                 const _FieldLabel('Descrição do Produto'),
                 const SizedBox(height: 8),
                 _TextField(
@@ -327,7 +333,6 @@ class _ProductFormViewState extends State<_ProductFormView> {
 
                 const SizedBox(height: 16),
 
-                // Preço + Unidade
                 Row(
                   children: [
                     Expanded(
@@ -373,7 +378,7 @@ class _ProductFormViewState extends State<_ProductFormView> {
                                     (u) => DropdownMenuItem(
                                       value: u,
                                       child: Text(
-                                        u,
+                                        unityTypeFullLabel(u),
                                         style: const TextStyle(
                                           fontFamily: 'Manrope',
                                           fontSize: 15,
@@ -400,7 +405,6 @@ class _ProductFormViewState extends State<_ProductFormView> {
 
                 const SizedBox(height: 16),
 
-                // Estoque
                 const _FieldLabel('Quantidade em Estoque'),
                 const SizedBox(height: 8),
                 _StockStepper(
@@ -428,7 +432,9 @@ class _ProductFormViewState extends State<_ProductFormView> {
                             fontFamily: 'Manrope',
                             fontSize: 13,
                             fontWeight: FontWeight.w600,
-                            color: selected ? AppColors.white : AppColors.darkGreen,
+                            color: selected
+                                ? AppColors.white
+                                : AppColors.darkGreen,
                           ),
                         ),
                         selected: selected,
@@ -444,7 +450,9 @@ class _ProductFormViewState extends State<_ProductFormView> {
                                 });
                               },
                         selectedColor: AppColors.darkGreen,
-                        backgroundColor: AppColors.darkGreen.withValues(alpha: 0.08),
+                        backgroundColor: AppColors.darkGreen.withValues(
+                          alpha: 0.08,
+                        ),
                         checkmarkColor: AppColors.white,
                         side: BorderSide(
                           color: selected
@@ -455,7 +463,10 @@ class _ProductFormViewState extends State<_ProductFormView> {
                           borderRadius: BorderRadius.circular(20),
                         ),
                         showCheckmark: false,
-                        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 4,
+                          vertical: 2,
+                        ),
                       );
                     }).toList(),
                   ),
@@ -463,7 +474,6 @@ class _ProductFormViewState extends State<_ProductFormView> {
 
                 const SizedBox(height: 32),
 
-                // Save button
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(

@@ -1,7 +1,4 @@
-// Screen: Login
-// User Story: US-01 — Consumer Login / US-08 — Producer Login
-// Epic: EPIC 1 — Authentication
-// Routes: POST /auth/login
+// Login screen (US-01 consumer / US-08 producer). Backed by POST /auth/login.
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -99,7 +96,7 @@ class LoginPage extends StatelessWidget {
           child: BlocListener<LoginBloc, LoginState>(
             listener: (context, state) {
               if (state is LoginForgotPasswordSuccess) {
-                Navigator.pop(context); // Close modal on success
+                Navigator.pop(context);
               }
             },
             child: Padding(

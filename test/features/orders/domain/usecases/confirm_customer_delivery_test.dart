@@ -18,7 +18,6 @@ void main() {
 
   final OrderDetail tConfirmed = OrderDetail(
     id: 'order-1',
-    orderNumber: '#0001',
     status: 'DELIVERED',
     statusLabel: 'Entregue',
     createdAt: DateTime(2026, 5, 5),
@@ -58,15 +57,15 @@ void main() {
       verify(() => repo.confirmCustomerDelivery('order-1')).called(1);
     });
 
-    test('propaga NotFoundException quando endpoint backend ainda não existe (bug C2)', () async {
-      when(
-        () => repo.confirmCustomerDelivery(any()),
-      ).thenThrow(const NotFoundException());
+    test(
+      'propaga NotFoundException quando endpoint backend ainda não existe (bug C2)',
+      () async {
+        when(
+          () => repo.confirmCustomerDelivery(any()),
+        ).thenThrow(const NotFoundException());
 
-      expect(
-        () => useCase('order-x'),
-        throwsA(isA<NotFoundException>()),
-      );
-    });
+        expect(() => useCase('order-x'), throwsA(isA<NotFoundException>()));
+      },
+    );
   });
 }

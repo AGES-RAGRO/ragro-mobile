@@ -1,26 +1,26 @@
-## O que mudou?
+## What changed?
 
 
 
-## Tipo de mudança
+## Type of change
 
-- [ ] Nova feature
+- [ ] New feature
 - [ ] Bug fix
-- [ ] Refatoração
-- [ ] Documentação
-- [ ] Chore (dependências, configs, etc.)
+- [ ] Refactor
+- [ ] Documentation
+- [ ] Chore (dependencies, configs, etc.)
 
-## Como testar?
+## How to test?
 
 
 
-## Screenshots / Gravações
+## Screenshots / Recordings
 
-<!-- Se mudou algo visual, cole prints ou gravações aqui -->
+<!-- If you changed something visual, paste screenshots or recordings here -->
 
 ## Checklist
 
-- [ ] Código formatado (`dart format .`)
-- [ ] Sem warnings no analyze (`dart analyze`)
-- [ ] Testes passando (`flutter test`)
-- [ ] Segue o padrão de arquitetura do projeto
+- [ ] Code formatted (`dart format .`)
+- [ ] No analyze warnings (`dart analyze`)
+- [ ] Tests passing (`flutter test`)
+- [ ] Follows the project's architecture pattern

@@ -35,7 +35,11 @@ class ProducerOrderAccepted extends ProducerOrdersEvent {
 }
 
 class ProducerOrderCancelled extends ProducerOrdersEvent {
-  const ProducerOrderCancelled(this.orderId, {required this.reason, this.details});
+  const ProducerOrderCancelled(
+    this.orderId, {
+    required this.reason,
+    this.details,
+  });
 
   final String orderId;
   final String reason;
@@ -54,13 +58,16 @@ class ProducerOrderLocallyRefused extends ProducerOrdersEvent {
   List<Object?> get props => [orderId];
 }
 
-class ProducerOrderMarkedInDelivery extends ProducerOrdersEvent {
-  const ProducerOrderMarkedInDelivery(this.orderId);
+/// Marks a set of orders as "in delivery" at once (multi-select). Does a single
+/// reload and feedback and reports partial failures, unlike firing N individual
+/// events.
+class ProducerOrdersBulkMarkedInDelivery extends ProducerOrdersEvent {
+  const ProducerOrdersBulkMarkedInDelivery(this.orderIds);
 
-  final String orderId;
+  final Set<String> orderIds;
 
   @override
-  List<Object?> get props => [orderId];
+  List<Object?> get props => [orderIds];
 }
 
 class ProducerOrderDeliveryConfirmed extends ProducerOrdersEvent {
@@ -74,6 +81,15 @@ class ProducerOrderDeliveryConfirmed extends ProducerOrdersEvent {
 
 class ProducerOrderLocallyDelivered extends ProducerOrdersEvent {
   const ProducerOrderLocallyDelivered(this.orderId);
+
+  final String orderId;
+
+  @override
+  List<Object?> get props => [orderId];
+}
+
+class ProducerOrderLocallySeen extends ProducerOrdersEvent {
+  const ProducerOrderLocallySeen(this.orderId);
 
   final String orderId;
 

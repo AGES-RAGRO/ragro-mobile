@@ -18,3 +18,15 @@ class HomeRefreshed extends HomeEvent {
 class HomeLoadMoreProducers extends HomeEvent {
   const HomeLoadMoreProducers();
 }
+
+class HomeLoadMoreProducts extends HomeEvent {
+  const HomeLoadMoreProducts();
+}
+
+class HomeFavoriteToggled extends HomeEvent {
+  const HomeFavoriteToggled(this.producerId);
+  final String producerId;
+
+  @override
+  List<Object?> get props => [producerId];
+}

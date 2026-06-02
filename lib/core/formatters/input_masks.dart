@@ -1,9 +1,8 @@
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 
-// Máscaras dinâmicas para campos de entrada. Aplicadas via `inputFormatters`
-// para autoformatar enquanto o usuário digita, mantendo apenas dígitos no
-// valor interno e inserindo separadores conforme o length.
+// Dynamic input masks applied via `inputFormatters`: they autoformat as the
+// user types, keeping only digits internally and inserting separators by length.
 
 class CpfInputFormatter extends TextInputFormatter {
   @override
@@ -124,9 +123,8 @@ class CnpjInputFormatter extends TextInputFormatter {
   }
 }
 
-/// Formatter adaptativo: aplica máscara CPF (11 dígitos) ou CNPJ (14 dígitos)
-/// conforme o comprimento digitado. Enquanto <= 11 dígitos: 000.000.000-00.
-/// A partir do 12º dígito muda para 00.000.000/0000-00.
+/// Adaptive formatter: CPF mask (<= 11 digits, 000.000.000-00) or CNPJ mask
+/// (from the 12th digit, 00.000.000/0000-00) based on the length typed.
 class FiscalNumberInputFormatter extends TextInputFormatter {
   @override
   TextEditingValue formatEditUpdate(
@@ -206,15 +204,15 @@ class CurrencyInputFormatter extends TextInputFormatter {
     }
 
     double value = double.parse(digitsOnly) / 100;
-    
+
     final format = NumberFormat.currency(
       locale: 'pt_BR',
       symbol: '',
       decimalDigits: 2,
     );
-    
+
     String formatted = format.format(value).trim();
-    
+
     return TextEditingValue(
       text: formatted,
       selection: TextSelection.collapsed(offset: formatted.length),

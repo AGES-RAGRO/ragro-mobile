@@ -1,20 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ragro_mobile/core/theme/app_colors.dart';
+import 'package:ragro_mobile/features/home/domain/entities/favorite_producer.dart';
 import 'package:ragro_mobile/features/home/domain/entities/producer.dart';
 import 'package:ragro_mobile/features/home/presentation/bloc/home_bloc.dart';
 import 'package:ragro_mobile/features/home/presentation/bloc/home_event.dart';
 import 'package:ragro_mobile/features/home/presentation/widgets/producer_card.dart';
+import 'package:ragro_mobile/shared/widgets/confirm_dialog.dart';
 
 class ProducersSection extends StatefulWidget {
   const ProducersSection({
     required this.producers,
+    required this.favorites,
+    required this.favoriteIds,
     required this.onProducerTap,
     required this.isLoadingMore,
     super.key,
   });
 
   final List<Producer> producers;
+  final List<FavoriteProducer> favorites;
+  final Set<String> favoriteIds;
   final void Function(Producer) onProducerTap;
   final bool isLoadingMore;
 
@@ -49,6 +55,61 @@ class _ProducersSectionState extends State<ProducersSection> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        if (widget.favorites.isNotEmpty) ...[
+          const Padding(
+            padding: EdgeInsets.fromLTRB(16, 0, 16, 16),
+            child: Text(
+              'Seus produtores favoritos',
+              style: TextStyle(
+                fontFamily: 'Figtree',
+                fontWeight: FontWeight.w600,
+                fontSize: 22,
+                color: AppColors.black,
+              ),
+            ),
+          ),
+          SizedBox(
+            height: 282,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              itemCount: widget.favorites.length,
+              separatorBuilder: (_, __) => const SizedBox(width: 16),
+              itemBuilder: (context, index) {
+                final fav = widget.favorites[index];
+                final producer = Producer(
+                  id: fav.producerId,
+                  name: fav.farmName,
+                  description: fav.producerName,
+                  avatarUrl: fav.avatarUrl,
+                  coverUrl: fav.coverUrl,
+                  averageRating: fav.averageRating,
+                  ownerName: fav.producerName,
+                );
+                return ProducerCard(
+                  producer: producer,
+                  isFavorite: true,
+                  onTap: () => widget.onProducerTap(producer),
+                  onFavoriteTap: () async {
+                    final confirmed = await ConfirmDialog.show(
+                      context: context,
+                      title:
+                          'Tem certeza que quer tirar o produtor dos seus favoritos?',
+                      confirmLabel: 'Tirar dos favoritos',
+                      confirmColor: AppColors.red,
+                    );
+                    if ((confirmed ?? false) && context.mounted) {
+                      context.read<HomeBloc>().add(
+                        HomeFavoriteToggled(fav.producerId),
+                      );
+                    }
+                  },
+                );
+              },
+            ),
+          ),
+          const SizedBox(height: 32),
+        ],
         const Padding(
           padding: EdgeInsets.fromLTRB(16, 0, 16, 16),
           child: Text(
@@ -73,9 +134,10 @@ class _ProducersSectionState extends State<ProducersSection> {
             separatorBuilder: (_, __) => const SizedBox(width: 16),
             itemBuilder: (context, index) {
               if (index < widget.producers.length) {
+                final producer = widget.producers[index];
                 return ProducerCard(
-                  producer: widget.producers[index],
-                  onTap: () => widget.onProducerTap(widget.producers[index]),
+                  producer: producer,
+                  onTap: () => widget.onProducerTap(producer),
                 );
               }
               return const Center(

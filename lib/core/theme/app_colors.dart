@@ -8,7 +8,9 @@ abstract final class AppColors {
   static const Color mintGreen = Color(0xFF87EFAC);
   static const Color red = Color(0xFFA63446);
   static const Color white = Color(0xFFFFFFFF);
-  static const Color yellow = Color(0xFFFFF275);
+  static const Color yellow = Color(0xFFFFB413);
+  static const Color orange = Color(0xFFF67C3B);
+  static const Color blue = Color(0xFF3B82F6);
   static const Color inputBackground = Color(0xFFF4F4F4);
   static const Color placeholder = Color(0xFF94A3B8);
   static const Color inputBorder = Color(0x332E5729);

@@ -1,6 +1,7 @@
-// lib/core/network/api_client.dart
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:injectable/injectable.dart';
+import 'package:ragro_mobile/core/network/api_endpoints.dart';
 import 'package:ragro_mobile/core/network/api_exception.dart';
 
 @lazySingleton
@@ -11,27 +12,51 @@ class ApiClient {
       ..receiveTimeout = const Duration(seconds: 10)
       ..sendTimeout = const Duration(seconds: 10)
       ..headers = {'Content-Type': 'application/json'};
+    _dio.interceptors.add(_AuthInterceptor(() => _accessToken));
     _dio.interceptors.add(_ErrorInterceptor());
   }
 
   final Dio _dio;
   Dio get dio => _dio;
 
+  String? _accessToken;
+
   void setAuthToken(String token) {
-    _dio.options.headers['Authorization'] = 'Bearer $token';
+    _accessToken = token.isEmpty ? null : token;
   }
 
   void clearAuthToken() {
-    _dio.options.headers.remove('Authorization');
+    _accessToken = null;
   }
 }
 
-/// Backend retorna 401 em dois cenários distintos:
-///   1. Credenciais inválidas (Keycloak / invalid_grant)
-///   2. Usuário autenticado porém com `active=false` no banco,
-///      via `FarmerAuthInterceptor` — body:
-///      `{"error": "Produtor inativo", ...}`
-/// Diferenciamos inspecionando o campo `error` da resposta.
+/// Attaches the bearer token per request, except on public endpoints
+/// ([ApiEndpoints.isPublic]), which must go out unauthenticated.
+class _AuthInterceptor extends Interceptor {
+  _AuthInterceptor(this._tokenProvider);
+
+  final String? Function() _tokenProvider;
+
+  @override
+  void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
+    if (ApiEndpoints.isPublic(options.uri.path)) {
+      options.headers.remove('Authorization');
+    } else {
+      final token = _tokenProvider();
+      if (token != null && token.isNotEmpty) {
+        options.headers['Authorization'] = 'Bearer $token';
+      } else {
+        options.headers.remove('Authorization');
+      }
+    }
+    handler.next(options);
+  }
+}
+
+/// The backend returns 401 for two cases: invalid credentials
+/// (Keycloak / invalid_grant) and an authenticated but deactivated account
+/// (FarmerAuthInterceptor, body `{"error": "Produtor inativo", ...}`).
+/// We tell them apart by inspecting the response `error` field.
 ApiException _map401(dynamic data) {
   if (data is Map && data['error'] is String) {
     final error = (data['error'] as String).toLowerCase();
@@ -55,7 +80,9 @@ class _ErrorInterceptor extends Interceptor {
       exception = switch (statusCode) {
         400 => UnknownApiException(responseMessage ?? 'Dados invalidos'),
         401 => _map401(err.response?.data),
-        403 => ForbiddenException(responseMessage ?? 'Sem permissao para esta acao'),
+        403 => ForbiddenException(
+          responseMessage ?? 'Sem permissao para esta acao',
+        ),
         404 => NotFoundException(responseMessage ?? 'Recurso nao encontrado'),
         409 => ConflictException(responseMessage ?? 'Recurso ja existe'),
         429 => const RateLimitedException(),
@@ -71,6 +98,9 @@ class _ErrorInterceptor extends Interceptor {
     } else if (err.type == DioExceptionType.connectionError) {
       exception = const NetworkException();
     } else {
+      debugPrint(
+        '[ApiClient] DioExceptionType: ${err.type} | message: ${err.message} | error: ${err.error}',
+      );
       exception = const UnknownApiException();
     }
     handler.reject(

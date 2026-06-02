@@ -29,15 +29,13 @@ class ProducerOrdersRemoteDataSource {
   }
 
   Future<ProducerOrder> getOrderById(String id) async {
-    try {
-      final response = await _apiClient.dio.get<Map<String, dynamic>>(
-        ApiEndpoints.producerOrder(id),
-      );
-
-      return ProducerOrderModel.fromJson(response.data!);
-    } on DioException catch (e) {
-      throw e.error as ApiException? ?? const UnknownApiException();
-    }
+    final orders = await getOrders();
+    final order = orders.cast<ProducerOrder?>().firstWhere(
+      (o) => o?.id == id,
+      orElse: () => null,
+    );
+    if (order == null) throw const UnknownApiException();
+    return order;
   }
 
   Future<void> confirmOrder(String id) async {
@@ -48,7 +46,11 @@ class ProducerOrdersRemoteDataSource {
     }
   }
 
-  Future<void> refuseOrder(String id, {required String reason, String? details}) async {
+  Future<void> refuseOrder(
+    String id, {
+    required String reason,
+    String? details,
+  }) async {
     try {
       await _apiClient.dio.patch<void>(
         ApiEndpoints.producerOrderCancel(id),
@@ -70,6 +72,14 @@ class ProducerOrdersRemoteDataSource {
     }
   }
 
+  Future<void> markAsSeen(String id) async {
+    try {
+      await _apiClient.dio.patch<void>(ApiEndpoints.orderSeen(id));
+    } on DioException catch (e) {
+      throw e.error as ApiException? ?? const UnknownApiException();
+    }
+  }
+
   List<Map<String, dynamic>> _readList(dynamic data) {
     final rawList = switch (data) {
       final List<dynamic> list => list,
@@ -85,8 +95,8 @@ class ProducerOrdersRemoteDataSource {
     return rawList.whereType<Map<String, dynamic>>().toList();
   }
 
-  // Backend OrderStatus enum (Java) é case-sensitive UPPERCASE.
-  // Ver ragro-backend/src/main/java/br/com/ragro/domain/enums/OrderStatus.java
+  // Backend OrderStatus enum (Java) is case-sensitive UPPERCASE.
+  // See ragro-backend/src/main/java/br/com/ragro/domain/enums/OrderStatus.java
   String _statusQueryValue(ProducerOrderStatus status) {
     return switch (status) {
       ProducerOrderStatus.pending => 'PENDING',

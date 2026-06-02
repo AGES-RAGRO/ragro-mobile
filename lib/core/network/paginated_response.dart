@@ -1,5 +1,3 @@
-// lib/core/network/paginated_response.dart
-
 class PaginatedResponse<T> {
   const PaginatedResponse({
     required this.content,

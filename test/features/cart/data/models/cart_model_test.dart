@@ -31,7 +31,7 @@ void main() {
       });
 
       test('aplica defaults quando campos opcionais vêm ausentes', () {
-        // unityType, productName e imageS3 são tolerantes a ausência
+        // unityType, productName and imageS3 tolerate missing values
         final json = <String, dynamic>{
           'id': 'cart-item-uuid-2',
           'productId': 'product-uuid-2',
@@ -116,6 +116,47 @@ void main() {
         expect(model.producerId, '');
         expect(model.farmName, '');
         expect(model.totalAmount, 0.0);
+      });
+
+      test('deserializa bankInfo (banco, agência, conta, pix)', () {
+        // Keys verified against the backend BankInfoResponse: bankName, agency, account, pixKey.
+        final json = <String, dynamic>{
+          'id': 'cart-bank',
+          'farmerId': 'farmer-1',
+          'farmName': 'Sítio Boa Vista',
+          'totalAmount': 10,
+          'items': <dynamic>[],
+          'bankInfo': {
+            'bankName': 'Banco do Brasil',
+            'agency': '3452-X',
+            'account': '123456-7',
+            'pixKey': 'joao@email.com',
+          },
+        };
+
+        final model = CartModel.fromJson(json);
+
+        expect(model.bankName, 'Banco do Brasil');
+        expect(model.bankAgency, '3452-X');
+        expect(model.bankAccount, '123456-7');
+        expect(model.bankPixKey, 'joao@email.com');
+      });
+
+      test('campos bancários viram string vazia quando bankInfo é ausente', () {
+        final json = <String, dynamic>{
+          'id': 'cart-no-bank',
+          'farmerId': 'farmer-1',
+          'farmName': 'Sítio Boa Vista',
+          'totalAmount': 10,
+          'items': <dynamic>[],
+        };
+
+        final model = CartModel.fromJson(json);
+
+        expect(model.bankName, '');
+        expect(model.bankAgency, '');
+        expect(model.bankAccount, '');
+        expect(model.bankPixKey, '');
       });
 
       test('CartModel.empty() é tratado como carrinho vazio', () {
