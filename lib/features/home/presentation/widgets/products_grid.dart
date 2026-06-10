@@ -30,6 +30,7 @@ class ProductsGrid extends StatelessWidget {
               id: r.id,
               name: r.name,
               price: r.price,
+              unityType: r.unityType,
               imageUrl: r.imageS3 ?? '',
               farmName: r.farmName,
               category: r.categoryNames.isNotEmpty ? r.categoryNames.first : '',

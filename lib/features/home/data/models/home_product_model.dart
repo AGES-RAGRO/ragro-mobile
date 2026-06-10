@@ -7,6 +7,7 @@ class HomeProductModel extends HomeProduct {
     required super.name,
     required super.category,
     required super.price,
+    required super.unityType,
     required super.imageUrl,
     required super.farmName,
     required super.producerId,
@@ -29,6 +30,11 @@ class HomeProductModel extends HomeProduct {
           primaryCategory?['name'] as String? ??
           '',
       price: (json['price'] as num?)?.toDouble() ?? 0,
+      unityType:
+          json['unityType'] as String? ??
+          json['unity_type'] as String? ??
+          json['unit'] as String? ??
+          '',
       imageUrl: ApiEndpoints.resolveMediaUrl(
         json['imageS3'] as String? ??
             json['image_s3'] as String? ??
