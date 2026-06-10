@@ -11,7 +11,7 @@ import 'package:ragro_mobile/features/producer_orders/data/models/co2_request_mo
 import 'package:ragro_mobile/features/producer_orders/data/repositories/co2_repository.dart';
 import 'package:ragro_mobile/features/producer_orders/data/repositories/route_repository.dart';
 import 'package:ragro_mobile/features/producer_orders/data/services/route_tracking_publisher.dart';
-import 'route_calculation_state.dart';
+import 'package:ragro_mobile/features/producer_orders/presentation/bloc/route_calculation_state.dart';
 
 /// Rota de entrega PERSISTIDA no backend: criada uma vez (1 chamada Google),
 /// retomada via GET /routes/active ao reabrir o app, e com progresso por parada
@@ -19,13 +19,6 @@ import 'route_calculation_state.dart';
 /// uma nova chamada Directions e fechar o app perdia a sequência.
 @injectable
 class RouteCalculationCubit extends Cubit<RouteCalculationState> {
-  final Co2Repository _co2Repository;
-  final RouteRepository _routeRepository;
-  final RouteTrackingPublisher _trackingPublisher;
-
-  /// Garante o registro de economia de CO2 só na CRIAÇÃO da rota (retomar uma
-  /// rota ativa não re-registra a mesma economia).
-  bool _savingsRecorded = false;
 
   RouteCalculationCubit(
     this._co2Repository,
@@ -34,6 +27,13 @@ class RouteCalculationCubit extends Cubit<RouteCalculationState> {
   ) : super(const RouteCalculationState()) {
     _initRoute();
   }
+  final Co2Repository _co2Repository;
+  final RouteRepository _routeRepository;
+  final RouteTrackingPublisher _trackingPublisher;
+
+  /// Garante o registro de economia de CO2 só na CRIAÇÃO da rota (retomar uma
+  /// rota ativa não re-registra a mesma economia).
+  bool _savingsRecorded = false;
 
   @override
   Future<void> close() async {
@@ -275,7 +275,7 @@ class RouteCalculationCubit extends Cubit<RouteCalculationState> {
         state.copyWith(
           deliveries: const [],
           orderedStops: const [],
-          totalDistanceKm: 0.0,
+          totalDistanceKm: 0,
           totalDurationMins: 0,
           status: RouteCalculationStatus.error,
           errorMessage:

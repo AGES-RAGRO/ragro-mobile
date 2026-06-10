@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math' as math;
 import 'dart:typed_data';
 import 'dart:ui' as ui;
@@ -151,13 +152,15 @@ class _MapPageState extends State<MapPage> {
             (producer.coverUrl != null && producer.coverUrl!.isNotEmpty)
             ? producer.coverUrl
             : producer.avatarUrl;
-        _createCustomMarker(imageUrl).then((marker) {
-          if (mounted) {
-            setState(() {
-              _customMarkers[producer.id] = marker;
-            });
-          }
-        });
+        unawaited(
+          _createCustomMarker(imageUrl).then((marker) {
+            if (mounted) {
+              setState(() {
+                _customMarkers[producer.id] = marker;
+              });
+            }
+          }),
+        );
       }
     } on Exception catch (_) {
       setState(() {
@@ -172,35 +175,36 @@ class _MapPageState extends State<MapPage> {
   }
 
   Future<BitmapDescriptor> _createCustomMarker(String? avatarUrl) async {
-    const int size = 180;
-    final ui.PictureRecorder pictureRecorder = ui.PictureRecorder();
-    final Canvas canvas = Canvas(pictureRecorder);
+    // Capturado antes dos awaits: usar context depois dispararia use_build_context_synchronously.
+    final dpr = MediaQuery.devicePixelRatioOf(context);
+    const size = 180;
+    final pictureRecorder = ui.PictureRecorder();
+    final canvas = Canvas(pictureRecorder);
 
     // Pin background (dark green teardrop)
-    final Paint paint = Paint()..color = AppColors.darkGreen;
-    final Path path = Path()
+    final paint = Paint()..color = AppColors.darkGreen;
+    final path = Path()
       ..moveTo(size / 2, size.toDouble())
       ..quadraticBezierTo(size * 0.1, size * 0.6, size * 0.1, size * 0.4)
       ..arcToPoint(
-        Offset(size * 0.9, size * 0.4),
+        const Offset(size * 0.9, size * 0.4),
         radius: const Radius.circular(size * 0.4),
-        clockwise: true,
       )
       ..quadraticBezierTo(size * 0.9, size * 0.6, size / 2, size.toDouble());
 
     canvas.drawPath(path, paint);
 
     // Inner white circle
-    final Paint whitePaint = Paint()..color = Colors.white;
-    final Offset circleCenter = Offset(size / 2, size * 0.4);
-    final double circleRadius = size * 0.32;
+    final whitePaint = Paint()..color = Colors.white;
+    const circleCenter = Offset(size / 2, size * 0.4);
+    const circleRadius = size * 0.32;
     canvas.drawCircle(circleCenter, circleRadius, whitePaint);
 
     ui.Image? profileImage;
     if (avatarUrl != null && avatarUrl.isNotEmpty) {
       try {
         // Rewrite localhost for the Android emulator.
-        String resolvedUrl = avatarUrl;
+        var resolvedUrl = avatarUrl;
         if (Theme.of(context).platform == TargetPlatform.android &&
             resolvedUrl.contains('localhost')) {
           resolvedUrl = resolvedUrl.replaceAll('localhost', '10.0.2.2');
@@ -215,51 +219,52 @@ class _MapPageState extends State<MapPage> {
           ),
         );
         if (response.data != null) {
-          final Uint8List bytes = Uint8List.fromList(response.data!);
-          final ui.Codec codec = await ui.instantiateImageCodec(
+          final bytes = Uint8List.fromList(response.data!);
+          final codec = await ui.instantiateImageCodec(
             bytes,
             targetWidth: (circleRadius * 2).toInt(),
             targetHeight: (circleRadius * 2).toInt(),
           );
-          final ui.FrameInfo fi = await codec.getNextFrame();
+          final fi = await codec.getNextFrame();
           profileImage = fi.image;
         }
-      } catch (_) {
+      } on Exception catch (_) {
         // Fallback for failed image download
       }
     }
 
     if (profileImage != null) {
       // Draw the clipped profile photo.
-      canvas.save();
-      canvas.clipPath(
-        Path()..addOval(
-          Rect.fromCircle(center: circleCenter, radius: circleRadius - 2),
-        ),
-      );
-      canvas.drawImage(
-        profileImage,
-        Offset(
-          circleCenter.dx - profileImage.width / 2,
-          circleCenter.dy - profileImage.height / 2,
-        ),
-        Paint(),
-      );
-      canvas.restore();
+      canvas
+        ..save()
+        ..clipPath(
+          Path()..addOval(
+            Rect.fromCircle(center: circleCenter, radius: circleRadius - 2),
+          ),
+        )
+        ..drawImage(
+          profileImage,
+          Offset(
+            circleCenter.dx - profileImage.width / 2,
+            circleCenter.dy - profileImage.height / 2,
+          ),
+          Paint(),
+        )
+        ..restore();
     } else {
       // Generic icon
-      final TextPainter textPainter = TextPainter(
+      final textPainter = TextPainter(
         textDirection: TextDirection.ltr,
-      );
-      textPainter.text = TextSpan(
-        text: String.fromCharCode(Icons.storefront.codePoint),
-        style: TextStyle(
-          fontSize: size * 0.4,
-          fontFamily: Icons.storefront.fontFamily,
-          color: AppColors.darkGreen,
-        ),
-      );
-      textPainter.layout();
+      )
+        ..text = TextSpan(
+          text: String.fromCharCode(Icons.storefront.codePoint),
+          style: TextStyle(
+            fontSize: size * 0.4,
+            fontFamily: Icons.storefront.fontFamily,
+            color: AppColors.darkGreen,
+          ),
+        )
+        ..layout();
       textPainter.paint(
         canvas,
         Offset(
@@ -270,22 +275,22 @@ class _MapPageState extends State<MapPage> {
     }
 
     // Thin border
-    final Paint borderPaint = Paint()
+    final borderPaint = Paint()
       ..color = AppColors.darkGreen
       ..style = PaintingStyle.stroke
       ..strokeWidth = 3.0;
     canvas.drawCircle(circleCenter, circleRadius, borderPaint);
 
-    final ui.Image markerAsImage = await pictureRecorder.endRecording().toImage(
+    final markerAsImage = await pictureRecorder.endRecording().toImage(
       size,
       size,
     );
-    final ByteData? byteData = await markerAsImage.toByteData(
+    final byteData = await markerAsImage.toByteData(
       format: ui.ImageByteFormat.png,
     );
-    final Uint8List uint8List = byteData!.buffer.asUint8List();
+    final uint8List = byteData!.buffer.asUint8List();
 
-    return BitmapDescriptor.fromBytes(uint8List);
+    return BitmapDescriptor.bytes(uint8List, imagePixelRatio: dpr);
   }
 
   Set<Marker> _buildMarkers() {
@@ -355,13 +360,13 @@ class _MapPageState extends State<MapPage> {
         elevation: 2,
         borderRadius: BorderRadius.circular(12),
         color: Colors.white,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        child: const Padding(
+          padding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           child: Row(
             children: [
-              const Icon(Icons.location_off_outlined, color: AppColors.darkGreen),
-              const SizedBox(width: 12),
-              const Expanded(
+              Icon(Icons.location_off_outlined, color: AppColors.darkGreen),
+              SizedBox(width: 12),
+              Expanded(
                 child: Text(
                   'Nenhum produtor com localização disponível no momento.',
                   style: TextStyle(fontSize: 13, color: AppColors.black),

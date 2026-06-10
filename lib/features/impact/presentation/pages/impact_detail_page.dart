@@ -119,7 +119,6 @@ class _ImpactDetailPageState extends State<ImpactDetailPage> {
                           ),
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
-                            crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
                               Padding(
                                 padding: const EdgeInsets.only(
@@ -233,7 +232,7 @@ class _ImpactDetailPageState extends State<ImpactDetailPage> {
                         ),
                         const SizedBox(height: 16),
 
-                        IntrinsicHeight(
+                        const IntrinsicHeight(
                           child: Row(
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
@@ -245,7 +244,7 @@ class _ImpactDetailPageState extends State<ImpactDetailPage> {
                                       'Conectamos você a produtores da sua região',
                                 ),
                               ),
-                              const SizedBox(width: 10),
+                              SizedBox(width: 10),
                               Expanded(
                                 child: _ImpactCard(
                                   icon: Icons.local_shipping_outlined,
@@ -254,7 +253,7 @@ class _ImpactDetailPageState extends State<ImpactDetailPage> {
                                       'Menor distância, menos emissões',
                                 ),
                               ),
-                              const SizedBox(width: 10),
+                              SizedBox(width: 10),
                               Expanded(
                                 child: _ImpactCard(
                                   icon: Icons.eco_outlined,
@@ -296,8 +295,6 @@ class _ImpactDetailPageState extends State<ImpactDetailPage> {
                                   ),
                                   child: Column(
                                     mainAxisAlignment: MainAxisAlignment.center,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.center,
                                     children: [
                                       Text(
                                         '$_totalProducers',
@@ -454,7 +451,6 @@ class _ImpactCard extends StatelessWidget {
         border: Border.all(color: const Color(0xFFE2E8F0)),
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Container(
             width: 48,

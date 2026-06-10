@@ -58,7 +58,7 @@ class OrderConfirmationPage extends StatelessWidget {
               context.go('/customer/orders/${state.order.id}');
             }
           }
-          if (state is CheckoutFailure) {
+          if (state is CheckoutFailure && context.mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(_friendlyError(state.message)),
@@ -845,7 +845,7 @@ class _DeliveryMapState extends State<_DeliveryMap> {
             );
           }
         });
-      } catch (_) {
+      } on Object catch (_) {
         if (mounted) setState(() => _geocoding = false);
       }
     }();

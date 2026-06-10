@@ -162,7 +162,6 @@ class _ReviewsPageState extends State<ReviewsPage> {
                         const SizedBox(height: 16),
                         IntrinsicHeight(
                           child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
                               Column(
                                 mainAxisAlignment: MainAxisAlignment.center,

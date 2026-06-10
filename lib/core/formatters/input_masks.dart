@@ -195,7 +195,7 @@ class CurrencyInputFormatter extends TextInputFormatter {
       return newValue.copyWith(text: '');
     }
 
-    String digitsOnly = newValue.text.replaceAll(RegExp(r'[^\d]'), '');
+    final digitsOnly = newValue.text.replaceAll(RegExp(r'[^\d]'), '');
     if (digitsOnly.isEmpty) {
       return const TextEditingValue(
         text: '0,00',
@@ -203,7 +203,7 @@ class CurrencyInputFormatter extends TextInputFormatter {
       );
     }
 
-    double value = double.parse(digitsOnly) / 100;
+    final value = double.parse(digitsOnly) / 100;
 
     final format = NumberFormat.currency(
       locale: 'pt_BR',
@@ -211,7 +211,7 @@ class CurrencyInputFormatter extends TextInputFormatter {
       decimalDigits: 2,
     );
 
-    String formatted = format.format(value).trim();
+    final formatted = format.format(value).trim();
 
     return TextEditingValue(
       text: formatted,

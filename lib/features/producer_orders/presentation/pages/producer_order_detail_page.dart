@@ -118,8 +118,10 @@ class ProducerOrderDetailPage extends StatelessWidget {
               state is ProducerOrderDetailRefusing ||
               state is ProducerOrderDetailUpdatingStatus;
 
-          return WillPopScope(
-            onWillPop: () async {
+          return PopScope(
+            canPop: false,
+            onPopInvokedWithResult: (didPop, result) {
+              if (didPop) return;
               // Mirrors the header back button: signal 'cancelled' so the list
               // moves the order to the Cancelled tab after a refuse, 'seen' if
               // the order was new, otherwise nothing.
@@ -130,7 +132,6 @@ class ProducerOrderDetailPage extends StatelessWidget {
               } else {
                 context.pop();
               }
-              return false;
             },
             child: _ProducerOrderDetailView(
               order: order,

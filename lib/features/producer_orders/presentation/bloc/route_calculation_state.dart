@@ -32,6 +32,26 @@ class RouteDelivery extends Equatable {
 }
 
 class RouteCalculationState extends Equatable {
+
+  const RouteCalculationState({
+    this.status = RouteCalculationStatus.initial,
+    this.calculatedCo2,
+    this.errorMessage,
+    this.selectedVehicle = 'Carro',
+    this.selectedFuel = 'Gasolina',
+    this.averageConsumption = '',
+    this.confirmedDeliveries = const {},
+    this.totalDurationMins = 0,
+    this.totalDistanceKm = 0.0,
+    this.producerLat,
+    this.producerLng,
+    this.routeId,
+    this.baselineDistanceKm,
+    this.overviewPolyline,
+    this.deliveries = const [],
+    this.orderedStops = const [],
+    this.allowedFuelsByVehicle = fallbackAllowedFuelsByVehicle,
+  });
   /// FALLBACK local da matriz veículo -> combustíveis do backend (Co2Service /
   /// `GET /co2/options`): usado como valor inicial e mantido quando a chamada
   /// falha, para os dropdowns continuarem dependentes e o app não enviar uma
@@ -74,26 +94,6 @@ class RouteCalculationState extends Equatable {
   /// [fallbackAllowedFuelsByVehicle] and is replaced by the backend matrix
   /// when `GET /co2/options` succeeds.
   final Map<String, List<String>> allowedFuelsByVehicle;
-
-  const RouteCalculationState({
-    this.status = RouteCalculationStatus.initial,
-    this.calculatedCo2,
-    this.errorMessage,
-    this.selectedVehicle = 'Carro',
-    this.selectedFuel = 'Gasolina',
-    this.averageConsumption = '',
-    this.confirmedDeliveries = const {},
-    this.totalDurationMins = 0,
-    this.totalDistanceKm = 0.0,
-    this.producerLat,
-    this.producerLng,
-    this.routeId,
-    this.baselineDistanceKm,
-    this.overviewPolyline,
-    this.deliveries = const [],
-    this.orderedStops = const [],
-    this.allowedFuelsByVehicle = fallbackAllowedFuelsByVehicle,
-  });
 
   /// Whether there are pending (unconfirmed) deliveries to route.
   bool get hasPendingDeliveries =>

@@ -257,7 +257,7 @@ class _InventoryView extends StatelessWidget {
                                         'productName': product.name,
                                         'unit': product.unit,
                                         'currentStock': product.stock
-                                            .toDouble(),
+                                            ,
                                       },
                                     )
                                     .then((result) {

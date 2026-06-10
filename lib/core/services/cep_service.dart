@@ -53,7 +53,7 @@ class CepService {
       if (response.statusCode == 200 && data != null) {
         return CepAddress.fromJson(data);
       }
-    } catch (e) {
+    } on Exception {
       return null;
     }
     return null;

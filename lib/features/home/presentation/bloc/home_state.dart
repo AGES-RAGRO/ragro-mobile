@@ -1,7 +1,7 @@
 import 'package:equatable/equatable.dart';
+import 'package:ragro_mobile/features/home/domain/entities/favorite_producer.dart';
 import 'package:ragro_mobile/features/home/domain/entities/home_product.dart';
 import 'package:ragro_mobile/features/home/domain/entities/producer.dart';
-import 'package:ragro_mobile/features/home/domain/entities/favorite_producer.dart';
 
 sealed class HomeState extends Equatable {
   const HomeState();

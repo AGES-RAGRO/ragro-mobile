@@ -2,6 +2,7 @@
 // US-23 — Create and Edit Products. Routes: POST /products, PUT /products/:id.
 
 import 'dart:io';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -9,13 +10,13 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
-import 'package:ragro_mobile/shared/utils/unity_type_label.dart';
 import 'package:ragro_mobile/core/di/injection.dart';
 import 'package:ragro_mobile/core/formatters/input_masks.dart';
 import 'package:ragro_mobile/core/theme/app_colors.dart';
 import 'package:ragro_mobile/features/inventory/presentation/bloc/product_form_bloc.dart';
 import 'package:ragro_mobile/features/inventory/presentation/bloc/product_form_event.dart';
 import 'package:ragro_mobile/features/inventory/presentation/bloc/product_form_state.dart';
+import 'package:ragro_mobile/shared/utils/unity_type_label.dart';
 
 class ProductFormPage extends StatelessWidget {
   const ProductFormPage({super.key, this.productId});

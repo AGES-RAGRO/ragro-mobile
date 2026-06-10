@@ -20,7 +20,7 @@ void main() {
     farmAvatarUrl: 'http://example.com/avatar.jpg',
     ownerName: 'Maria Silva',
     items: const [],
-    totalAmount: 200.0,
+    totalAmount: 200,
     status: OrderStatus.pending,
     createdAt: DateTime(2026, 5, 5),
     deliveryAddress: const DeliveryAddress(

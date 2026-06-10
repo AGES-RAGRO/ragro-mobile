@@ -73,8 +73,9 @@ class AdminProducerFormBloc
           lat = locations.first.latitude;
           lng = locations.first.longitude;
         }
-      } catch (e) {
-        // Ignore geocoding errors so they don't block creation
+      } on Object catch (_) {
+        // Ignore geocoding errors so they don't block creation (o plugin de
+        // geocoding pode lançar tipos fora de Exception, ex.: em ambiente de teste).
       }
 
       final producer = AdminProducer(

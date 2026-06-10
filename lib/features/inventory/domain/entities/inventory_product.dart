@@ -15,17 +15,6 @@ class InventoryProduct extends Equatable {
     this.categoryIds = const [],
   });
 
-  final String id;
-  final String producerId;
-  final String name;
-  final String description;
-  final String imageUrl;
-  final double price;
-  final String unit;
-  final double stock;
-  final bool active;
-  final List<int> categoryIds;
-
   factory InventoryProduct.fromJson(Map<String, dynamic> json) =>
       InventoryProduct(
         id: (json['id'] as String?) ?? '',
@@ -44,6 +33,17 @@ class InventoryProduct extends Equatable {
             .map((c) => c['id'] as int)
             .toList(),
       );
+
+  final String id;
+  final String producerId;
+  final String name;
+  final String description;
+  final String imageUrl;
+  final double price;
+  final String unit;
+  final double stock;
+  final bool active;
+  final List<int> categoryIds;
 
   Map<String, dynamic> toJson() => {
     'name': name,

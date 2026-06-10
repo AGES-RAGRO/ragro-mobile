@@ -1,10 +1,6 @@
 import 'package:equatable/equatable.dart';
 
 class Co2CalculationRequest extends Equatable {
-  final double distanceKm;
-  final String vehicleType;
-  final String fuelType;
-  final double? averageConsumption;
 
   const Co2CalculationRequest({
     required this.distanceKm,
@@ -12,6 +8,10 @@ class Co2CalculationRequest extends Equatable {
     required this.fuelType,
     this.averageConsumption,
   });
+  final double distanceKm;
+  final String vehicleType;
+  final String fuelType;
+  final double? averageConsumption;
 
   Map<String, dynamic> toJson() {
     return {
@@ -29,14 +29,6 @@ class Co2CalculationRequest extends Equatable {
 /// Records an optimized route's CO2 savings (POST /co2/record-savings). The
 /// backend computes savings = emission(baseline) − emission(optimized).
 class Co2SavingRequest extends Equatable {
-  final double distanceOptimized;
-
-  /// Baseline já em ida-e-volta (km): vem do servidor (Route Matrix) junto com
-  /// a rota persistida — antes era linha reta calculada no app.
-  final double distanceNonOptimized;
-  final String vehicleType;
-  final String fuelType;
-  final double? averageConsumption;
 
   const Co2SavingRequest({
     required this.distanceOptimized,
@@ -45,6 +37,14 @@ class Co2SavingRequest extends Equatable {
     required this.fuelType,
     this.averageConsumption,
   });
+  final double distanceOptimized;
+
+  /// Baseline já em ida-e-volta (km): vem do servidor (Route Matrix) junto com
+  /// a rota persistida — antes era linha reta calculada no app.
+  final double distanceNonOptimized;
+  final String vehicleType;
+  final String fuelType;
+  final double? averageConsumption;
 
   Map<String, dynamic> toJson() {
     return {

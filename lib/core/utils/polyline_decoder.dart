@@ -8,7 +8,9 @@ List<(double, double)> decodePolyline(String encoded) {
   var lng = 0;
 
   while (index < encoded.length) {
-    int shift = 0, result = 0, byte;
+    var shift = 0;
+    var result = 0;
+    int byte;
     do {
       byte = encoded.codeUnitAt(index++) - 63;
       result |= (byte & 0x1f) << shift;

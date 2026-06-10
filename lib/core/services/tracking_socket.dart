@@ -36,7 +36,6 @@ class TrackingSocket {
         url: ApiEndpoints.wsUrl,
         stompConnectHeaders: headers,
         webSocketConnectHeaders: headers,
-        reconnectDelay: const Duration(seconds: 5),
         onConnect: (_) {
           for (final listener in List.of(_connectListeners)) {
             listener();

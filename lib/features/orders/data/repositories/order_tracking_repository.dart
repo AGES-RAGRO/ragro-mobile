@@ -21,22 +21,6 @@ class OrderTracking {
     this.overviewPolyline,
   });
 
-  final bool available;
-  final String? routeId;
-  final double? producerLatitude;
-  final double? producerLongitude;
-  final DateTime? recordedAt;
-  final double? destinationLatitude;
-  final double? destinationLongitude;
-  final int? etaSeconds;
-  final int stopsBefore;
-
-  /// PENDING | ARRIVED | DELIVERED | FAILED.
-  final String? stopStatus;
-
-  /// Polyline codificada (Google) da rota completa — desenha o caminho no mapa.
-  final String? overviewPolyline;
-
   factory OrderTracking.fromJson(Map<String, dynamic> json) {
     return OrderTracking(
       available: json['available'] as bool? ?? false,
@@ -52,6 +36,22 @@ class OrderTracking {
       overviewPolyline: json['overviewPolyline'] as String?,
     );
   }
+
+  final bool available;
+  final String? routeId;
+  final double? producerLatitude;
+  final double? producerLongitude;
+  final DateTime? recordedAt;
+  final double? destinationLatitude;
+  final double? destinationLongitude;
+  final int? etaSeconds;
+  final int stopsBefore;
+
+  /// PENDING | ARRIVED | DELIVERED | FAILED.
+  final String? stopStatus;
+
+  /// Polyline codificada (Google) da rota completa — desenha o caminho no mapa.
+  final String? overviewPolyline;
 }
 
 /// Estado inicial e fallback de polling do acompanhamento de entrega — o stream

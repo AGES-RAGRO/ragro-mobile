@@ -21,22 +21,6 @@ class DeliveryRouteStop {
     this.completedAt,
   });
 
-  final String id;
-  final String orderId;
-  final int sequence;
-
-  /// PENDING | ARRIVED | DELIVERED | FAILED.
-  final String status;
-  final double latitude;
-  final double longitude;
-  final String addressText;
-  final String customerName;
-  final int? legDurationSeconds;
-  final DateTime? eta;
-  final DateTime? completedAt;
-
-  bool get isTerminal => status == 'DELIVERED' || status == 'FAILED';
-
   factory DeliveryRouteStop.fromJson(Map<String, dynamic> json) {
     return DeliveryRouteStop(
       id: json['id'] as String? ?? '',
@@ -52,6 +36,22 @@ class DeliveryRouteStop {
       completedAt: parseApiDateTime(json['completedAt']),
     );
   }
+
+  final String id;
+  final String orderId;
+  final int sequence;
+
+  /// PENDING | ARRIVED | DELIVERED | FAILED.
+  final String status;
+  final double latitude;
+  final double longitude;
+  final String addressText;
+  final String customerName;
+  final int? legDurationSeconds;
+  final DateTime? eta;
+  final DateTime? completedAt;
+
+  bool get isTerminal => status == 'DELIVERED' || status == 'FAILED';
 }
 
 /// Rota de entrega persistida do produtor (`RouteResponse` do backend).
@@ -67,20 +67,6 @@ class DeliveryRoute {
     this.baselineDistanceKm,
     this.overviewPolyline,
   });
-
-  final String id;
-
-  /// ACTIVE | COMPLETED | CANCELLED.
-  final String status;
-  final double originLatitude;
-  final double originLongitude;
-  final double totalDistanceKm;
-  final int totalDurationSeconds;
-
-  /// Baseline do CO2 (ida-e-volta individual a cada parada), calculado no servidor.
-  final double? baselineDistanceKm;
-  final String? overviewPolyline;
-  final List<DeliveryRouteStop> stops;
 
   factory DeliveryRoute.fromJson(Map<String, dynamic> json) {
     return DeliveryRoute(
@@ -98,6 +84,20 @@ class DeliveryRoute {
           .toList(),
     );
   }
+
+  final String id;
+
+  /// ACTIVE | COMPLETED | CANCELLED.
+  final String status;
+  final double originLatitude;
+  final double originLongitude;
+  final double totalDistanceKm;
+  final int totalDurationSeconds;
+
+  /// Baseline do CO2 (ida-e-volta individual a cada parada), calculado no servidor.
+  final double? baselineDistanceKm;
+  final String? overviewPolyline;
+  final List<DeliveryRouteStop> stops;
 }
 
 /// Rotas de entrega persistidas no backend (Google Routes API roda no servidor;

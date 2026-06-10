@@ -196,8 +196,8 @@ class _ProducerProfileView extends StatelessWidget {
             return RefreshIndicator(
               color: AppColors.darkGreen,
               onRefresh: () async {
-                final bloc = context.read<ProducerManagementBloc>();
-                bloc.add(const ProducerManagementRefreshed());
+                final bloc = context.read<ProducerManagementBloc>()
+                  ..add(const ProducerManagementRefreshed());
                 await bloc.stream.firstWhere(
                   (s) =>
                       s is ProducerManagementLoaded ||

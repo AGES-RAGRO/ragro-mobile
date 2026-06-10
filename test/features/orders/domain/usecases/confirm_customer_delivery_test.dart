@@ -16,7 +16,7 @@ void main() {
     useCase = ConfirmCustomerDelivery(repo);
   });
 
-  final OrderDetail tConfirmed = OrderDetail(
+  final tConfirmed = OrderDetail(
     id: 'order-1',
     status: 'DELIVERED',
     statusLabel: 'Entregue',

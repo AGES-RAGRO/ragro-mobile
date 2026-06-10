@@ -93,9 +93,7 @@ class _ImpactPageState extends State<ImpactPage> {
                 ),
               ),
               const SizedBox(height: 16),
-              _loading
-                  ? const CircularProgressIndicator(color: AppColors.darkGreen)
-                  : Text(
+              if (_loading) const CircularProgressIndicator(color: AppColors.darkGreen) else Text(
                       co2Value,
                       style: const TextStyle(
                         fontFamily: 'Figtree',

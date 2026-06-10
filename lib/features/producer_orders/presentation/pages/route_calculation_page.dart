@@ -603,7 +603,6 @@ class _DeliveryItem extends StatelessWidget {
       builder: (context, state) {
         final isConfirmed = state.confirmedDeliveries.contains(id);
         return Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Text(
               number.toString(),
@@ -716,7 +715,7 @@ class _Co2BottomSheetContentState extends State<_Co2BottomSheetContent> {
               ),
               const SizedBox(height: 8),
               DropdownButtonFormField<String>(
-                value: state.selectedVehicle,
+                initialValue: state.selectedVehicle,
                 decoration: InputDecoration(
                   contentPadding: const EdgeInsets.symmetric(
                     horizontal: 16,
@@ -750,7 +749,7 @@ class _Co2BottomSheetContentState extends State<_Co2BottomSheetContent> {
               ),
               const SizedBox(height: 8),
               DropdownButtonFormField<String>(
-                value: state.selectedFuel,
+                initialValue: state.selectedFuel,
                 decoration: InputDecoration(
                   contentPadding: const EdgeInsets.symmetric(
                     horizontal: 16,

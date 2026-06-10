@@ -52,7 +52,7 @@ void main() {
 
       verify(
         () =>
-            repo.cancelCustomerOrder('order-2', reason: 'Outro', details: null),
+            repo.cancelCustomerOrder('order-2', reason: 'Outro'),
       ).called(1);
     });
 

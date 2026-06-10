@@ -21,7 +21,7 @@ void main() {
     producerPhone: '5199999999',
     producerPicture: null,
     items: const [],
-    totalAmount: 150.0,
+    totalAmount: 150,
     deliveryAddress: const OrderDetailAddress(
       street: 'Rua A',
       number: '123',
@@ -82,7 +82,7 @@ void main() {
               productPhoto: 'http://example.com/tomate.jpg',
               quantity: 2.5,
               unityType: 'kg',
-              unitPrice: 5.0,
+              unitPrice: 5,
               subtotal: 12.5,
             ),
           ],

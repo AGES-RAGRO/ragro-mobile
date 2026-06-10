@@ -13,17 +13,6 @@ class StockMovement extends Equatable {
     this.notes,
   });
 
-  final String id;
-  final String productId;
-  final String productName;
-  final String type; // 'ENTRY' | 'EXIT'
-  final String
-  reason; // 'SALE' | 'LOSS' | 'DISPOSAL' | 'MANUAL_ENTRY' | 'CANCELED_SALE'
-  final double quantity;
-  final String? notes;
-  final DateTime createdAt;
-  final double currentStockQuantity;
-
   factory StockMovement.fromJson(Map<String, dynamic> json) => StockMovement(
     id: (json['id'] as String?) ?? '',
     productId: (json['productId'] as String?) ?? '',
@@ -38,6 +27,17 @@ class StockMovement extends Equatable {
     currentStockQuantity:
         (json['currentStockQuantity'] as num?)?.toDouble() ?? 0.0,
   );
+
+  final String id;
+  final String productId;
+  final String productName;
+  final String type; // 'ENTRY' | 'EXIT'
+  final String
+  reason; // 'SALE' | 'LOSS' | 'DISPOSAL' | 'MANUAL_ENTRY' | 'CANCELED_SALE'
+  final double quantity;
+  final String? notes;
+  final DateTime createdAt;
+  final double currentStockQuantity;
 
   String get reasonLabel => switch (reason) {
     'SALE' => 'Venda',

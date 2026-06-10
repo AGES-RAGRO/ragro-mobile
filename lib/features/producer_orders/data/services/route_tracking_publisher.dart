@@ -59,7 +59,6 @@ class RouteTrackingPublisher {
       settings = AppleSettings(
         accuracy: LocationAccuracy.high,
         distanceFilter: 5,
-        allowBackgroundLocationUpdates: true,
         showBackgroundLocationIndicator: true,
       );
     } else {
