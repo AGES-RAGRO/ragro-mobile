@@ -26,25 +26,13 @@ class RecommendationsRemoteDatasource {
     }
   }
 
+  // Contrato do backend: RecommendationResponse{recommendations: [...], total} —
+  // a leitura defensiva de 6 chaves alternativas mascarava mudanças de contrato.
   List<Map<String, dynamic>> _readList(dynamic data) {
-    if (data is List<dynamic>) {
-      return data.whereType<Map<String, dynamic>>().toList();
-    }
-    if (data is Map<String, dynamic>) {
-      for (final key in const [
-        'data',
-        'content',
-        'items',
-        'recommendations',
-        'result',
-        'list',
-      ]) {
-        if (data[key] is List<dynamic>) {
-          return (data[key] as List<dynamic>)
-              .whereType<Map<String, dynamic>>()
-              .toList();
-        }
-      }
+    if (data is Map<String, dynamic> && data['recommendations'] is List<dynamic>) {
+      return (data['recommendations'] as List<dynamic>)
+          .whereType<Map<String, dynamic>>()
+          .toList();
     }
     return const [];
   }
