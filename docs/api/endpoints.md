@@ -1,6 +1,8 @@
 # RAGRO API — Endpoint Reference
 
-Base URL: `https://api.ragro.com.br`
+Base URL: `https://7ruopxdlm7.execute-api.us-east-2.amazonaws.com`
+
+Set `API_BASE_URL` in the Flutter app to switch to a local backend such as `http://localhost:8080` or `http://10.0.2.2:8080` on the Android emulator.
 
 All authenticated endpoints require the header: `Authorization: Bearer <token>`
 
@@ -15,7 +17,7 @@ Returns the Keycloak authentication configuration. No authentication required.
 **Response (200 OK):**
 ```json
 {
-  "tokenUrl": "https://keycloak.ragro.com.br/realms/ragro/protocol/openid-connect/token",
+  "tokenUrl": "https://kwn6g5amn5.execute-api.us-east-2.amazonaws.com/realms/ragro/protocol/openid-connect/token",
   "clientId": "ragro-app",
   "realm": "ragro"
 }

@@ -1,11 +1,13 @@
-// Screen: Confirmação de Pedido - Dados Bancários
+// Screen: Order Confirmation - Bank Details
 // User Story: US-10 — Checkout
 // Epic: EPIC 3 — Shopping & Orders
 // Routes: POST /orders (confirm)
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:geocoding/geocoding.dart' as geo;
 import 'package:go_router/go_router.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:ragro_mobile/core/di/injection.dart';
 import 'package:ragro_mobile/core/theme/app_colors.dart';
 import 'package:ragro_mobile/features/auth/domain/entities/address.dart';
@@ -33,9 +35,9 @@ class OrderConfirmationPage extends StatelessWidget {
           create: (_) =>
               getIt<CheckoutBloc>()..add(const CheckoutStarted('cart')),
         ),
-        // CustomerProfileBloc é factory no DI; o BlocProvider mantém uma única
-        // instância no subtree, então context.read<CustomerProfileBloc>() em
-        // callbacks (ex.: botão "Alterar") referencia o mesmo bloc do BlocBuilder.
+        // CustomerProfileBloc is a DI factory; this BlocProvider keeps a single
+        // instance in the subtree, so context.read<CustomerProfileBloc>() in
+        // callbacks (e.g. "Alterar") points to the same bloc as the BlocBuilder.
         BlocProvider(
           create: (_) =>
               getIt<CustomerProfileBloc>()..add(const CustomerProfileStarted()),
@@ -169,7 +171,6 @@ class _CheckoutView extends StatelessWidget {
       body: SafeArea(
         child: Column(
           children: [
-            // Top app bar
             Padding(
               padding: const EdgeInsets.all(16),
               child: Row(
@@ -197,11 +198,9 @@ class _CheckoutView extends StatelessWidget {
               ),
             ),
 
-            // Scrollable content
             Expanded(
               child: ListView(
                 children: [
-                  // Order items summary
                   Padding(
                     padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
                     child: Column(
@@ -249,184 +248,190 @@ class _CheckoutView extends StatelessWidget {
                     ),
                   ),
 
-                  // Divider
                   Container(height: 8, color: const Color(0xFFF6F7F6)),
 
-                  // Payment & Delivery info
                   Padding(
                     padding: const EdgeInsets.fromLTRB(16, 24, 16, 24),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Bank info
-                        const Text(
-                          'Dados Bancários do Produtor',
-                          style: TextStyle(
-                            fontFamily: 'Manrope',
-                            fontWeight: FontWeight.w700,
-                            fontSize: 18,
-                            color: AppColors.black,
+                        // Render bank info only when present, to avoid an empty
+                        // card when the producer has no PaymentMethod and the
+                        // backend returns a null bankInfo.
+                        if (cart.bankName.isNotEmpty ||
+                            cart.bankAgency.isNotEmpty ||
+                            cart.bankAccount.isNotEmpty ||
+                            cart.bankPixKey.isNotEmpty) ...[
+                          const Text(
+                            'Dados Bancários do Produtor',
+                            style: TextStyle(
+                              fontFamily: 'Manrope',
+                              fontWeight: FontWeight.w700,
+                              fontSize: 18,
+                              color: AppColors.black,
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 16),
-                        Container(
-                          padding: const EdgeInsets.all(17),
-                          decoration: BoxDecoration(
-                            color: AppColors.white,
-                            borderRadius: BorderRadius.circular(16),
-                            border: Border.all(color: AppColors.placeholder),
-                          ),
-                          child: Column(
-                            children: [
-                              // Bank
-                              Row(
-                                children: [
-                                  const Icon(
-                                    Icons.account_balance_outlined,
-                                    size: 20,
-                                    color: AppColors.darkGreen,
+                          const SizedBox(height: 16),
+                          Container(
+                            padding: const EdgeInsets.all(17),
+                            decoration: BoxDecoration(
+                              color: AppColors.white,
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(color: AppColors.placeholder),
+                            ),
+                            child: Column(
+                              children: [
+                                if (cart.bankName.isNotEmpty) ...[
+                                  Row(
+                                    children: [
+                                      const Icon(
+                                        Icons.account_balance_outlined,
+                                        size: 20,
+                                        color: AppColors.darkGreen,
+                                      ),
+                                      const SizedBox(width: 16),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            const Text(
+                                              'Banco',
+                                              style: TextStyle(
+                                                fontFamily: 'Manrope',
+                                                fontWeight: FontWeight.w700,
+                                                fontSize: 14,
+                                                color: AppColors.placeholder,
+                                              ),
+                                            ),
+                                            Text(
+                                              cart.bankName,
+                                              style: const TextStyle(
+                                                fontFamily: 'Manrope',
+                                                fontWeight: FontWeight.w700,
+                                                fontSize: 14,
+                                                color: AppColors.black,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                  const SizedBox(width: 16),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        const Text(
-                                          'Banco',
-                                          style: TextStyle(
-                                            fontFamily: 'Manrope',
-                                            fontWeight: FontWeight.w700,
-                                            fontSize: 14,
-                                            color: AppColors.placeholder,
+                                  const SizedBox(height: 12),
+                                ],
+                                if (cart.bankAgency.isNotEmpty ||
+                                    cart.bankAccount.isNotEmpty) ...[
+                                  Row(
+                                    children: [
+                                      if (cart.bankAgency.isNotEmpty)
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              const Text(
+                                                'Agência',
+                                                style: TextStyle(
+                                                  fontFamily: 'Manrope',
+                                                  fontWeight: FontWeight.w700,
+                                                  fontSize: 12,
+                                                  color: AppColors.placeholder,
+                                                ),
+                                              ),
+                                              Text(
+                                                cart.bankAgency,
+                                                style: const TextStyle(
+                                                  fontFamily: 'Manrope',
+                                                  fontWeight: FontWeight.w700,
+                                                  fontSize: 14,
+                                                  color: AppColors.black,
+                                                ),
+                                              ),
+                                            ],
                                           ),
                                         ),
-                                        Text(
-                                          cart.bankName.isNotEmpty
-                                              ? cart.bankName
-                                              : '-',
-                                          style: const TextStyle(
-                                            fontFamily: 'Manrope',
-                                            fontWeight: FontWeight.w700,
-                                            fontSize: 14,
-                                            color: AppColors.black,
+                                      if (cart.bankAccount.isNotEmpty)
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              const Text(
+                                                'Conta Corrente',
+                                                style: TextStyle(
+                                                  fontFamily: 'Manrope',
+                                                  fontWeight: FontWeight.w700,
+                                                  fontSize: 12,
+                                                  color: AppColors.placeholder,
+                                                ),
+                                              ),
+                                              Text(
+                                                cart.bankAccount,
+                                                style: const TextStyle(
+                                                  fontFamily: 'Manrope',
+                                                  fontWeight: FontWeight.w700,
+                                                  fontSize: 14,
+                                                  color: AppColors.black,
+                                                ),
+                                              ),
+                                            ],
                                           ),
                                         ),
-                                      ],
+                                    ],
+                                  ),
+                                  const SizedBox(height: 12),
+                                ],
+                                if (cart.bankPixKey.isNotEmpty) ...[
+                                  if (cart.bankName.isNotEmpty ||
+                                      cart.bankAgency.isNotEmpty ||
+                                      cart.bankAccount.isNotEmpty)
+                                    const Divider(
+                                      color: Color(0xFFF1F5F9),
+                                      height: 24,
                                     ),
+                                  Row(
+                                    children: [
+                                      const Icon(
+                                        Icons.pix,
+                                        size: 22,
+                                        color: AppColors.lightGreen,
+                                      ),
+                                      const SizedBox(width: 16),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            const Text(
+                                              'Chave PIX',
+                                              style: TextStyle(
+                                                fontFamily: 'Manrope',
+                                                fontWeight: FontWeight.w700,
+                                                fontSize: 12,
+                                                color: AppColors.placeholder,
+                                              ),
+                                            ),
+                                            Text(
+                                              cart.bankPixKey,
+                                              style: const TextStyle(
+                                                fontFamily: 'Manrope',
+                                                fontWeight: FontWeight.w700,
+                                                fontSize: 14,
+                                                color: AppColors.black,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ],
-                              ),
-                              const SizedBox(height: 12),
-                              // Agency + Account
-                              Row(
-                                children: [
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        const Text(
-                                          'Agência',
-                                          style: TextStyle(
-                                            fontFamily: 'Manrope',
-                                            fontWeight: FontWeight.w700,
-                                            fontSize: 12,
-                                            color: AppColors.placeholder,
-                                          ),
-                                        ),
-                                        Text(
-                                          cart.bankAgency.isNotEmpty
-                                              ? cart.bankAgency
-                                              : '-',
-                                          style: const TextStyle(
-                                            fontFamily: 'Manrope',
-                                            fontWeight: FontWeight.w700,
-                                            fontSize: 14,
-                                            color: AppColors.black,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        const Text(
-                                          'Conta Corrente',
-                                          style: TextStyle(
-                                            fontFamily: 'Manrope',
-                                            fontWeight: FontWeight.w700,
-                                            fontSize: 12,
-                                            color: AppColors.placeholder,
-                                          ),
-                                        ),
-                                        Text(
-                                          cart.bankAccount.isNotEmpty
-                                              ? cart.bankAccount
-                                              : '-',
-                                          style: const TextStyle(
-                                            fontFamily: 'Manrope',
-                                            fontWeight: FontWeight.w700,
-                                            fontSize: 14,
-                                            color: AppColors.black,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const Divider(
-                                color: Color(0xFFF1F5F9),
-                                height: 24,
-                              ),
-                              // PIX
-                              Row(
-                                children: [
-                                  const Icon(
-                                    Icons.pix,
-                                    size: 22,
-                                    color: AppColors.lightGreen,
-                                  ),
-                                  const SizedBox(width: 16),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        const Text(
-                                          'Chave PIX',
-                                          style: TextStyle(
-                                            fontFamily: 'Manrope',
-                                            fontWeight: FontWeight.w700,
-                                            fontSize: 12,
-                                            color: AppColors.placeholder,
-                                          ),
-                                        ),
-                                        Text(
-                                          cart.bankPixKey.isNotEmpty
-                                              ? cart.bankPixKey
-                                              : 'Disponível nos detalhes do pedido',
-                                          style: const TextStyle(
-                                            fontFamily: 'Manrope',
-                                            fontWeight: FontWeight.w700,
-                                            fontSize: 14,
-                                            color: AppColors.black,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 24),
-                        // Delivery address
+                          const SizedBox(height: 24),
+                        ],
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
@@ -445,8 +450,8 @@ class _CheckoutView extends StatelessWidget {
                                   '/customer/edit-address',
                                 );
                                 if ((updated ?? false) && context.mounted) {
-                                  // Recarrega checkout + perfil para refletir
-                                  // o endereço atualizado.
+                                  // Reload checkout and profile to reflect the
+                                  // updated address.
                                   context.read<CheckoutBloc>().add(
                                     const CheckoutStarted('cart'),
                                   );
@@ -470,38 +475,8 @@ class _CheckoutView extends StatelessWidget {
                         const SizedBox(height: 16),
                         const _DeliveryAddressCard(),
                         const SizedBox(height: 16),
-                        // Map placeholder
-                        Container(
-                          height: 128,
-                          decoration: BoxDecoration(
-                            color: AppColors.lightGreen.withValues(alpha: 0.1),
-                            borderRadius: BorderRadius.circular(24),
-                            border: Border.all(color: AppColors.black),
-                          ),
-                          child: const Center(
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(
-                                  Icons.map_outlined,
-                                  color: AppColors.darkGreen,
-                                  size: 24,
-                                ),
-                                SizedBox(width: 8),
-                                Text(
-                                  'Mapa de Entrega',
-                                  style: TextStyle(
-                                    fontFamily: 'Manrope',
-                                    fontSize: 14,
-                                    color: AppColors.darkGreen,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
+                        const _DeliveryMap(),
                         const SizedBox(height: 24),
-                        // Delivery type
                         const Text(
                           'Tipo de Entrega',
                           style: TextStyle(
@@ -554,7 +529,6 @@ class _CheckoutView extends StatelessWidget {
               ),
             ),
 
-            // Sticky footer
             Container(
               padding: const EdgeInsets.fromLTRB(24, 25, 24, 24),
               decoration: const BoxDecoration(
@@ -570,7 +544,6 @@ class _CheckoutView extends StatelessWidget {
               ),
               child: Column(
                 children: [
-                  // Subtotal row
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -593,7 +566,6 @@ class _CheckoutView extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 8),
-                  // Frete row
                   const Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -617,7 +589,6 @@ class _CheckoutView extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 8),
-                  // Total row
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -642,14 +613,14 @@ class _CheckoutView extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 16),
-                  // Confirm button
                   GestureDetector(
                     onTap: isConfirming
                         ? null
                         : () async {
                             // Step 1 — confirm delivery data
-                            final profileState =
-                                context.read<CustomerProfileBloc>().state;
+                            final profileState = context
+                                .read<CustomerProfileBloc>()
+                                .state;
                             final profile = switch (profileState) {
                               CustomerProfileLoaded(:final profile) => profile,
                               CustomerProfileUpdating(:final profile) =>
@@ -688,9 +659,9 @@ class _CheckoutView extends StatelessWidget {
                               confirmColor: AppColors.lightGreen,
                             );
                             if ((confirmed ?? false) && context.mounted) {
-                              context
-                                  .read<CheckoutBloc>()
-                                  .add(const CheckoutConfirmed('cart'));
+                              context.read<CheckoutBloc>().add(
+                                const CheckoutConfirmed('cart'),
+                              );
                             }
                           },
                     child: Container(
@@ -820,8 +791,152 @@ class _CartItemRow extends StatelessWidget {
   }
 }
 
-/// Card que exibe o endereço primário do customer logado.
-/// Lê do [CustomerProfileBloc] já provido pela página.
+/// Delivery map for the customer's primary address. Uses the address
+/// coordinates when present; otherwise geocodes on-device (native geocoder, no
+/// API key) so it still works for older addresses with null coordinates.
+class _DeliveryMap extends StatefulWidget {
+  const _DeliveryMap();
+
+  @override
+  State<_DeliveryMap> createState() => _DeliveryMapState();
+}
+
+class _DeliveryMapState extends State<_DeliveryMap> {
+  LatLng? _geocoded;
+  bool _geocoding = false;
+  String? _geocodedQuery;
+
+  Address? _addressOf(CustomerProfileState state) {
+    final profile = switch (state) {
+      CustomerProfileLoaded(:final profile) => profile,
+      CustomerProfileUpdating(:final profile) => profile,
+      CustomerProfileUpdateSuccess(:final profile) => profile,
+      CustomerProfileUpdateFailure(:final profile) => profile,
+      _ => null,
+    };
+    return profile?.primaryAddress;
+  }
+
+  String _addressQuery(Address a) {
+    final streetLine = a.number.isNotEmpty
+        ? '${a.street}, ${a.number}'
+        : a.street;
+    final parts = <String>[
+      if (streetLine.isNotEmpty) streetLine,
+      if ((a.neighborhood ?? '').isNotEmpty) a.neighborhood!,
+      if (a.city.isNotEmpty) a.city,
+      if (a.state.isNotEmpty) a.state,
+      if (a.zipCode.isNotEmpty) a.zipCode,
+    ];
+    if (parts.isEmpty) return '';
+    return '${parts.join(', ')}, Brasil';
+  }
+
+  void _maybeGeocode(Address address) {
+    final query = _addressQuery(address);
+    if (query.isEmpty || _geocoding || _geocodedQuery == query) return;
+    _geocoding = true;
+    _geocodedQuery = query;
+    () async {
+      try {
+        final locations = await geo.locationFromAddress(query);
+        if (!mounted) return;
+        setState(() {
+          _geocoding = false;
+          if (locations.isNotEmpty) {
+            _geocoded = LatLng(
+              locations.first.latitude,
+              locations.first.longitude,
+            );
+          }
+        });
+      } catch (_) {
+        if (mounted) setState(() => _geocoding = false);
+      }
+    }();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<CustomerProfileBloc, CustomerProfileState>(
+      builder: (context, state) {
+        final address = _addressOf(state);
+        final lat = address?.latitude;
+        final lng = address?.longitude;
+
+        // Address has coordinates: render immediately.
+        if (lat != null && lng != null) {
+          return _map(LatLng(lat, lng));
+        }
+
+        // No coordinates: geocode on-device (once per address).
+        if (address != null) _maybeGeocode(address);
+        if (_geocoded != null) return _map(_geocoded!);
+
+        return _placeholder(loading: _geocoding);
+      },
+    );
+  }
+
+  Widget _map(LatLng position) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(24),
+      child: SizedBox(
+        height: 128,
+        child: GoogleMap(
+          initialCameraPosition: CameraPosition(target: position, zoom: 15),
+          markers: {
+            Marker(markerId: const MarkerId('delivery'), position: position),
+          },
+          zoomControlsEnabled: false,
+          scrollGesturesEnabled: false,
+          rotateGesturesEnabled: false,
+          tiltGesturesEnabled: false,
+          myLocationButtonEnabled: false,
+          liteModeEnabled: true,
+        ),
+      ),
+    );
+  }
+
+  Widget _placeholder({bool loading = false}) {
+    return Container(
+      height: 128,
+      decoration: BoxDecoration(
+        color: AppColors.lightGreen.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: AppColors.black),
+      ),
+      child: Center(
+        child: loading
+            ? const SizedBox(
+                width: 22,
+                height: 22,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: AppColors.darkGreen,
+                ),
+              )
+            : const Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.map_outlined, color: AppColors.darkGreen, size: 24),
+                  SizedBox(width: 8),
+                  Text(
+                    'Mapa de Entrega',
+                    style: TextStyle(
+                      fontFamily: 'Manrope',
+                      fontSize: 14,
+                      color: AppColors.darkGreen,
+                    ),
+                  ),
+                ],
+              ),
+      ),
+    );
+  }
+}
+
 class _DeliveryAddressCard extends StatelessWidget {
   const _DeliveryAddressCard();
 

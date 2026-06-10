@@ -31,11 +31,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
   Future<void> _onStarted(HomeEvent event, Emitter<HomeState> emit) async {
     emit(const HomeLoading());
     try {
-      final (
-        :producers,
-        :products,
-        :hasMoreProducts,
-      ) = await _getHomeData();
+      final (:producers, :products, :hasMoreProducts) = await _getHomeData();
 
       final favorites = await _favoriteRepository.getFavorites();
 
@@ -69,8 +65,8 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     final newIds = Set<String>.from(current.favoriteIds);
     final newFavorites = isFav
         ? current.favorites
-            .where((f) => f.producerId != event.producerId)
-            .toList()
+              .where((f) => f.producerId != event.producerId)
+              .toList()
         : current.favorites;
 
     if (isFav) {
@@ -88,10 +84,12 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
         await _favoriteRepository.favoriteProducer(event.producerId);
       }
       final favorites = await _favoriteRepository.getFavorites();
-      emit(current.copyWith(
-        favorites: favorites,
-        favoriteIds: {for (final f in favorites) f.producerId},
-      ));
+      emit(
+        current.copyWith(
+          favorites: favorites,
+          favoriteIds: {for (final f in favorites) f.producerId},
+        ),
+      );
     } on Object {
       emit(current.copyWith(favoriteIds: current.favoriteIds));
     }

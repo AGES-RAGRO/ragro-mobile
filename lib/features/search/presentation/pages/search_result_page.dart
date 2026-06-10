@@ -342,10 +342,7 @@ class _SearchResultsViewState extends State<_SearchResultsView> {
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
       ..showSnackBar(
-        SnackBar(
-          content: Text(message),
-          backgroundColor: AppColors.darkGreen,
-        ),
+        SnackBar(content: Text(message), backgroundColor: AppColors.darkGreen),
       );
   }
 

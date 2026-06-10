@@ -10,6 +10,7 @@
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'package:dio/dio.dart' as _i361;
+import 'package:flutter_secure_storage/flutter_secure_storage.dart' as _i558;
 import 'package:get_it/get_it.dart' as _i174;
 import 'package:injectable/injectable.dart' as _i526;
 import 'package:ragro_mobile/core/di/network_module.dart' as _i1002;
@@ -153,16 +154,7 @@ import 'package:ragro_mobile/features/inventory/presentation/bloc/stock_exit_blo
     as _i567;
 import 'package:ragro_mobile/features/inventory/presentation/bloc/stock_movements_bloc.dart'
     as _i67;
-import 'package:ragro_mobile/features/learning/data/datasources/product_mock_datasource.dart'
-    as _i368;
-import 'package:ragro_mobile/features/learning/data/repositories/product_repository_impl.dart'
-    as _i770;
-import 'package:ragro_mobile/features/learning/domain/repositories/product_repository.dart'
-    as _i414;
-import 'package:ragro_mobile/features/learning/domain/usecases/get_products.dart'
-    as _i20;
-import 'package:ragro_mobile/features/learning/presentation/bloc/learning_bloc.dart'
-    as _i79;
+import 'package:ragro_mobile/features/map/data/map_repository.dart' as _i362;
 import 'package:ragro_mobile/features/notifications/data/datasources/notifications_remote_datasource.dart'
     as _i733;
 import 'package:ragro_mobile/features/notifications/data/repositories/notifications_repository_impl.dart'
@@ -174,7 +166,7 @@ import 'package:ragro_mobile/features/notifications/domain/usecases/get_notifica
 import 'package:ragro_mobile/features/notifications/domain/usecases/get_unread_notifications_count.dart'
     as _i684;
 import 'package:ragro_mobile/features/notifications/domain/usecases/mark_all_notifications_as_read.dart'
-    as _i1100;
+    as _i218;
 import 'package:ragro_mobile/features/notifications/domain/usecases/mark_notification_as_read.dart'
     as _i208;
 import 'package:ragro_mobile/features/notifications/presentation/bloc/notifications_bloc.dart'
@@ -187,28 +179,16 @@ import 'package:ragro_mobile/features/orders/domain/repositories/orders_reposito
     as _i165;
 import 'package:ragro_mobile/features/orders/domain/usecases/cancel_customer_order.dart'
     as _i251;
-import 'package:ragro_mobile/features/orders/domain/usecases/cancel_order.dart'
-    as _i930;
 import 'package:ragro_mobile/features/orders/domain/usecases/confirm_customer_delivery.dart'
     as _i774;
-import 'package:ragro_mobile/features/orders/domain/usecases/confirm_existing_order.dart'
-    as _i179;
 import 'package:ragro_mobile/features/orders/domain/usecases/confirm_order.dart'
     as _i680;
-import 'package:ragro_mobile/features/orders/domain/usecases/CreateReview.dart'
-    as _i1071;
+import 'package:ragro_mobile/features/orders/domain/usecases/create_review.dart'
+    as _i5;
 import 'package:ragro_mobile/features/orders/domain/usecases/get_customer_order_by_id.dart'
     as _i961;
-import 'package:ragro_mobile/features/orders/domain/usecases/get_order_detail.dart'
-    as _i884;
 import 'package:ragro_mobile/features/orders/domain/usecases/get_orders.dart'
     as _i52;
-import 'package:ragro_mobile/features/orders/domain/usecases/rate_producer.dart'
-    as _i907;
-import 'package:ragro_mobile/features/orders/domain/usecases/repeat_order.dart'
-    as _i69;
-import 'package:ragro_mobile/features/orders/domain/usecases/update_order_status.dart'
-    as _i903;
 import 'package:ragro_mobile/features/orders/presentation/bloc/checkout_bloc.dart'
     as _i463;
 import 'package:ragro_mobile/features/orders/presentation/bloc/order_detail_bloc.dart'
@@ -229,8 +209,12 @@ import 'package:ragro_mobile/features/producer_management/presentation/bloc/prod
     as _i767;
 import 'package:ragro_mobile/features/producer_orders/data/datasources/producer_orders_remote_datasource.dart'
     as _i608;
+import 'package:ragro_mobile/features/producer_orders/data/repositories/co2_repository.dart'
+    as _i206;
 import 'package:ragro_mobile/features/producer_orders/data/repositories/producer_orders_repository_impl.dart'
     as _i182;
+import 'package:ragro_mobile/features/producer_orders/data/repositories/route_repository.dart'
+    as _i609;
 import 'package:ragro_mobile/features/producer_orders/domain/repositories/producer_orders_repository.dart'
     as _i649;
 import 'package:ragro_mobile/features/producer_orders/domain/usecases/confirm_producer_order.dart'
@@ -239,8 +223,6 @@ import 'package:ragro_mobile/features/producer_orders/domain/usecases/get_produc
     as _i181;
 import 'package:ragro_mobile/features/producer_orders/domain/usecases/get_producer_orders.dart'
     as _i935;
-import 'package:ragro_mobile/features/producer_orders/domain/usecases/mark_producer_order_seen.dart'
-    as _i367;
 import 'package:ragro_mobile/features/producer_orders/domain/usecases/refuse_producer_order.dart'
     as _i885;
 import 'package:ragro_mobile/features/producer_orders/domain/usecases/update_producer_order_status.dart'
@@ -249,6 +231,8 @@ import 'package:ragro_mobile/features/producer_orders/presentation/bloc/producer
     as _i921;
 import 'package:ragro_mobile/features/producer_orders/presentation/bloc/producer_orders_bloc.dart'
     as _i1;
+import 'package:ragro_mobile/features/producer_orders/presentation/bloc/route_calculation_cubit.dart'
+    as _i48;
 import 'package:ragro_mobile/features/producer_profile/data/datasources/producer_profile_remote_datasource.dart'
     as _i889;
 import 'package:ragro_mobile/features/producer_profile/data/repositories/producer_profile_repository_impl.dart'
@@ -311,6 +295,9 @@ extension GetItInjectableX on _i174.GetIt {
       preResolve: true,
     );
     gh.lazySingleton<_i361.Dio>(() => networkModule.dio);
+    gh.lazySingleton<_i558.FlutterSecureStorage>(
+      () => sharedPreferencesModule.secureStorage,
+    );
     gh.lazySingleton<_i305.CepService>(() => _i305.CepService());
     gh.lazySingleton<_i870.InventoryRemoteDataSource>(
       () => _i870.InventoryRemoteDataSource(),
@@ -318,37 +305,29 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i456.StockMovementRemoteDataSource>(
       () => _i456.StockMovementRemoteDataSource(),
     );
-    gh.lazySingleton<_i368.ProductMockDataSource>(
-      () => _i368.ProductMockDataSource(),
-    );
     gh.lazySingleton<_i727.ProducerManagementRemoteDataSource>(
       () => _i727.ProducerManagementRemoteDataSource(),
     );
+    gh.lazySingleton<_i206.Co2Repository>(() => _i206.Co2Repository());
     gh.lazySingleton<_i276.InventoryRepository>(
       () =>
           _i601.InventoryRepositoryImpl(gh<_i870.InventoryRemoteDataSource>()),
-    );
-    gh.lazySingleton<_i414.ProductRepository>(
-      () => _i770.ProductRepositoryImpl(gh<_i368.ProductMockDataSource>()),
-    );
-    gh.lazySingleton<_i20.GetProducts>(
-      () => _i20.GetProducts(gh<_i414.ProductRepository>()),
     );
     gh.lazySingleton<_i570.ProducerManagementRepository>(
       () => _i715.ProducerManagementRepositoryImpl(
         gh<_i727.ProducerManagementRemoteDataSource>(),
       ),
     );
-    gh.lazySingleton<_i873.ApiClient>(() => _i873.ApiClient(gh<_i361.Dio>()));
-    gh.factory<_i79.LearningBloc>(
-      () => _i79.LearningBloc(gh<_i20.GetProducts>()),
+    gh.lazySingleton<_i209.AuthLocalDataSource>(
+      () => _i209.AuthLocalDataSource(
+        gh<_i460.SharedPreferences>(),
+        gh<_i558.FlutterSecureStorage>(),
+      ),
     );
+    gh.lazySingleton<_i873.ApiClient>(() => _i873.ApiClient(gh<_i361.Dio>()));
     gh.lazySingleton<_i805.GetProducerDashboard>(
       () =>
           _i805.GetProducerDashboard(gh<_i570.ProducerManagementRepository>()),
-    );
-    gh.lazySingleton<_i209.AuthLocalDataSource>(
-      () => _i209.AuthLocalDataSource(gh<_i460.SharedPreferences>()),
     );
     gh.lazySingleton<_i52.SearchLocalDataSource>(
       () => _i52.SearchLocalDataSource(gh<_i460.SharedPreferences>()),
@@ -372,6 +351,9 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i279.UploadProductPhoto>(
       () => _i279.UploadProductPhoto(gh<_i276.InventoryRepository>()),
+    );
+    gh.factory<_i362.MapRepository>(
+      () => _i362.MapRepository(gh<_i873.ApiClient>()),
     );
     gh.lazySingleton<_i16.AdminRemoteDataSource>(
       () => _i16.AdminRemoteDataSource(gh<_i873.ApiClient>()),
@@ -397,6 +379,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i608.ProducerOrdersRemoteDataSource>(
       () => _i608.ProducerOrdersRemoteDataSource(gh<_i873.ApiClient>()),
     );
+    gh.lazySingleton<_i609.RouteRepository>(
+      () => _i609.RouteRepository(gh<_i873.ApiClient>()),
+    );
     gh.lazySingleton<_i889.ProducerProfileRemoteDataSource>(
       () => _i889.ProducerProfileRemoteDataSource(gh<_i873.ApiClient>()),
     );
@@ -409,7 +394,7 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i987.SearchRemoteDataSource>(
       () => _i987.SearchRemoteDataSource(gh<_i873.ApiClient>()),
     );
-    gh.factory<_i767.ProducerManagementBloc>(
+    gh.lazySingleton<_i767.ProducerManagementBloc>(
       () => _i767.ProducerManagementBloc(gh<_i805.GetProducerDashboard>()),
     );
     gh.lazySingleton<_i104.FavoriteProducerRepository>(
@@ -545,13 +530,12 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i853.NotificationsRepository>(),
       ),
     );
+    gh.lazySingleton<_i218.MarkAllNotificationsAsRead>(
+      () =>
+          _i218.MarkAllNotificationsAsRead(gh<_i853.NotificationsRepository>()),
+    );
     gh.lazySingleton<_i208.MarkNotificationAsRead>(
       () => _i208.MarkNotificationAsRead(gh<_i853.NotificationsRepository>()),
-    );
-    gh.lazySingleton<_i1100.MarkAllNotificationsAsRead>(
-      () => _i1100.MarkAllNotificationsAsRead(
-        gh<_i853.NotificationsRepository>(),
-      ),
     );
     gh.lazySingleton<_i420.ProducerProfileRepository>(
       () => _i86.ProducerProfileRepositoryImpl(
@@ -604,41 +588,30 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i436.UpdateCustomerProfile>(
       () => _i436.UpdateCustomerProfile(gh<_i788.CustomerProfileRepository>()),
     );
-    gh.lazySingleton<_i1071.CreateReview>(
-      () => _i1071.CreateReview(gh<_i165.OrdersRepository>()),
+    gh.factory<_i48.RouteCalculationCubit>(
+      () => _i48.RouteCalculationCubit(
+        gh<_i206.Co2Repository>(),
+        gh<_i649.ProducerOrdersRepository>(),
+        gh<_i609.RouteRepository>(),
+      ),
     );
     gh.lazySingleton<_i251.CancelCustomerOrder>(
       () => _i251.CancelCustomerOrder(gh<_i165.OrdersRepository>()),
     );
-    gh.lazySingleton<_i930.CancelOrder>(
-      () => _i930.CancelOrder(gh<_i165.OrdersRepository>()),
-    );
     gh.lazySingleton<_i774.ConfirmCustomerDelivery>(
       () => _i774.ConfirmCustomerDelivery(gh<_i165.OrdersRepository>()),
-    );
-    gh.lazySingleton<_i179.ConfirmExistingOrder>(
-      () => _i179.ConfirmExistingOrder(gh<_i165.OrdersRepository>()),
     );
     gh.lazySingleton<_i680.ConfirmOrder>(
       () => _i680.ConfirmOrder(gh<_i165.OrdersRepository>()),
     );
+    gh.lazySingleton<_i5.CreateReview>(
+      () => _i5.CreateReview(gh<_i165.OrdersRepository>()),
+    );
     gh.lazySingleton<_i961.GetCustomerOrderById>(
       () => _i961.GetCustomerOrderById(gh<_i165.OrdersRepository>()),
     );
-    gh.lazySingleton<_i884.GetOrderDetail>(
-      () => _i884.GetOrderDetail(gh<_i165.OrdersRepository>()),
-    );
     gh.lazySingleton<_i52.GetOrders>(
       () => _i52.GetOrders(gh<_i165.OrdersRepository>()),
-    );
-    gh.lazySingleton<_i907.RateProducer>(
-      () => _i907.RateProducer(gh<_i165.OrdersRepository>()),
-    );
-    gh.lazySingleton<_i69.RepeatOrder>(
-      () => _i69.RepeatOrder(gh<_i165.OrdersRepository>()),
-    );
-    gh.lazySingleton<_i903.UpdateOrderStatus>(
-      () => _i903.UpdateOrderStatus(gh<_i165.OrdersRepository>()),
     );
     gh.lazySingleton<_i151.HomeBloc>(
       () => _i151.HomeBloc(
@@ -665,7 +638,7 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i888.NotificationsBloc(
         gh<_i1023.GetNotifications>(),
         gh<_i684.GetUnreadNotificationsCount>(),
-        gh<_i1100.MarkAllNotificationsAsRead>(),
+        gh<_i218.MarkAllNotificationsAsRead>(),
         gh<_i208.MarkNotificationAsRead>(),
       ),
     );
@@ -677,9 +650,6 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i935.GetProducerOrders>(
       () => _i935.GetProducerOrders(gh<_i649.ProducerOrdersRepository>()),
-    );
-    gh.lazySingleton<_i367.MarkProducerOrderSeen>(
-      () => _i367.MarkProducerOrderSeen(gh<_i649.ProducerOrdersRepository>()),
     );
     gh.lazySingleton<_i885.RefuseProducerOrder>(
       () => _i885.RefuseProducerOrder(gh<_i649.ProducerOrdersRepository>()),
@@ -735,9 +705,6 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i992.ClearCart>(),
       ),
     );
-    gh.factory<_i432.RateProducerBloc>(
-      () => _i432.RateProducerBloc(gh<_i1071.CreateReview>()),
-    );
     gh.factory<_i526.CustomerProfileBloc>(
       () => _i526.CustomerProfileBloc(
         gh<_i626.GetCustomerProfile>(),
@@ -772,6 +739,9 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i885.RefuseProducerOrder>(),
         gh<_i1038.UpdateProducerOrderStatus>(),
       ),
+    );
+    gh.factory<_i432.RateProducerBloc>(
+      () => _i432.RateProducerBloc(gh<_i5.CreateReview>()),
     );
     return this;
   }

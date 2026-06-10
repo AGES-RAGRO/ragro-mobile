@@ -1,5 +1,5 @@
-// Validação aritmética de CNPJ — algoritmo mod 11 com pesos oficiais.
-// Espelha a lógica do backend (br.com.ragro.validation.FiscalNumberValidator).
+// Arithmetic CNPJ validation (mod 11 with official weights); mirrors the
+// backend (br.com.ragro.validation.FiscalNumberValidator).
 class CnpjValidator {
   const CnpjValidator._();
 

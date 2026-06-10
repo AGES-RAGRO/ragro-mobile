@@ -4,7 +4,9 @@ import 'package:ragro_mobile/features/producer_management/domain/usecases/get_pr
 import 'package:ragro_mobile/features/producer_management/presentation/bloc/producer_management_event.dart';
 import 'package:ragro_mobile/features/producer_management/presentation/bloc/producer_management_state.dart';
 
-@injectable
+// Singleton so the producer shell can trigger a refresh when the Profile tab
+// opens (the page stays alive in the IndexedStack and won't re-init on its own).
+@lazySingleton
 class ProducerManagementBloc
     extends Bloc<ProducerManagementEvent, ProducerManagementState> {
   ProducerManagementBloc(this._getDashboard)

@@ -26,7 +26,6 @@ class AvailabilitySection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Se não há disponibilidade, exibe estado vazio.
     if (availability.isEmpty) {
       return Center(
         child: Padding(
@@ -55,9 +54,8 @@ class AvailabilitySection extends StatelessWidget {
       );
     }
 
-    // Ordena os dias para exibição (Seg -> Dom) e filtra apenas os dias
-    // que realmente possuem um slot de disponibilidade.
-    final orderedWeekdays = [1, 2, 3, 4, 5, 6, 0]; // Seg..Dom
+    // Order days for display (Mon -> Sun) and keep only those with a slot.
+    final orderedWeekdays = [1, 2, 3, 4, 5, 6, 0]; // Mon..Sun
     final shownWeekdays = orderedWeekdays
         .where((d) => availability.any((s) => s.weekday == d))
         .toList();
@@ -98,7 +96,6 @@ class AvailabilitySection extends StatelessWidget {
                         textAlign: TextAlign.center,
                       ),
                       const SizedBox(height: 4),
-                      // separador vertical pequeno conforme o Figma
                       Container(
                         width: 2,
                         height: 12,

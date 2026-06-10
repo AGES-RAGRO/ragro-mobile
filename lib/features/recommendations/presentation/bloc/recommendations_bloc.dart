@@ -9,7 +9,7 @@ import 'package:ragro_mobile/features/recommendations/presentation/bloc/recommen
 class RecommendationsBloc
     extends Bloc<RecommendationsEvent, RecommendationsState> {
   RecommendationsBloc(this._getRecommendations)
-      : super(const RecommendationsInitial()) {
+    : super(const RecommendationsInitial()) {
     on<RecommendationsStarted>(_onStarted);
     on<RecommendationsRefreshRequested>(_onRefreshRequested);
   }
@@ -32,9 +32,7 @@ class RecommendationsBloc
     await _fetchRecommendations(emit);
   }
 
-  Future<void> _fetchRecommendations(
-    Emitter<RecommendationsState> emit,
-  ) async {
+  Future<void> _fetchRecommendations(Emitter<RecommendationsState> emit) async {
     try {
       final recommendations = await _getRecommendations();
       if (recommendations.isEmpty) {
@@ -45,7 +43,11 @@ class RecommendationsBloc
     } on ApiException catch (e) {
       emit(RecommendationsError(e.message));
     } on Exception catch (_) {
-      emit(const RecommendationsError('Não foi possível carregar as recomendações.'));
+      emit(
+        const RecommendationsError(
+          'Não foi possível carregar as recomendações.',
+        ),
+      );
     }
   }
 }

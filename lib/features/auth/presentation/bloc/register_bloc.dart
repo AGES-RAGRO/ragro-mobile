@@ -41,7 +41,7 @@ class RegisterBloc extends Bloc<RegisterEvent, RegisterState> {
     }
   }
 
-  // Traduz mensagens do backend (EN) para o usuário final (PT-BR).
+  // Translates backend messages (EN) into user-facing text (PT-BR).
   String _mapConflictMessage(String raw) {
     final lower = raw.toLowerCase();
     if (lower.contains('e-mail') || lower.contains('email')) {

@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:ragro_mobile/core/di/injection.dart';
 import 'package:ragro_mobile/core/theme/app_colors.dart';
+import 'package:ragro_mobile/features/producer_management/presentation/bloc/producer_management_bloc.dart';
+import 'package:ragro_mobile/features/producer_management/presentation/bloc/producer_management_event.dart';
+import 'package:ragro_mobile/features/producer_management/presentation/bloc/producer_management_state.dart';
 
 class ProducerShell extends StatelessWidget {
   const ProducerShell({required this.navigationShell, super.key});
@@ -61,6 +65,15 @@ class ProducerShell extends StatelessWidget {
       index,
       initialLocation: index == navigationShell.currentIndex,
     );
+    // Profile tab (2): reload the dashboard on reopen so fresh data shows up
+    // (e.g. after a delivery) without restarting the app. The initial load is
+    // handled by the page's own loader.
+    if (index == 2) {
+      final bloc = getIt<ProducerManagementBloc>();
+      if (bloc.state is! ProducerManagementInitial) {
+        bloc.add(const ProducerManagementRefreshed());
+      }
+    }
   }
 }
 

@@ -28,18 +28,8 @@ class CartModel extends Cart {
         .whereType<Map<String, dynamic>>()
         .toList();
 
-    final paymentMethods = (json['paymentMethods'] as List<dynamic>? ?? [])
-        .whereType<Map<String, dynamic>>()
-        .toList();
-
-    final bankMethod = paymentMethods.firstWhere(
-      (m) => (m['type'] as String? ?? '') == 'bank_account',
-      orElse: () => const <String, dynamic>{},
-    );
-    final pixMethod = paymentMethods.firstWhere(
-      (m) => (m['type'] as String? ?? '') == 'pix',
-      orElse: () => const <String, dynamic>{},
-    );
+    final bankInfo =
+        json['bankInfo'] as Map<String, dynamic>? ?? const <String, dynamic>{};
 
     return CartModel(
       id: json['id'] as String? ?? '',
@@ -48,10 +38,10 @@ class CartModel extends Cart {
       farmName: json['farmName'] as String? ?? '',
       items: itemsJson.map(CartItemModel.fromJson).toList(),
       totalAmount: (json['totalAmount'] as num?)?.toDouble() ?? 0.0,
-      bankName: bankMethod['bankName'] as String? ?? '',
-      bankAgency: bankMethod['agency'] as String? ?? '',
-      bankAccount: bankMethod['accountNumber'] as String? ?? '',
-      bankPixKey: pixMethod['pixKey'] as String? ?? '',
+      bankName: bankInfo['bankName'] as String? ?? '',
+      bankAgency: bankInfo['agency'] as String? ?? '',
+      bankAccount: bankInfo['account'] as String? ?? '',
+      bankPixKey: bankInfo['pixKey'] as String? ?? '',
     );
   }
 }

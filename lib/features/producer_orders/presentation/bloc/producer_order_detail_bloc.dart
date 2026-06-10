@@ -34,24 +34,23 @@ class ProducerOrderDetailBloc
     ProducerOrderDetailStarted event,
     Emitter<ProducerOrderDetailState> emit,
   ) async {
-    if (event.initialOrder != null) {
-      final initial = event.initialOrder!;
+    final initial = event.initialOrder;
+    if (initial != null) {
       emit(ProducerOrderDetailLoaded(initial));
-      // Mark as seen when producer opened the detail and update local view
       try {
         await getIt<ProducerOrdersRepository>().markAsSeen(event.orderId);
-        final updated = initial.copyWith(isNew: false);
-        emit(ProducerOrderDetailLoaded(updated));
-      } catch (_) {
-        // swallow: non-critical
-      }
+        emit(ProducerOrderDetailLoaded(initial.copyWith(isNew: false)));
+      } catch (_) {}
+      // The producer detail comes from the same list payload
+      // (GET /orders/producer): a re-fetch brings no new fields and would wipe
+      // the cancellationReason/Details that a refuse in this session already
+      // set. Keep the order we received.
       return;
     }
-
     emit(const ProducerOrderDetailLoading());
     try {
       final order = await _getDetail(event.orderId);
-      // Mark as seen after loading details and update view
+      // Mark as seen after loading and refresh the view.
       try {
         await getIt<ProducerOrdersRepository>().markAsSeen(event.orderId);
         final updated = order.copyWith(isNew: false);
@@ -79,7 +78,8 @@ class ProducerOrderDetailBloc
       emit(ProducerOrderDetailSuccess(order: updated, action: 'confirmed'));
       emit(ProducerOrderDetailLoaded(updated));
     } on Exception catch (e) {
-      emit(ProducerOrderDetailFailure(e.toString()));
+      emit(ProducerOrderDetailActionError(current.order, e.toString()));
+      emit(ProducerOrderDetailLoaded(current.order));
     }
   }
 
@@ -91,14 +91,21 @@ class ProducerOrderDetailBloc
     if (current is! ProducerOrderDetailLoaded) return;
     emit(ProducerOrderDetailRefusing(current.order));
     try {
-      await _refuseOrder(event.orderId, reason: event.reason, details: event.details);
+      await _refuseOrder(
+        event.orderId,
+        reason: event.reason,
+        details: event.details,
+      );
       final updated = current.order.copyWith(
         status: ProducerOrderStatus.cancelled,
+        cancellationReason: event.reason,
+        cancellationDetails: event.details,
       );
       emit(ProducerOrderDetailSuccess(order: updated, action: 'refused'));
       emit(ProducerOrderDetailLoaded(updated));
     } on Exception catch (e) {
-      emit(ProducerOrderDetailFailure(e.toString()));
+      emit(ProducerOrderDetailActionError(current.order, e.toString()));
+      emit(ProducerOrderDetailLoaded(current.order));
     }
   }
 
@@ -116,7 +123,7 @@ class ProducerOrderDetailBloc
       emit(
         ProducerOrderDetailSuccess(order: updated, action: 'status_updated'),
       );
-      
+
       try {
         await getIt<ProducerOrdersRepository>().markAsSeen(event.orderId);
         final updatedSeen = updated.copyWith(isNew: false);
@@ -125,7 +132,8 @@ class ProducerOrderDetailBloc
         emit(ProducerOrderDetailLoaded(updated));
       }
     } on Exception catch (e) {
-      emit(ProducerOrderDetailFailure(e.toString()));
+      emit(ProducerOrderDetailActionError(current.order, e.toString()));
+      emit(ProducerOrderDetailLoaded(current.order));
     }
   }
 }

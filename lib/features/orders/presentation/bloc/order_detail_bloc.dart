@@ -48,9 +48,17 @@ class OrderDetailBloc extends Bloc<OrderDetailEvent, OrderDetailState> {
     if (current is! OrderDetailLoaded) return;
     emit(OrderDetailUpdating(current.order));
     try {
-      await _cancelOrder(event.orderId, reason: event.reason, details: event.details);
+      await _cancelOrder(
+        event.orderId,
+        reason: event.reason,
+        details: event.details,
+      );
       final cancelled = current.order.copyWith(
         status: OrderStatus.cancelled.backendValue,
+        // Fill the reason locally so the cancellation card shows up this
+        // session (the backend doesn't yet return these fields on the detail).
+        cancellationReason: event.reason,
+        cancellationDetails: event.details,
         actions: const OrderDetailActions(
           canConfirmDelivery: false,
           canCancel: false,
@@ -65,12 +73,7 @@ class OrderDetailBloc extends Bloc<OrderDetailEvent, OrderDetailState> {
       );
       emit(OrderDetailLoaded(cancelled));
     } on ApiException catch (e) {
-      emit(
-        OrderDetailActionFailure(
-          order: current.order,
-          message: e.message,
-        ),
-      );
+      emit(OrderDetailActionFailure(order: current.order, message: e.message));
       emit(OrderDetailLoaded(current.order));
     } on Exception catch (_) {
       emit(
@@ -100,12 +103,7 @@ class OrderDetailBloc extends Bloc<OrderDetailEvent, OrderDetailState> {
       );
       emit(OrderDetailLoaded(order));
     } on ApiException catch (e) {
-      emit(
-        OrderDetailActionFailure(
-          order: current.order,
-          message: e.message,
-        ),
-      );
+      emit(OrderDetailActionFailure(order: current.order, message: e.message));
       emit(OrderDetailLoaded(current.order));
     } on Exception catch (_) {
       emit(

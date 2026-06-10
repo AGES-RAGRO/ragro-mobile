@@ -1,4 +1,4 @@
-// Payload de PUT /producers/:id — patch parcial alinhado ao ProducerUpdateRequest.java.
+// PUT /producers/:id payload — partial patch mirroring ProducerUpdateRequest.java.
 class ProducerUpdateRequest {
   const ProducerUpdateRequest({
     this.name,

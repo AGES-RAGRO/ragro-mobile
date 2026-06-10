@@ -58,7 +58,7 @@ class _ReviewsPageState extends State<ReviewsPage> {
       setState(() {
         _error =
             (e.error as ApiException?)?.message ??
-                'Erro ao carregar avaliações';
+            'Erro ao carregar avaliações';
         _loading = false;
       });
     } on Object catch (_) {
@@ -99,144 +99,146 @@ class _ReviewsPageState extends State<ReviewsPage> {
       ),
       body: _loading
           ? const Center(
-        child: CircularProgressIndicator(color: AppColors.darkGreen),
-      )
+              child: CircularProgressIndicator(color: AppColors.darkGreen),
+            )
           : _error != null
           ? Center(child: Text(_error!))
           : SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              widget.producerName,
-              style: const TextStyle(
-                fontFamily: 'Figtree',
-                fontWeight: FontWeight.w700,
-                fontSize: 26,
-                color: AppColors.darkGreen,
-              ),
-            ),
-            if (widget.producerLocation.isNotEmpty) ...[
-              const SizedBox(height: 6),
-              Row(
-                children: [
-                  const Icon(
-                    Icons.location_on_outlined,
-                    size: 14,
-                    color: Color(0xFF64748B),
-                  ),
-                  const SizedBox(width: 4),
-                  Text(
-                    widget.producerLocation,
-                    style: const TextStyle(
-                      fontFamily: 'Figtree',
-                      fontWeight: FontWeight.w500,
-                      fontSize: 13,
-                      color: Color(0xFF64748B),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-
-            const SizedBox(height: 24),
-            Container(
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: const Color(0x1A64748B), // #64748B1A do Figma
-                borderRadius: BorderRadius.circular(16),
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    'Resumo das Avaliações',
-                    style: TextStyle(
+                  Text(
+                    widget.producerName,
+                    style: const TextStyle(
                       fontFamily: 'Figtree',
                       fontWeight: FontWeight.w700,
-                      fontSize: 15,
-                      color: AppColors.black,
+                      fontSize: 26,
+                      color: AppColors.darkGreen,
                     ),
                   ),
-                  const SizedBox(height: 16),
-                  IntrinsicHeight(
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
+                  if (widget.producerLocation.isNotEmpty) ...[
+                    const SizedBox(height: 6),
+                    Row(
                       children: [
-                        Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              widget.averageRating.toStringAsFixed(1),
-                              style: const TextStyle(
-                                fontFamily: 'Figtree',
-                                fontWeight: FontWeight.w700,
-                                fontSize: 52,
-                                color: AppColors.black,
-                              ),
-                            ),
-                            _SummaryStarRow(rating: widget.averageRating),
-                            const SizedBox(height: 6),
-                            Text(
-                              '${widget.totalReviews} Avaliações',
-                              style: const TextStyle(
-                                fontFamily: 'Figtree',
-                                fontSize: 12,
-                                color: Color(0xFF94A3B8),
-                              ),
-                            ),
-                          ],
+                        const Icon(
+                          Icons.location_on_outlined,
+                          size: 14,
+                          color: Color(0xFF64748B),
                         ),
-                        const SizedBox(width: 20),
-                        Expanded(
-                          child: _RatingDistribution(
-                            distribution: _buildDistribution(),
-                            total: _reviews.length,
+                        const SizedBox(width: 4),
+                        Text(
+                          widget.producerLocation,
+                          style: const TextStyle(
+                            fontFamily: 'Figtree',
+                            fontWeight: FontWeight.w500,
+                            fontSize: 13,
+                            color: Color(0xFF64748B),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+
+                  const SizedBox(height: 24),
+                  Container(
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      color: const Color(0x1A64748B),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Resumo das Avaliações',
+                          style: TextStyle(
+                            fontFamily: 'Figtree',
+                            fontWeight: FontWeight.w700,
+                            fontSize: 15,
+                            color: AppColors.black,
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        IntrinsicHeight(
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    widget.averageRating.toStringAsFixed(1),
+                                    style: const TextStyle(
+                                      fontFamily: 'Figtree',
+                                      fontWeight: FontWeight.w700,
+                                      fontSize: 52,
+                                      color: AppColors.black,
+                                    ),
+                                  ),
+                                  _SummaryStarRow(rating: widget.averageRating),
+                                  const SizedBox(height: 6),
+                                  Text(
+                                    '${widget.totalReviews} Avaliações',
+                                    style: const TextStyle(
+                                      fontFamily: 'Figtree',
+                                      fontSize: 12,
+                                      color: Color(0xFF94A3B8),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(width: 20),
+                              Expanded(
+                                child: _RatingDistribution(
+                                  distribution: _buildDistribution(),
+                                  total: _reviews.length,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ],
                     ),
                   ),
+
+                  const SizedBox(height: 24),
+                  if (_reviews.isEmpty)
+                    Center(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 32),
+                        child: Column(
+                          children: [
+                            Icon(
+                              Icons.rate_review_outlined,
+                              size: 48,
+                              color: AppColors.darkGreen.withValues(alpha: 0.3),
+                            ),
+                            const SizedBox(height: 12),
+                            Text(
+                              'Nenhuma avaliação ainda',
+                              style: TextStyle(
+                                fontFamily: 'Figtree',
+                                fontSize: 16,
+                                color: AppColors.darkGreen.withValues(
+                                  alpha: 0.6,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    )
+                  else
+                    ListView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: _reviews.length,
+                      itemBuilder: (_, i) => ReviewCard(review: _reviews[i]),
+                    ),
                 ],
               ),
             ),
-
-            const SizedBox(height: 24),
-            if (_reviews.isEmpty)
-              Center(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 32),
-                  child: Column(
-                    children: [
-                      Icon(
-                        Icons.rate_review_outlined,
-                        size: 48,
-                        color: AppColors.darkGreen.withValues(alpha: 0.3),
-                      ),
-                      const SizedBox(height: 12),
-                      Text(
-                        'Nenhuma avaliação ainda',
-                        style: TextStyle(
-                          fontFamily: 'Figtree',
-                          fontSize: 16,
-                          color: AppColors.darkGreen.withValues(alpha: 0.6),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              )
-            else
-              ListView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: _reviews.length,
-                itemBuilder: (_, i) => ReviewCard(review: _reviews[i]),
-              ),
-          ],
-        ),
-      ),
     );
   }
 }
@@ -251,11 +253,19 @@ class _SummaryStarRow extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: List.generate(5, (i) {
         if (i < rating.floor()) {
-          return const Icon(Icons.star,      size: 18, color: AppColors.darkGreen);
+          return const Icon(Icons.star, size: 18, color: AppColors.darkGreen);
         } else if (i < rating) {
-          return const Icon(Icons.star_half, size: 18, color: AppColors.darkGreen);
+          return const Icon(
+            Icons.star_half,
+            size: 18,
+            color: AppColors.darkGreen,
+          );
         }
-        return const Icon(Icons.star_border, size: 18, color: AppColors.darkGreen);
+        return const Icon(
+          Icons.star_border,
+          size: 18,
+          color: AppColors.darkGreen,
+        );
       }),
     );
   }

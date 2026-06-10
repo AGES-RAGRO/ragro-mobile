@@ -1,3 +1,4 @@
+import 'package:ragro_mobile/core/network/api_endpoints.dart';
 import 'package:ragro_mobile/features/orders/data/models/order_item_model.dart';
 import 'package:ragro_mobile/features/orders/domain/entities/order.dart';
 import 'package:ragro_mobile/features/orders/domain/entities/order_status.dart';
@@ -5,7 +6,6 @@ import 'package:ragro_mobile/features/orders/domain/entities/order_status.dart';
 class OrderModel extends Order {
   const OrderModel({
     required super.id,
-    required super.orderNumber,
     required super.producerId,
     required super.producerPhone,
     required super.farmName,
@@ -38,7 +38,6 @@ class OrderModel extends Order {
 
     return OrderModel(
       id: json['id'] as String? ?? '',
-      orderNumber: json['orderNumber'] as String? ?? '',
       producerPhone:
           json['producerPhone'] as String? ?? json['phone'] as String? ?? '',
       producerId:
@@ -51,13 +50,14 @@ class OrderModel extends Order {
           json['producerName'] as String? ??
           producerJson?['name'] as String? ??
           '',
-      farmAvatarUrl:
-          json['producerPicture'] as String? ??
-          json['producerPhoto'] as String? ??
-          json['producerPhotoUrl'] as String? ??
-          json['farmAvatarUrl'] as String? ??
-          producerJson?['photoUrl'] as String? ??
-          '',
+      farmAvatarUrl: ApiEndpoints.resolveMediaUrl(
+        json['producerPicture'] as String? ??
+            json['producerPhoto'] as String? ??
+            json['producerPhotoUrl'] as String? ??
+            json['farmAvatarUrl'] as String? ??
+            producerJson?['photoUrl'] as String? ??
+            '',
+      ),
       ownerName:
           json['ownerName'] as String? ??
           producerJson?['ownerName'] as String? ??

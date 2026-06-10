@@ -20,27 +20,34 @@ class ProductsGrid extends StatelessWidget {
   final void Function(HomeProduct) onAddToCart;
   final bool isLoadingMore;
 
-  List<({HomeProduct product, bool isRecommended})> _buildItems() {
+  List<({HomeProduct product, bool isRecommended, bool aiRanked, int score})>
+  _buildItems() {
     final recommended = recommendations
         .take(20)
-        .map((r) => (
-              product: HomeProduct(
-                id: r.id,
-                name: r.name,
-                price: r.price,
-                imageUrl: r.imageS3 ?? '',
-                farmName: r.farmName,
-                category: r.categoryNames.isNotEmpty
-                    ? r.categoryNames.first
-                    : '',
-                producerId: r.farmerId,
-              ),
-              isRecommended: true,
-            ))
+        .map(
+          (r) => (
+            product: HomeProduct(
+              id: r.id,
+              name: r.name,
+              price: r.price,
+              imageUrl: r.imageS3 ?? '',
+              farmName: r.farmName,
+              category: r.categoryNames.isNotEmpty ? r.categoryNames.first : '',
+              producerId: r.farmerId,
+            ),
+            isRecommended: true,
+            // Only "AI recommends" when the LLM reranker reordered it
+            // (LLM_RERANKED); other reasons are heuristic ("Para você" badge).
+            aiRanked: r.reason == 'LLM_RERANKED',
+            score: r.score,
+          ),
+        )
         .toList();
 
     final regular = products
-        .map((p) => (product: p, isRecommended: false))
+        .map(
+          (p) => (product: p, isRecommended: false, aiRanked: false, score: 0),
+        )
         .toList();
 
     return [...recommended, ...regular];
@@ -82,6 +89,8 @@ class ProductsGrid extends StatelessWidget {
               return HomeProductCard(
                 product: item.product,
                 isRecommended: item.isRecommended,
+                aiRanked: item.aiRanked,
+                aiScore: item.score,
                 onTap: () => onProductTap(item.product),
                 onAddToCart: () => onAddToCart(item.product),
               );

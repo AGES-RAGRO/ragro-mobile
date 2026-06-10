@@ -1,0 +1,13 @@
+# Release signing config for the production Android build.
+# Copy to android/key.properties (gitignored) and fill in real values.
+#
+# Generate a keystore once:
+#   keytool -genkey -v -keystore ~/ragro-release.jks \
+#     -keyalg RSA -keysize 2048 -validity 10000 -alias ragro
+#
+# Keep the .jks and these passwords secret (never commit them).
+
+storeFile=/absolute/path/to/ragro-release.jks
+storePassword=CHANGE_ME
+keyAlias=ragro
+keyPassword=CHANGE_ME

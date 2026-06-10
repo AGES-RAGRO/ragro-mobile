@@ -3,10 +3,12 @@
 ## Base URL
 
 ```
-https://api.ragro.com.br
+https://7ruopxdlm7.execute-api.us-east-2.amazonaws.com
 ```
 
 All requests are made over HTTPS. There is no API version in the URL — versioning is managed via headers when necessary.
+
+Use `API_BASE_URL` in the Flutter app to switch between this AWS environment and a local backend such as `http://localhost:8080`.
 
 ---
 
@@ -87,7 +89,7 @@ Three users are pre-configured in both Keycloak and the database when the backen
 | Farmer | `farmer@ragro.com.br` | `Test@123` |
 | Admin | `admin@ragro.com.br` | `Admin@123` |
 
-These credentials authenticate against the real Keycloak instance running at `http://localhost:8180`. The backend must be running (`docker compose up -d` from `ragro-backend/`).
+These credentials authenticate against the local Keycloak instance at `http://localhost:8180` or the AWS equivalent at `https://kwn6g5amn5.execute-api.us-east-2.amazonaws.com`, depending on the backend selected through `API_BASE_URL`.
 
 ---
 

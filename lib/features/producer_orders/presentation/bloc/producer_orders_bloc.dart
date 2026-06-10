@@ -1,5 +1,9 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
+import 'package:ragro_mobile/core/di/injection.dart';
+import 'package:ragro_mobile/features/producer_management/presentation/bloc/producer_management_bloc.dart';
+import 'package:ragro_mobile/features/producer_management/presentation/bloc/producer_management_event.dart';
+import 'package:ragro_mobile/features/producer_management/presentation/bloc/producer_management_state.dart';
 import 'package:ragro_mobile/features/producer_orders/domain/entities/producer_order_status.dart';
 import 'package:ragro_mobile/features/producer_orders/domain/usecases/confirm_producer_order.dart';
 import 'package:ragro_mobile/features/producer_orders/domain/usecases/get_producer_orders.dart';
@@ -24,7 +28,7 @@ class ProducerOrdersBloc
     on<ProducerOrderCancelled>(_onCancelled);
     on<ProducerOrderLocallyRefused>(_onLocallyRefused);
     on<ProducerOrderLocallySeen>(_onLocallySeen);
-    on<ProducerOrderMarkedInDelivery>(_onMarkedInDelivery);
+    on<ProducerOrdersBulkMarkedInDelivery>(_onBulkMarkedInDelivery);
     on<ProducerOrderDeliveryConfirmed>(_onDeliveryConfirmed);
     on<ProducerOrderLocallyDelivered>(_onLocallyDelivered);
   }
@@ -71,11 +75,13 @@ class ProducerOrdersBloc
     try {
       await _confirmProducerOrder(event.orderId);
       final orders = await _getProducerOrders();
-      emit(ProducerOrdersActionSuccess(
-        message: 'Pedido aceito com sucesso.',
-        orders: orders,
-        activeTab: _activeTab,
-      ));
+      emit(
+        ProducerOrdersActionSuccess(
+          message: 'Pedido aceito com sucesso.',
+          orders: orders,
+          activeTab: _activeTab,
+        ),
+      );
       emit(ProducerOrdersLoaded(orders: orders, activeTab: _activeTab));
     } on Exception catch (e) {
       emit(ProducerOrdersFailure(e.toString()));
@@ -95,7 +101,11 @@ class ProducerOrdersBloc
 
     emit(ProducerOrdersLoading(_activeTab));
     try {
-      await _refuseProducerOrder(event.orderId, reason: event.reason, details: event.details);
+      await _refuseProducerOrder(
+        event.orderId,
+        reason: event.reason,
+        details: event.details,
+      );
       final updated = currentOrders
           .map(
             (o) => o.id == event.orderId
@@ -103,11 +113,13 @@ class ProducerOrdersBloc
                 : o,
           )
           .toList();
-      emit(ProducerOrdersActionSuccess(
-        message: 'Pedido recusado com sucesso.',
-        orders: updated,
-        activeTab: _activeTab,
-      ));
+      emit(
+        ProducerOrdersActionSuccess(
+          message: 'Pedido recusado com sucesso.',
+          orders: updated,
+          activeTab: _activeTab,
+        ),
+      );
       emit(ProducerOrdersLoaded(orders: updated, activeTab: _activeTab));
     } on Exception catch (e) {
       emit(ProducerOrdersLoaded(orders: currentOrders, activeTab: _activeTab));
@@ -148,29 +160,43 @@ class ProducerOrdersBloc
     if (currentOrders == null) return;
 
     final updated = currentOrders
-        .map(
-          (o) => o.id == event.orderId ? o.copyWith(isNew: false) : o,
-        )
+        .map((o) => o.id == event.orderId ? o.copyWith(isNew: false) : o)
         .toList();
     emit(ProducerOrdersLoaded(orders: updated, activeTab: _activeTab));
   }
 
-  Future<void> _onMarkedInDelivery(
-    ProducerOrderMarkedInDelivery event,
+  Future<void> _onBulkMarkedInDelivery(
+    ProducerOrdersBulkMarkedInDelivery event,
     Emitter<ProducerOrdersState> emit,
   ) async {
+    if (event.orderIds.isEmpty) return;
     emit(ProducerOrdersLoading(_activeTab));
+
+    var succeeded = 0;
+    var failed = 0;
+    for (final id in event.orderIds) {
+      try {
+        await _updateProducerOrderStatus(id, ProducerOrderStatus.inDelivery);
+        succeeded++;
+      } on Exception {
+        failed++;
+      }
+    }
+
+    // After starting deliveries, switch to the "A caminho" tab.
+    _activeTab = ProducerOrderStatus.inDelivery;
     try {
-      await _updateProducerOrderStatus(
-        event.orderId,
-        ProducerOrderStatus.inDelivery,
-      );
       final orders = await _getProducerOrders();
-      emit(ProducerOrdersActionSuccess(
-        message: 'Entrega iniciada com sucesso.',
-        orders: orders,
-        activeTab: _activeTab,
-      ));
+      final message = failed == 0
+          ? 'Entrega(s) iniciada(s) com sucesso.'
+          : '$succeeded iniciada(s), $failed não puderam ser iniciadas.';
+      emit(
+        ProducerOrdersActionSuccess(
+          message: message,
+          orders: orders,
+          activeTab: _activeTab,
+        ),
+      );
       emit(ProducerOrdersLoaded(orders: orders, activeTab: _activeTab));
     } on Exception catch (e) {
       emit(ProducerOrdersFailure(e.toString()));
@@ -194,6 +220,8 @@ class ProducerOrdersBloc
         event.orderId,
         ProducerOrderStatus.delivered,
       );
+      // Delivery completed: reload the dashboard (delivered only).
+      _refreshProducerDashboard();
       final updated = currentOrders
           .map(
             (o) => o.id == event.orderId
@@ -201,11 +229,13 @@ class ProducerOrdersBloc
                 : o,
           )
           .toList();
-      emit(ProducerOrdersActionSuccess(
-        message: 'Entrega confirmada com sucesso.',
-        orders: updated,
-        activeTab: _activeTab,
-      ));
+      emit(
+        ProducerOrdersActionSuccess(
+          message: 'Entrega confirmada com sucesso.',
+          orders: updated,
+          activeTab: _activeTab,
+        ),
+      );
       emit(ProducerOrdersLoaded(orders: updated, activeTab: _activeTab));
     } on Exception catch (e) {
       emit(ProducerOrdersLoaded(orders: currentOrders, activeTab: _activeTab));
@@ -232,6 +262,14 @@ class ProducerOrdersBloc
         )
         .toList();
     emit(ProducerOrdersLoaded(orders: updated, activeTab: _activeTab));
+  }
+
+  /// Reloads the producer dashboard (singleton bloc) after a delivery.
+  void _refreshProducerDashboard() {
+    final dashboard = getIt<ProducerManagementBloc>();
+    if (dashboard.state is! ProducerManagementInitial) {
+      dashboard.add(const ProducerManagementRefreshed());
+    }
   }
 
   Future<void> _reload(Emitter<ProducerOrdersState> emit) async {

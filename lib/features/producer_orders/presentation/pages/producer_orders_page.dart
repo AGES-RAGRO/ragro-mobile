@@ -1,7 +1,4 @@
-// Screen: Producer Orders (Pedidos do Produtor)
-// User Story: US-20 — Manage Received Orders
-// Epic: EPIC 4 — Producer Features
-// Routes: GET /orders/producer
+// Producer Orders screen (US-20). Route: GET /orders/producer.
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -14,7 +11,6 @@ import 'package:ragro_mobile/features/producer_orders/presentation/bloc/producer
 import 'package:ragro_mobile/features/producer_orders/presentation/bloc/producer_orders_event.dart';
 import 'package:ragro_mobile/features/producer_orders/presentation/bloc/producer_orders_state.dart';
 import 'package:ragro_mobile/features/producer_orders/presentation/widgets/producer_order_card.dart';
-import 'package:ragro_mobile/shared/widgets/cancel_order_dialog.dart';
 
 class ProducerOrdersPage extends StatelessWidget {
   const ProducerOrdersPage({super.key});
@@ -30,8 +26,41 @@ class ProducerOrdersPage extends StatelessWidget {
   }
 }
 
-class _ProducerOrdersView extends StatelessWidget {
+class _ProducerOrdersView extends StatefulWidget {
   const _ProducerOrdersView();
+
+  @override
+  State<_ProducerOrdersView> createState() => _ProducerOrdersViewState();
+}
+
+class _ProducerOrdersViewState extends State<_ProducerOrdersView> {
+  bool _selectionMode = false;
+  final Set<String> _selectedIds = {};
+
+  void _enterSelectionMode() => setState(() {
+    _selectionMode = true;
+    _selectedIds.clear();
+  });
+
+  void _exitSelectionMode() => setState(() {
+    _selectionMode = false;
+    _selectedIds.clear();
+  });
+
+  void _toggleSelection(String id) => setState(() {
+    if (_selectedIds.contains(id)) {
+      _selectedIds.remove(id);
+    } else {
+      _selectedIds.add(id);
+    }
+  });
+
+  void _saveSelection(BuildContext context) {
+    context.read<ProducerOrdersBloc>().add(
+      ProducerOrdersBulkMarkedInDelivery({..._selectedIds}),
+    );
+    _exitSelectionMode();
+  }
 
   static const _tabs = [
     (ProducerOrderStatus.pending, 'Pendentes'),
@@ -87,7 +116,6 @@ class _ProducerOrdersView extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Title
               const Padding(
                 padding: EdgeInsets.fromLTRB(20, 16, 20, 4),
                 child: Text(
@@ -100,7 +128,6 @@ class _ProducerOrdersView extends StatelessWidget {
                   ),
                 ),
               ),
-              // Date subtitle
               Padding(
                 padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
                 child: Text(
@@ -114,7 +141,6 @@ class _ProducerOrdersView extends StatelessWidget {
               ),
               const SizedBox(height: 8),
 
-              // Tab bar
               BlocBuilder<ProducerOrdersBloc, ProducerOrdersState>(
                 builder: (context, state) {
                   final activeTab = _activeTabFrom(state);
@@ -125,10 +151,12 @@ class _ProducerOrdersView extends StatelessWidget {
                       children: _tabs.map((tab) {
                         final isActive = activeTab == tab.$1;
                         return GestureDetector(
-                          onTap: () =>
-                              context.read<ProducerOrdersBloc>().add(
-                                ProducerOrdersTabChanged(tab.$1),
-                              ),
+                          onTap: () {
+                            _exitSelectionMode();
+                            context.read<ProducerOrdersBloc>().add(
+                              ProducerOrdersTabChanged(tab.$1),
+                            );
+                          },
                           child: Container(
                             padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
                             decoration: BoxDecoration(
@@ -162,7 +190,6 @@ class _ProducerOrdersView extends StatelessWidget {
                 },
               ),
 
-              // Content
               Expanded(
                 child: BlocBuilder<ProducerOrdersBloc, ProducerOrdersState>(
                   builder: (context, state) {
@@ -220,41 +247,6 @@ class _ProducerOrdersView extends StatelessWidget {
                     return Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        if (activeTab == ProducerOrderStatus.inDelivery)
-                          Padding(
-                            padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
-                            child: GestureDetector(
-                              onTap: () =>
-                                  context.push('/producer/home/route'),
-                              child: Container(
-                                height: 44,
-                                decoration: BoxDecoration(
-                                  color: AppColors.darkGreen,
-                                  borderRadius: BorderRadius.circular(22),
-                                ),
-                                child: const Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Icon(
-                                      Icons.route_outlined,
-                                      color: AppColors.white,
-                                      size: 18,
-                                    ),
-                                    SizedBox(width: 8),
-                                    Text(
-                                      'Calcular Rota',
-                                      style: TextStyle(
-                                        fontFamily: 'Figtree',
-                                        fontWeight: FontWeight.w700,
-                                        fontSize: 14,
-                                        color: AppColors.white,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ),
                         if (newCount > 0)
                           Padding(
                             padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
@@ -270,89 +262,218 @@ class _ProducerOrdersView extends StatelessWidget {
                           ),
                         Expanded(
                           child: ListView.separated(
-                            padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+                            padding: EdgeInsets.fromLTRB(
+                              16,
+                              12,
+                              16,
+                              (activeTab == ProducerOrderStatus.accepted ||
+                                      activeTab ==
+                                          ProducerOrderStatus.inDelivery)
+                                  ? 80
+                                  : 16,
+                            ),
                             itemCount: orders.length,
                             separatorBuilder: (_, __) =>
                                 const SizedBox(height: 12),
                             itemBuilder: (context, index) {
                               final order = orders[index];
+                              final inAcceptedSelection =
+                                  activeTab == ProducerOrderStatus.accepted &&
+                                  _selectionMode;
                               return ProducerOrderCard(
                                 order: order,
                                 onDetailTap: () async {
-                                  final result =
-                                      await context.push<String?>(
-                                        '/producer/home/orders/${order.id}',
-                                        extra: order,
-                                      );
+                                  if (inAcceptedSelection) return;
+                                  final result = await context.push<String?>(
+                                    '/producer/home/orders/${order.id}',
+                                    extra: order,
+                                  );
                                   if (!context.mounted) return;
-                                  if (result == 'in_delivery') {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
-                                        content: Text(
-                                          'Entrega iniciada com sucesso.',
-                                        ),
-                                        backgroundColor: AppColors.darkGreen,
-                                      ),
-                                    );
-                                    context.read<ProducerOrdersBloc>().add(
-                                      const ProducerOrdersStarted(
-                                        ProducerOrderStatus.inDelivery,
-                                      ),
-                                    );
-                                  } else if (result == 'cancelled') {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
-                                        content: Text(
-                                          'Pedido recusado com sucesso.',
-                                        ),
-                                        backgroundColor: AppColors.darkGreen,
-                                      ),
-                                    );
+                                  if (result == 'cancelled') {
                                     context.read<ProducerOrdersBloc>().add(
                                       ProducerOrderLocallyRefused(order.id),
                                     );
-                                  } else if (result == 'delivered') {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
-                                        content: Text(
-                                          'Entrega confirmada com sucesso.',
-                                        ),
-                                        backgroundColor: AppColors.darkGreen,
-                                      ),
-                                    );
                                     context.read<ProducerOrdersBloc>().add(
-                                      ProducerOrderLocallyDelivered(order.id),
+                                      const ProducerOrdersTabChanged(
+                                        ProducerOrderStatus.cancelled,
+                                      ),
                                     );
                                   } else if (result == 'seen') {
                                     context.read<ProducerOrdersBloc>().add(
                                       ProducerOrderLocallySeen(order.id),
                                     );
+                                  } else {
+                                    final targetTab = switch (result) {
+                                      'in_delivery' =>
+                                        ProducerOrderStatus.inDelivery,
+                                      'delivered' =>
+                                        ProducerOrderStatus.delivered,
+                                      _ => activeTab,
+                                    };
+                                    context.read<ProducerOrdersBloc>().add(
+                                      ProducerOrdersStarted(targetTab),
+                                    );
                                   }
                                 },
-                                onCancelTap:
-                                    order.status == ProducerOrderStatus.pending
-                                    ? () => _confirmCancel(context, order.id)
-                                    : null,
                                 onActionTap:
                                     order.status == ProducerOrderStatus.pending
-                                    ? () =>
-                                          context
-                                              .read<ProducerOrdersBloc>()
-                                              .add(
-                                                ProducerOrderAccepted(order.id),
-                                              )
+                                    ? () => context
+                                          .read<ProducerOrdersBloc>()
+                                          .add(ProducerOrderAccepted(order.id))
                                     : null,
-                                onDeliveryConfirmTap: order.status ==
-                                        ProducerOrderStatus.inDelivery
-                                    ? () => _confirmDelivery(
-                                        context,
-                                        order.id,
-                                      )
+                                isSelected: inAcceptedSelection
+                                    ? _selectedIds.contains(order.id)
+                                    : null,
+                                onSelect: inAcceptedSelection
+                                    ? () => _toggleSelection(order.id)
                                     : null,
                               );
                             },
                           ),
                         ),
+                        if (activeTab == ProducerOrderStatus.inDelivery)
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
+                            child: GestureDetector(
+                              onTap: () async {
+                                final delivered = await context
+                                    .push<List<String>?>(
+                                      '/producer/home/route',
+                                    );
+                                if (!context.mounted) return;
+                                final bloc = context
+                                    .read<ProducerOrdersBloc>();
+                                // Optimistic update: confirmed deliveries leave
+                                // "A caminho" immediately.
+                                for (final id
+                                    in delivered ?? const <String>[]) {
+                                  bloc.add(ProducerOrderLocallyDelivered(id));
+                                }
+                                // Resync with the backend.
+                                bloc.add(const ProducerOrdersRefreshed());
+                              },
+                              child: Container(
+                                height: 52,
+                                decoration: BoxDecoration(
+                                  color: AppColors.darkGreen,
+                                  borderRadius: BorderRadius.circular(26),
+                                ),
+                                child: const Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                      Icons.route_outlined,
+                                      color: AppColors.white,
+                                      size: 20,
+                                    ),
+                                    SizedBox(width: 8),
+                                    Text(
+                                      'Calcular Melhor Rota',
+                                      style: TextStyle(
+                                        fontFamily: 'Figtree',
+                                        fontWeight: FontWeight.w700,
+                                        fontSize: 15,
+                                        color: AppColors.white,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        if (activeTab == ProducerOrderStatus.accepted)
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
+                            child: _selectionMode
+                                ? Row(
+                                    children: [
+                                      Expanded(
+                                        child: OutlinedButton(
+                                          onPressed: _exitSelectionMode,
+                                          style: OutlinedButton.styleFrom(
+                                            foregroundColor:
+                                                AppColors.placeholder,
+                                            side: const BorderSide(
+                                              color: AppColors.placeholder,
+                                            ),
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(24),
+                                            ),
+                                            padding: const EdgeInsets.symmetric(
+                                              vertical: 12,
+                                            ),
+                                          ),
+                                          child: const Text(
+                                            'Cancelar',
+                                            style: TextStyle(
+                                              fontFamily: 'Manrope',
+                                              fontWeight: FontWeight.w600,
+                                              fontSize: 14,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                      const SizedBox(width: 10),
+                                      Expanded(
+                                        child: ElevatedButton(
+                                          onPressed: _selectedIds.isEmpty
+                                              ? null
+                                              : () => _saveSelection(context),
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor:
+                                                AppColors.darkGreen,
+                                            disabledBackgroundColor: AppColors
+                                                .darkGreen
+                                                .withValues(alpha: 0.4),
+                                            foregroundColor: AppColors.white,
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(24),
+                                            ),
+                                            padding: const EdgeInsets.symmetric(
+                                              vertical: 12,
+                                            ),
+                                          ),
+                                          child: Text(
+                                            _selectedIds.isEmpty
+                                                ? 'Salvar'
+                                                : 'Salvar (${_selectedIds.length})',
+                                            style: const TextStyle(
+                                              fontFamily: 'Manrope',
+                                              fontWeight: FontWeight.w600,
+                                              fontSize: 14,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  )
+                                : OutlinedButton(
+                                    onPressed: _enterSelectionMode,
+                                    style: OutlinedButton.styleFrom(
+                                      foregroundColor: AppColors.darkGreen,
+                                      side: const BorderSide(
+                                        color: AppColors.darkGreen,
+                                      ),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(24),
+                                      ),
+                                      minimumSize: const Size(
+                                        double.infinity,
+                                        48,
+                                      ),
+                                    ),
+                                    child: const Text(
+                                      'Selecionar entregas de hoje',
+                                      style: TextStyle(
+                                        fontFamily: 'Figtree',
+                                        fontWeight: FontWeight.w700,
+                                        fontSize: 14,
+                                      ),
+                                    ),
+                                  ),
+                          ),
                       ],
                     );
                   },
@@ -363,42 +484,5 @@ class _ProducerOrdersView extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  Future<void> _confirmCancel(BuildContext context, String orderId) async {
-    final result = await CancelOrderDialog.showForProducer(context);
-    if (result != null && context.mounted) {
-      context.read<ProducerOrdersBloc>().add(
-        ProducerOrderCancelled(orderId, reason: result.reason, details: result.details),
-      );
-    }
-  }
-
-  Future<void> _confirmDelivery(BuildContext context, String orderId) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: const Text('Confirmar entrega'),
-        content: const Text(
-          'Tem certeza que deseja confirmar a entrega deste pedido?',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: const Text('Voltar'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: const Text('Confirmar entrega'),
-          ),
-        ],
-      ),
-    );
-
-    if ((confirmed ?? false) && context.mounted) {
-      context
-          .read<ProducerOrdersBloc>()
-          .add(ProducerOrderDeliveryConfirmed(orderId));
-    }
   }
 }

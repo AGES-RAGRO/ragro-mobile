@@ -25,8 +25,8 @@ class CustomerHomePage extends StatelessWidget {
       providers: [
         BlocProvider.value(value: getIt<HomeBloc>()),
         BlocProvider(
-          create: (_) => getIt<RecommendationsBloc>()
-            ..add(const RecommendationsStarted()),
+          create: (_) =>
+              getIt<RecommendationsBloc>()..add(const RecommendationsStarted()),
         ),
       ],
       child: const _CustomerHomeView(),
@@ -117,8 +117,7 @@ class _CustomerHomeViewState extends State<_CustomerHomeView> {
                               producers: producers,
                               favorites: state.favorites,
                               favoriteIds: state.favoriteIds,
-                              onProducerTap: (p) =>
-                                  _onProducerTap(context, p),
+                              onProducerTap: (p) => _onProducerTap(context, p),
                               isLoadingMore: state.isFetchingMoreProducers,
                             ),
                           ),

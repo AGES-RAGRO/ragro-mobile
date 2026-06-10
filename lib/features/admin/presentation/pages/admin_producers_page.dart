@@ -1,7 +1,4 @@
-// Screen: Admin Producers (Painel Admin - Produtores)
-// User Story: US-30 — Admin Manage Producers
-// Epic: EPIC 5 — Admin Features
-// Routes: GET /admin/producers
+// Admin producers screen (US-30). Backed by GET /admin/producers.
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';

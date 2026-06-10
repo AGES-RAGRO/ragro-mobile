@@ -1,3 +1,4 @@
+import 'package:ragro_mobile/core/network/api_endpoints.dart';
 import 'package:ragro_mobile/features/orders/domain/entities/order_detail.dart';
 
 class OrderDetailActionsModel extends OrderDetailActions {
@@ -26,8 +27,8 @@ class OrderDetailBankInfoModel extends OrderDetailBankInfo {
 
   factory OrderDetailBankInfoModel.fromJson(Map<String, dynamic> json) {
     return OrderDetailBankInfoModel(
-      // Backend BankInfoResponse envia `bankName`. Mantém fallbacks para
-      // compatibilidade com payloads antigos / variantes snake_case.
+      // Backend BankInfoResponse sends `bankName`; keep fallbacks for older
+      // payloads and snake_case variants.
       bank:
           json['bankName'] as String? ??
           json['bank_name'] as String? ??
@@ -93,12 +94,13 @@ class OrderDetailItemModel extends OrderDetailItem {
           json['productId'] as String? ?? json['product_id'] as String? ?? '',
       productName:
           json['productName'] as String? ?? json['name'] as String? ?? '',
-      productPhoto:
-          json['productPhoto'] as String? ??
-          json['productPhotoUrl'] as String? ??
-          json['imageUrl'] as String? ??
-          json['imageS3'] as String? ??
-          '',
+      productPhoto: ApiEndpoints.resolveMediaUrl(
+        json['productPhoto'] as String? ??
+            json['productPhotoUrl'] as String? ??
+            json['imageUrl'] as String? ??
+            json['imageS3'] as String? ??
+            '',
+      ),
       quantity: (json['quantity'] as num? ?? 0).toDouble(),
       unityType:
           json['unityType'] as String? ??
@@ -120,7 +122,6 @@ class OrderDetailItemModel extends OrderDetailItem {
 class OrderDetailModel extends OrderDetail {
   const OrderDetailModel({
     required super.id,
-    required super.orderNumber,
     required super.status,
     required super.statusLabel,
     required super.createdAt,
@@ -134,6 +135,8 @@ class OrderDetailModel extends OrderDetail {
     required super.actions,
     super.bankInfo,
     super.reviewed,
+    super.cancellationReason,
+    super.cancellationDetails,
   });
 
   factory OrderDetailModel.fromJson(Map<String, dynamic> json) {
@@ -152,7 +155,6 @@ class OrderDetailModel extends OrderDetail {
 
     return OrderDetailModel(
       id: json['id'] as String? ?? '',
-      orderNumber: json['orderNumber'] as String?,
       status: _normalizeStatus(json['status'] as String?),
       statusLabel: json['statusLabel'] as String?,
       createdAt: DateTime.tryParse(json['createdAt'] as String? ?? ''),
@@ -167,13 +169,15 @@ class OrderDetailModel extends OrderDetail {
           json['producerPhone'] as String? ??
           json['producerWhatsapp'] as String? ??
           producerJson?['phone'] as String?,
-      producerPicture:
-          json['producerPicture'] as String? ??
+      producerPicture: switch (json['producerPicture'] as String? ??
           json['producerPhoto'] as String? ??
           json['producerPhotoUrl'] as String? ??
           json['producerAvatarUrl'] as String? ??
           producerJson?['photoUrl'] as String? ??
-          producerJson?['picture'] as String?,
+          producerJson?['picture'] as String?) {
+        final String s when s.isNotEmpty => ApiEndpoints.resolveMediaUrl(s),
+        _ => null,
+      },
       items: items,
       totalAmount:
           (json['totalAmount'] as num? ??
@@ -192,6 +196,14 @@ class OrderDetailModel extends OrderDetail {
           ? null
           : OrderDetailBankInfoModel.fromJson(bankJson),
       reviewed: _parseReviewed(json),
+      cancellationReason:
+          json['cancellationReason'] as String? ??
+          json['cancelReason'] as String? ??
+          json['reason'] as String?,
+      cancellationDetails:
+          json['cancellationDetails'] as String? ??
+          json['cancelDetails'] as String? ??
+          json['details'] as String?,
     );
   }
 

@@ -43,7 +43,7 @@ class AdminEditProducerBloc
 
     emit(const AdminEditProducerSaving());
     try {
-      // ── Horário de atendimento ──────────────────────────────────────────
+      // Business hours
       final selectedDays = <AdminAvailability>[];
       for (var i = 0; i < event.scheduleWeekdays.length; i++) {
         if (event.scheduleWeekdays[i]) {
@@ -57,8 +57,8 @@ class AdminEditProducerBloc
         }
       }
 
-      // ── Payment methods (partial update — inclui apenas o que foi preenchido) ──
-      // Regra: só inclui um item se o admin preencheu o bloco inteiro daquele tipo.
+      // Payment methods: partial update — include a method only when the admin
+      // filled in its entire block.
       final paymentMethods = <AdminPaymentMethod>[];
 
       final hasPix =

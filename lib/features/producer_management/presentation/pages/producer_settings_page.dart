@@ -1,7 +1,4 @@
-// Screen: Configurações Perfil do Produtor
-// User Story: US-07 — Update Producer Data
-// Epic: EPIC 1 — Authentication
-// Routes: (settings page, no dedicated API route)
+// Producer settings screen (US-07). No dedicated API route.
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -63,7 +60,6 @@ class ProducerSettingsPage extends StatelessWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // Alterar senha
                 BlocBuilder<AuthBloc, AuthState>(
                   builder: (context, state) {
                     final isLoading = state is AuthPasswordResetInProgress;
@@ -107,7 +103,6 @@ class ProducerSettingsPage extends StatelessWidget {
                   },
                 ),
                 const Divider(height: 1, color: Color(0xFFE2E8F0)),
-                // Sair
                 ListTile(
                   onTap: () {
                     context.read<AuthBloc>().add(const AuthLogoutRequested());

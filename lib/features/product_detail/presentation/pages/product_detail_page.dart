@@ -1,7 +1,5 @@
-// Screen: Product Detail
-// User Story: US-15 — Register Product (consumer view)
-// Epic: EPIC 4 — Product Management
-// Routes: GET /products/:id
+// Screen: Product Detail (consumer view).
+// US-15 — Register Product. Route: GET /products/:id.
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -61,7 +59,6 @@ class _ProductDetailView extends StatelessWidget {
             children: [
               CustomScrollView(
                 slivers: [
-                  // Header
                   SliverAppBar(
                     backgroundColor: Colors.white.withValues(alpha: 0.9),
                     leading: GestureDetector(
@@ -93,7 +90,6 @@ class _ProductDetailView extends StatelessWidget {
                   SliverToBoxAdapter(
                     child: Column(
                       children: [
-                        // Product image
                         Padding(
                           padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
                           child: ClipRRect(
@@ -133,7 +129,6 @@ class _ProductDetailView extends StatelessWidget {
                             ),
                           ),
                         ),
-                        // Product content card
                         Container(
                           decoration: const BoxDecoration(
                             color: Color(0xFFF6F7F6),
@@ -145,7 +140,6 @@ class _ProductDetailView extends StatelessWidget {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              // Name + Price
                               Row(
                                 children: [
                                   Expanded(
@@ -171,7 +165,6 @@ class _ProductDetailView extends StatelessWidget {
                                 ],
                               ),
                               const SizedBox(height: 16),
-                              // Producer info
                               if (product.producerName.isNotEmpty)
                                 Text(
                                   'Produtor: ${product.producerName}',
@@ -204,7 +197,6 @@ class _ProductDetailView extends StatelessWidget {
                                 ),
                               if (product.farmName.isNotEmpty)
                                 const SizedBox(height: 16),
-                              // Category badge — only shown when assigned
                               if (product.category.isNotEmpty)
                                 Container(
                                   padding: const EdgeInsets.symmetric(
@@ -228,7 +220,6 @@ class _ProductDetailView extends StatelessWidget {
                               if (product.category.isNotEmpty)
                                 const SizedBox(height: 8),
                               const SizedBox(height: 24),
-                              // Description
                               const Text(
                                 'Descrição',
                                 style: TextStyle(
@@ -256,7 +247,6 @@ class _ProductDetailView extends StatelessWidget {
                   ),
                 ],
               ),
-              // Sticky bottom bar
               Positioned(
                 left: 0,
                 right: 0,
@@ -271,7 +261,6 @@ class _ProductDetailView extends StatelessWidget {
                   ),
                   child: Row(
                     children: [
-                      // Quantity selector
                       Container(
                         height: 53,
                         width: 113,
@@ -308,7 +297,6 @@ class _ProductDetailView extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(width: 12),
-                      // Add to cart button
                       Expanded(
                         child: GestureDetector(
                           onTap: () {

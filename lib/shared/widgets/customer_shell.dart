@@ -33,10 +33,12 @@ class _CustomerShellState extends State<CustomerShell> {
     super.initState();
     _notificationsBloc = getIt<NotificationsBloc>()
       ..add(const NotificationsUnreadCountRequested());
+
     final cartBloc = getIt<CartBloc>();
     if (cartBloc.state is CartInitial) {
       cartBloc.add(const CartStarted());
     }
+
     final homeBloc = getIt<HomeBloc>();
     if (homeBloc.state is HomeInitial) {
       homeBloc.add(const HomeStarted());
@@ -121,18 +123,25 @@ class _CustomerShellState extends State<CustomerShell> {
                           onTap: () => _onTap(1),
                         ),
                         _NavItem(
+                          icon: Icons.map_outlined,
+                          activeIcon: Icons.map,
+                          label: 'Mapa',
+                          isActive: widget.navigationShell.currentIndex == 2,
+                          onTap: () => _onTap(2),
+                        ),
+                        _NavItem(
                           icon: Icons.person_outline,
                           activeIcon: Icons.person,
                           label: 'Perfil',
-                          isActive: widget.navigationShell.currentIndex == 2,
-                          onTap: () => _onTap(2),
+                          isActive: widget.navigationShell.currentIndex == 3,
+                          onTap: () => _onTap(3),
                         ),
                         _NavItem(
                           icon: Icons.search,
                           activeIcon: Icons.search,
                           label: 'Pesquisa',
-                          isActive: widget.navigationShell.currentIndex == 3,
-                          onTap: () => _onTap(3),
+                          isActive: widget.navigationShell.currentIndex == 4,
+                          onTap: () => _onTap(4),
                         ),
                         BlocBuilder<NotificationsBloc, NotificationsState>(
                           builder: (context, state) {
@@ -141,9 +150,9 @@ class _CustomerShellState extends State<CustomerShell> {
                               activeIcon: Icons.notifications,
                               label: 'Notificações',
                               isActive:
-                                  widget.navigationShell.currentIndex == 4,
+                                  widget.navigationShell.currentIndex == 5,
                               badgeCount: _unreadCountFromState(state),
-                              onTap: () => _onTap(4),
+                              onTap: () => _onTap(5),
                             );
                           },
                         ),
@@ -210,10 +219,12 @@ class _NavItem extends StatelessWidget {
             const SizedBox(height: 4),
             Text(
               label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
               style: TextStyle(
                 fontFamily: 'Figtree',
                 fontWeight: FontWeight.w500,
-                fontSize: 12,
+                fontSize: 11,
                 color: isActive ? AppColors.darkGreen : AppColors.placeholder,
               ),
             ),

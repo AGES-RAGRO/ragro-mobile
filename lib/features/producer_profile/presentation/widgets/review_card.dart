@@ -48,11 +48,9 @@ class ReviewCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-
               CircleAvatar(
                 radius: 18,
 
@@ -65,14 +63,14 @@ class ReviewCard extends StatelessWidget {
                     : null,
                 child: review.authorAvatarUrl == null
                     ? Text(
-                  _authorInitial,
-                  style: const TextStyle(
-                    fontFamily: 'Figtree',
-                    fontWeight: FontWeight.w700,
-                    fontSize: 14,
-                    color: AppColors.darkGreen,
-                  ),
-                )
+                        _authorInitial,
+                        style: const TextStyle(
+                          fontFamily: 'Figtree',
+                          fontWeight: FontWeight.w700,
+                          fontSize: 14,
+                          color: AppColors.darkGreen,
+                        ),
+                      )
                     : null,
               ),
               const SizedBox(width: 12),
@@ -96,7 +94,6 @@ class ReviewCard extends StatelessWidget {
                   ],
                 ),
               ),
-              // Date — top right
               Text(
                 _formatDate(review.createdAt),
                 style: const TextStyle(
@@ -109,7 +106,6 @@ class ReviewCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 10),
-          // Comment
           Text(
             review.comment,
             style: const TextStyle(

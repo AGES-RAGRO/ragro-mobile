@@ -48,7 +48,7 @@ class ProducerDashboard extends Equatable {
   final double ordersGrowthPercent;
   final double stockPercentage;
   final double stockChangePercent;
-  final List<double> weeklyChartData; // 7 values: S,T,Q,Q,S,S,D
+  final List<double> weeklyChartData; // 7 values: Mon..Sun
   final String currentMonth;
   final List<DashboardAvailabilitySlot> availability;
 

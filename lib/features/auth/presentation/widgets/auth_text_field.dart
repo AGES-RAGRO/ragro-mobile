@@ -3,9 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:ragro_mobile/core/theme/app_colors.dart';
 import 'package:ragro_mobile/core/theme/app_text_styles.dart';
 
-/// Reusable rounded text field for auth screens.
-///
-/// Supports optional password visibility toggle when [isPassword] is true.
+/// Reusable rounded text field for auth screens; toggles password visibility when [isPassword].
 class AuthTextField extends StatefulWidget {
   const AuthTextField({
     required this.label,

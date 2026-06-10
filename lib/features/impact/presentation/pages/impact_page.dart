@@ -26,7 +26,6 @@ const _kLogoSvg = '''
 </svg>
 ''';
 
-
 class ImpactPage extends StatefulWidget {
   const ImpactPage({super.key});
 
@@ -66,7 +65,11 @@ class _ImpactPageState extends State<ImpactPage> {
 
   @override
   Widget build(BuildContext context) {
-    final co2InTons = (_totalCo2Saved / 1000).round();
+    // _totalCo2Saved is in kg -> tonnes, 2 decimals (comma), so partial values
+    // (< 1 t) show instead of rounding to 0.
+    final co2Value = (_totalCo2Saved / 1000)
+        .toStringAsFixed(2)
+        .replaceAll('.', ',');
 
     return Scaffold(
       backgroundColor: AppColors.white,
@@ -77,11 +80,7 @@ class _ImpactPageState extends State<ImpactPage> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               const Spacer(),
-              SvgPicture.string(
-                _kLogoSvg,
-                width: 110,
-                height: 110,
-              ),
+              SvgPicture.string(_kLogoSvg, width: 110, height: 110),
               const SizedBox(height: 48),
               const Text(
                 'Juntos já\npoupamos',
@@ -97,15 +96,15 @@ class _ImpactPageState extends State<ImpactPage> {
               _loading
                   ? const CircularProgressIndicator(color: AppColors.darkGreen)
                   : Text(
-                '$co2InTons',
-                style: const TextStyle(
-                  fontFamily: 'Figtree',
-                  fontWeight: FontWeight.w700,
-                  fontSize: 96,
-                  color: AppColors.darkGreen,
-                  height: 1,
-                ),
-              ),
+                      co2Value,
+                      style: const TextStyle(
+                        fontFamily: 'Figtree',
+                        fontWeight: FontWeight.w700,
+                        fontSize: 96,
+                        color: AppColors.darkGreen,
+                        height: 1,
+                      ),
+                    ),
               const SizedBox(height: 8),
               const Text(
                 'toneladas de CO₂',

@@ -5,8 +5,7 @@ import 'package:ragro_mobile/features/producer_profile/data/models/public_produc
 void main() {
   group('PublicProducerModel.fromJson', () {
     test('parseia ProducerPublicProfileResponse real do backend', () {
-      // Shape real retornado por GET /producers/{id}/profile
-      // Com @PreAuthorize("hasRole('CUSTOMER')")
+      // Real shape returned by GET /producers/{id}/profile
       final json = {
         'id': 'abc-123',
         'name': 'João Silva',
@@ -44,7 +43,7 @@ void main() {
       expect(model.totalReviews, 120);
       expect(model.memberSince, DateTime(2020, 3, 15));
       expect(model.location, 'Porto Alegre, RS');
-      // Availability é incluído na resposta
+      // Availability is included in the response
       expect(model.availability, isNotEmpty);
       expect(model.availability.length, 1);
     });

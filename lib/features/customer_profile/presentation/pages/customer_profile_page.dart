@@ -10,6 +10,7 @@ import 'package:ragro_mobile/features/customer_profile/presentation/bloc/custome
 import 'package:ragro_mobile/features/customer_profile/presentation/widgets/profile_info_row.dart';
 import 'package:ragro_mobile/features/customer_profile/presentation/widgets/profile_menu_item.dart';
 import 'package:ragro_mobile/shared/widgets/app_notification.dart';
+import 'package:ragro_mobile/shared/widgets/terms_of_use_dialog.dart';
 
 class CustomerProfilePage extends StatelessWidget {
   const CustomerProfilePage({super.key});
@@ -173,7 +174,7 @@ class _CustomerProfileView extends StatelessWidget {
                     ProfileMenuItem(
                       icon: Icons.help_outline,
                       label: 'Termos de uso',
-                      onTap: () {},
+                      onTap: () => showTermsOfUseDialog(context),
                     ),
                     const SizedBox(height: 16),
                     ProfileMenuItem(

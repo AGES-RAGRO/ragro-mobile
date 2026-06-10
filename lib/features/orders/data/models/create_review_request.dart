@@ -1,4 +1,4 @@
-// Payload de POST /reviews — alinhado ao CreateReviewRequest do backend.
+// POST /reviews payload, aligned with the backend CreateReviewRequest.
 class CreateReviewRequest {
   const CreateReviewRequest({
     required this.orderId,

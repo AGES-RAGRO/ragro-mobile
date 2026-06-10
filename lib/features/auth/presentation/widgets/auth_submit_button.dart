@@ -2,9 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:ragro_mobile/core/theme/app_colors.dart';
 import 'package:ragro_mobile/core/theme/app_text_styles.dart';
 
-/// Full-width primary action button for auth screens.
-///
-/// Shows a [CircularProgressIndicator] when [isLoading] is true.
+/// Full-width primary action button for auth screens; shows a spinner when [isLoading].
 class AuthSubmitButton extends StatelessWidget {
   const AuthSubmitButton({
     required this.label,

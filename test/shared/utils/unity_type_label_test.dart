@@ -23,6 +23,20 @@ void main() {
       expect(localizeUnityType('ml'), 'ml');
     });
 
+    test('traduz maço e pacote', () {
+      expect(localizeUnityType('maço'), 'maço');
+      expect(localizeUnityType('pacote'), 'pct');
+    });
+
+    test('aceita pct como variante já abreviada de pacote', () {
+      expect(localizeUnityType('pct'), 'pct');
+    });
+
+    test('maço/pacote são case-insensitive e ignoram espaços', () {
+      expect(localizeUnityType(' MAÇO '), 'maço');
+      expect(localizeUnityType('Pacote'), 'pct');
+    });
+
     test('é case-insensitive', () {
       expect(localizeUnityType('UNIT'), 'un');
       expect(localizeUnityType('Box'), 'caixa');

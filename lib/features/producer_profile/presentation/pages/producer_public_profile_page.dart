@@ -1,7 +1,4 @@
-// Screen: Producer Public Profile (Consumer View)
-// User Story: US-14 — View Producer Profile
-// Epic: EPIC 3 — Producer Profile and Catalog
-// Routes: GET /producers/:id
+// Producer public profile (consumer view, US-14). Route: GET /producers/:id.
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -31,7 +28,7 @@ class ProducerPublicProfilePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (_) =>
-      getIt<ProducerProfileBloc>()..add(ProducerProfileStarted(producerId)),
+          getIt<ProducerProfileBloc>()..add(ProducerProfileStarted(producerId)),
       child: _ProducerPublicProfileView(producerId: producerId),
     );
   }
@@ -58,12 +55,10 @@ class _ProducerPublicProfileViewState
   }
 
   Future<void> _checkFavorite() async {
-    final favorites =
-    await getIt<FavoriteProducerRepository>().getFavorites();
+    final favorites = await getIt<FavoriteProducerRepository>().getFavorites();
     if (mounted) {
       setState(() {
-        _isFavorite =
-            favorites.any((f) => f.producerId == widget.producerId);
+        _isFavorite = favorites.any((f) => f.producerId == widget.producerId);
       });
     }
   }
@@ -114,7 +109,6 @@ class _ProducerPublicProfileViewState
             ),
             ProducerProfileLoaded(:final producer) => CustomScrollView(
               slivers: [
-                // Header with blur background
                 SliverAppBar(
                   backgroundColor: Colors.white.withValues(alpha: 0.85),
                   leading: GestureDetector(
@@ -133,7 +127,6 @@ class _ProducerPublicProfileViewState
                   pinned: true,
                   expandedHeight: kToolbarHeight,
                 ),
-                // Producer info
                 SliverToBoxAdapter(
                   child: Column(
                     children: [
@@ -294,7 +287,6 @@ class _ProducerPublicProfileViewState
                               ],
                             ),
                             const SizedBox(height: 24),
-                            // Contact button
                             SizedBox(
                               width: double.infinity,
                               child: ElevatedButton.icon(
@@ -325,7 +317,6 @@ class _ProducerPublicProfileViewState
                               ),
                             ),
                             const SizedBox(height: 16),
-                            // Descrição
                             if (producer.description.isNotEmpty)
                               Padding(
                                 padding: const EdgeInsets.only(bottom: 16),
@@ -341,7 +332,6 @@ class _ProducerPublicProfileViewState
                                   textAlign: TextAlign.center,
                                 ),
                               ),
-                            // Story
                             Text(
                               producer.story,
                               style: const TextStyle(
@@ -354,19 +344,16 @@ class _ProducerPublicProfileViewState
                               textAlign: TextAlign.center,
                             ),
                             const SizedBox(height: 32),
-                            // Availability section
                             AvailabilitySection(
                               availability: producer.availability,
                             ),
                             const SizedBox(height: 32),
-                            // Stats
                             ProducerStatsRow(
                               productCount: producer.products?.length ?? 0,
                               rating: producer.averageRating,
                               yearsOnPlatform: producer.yearsOnPlatform,
                             ),
                             const SizedBox(height: 32),
-                            // Products section header
                             if ((producer.products ?? const []).isNotEmpty)
                               const Align(
                                 alignment: Alignment.centerLeft,
@@ -382,7 +369,6 @@ class _ProducerPublicProfileViewState
                               ),
                             if ((producer.products ?? const []).isNotEmpty)
                               const SizedBox(height: 16),
-                            // Products grid
                             if ((producer.products ?? const []).isNotEmpty)
                               GridView.builder(
                                 shrinkWrap: true,

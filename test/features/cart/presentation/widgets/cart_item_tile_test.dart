@@ -206,19 +206,18 @@ void main() {
       },
     );
 
-    testWidgets(
-      'ícone de lixeira NÃO dispara CartItemRemoved ao cancelar',
-      (tester) async {
-        await tester.pumpWidget(buildSubject(item: buildItem()));
+    testWidgets('ícone de lixeira NÃO dispara CartItemRemoved ao cancelar', (
+      tester,
+    ) async {
+      await tester.pumpWidget(buildSubject(item: buildItem()));
 
-        await tester.tap(find.byIcon(Icons.delete_outline));
-        await tester.pumpAndSettle();
+      await tester.tap(find.byIcon(Icons.delete_outline));
+      await tester.pumpAndSettle();
 
-        await tester.tap(find.text('Cancelar'));
-        await tester.pumpAndSettle();
+      await tester.tap(find.text('Cancelar'));
+      await tester.pumpAndSettle();
 
-        verifyNever(() => bloc.add(const CartItemRemoved('item-1')));
-      },
-    );
+      verifyNever(() => bloc.add(const CartItemRemoved('item-1')));
+    });
   });
 }

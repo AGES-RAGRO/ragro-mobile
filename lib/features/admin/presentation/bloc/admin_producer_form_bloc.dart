@@ -1,4 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:geocoding/geocoding.dart';
 import 'package:injectable/injectable.dart';
 import 'package:ragro_mobile/core/network/api_exception.dart';
 import 'package:ragro_mobile/features/admin/domain/entities/admin_address.dart';
@@ -25,9 +26,9 @@ class AdminProducerFormBloc
   ) async {
     emit(const AdminProducerFormLoading());
     try {
-      // Mapeamento UI → backend weekday:
-      //   UI index 0..5 = Seg..Sáb  → backend 1..6
-      //   UI index 6    = Dom       → backend 0
+      // Map UI weekday to backend weekday:
+      //   UI index 0..5 = Mon..Sat -> backend 1..6
+      //   UI index 6    = Sun      -> backend 0
       final selectedDays = <AdminAvailability>[];
       for (var i = 0; i < event.scheduleWeekdays.length; i++) {
         if (event.scheduleWeekdays[i]) {
@@ -41,8 +42,8 @@ class AdminProducerFormBloc
         }
       }
 
-      // Backend exige os 2 payment methods (pix + bank_account) —
-      // a page valida antes de disparar o evento.
+      // Backend requires both payment methods (pix + bank_account); the page
+      // validates this before dispatching the event.
       final paymentMethods = <AdminPaymentMethod>[
         AdminPaymentMethod(
           type: 'pix',
@@ -60,6 +61,20 @@ class AdminProducerFormBloc
           fiscalNumber: event.bankFiscalNumber,
         ),
       ];
+
+      double? lat;
+      double? lng;
+      try {
+        final fullAddress =
+            '${event.address}, ${event.number}, ${event.city}, ${event.state}';
+        final locations = await locationFromAddress(fullAddress);
+        if (locations.isNotEmpty) {
+          lat = locations.first.latitude;
+          lng = locations.first.longitude;
+        }
+      } catch (e) {
+        // Ignore geocoding errors so they don't block creation
+      }
 
       final producer = AdminProducer(
         id: DateTime.now().millisecondsSinceEpoch.toString(),
@@ -83,6 +98,8 @@ class AdminProducerFormBloc
           neighborhood: (event.neighborhood?.isNotEmpty ?? false)
               ? event.neighborhood
               : null,
+          latitude: lat,
+          longitude: lng,
         ),
         paymentMethods: paymentMethods,
         availability: selectedDays.isNotEmpty ? selectedDays : null,

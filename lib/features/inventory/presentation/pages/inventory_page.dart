@@ -1,7 +1,5 @@
-// Screen: Inventory (Estoque do Produtor)
-// User Story: US-22 — Manage Product Inventory
-// Epic: EPIC 4 — Producer Features
-// Routes: GET /products
+// Screen: Inventory (producer's stock).
+// US-22 — Manage Product Inventory. Route: GET /products.
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -47,7 +45,6 @@ class _InventoryView extends StatelessWidget {
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Header
                 Padding(
                   padding: const EdgeInsets.fromLTRB(20, 16, 20, 4),
                   child: Row(
@@ -64,15 +61,14 @@ class _InventoryView extends StatelessWidget {
                       ),
                       if (state is InventoryLoaded)
                         GestureDetector(
-                          onTap: () => context
-                              .push('/producer/stock/new')
-                              .then((_) {
-                            if (context.mounted) {
-                              context
-                                  .read<InventoryBloc>()
-                                  .add(const InventoryRefreshed());
-                            }
-                          }),
+                          onTap: () =>
+                              context.push('/producer/stock/new').then((_) {
+                                if (context.mounted) {
+                                  context.read<InventoryBloc>().add(
+                                    const InventoryRefreshed(),
+                                  );
+                                }
+                              }),
                           child: Container(
                             padding: const EdgeInsets.symmetric(
                               horizontal: 16,
@@ -107,7 +103,6 @@ class _InventoryView extends StatelessWidget {
                   ),
                 ),
 
-                // Summary cards
                 if (state is InventoryLoaded) ...[
                   Padding(
                     padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
@@ -133,7 +128,6 @@ class _InventoryView extends StatelessWidget {
                   ),
                   const SizedBox(height: 16),
 
-                  // Meus Produtos label
                   const Padding(
                     padding: EdgeInsets.fromLTRB(20, 0, 20, 12),
                     child: Text(
@@ -147,7 +141,6 @@ class _InventoryView extends StatelessWidget {
                     ),
                   ),
 
-                  // Filter pills
                   SingleChildScrollView(
                     scrollDirection: Axis.horizontal,
                     padding: const EdgeInsets.only(left: 16),
@@ -203,7 +196,6 @@ class _InventoryView extends StatelessWidget {
 
                   const SizedBox(height: 12),
 
-                  // Product list
                   Expanded(
                     child: state.products.isEmpty
                         ? const Center(
@@ -237,47 +229,46 @@ class _InventoryView extends StatelessWidget {
                               return InventoryProductCard(
                                 product: product,
                                 onEditTap: () => context
-                                    .push(
-                                  '/producer/stock/${product.id}/edit',
-                                )
+                                    .push('/producer/stock/${product.id}/edit')
                                     .then((_) {
-                                  if (context.mounted) {
-                                    context.read<InventoryBloc>().add(
-                                      const InventoryRefreshed(),
-                                    );
-                                  }
-                                }),
+                                      if (context.mounted) {
+                                        context.read<InventoryBloc>().add(
+                                          const InventoryRefreshed(),
+                                        );
+                                      }
+                                    }),
                                 onEntryTap: () => context
                                     .push(
-                                  '/producer/stock/${product.id}/entry',
-                                  extra: {
-                                    'productName': product.name,
-                                    'unit': product.unit,
-                                  },
-                                )
+                                      '/producer/stock/${product.id}/entry',
+                                      extra: {
+                                        'productName': product.name,
+                                        'unit': product.unit,
+                                      },
+                                    )
                                     .then((result) {
-                                  if (result == true && context.mounted) {
-                                    context.read<InventoryBloc>().add(
-                                      const InventoryRefreshed(),
-                                    );
-                                  }
-                                }),
+                                      if (result == true && context.mounted) {
+                                        context.read<InventoryBloc>().add(
+                                          const InventoryRefreshed(),
+                                        );
+                                      }
+                                    }),
                                 onExitTap: () => context
                                     .push(
-                                  '/producer/stock/${product.id}/exit',
-                                  extra: {
-                                    'productName': product.name,
-                                    'unit': product.unit,
-                                    'currentStock': product.stock.toDouble(),
-                                  },
-                                )
+                                      '/producer/stock/${product.id}/exit',
+                                      extra: {
+                                        'productName': product.name,
+                                        'unit': product.unit,
+                                        'currentStock': product.stock
+                                            .toDouble(),
+                                      },
+                                    )
                                     .then((result) {
-                                  if (result == true && context.mounted) {
-                                    context.read<InventoryBloc>().add(
-                                      const InventoryRefreshed(),
-                                    );
-                                  }
-                                }),
+                                      if (result == true && context.mounted) {
+                                        context.read<InventoryBloc>().add(
+                                          const InventoryRefreshed(),
+                                        );
+                                      }
+                                    }),
                                 onHistoryTap: () => context.push(
                                   '/producer/stock/${product.id}/history',
                                   extra: {'productName': product.name},

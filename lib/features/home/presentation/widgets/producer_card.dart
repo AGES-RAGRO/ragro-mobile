@@ -3,7 +3,13 @@ import 'package:ragro_mobile/core/theme/app_colors.dart';
 import 'package:ragro_mobile/features/home/domain/entities/producer.dart';
 
 class ProducerCard extends StatelessWidget {
-  const ProducerCard({required this.producer, required this.onTap, this.isFavorite, this.onFavoriteTap, super.key,});
+  const ProducerCard({
+    required this.producer,
+    required this.onTap,
+    this.isFavorite,
+    this.onFavoriteTap,
+    super.key,
+  });
 
   final Producer producer;
   final VoidCallback onTap;
@@ -131,16 +137,16 @@ class ProducerCard extends StatelessWidget {
                             : null,
                         child: producer.avatarUrl.isEmpty
                             ? Text(
-                          producer.ownerName.isNotEmpty
-                              ? producer.ownerName[0].toUpperCase()
-                              : '?',
-                          style: const TextStyle(
-                            fontFamily: 'Figtree',
-                            fontWeight: FontWeight.w700,
-                            fontSize: 10,
-                            color: AppColors.darkGreen,
-                          ),
-                        )
+                                producer.ownerName.isNotEmpty
+                                    ? producer.ownerName[0].toUpperCase()
+                                    : '?',
+                                style: const TextStyle(
+                                  fontFamily: 'Figtree',
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 10,
+                                  color: AppColors.darkGreen,
+                                ),
+                              )
                             : null,
                       ),
                       const SizedBox(width: 8),

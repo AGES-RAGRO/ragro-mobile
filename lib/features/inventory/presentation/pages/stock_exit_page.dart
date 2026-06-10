@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:ragro_mobile/core/di/injection.dart';
 import 'package:ragro_mobile/core/theme/app_colors.dart';
 import 'package:ragro_mobile/features/inventory/presentation/bloc/stock_exit_bloc.dart';
+import 'package:ragro_mobile/shared/utils/unity_type_label.dart';
 import 'package:ragro_mobile/features/inventory/presentation/bloc/stock_exit_event.dart';
 import 'package:ragro_mobile/features/inventory/presentation/bloc/stock_exit_state.dart';
 
@@ -58,10 +59,7 @@ class _StockExitViewState extends State<_StockExitView> {
   final _notesController = TextEditingController();
   String _selectedReason = 'LOSS';
 
-  static const _reasons = [
-    ('LOSS', 'Perda'),
-    ('DISPOSAL', 'Descarte'),
-  ];
+  static const _reasons = [('LOSS', 'Perda'), ('DISPOSAL', 'Descarte')];
 
   @override
   void dispose() {
@@ -151,7 +149,6 @@ class _StockExitViewState extends State<_StockExitView> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Product info
                   Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
@@ -187,12 +184,13 @@ class _StockExitViewState extends State<_StockExitView> {
                                 ),
                               ),
                               Text(
-                                'Saldo atual: ${widget.currentStock % 1 == 0 ? widget.currentStock.toInt() : widget.currentStock.toStringAsFixed(2)} ${widget.unit}',
+                                'Saldo atual: ${widget.currentStock % 1 == 0 ? widget.currentStock.toInt() : widget.currentStock.toStringAsFixed(2)} ${localizeUnityType(widget.unit)}',
                                 style: TextStyle(
                                   fontFamily: 'Manrope',
                                   fontSize: 13,
-                                  color:
-                                      AppColors.darkGreen.withValues(alpha: 0.8),
+                                  color: AppColors.darkGreen.withValues(
+                                    alpha: 0.8,
+                                  ),
                                 ),
                               ),
                             ],
@@ -217,7 +215,7 @@ class _StockExitViewState extends State<_StockExitView> {
                     enabled: !isLoading,
                     decoration: InputDecoration(
                       hintText: '0',
-                      suffixText: widget.unit,
+                      suffixText: localizeUnityType(widget.unit),
                       hintStyle: const TextStyle(
                         fontFamily: 'Manrope',
                         fontSize: 15,
@@ -231,13 +229,15 @@ class _StockExitViewState extends State<_StockExitView> {
                       ),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide:
-                            const BorderSide(color: AppColors.inputBorder),
+                        borderSide: const BorderSide(
+                          color: AppColors.inputBorder,
+                        ),
                       ),
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide:
-                            const BorderSide(color: AppColors.inputBorder),
+                        borderSide: const BorderSide(
+                          color: AppColors.inputBorder,
+                        ),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
@@ -318,13 +318,15 @@ class _StockExitViewState extends State<_StockExitView> {
                       ),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide:
-                            const BorderSide(color: AppColors.inputBorder),
+                        borderSide: const BorderSide(
+                          color: AppColors.inputBorder,
+                        ),
                       ),
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide:
-                            const BorderSide(color: AppColors.inputBorder),
+                        borderSide: const BorderSide(
+                          color: AppColors.inputBorder,
+                        ),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),

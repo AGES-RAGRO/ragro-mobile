@@ -1,7 +1,4 @@
-// Screen: Customer Registration
-// User Story: US-01 — Customer Registration
-// Epic: EPIC 1 — Authentication
-// Routes: POST /auth/register/customer
+// Customer registration screen (US-01). Backed by POST /auth/register/customer.
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -19,6 +16,7 @@ import 'package:ragro_mobile/features/auth/presentation/bloc/register_event.dart
 import 'package:ragro_mobile/features/auth/presentation/bloc/register_state.dart';
 import 'package:ragro_mobile/features/auth/presentation/widgets/auth_submit_button.dart';
 import 'package:ragro_mobile/features/auth/presentation/widgets/auth_text_field.dart';
+import 'package:ragro_mobile/shared/widgets/terms_of_use_dialog.dart';
 
 const List<String> _brazilianStates = [
   'AC',
@@ -379,7 +377,9 @@ class _CustomerRegisterViewState extends State<_CustomerRegisterView> {
                           if (value == null || value.trim().isEmpty) {
                             return 'Informe a UF';
                           }
-                          if (!_brazilianStates.contains(value.trim().toUpperCase())) {
+                          if (!_brazilianStates.contains(
+                            value.trim().toUpperCase(),
+                          )) {
                             return 'UF inválida';
                           }
                           return null;
@@ -429,9 +429,7 @@ class _TermsCheckbox extends StatefulWidget {
 
 class _TermsCheckboxState extends State<_TermsCheckbox> {
   late final TapGestureRecognizer _termsTapRecognizer = TapGestureRecognizer()
-    ..onTap = () {
-      // TODO(ragro): open terms of service page
-    };
+    ..onTap = () => showTermsOfUseDialog(context);
 
   @override
   void dispose() {
