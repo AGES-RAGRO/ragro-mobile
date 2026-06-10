@@ -10,6 +10,7 @@ import 'package:ragro_mobile/features/producer_management/presentation/bloc/prod
 import 'package:ragro_mobile/features/producer_orders/data/models/co2_request_model.dart';
 import 'package:ragro_mobile/features/producer_orders/data/repositories/co2_repository.dart';
 import 'package:ragro_mobile/features/producer_orders/data/repositories/route_repository.dart';
+import 'package:ragro_mobile/features/producer_orders/data/services/route_tracking_publisher.dart';
 import 'route_calculation_state.dart';
 
 /// Rota de entrega PERSISTIDA no backend: criada uma vez (1 chamada Google),
@@ -20,14 +21,25 @@ import 'route_calculation_state.dart';
 class RouteCalculationCubit extends Cubit<RouteCalculationState> {
   final Co2Repository _co2Repository;
   final RouteRepository _routeRepository;
+  final RouteTrackingPublisher _trackingPublisher;
 
   /// Garante o registro de economia de CO2 só na CRIAÇÃO da rota (retomar uma
   /// rota ativa não re-registra a mesma economia).
   bool _savingsRecorded = false;
 
-  RouteCalculationCubit(this._co2Repository, this._routeRepository)
-    : super(const RouteCalculationState()) {
+  RouteCalculationCubit(
+    this._co2Repository,
+    this._routeRepository,
+    this._trackingPublisher,
+  ) : super(const RouteCalculationState()) {
     _initRoute();
+  }
+
+  @override
+  Future<void> close() async {
+    // Fechar a tela NÃO encerra o compartilhamento: a rota continua ativa e o
+    // foreground service segue emitindo até a última entrega ser confirmada.
+    return super.close();
   }
 
   Future<void> _initRoute() async {
@@ -240,6 +252,14 @@ class RouteCalculationCubit extends Cubit<RouteCalculationState> {
       stop: '${stop.latitude},${stop.longitude}',
       eta: stop.eta,
     );
+
+    // Rota ativa: liga o compartilhamento de posição (tempo real p/ os clientes);
+    // rota concluída: para de emitir e a posição deixa de ser compartilhada.
+    if (route.status == 'ACTIVE') {
+      unawaited(_trackingPublisher.start(route.id));
+    } else {
+      unawaited(_trackingPublisher.stop());
+    }
 
     emit(
       state.copyWith(

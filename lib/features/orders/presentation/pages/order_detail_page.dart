@@ -6,6 +6,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show Clipboard, ClipboardData;
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:ragro_mobile/core/di/injection.dart';
 import 'package:ragro_mobile/core/theme/app_colors.dart';
@@ -855,6 +856,16 @@ class _ActionFooter extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final buttons = <Widget>[
+      // Pedido em rota: acompanhamento em tempo real no mapa (Fase 3).
+      if (order.isInDelivery)
+        _ActionButton(
+          label: 'Acompanhar Entrega',
+          icon: Icons.location_on_outlined,
+          color: AppColors.lightGreen,
+          onTap: isUpdating
+              ? null
+              : () => context.push('/customer/orders/${order.id}/tracking'),
+        ),
       if (order.canConfirmDelivery)
         _ActionButton(
           label: 'Confirmar Entrega',

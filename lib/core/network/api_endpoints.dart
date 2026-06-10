@@ -80,6 +80,9 @@ abstract final class ApiEndpoints {
   static String get co2RecordSavings => '$_base/co2/record-savings';
   static String get co2Options => '$_base/co2/options';
 
+  /// Endpoint WebSocket (STOMP) do rastreamento em tempo real.
+  static String get wsUrl => '${_base.replaceFirst('http', 'ws')}/ws';
+
   // Routes (persisted delivery routes; the Google key stays on the server)
   static String get routes => '$_base/routes';
   static String get activeRoute => '$_base/routes/active';
@@ -100,6 +103,7 @@ abstract final class ApiEndpoints {
   static String orderStatus(String id) => '$_base/orders/$id/status';
   static String orderConfirm(String id) => '$_base/orders/$id/confirm';
   static String orderSeen(String id) => '$_base/orders/$id/seen';
+  static String orderTracking(String id) => '$_base/orders/$id/tracking';
   static String get reviews => '$_base/reviews';
 
   // Customer cart

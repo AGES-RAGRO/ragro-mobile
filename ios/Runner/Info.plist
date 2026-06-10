@@ -68,7 +68,13 @@
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Necessário para mostrar o mapa de produtores próximos a você.</string>
 	<key>NSLocationAlwaysUsageDescription</key>
-	<string>Necessário para mostrar o mapa de produtores próximos a você.</string>
+	<string>Durante uma entrega ativa, sua localização é compartilhada com os clientes da rota para acompanhamento em tempo real.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>Durante uma entrega ativa, sua localização é compartilhada com os clientes da rota para acompanhamento em tempo real.</string>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>location</string>
+	</array>
 	<key>UISupportedInterfaceOrientations~ipad</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>

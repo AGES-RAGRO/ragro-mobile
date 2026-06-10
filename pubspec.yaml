@@ -25,6 +25,8 @@ dependencies:
   url_launcher: ^6.3.2
   google_maps_flutter: ^2.17.0
   geolocator: ^14.0.2
+  # Cliente STOMP do rastreamento em tempo real (canal /ws do backend)
+  stomp_dart_client: ^3.0.1
   geocoding: ^4.0.0
 
 dev_dependencies:
