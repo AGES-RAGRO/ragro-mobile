@@ -1,3 +1,5 @@
+import 'dart:ui' as ui;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -39,6 +41,12 @@ class _DeliveryTrackingViewState extends State<_DeliveryTrackingView>
   LatLng? _animFrom;
   LatLng? _animTo;
 
+  /// Ícones do mapa (carro verde = produtor; casa = destino), gerados via Canvas
+  /// para não depender de assets PNG. Carregados uma vez em didChangeDependencies.
+  BitmapDescriptor? _producerIcon;
+  BitmapDescriptor? _destinationIcon;
+  bool _iconsRequested = false;
+
   @override
   void initState() {
     super.initState();
@@ -59,6 +67,82 @@ class _DeliveryTrackingViewState extends State<_DeliveryTrackingView>
               );
             });
           });
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_iconsRequested) return;
+    _iconsRequested = true;
+    final dpr = MediaQuery.devicePixelRatioOf(context);
+    _loadMarkerIcons(dpr);
+  }
+
+  Future<void> _loadMarkerIcons(double dpr) async {
+    // Carro verde (temática RAGRO) para o produtor; casa para a sua entrega.
+    final producer = await _markerFromIcon(
+      Icons.directions_car_filled,
+      AppColors.lightGreen,
+      dpr,
+    );
+    final destination = await _markerFromIcon(
+      Icons.home_rounded,
+      AppColors.darkGreen,
+      dpr,
+    );
+    if (!mounted) return;
+    setState(() {
+      _producerIcon = producer;
+      _destinationIcon = destination;
+    });
+  }
+
+  /// Renderiza um [IconData] num círculo branco com borda colorida e devolve um
+  /// [BitmapDescriptor] — marker nítido em qualquer densidade de tela, sem PNG.
+  Future<BitmapDescriptor> _markerFromIcon(
+    IconData icon,
+    Color color,
+    double dpr,
+  ) async {
+    final px = 46.0 * dpr;
+    final recorder = ui.PictureRecorder();
+    final canvas = Canvas(recorder);
+    final center = Offset(px / 2, px / 2);
+    final radius = px / 2;
+
+    canvas
+      ..drawCircle(center, radius * 0.92, Paint()..color = Colors.white)
+      ..drawCircle(
+        center,
+        radius * 0.92,
+        Paint()
+          ..color = color
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = px * 0.06,
+      );
+
+    final painter = TextPainter(textDirection: TextDirection.ltr)
+      ..text = TextSpan(
+        text: String.fromCharCode(icon.codePoint),
+        style: TextStyle(
+          fontSize: px * 0.5,
+          fontFamily: icon.fontFamily,
+          package: icon.fontPackage,
+          color: color,
+        ),
+      )
+      ..layout();
+    painter.paint(
+      canvas,
+      Offset(center.dx - painter.width / 2, center.dy - painter.height / 2),
+    );
+
+    final image = await recorder.endRecording().toImage(px.round(), px.round());
+    final bytes = await image.toByteData(format: ui.ImageByteFormat.png);
+    return BitmapDescriptor.bytes(
+      bytes!.buffer.asUint8List(),
+      imagePixelRatio: dpr,
+    );
   }
 
   @override
@@ -96,6 +180,10 @@ class _DeliveryTrackingViewState extends State<_DeliveryTrackingView>
       DeliveryTrackingPhase.waiting => (
         'Aguardando o produtor sair para entrega',
         'Você verá o mapa assim que a rota começar.',
+      ),
+      DeliveryTrackingPhase.awaitingLocation => (
+        'Aguardando localização do produtor',
+        'O produtor ainda não iniciou o compartilhamento da localização. Assim que ele estiver a caminho, você o verá no mapa.',
       ),
       DeliveryTrackingPhase.enRoute => (
         'Pedido em rota',
@@ -171,15 +259,22 @@ class _DeliveryTrackingViewState extends State<_DeliveryTrackingView>
                             Marker(
                               markerId: const MarkerId('producer'),
                               position: producer,
-                              icon: BitmapDescriptor.defaultMarkerWithHue(
-                                BitmapDescriptor.hueGreen,
-                              ),
+                              icon:
+                                  _producerIcon ??
+                                  BitmapDescriptor.defaultMarkerWithHue(
+                                    BitmapDescriptor.hueGreen,
+                                  ),
+                              anchor: const Offset(0.5, 0.5),
                               infoWindow: const InfoWindow(title: 'Produtor'),
                             ),
                           if (destination != null)
                             Marker(
                               markerId: const MarkerId('destination'),
                               position: destination,
+                              icon:
+                                  _destinationIcon ??
+                                  BitmapDescriptor.defaultMarker,
+                              anchor: const Offset(0.5, 0.5),
                               infoWindow: const InfoWindow(
                                 title: 'Sua entrega',
                               ),

@@ -11,6 +11,7 @@ import 'package:ragro_mobile/features/orders/data/repositories/order_tracking_re
 enum DeliveryTrackingPhase {
   loading,
   waiting, // pedido ainda não está em rota ativa
+  awaitingLocation, // em rota, mas o produtor ainda não enviou posição GPS
   enRoute, // em rota, com paradas antes da sua
   nextStop, // a sua entrega é a próxima parada
   arriving, // ETA < 5 min
@@ -138,12 +139,14 @@ class DeliveryTrackingCubit extends Cubit<DeliveryTrackingState> {
     final stopStatus = myEta?['status'] as String?;
     final etaSeconds = (myEta?['etaSeconds'] as num?)?.toInt();
     final stopsBefore = (myEta?['stopsBefore'] as num? ?? 0).toInt();
+    final lat = (message['latitude'] as num?)?.toDouble();
+    final lng = (message['longitude'] as num?)?.toDouble();
 
     emit(
       state.copyWith(
-        phase: _phaseFor(stopStatus, etaSeconds, stopsBefore),
-        producerLat: (message['latitude'] as num?)?.toDouble(),
-        producerLng: (message['longitude'] as num?)?.toDouble(),
+        phase: _phaseFor(stopStatus, etaSeconds, stopsBefore, hasPosition: lat != null),
+        producerLat: lat,
+        producerLng: lng,
         etaSeconds: etaSeconds,
         stopsBefore: stopsBefore,
         live: true,
@@ -179,6 +182,7 @@ class DeliveryTrackingCubit extends Cubit<DeliveryTrackingState> {
             tracking.stopStatus,
             tracking.etaSeconds,
             tracking.stopsBefore,
+            hasPosition: tracking.producerLatitude != null,
           ),
           producerLat: tracking.producerLatitude,
           producerLng: tracking.producerLongitude,
@@ -202,9 +206,13 @@ class DeliveryTrackingCubit extends Cubit<DeliveryTrackingState> {
   DeliveryTrackingPhase _phaseFor(
     String? stopStatus,
     int? etaSeconds,
-    int stopsBefore,
-  ) {
+    int stopsBefore, {
+    required bool hasPosition,
+  }) {
     if (stopStatus == 'DELIVERED') return DeliveryTrackingPhase.delivered;
+    // Em rota mas sem nenhum ping do produtor ainda: deixa explícito em vez de um
+    // mapa "vazio" sem o marker do produtor.
+    if (!hasPosition) return DeliveryTrackingPhase.awaitingLocation;
     if (etaSeconds != null && etaSeconds <= 300 && stopsBefore == 0) {
       return DeliveryTrackingPhase.arriving;
     }
