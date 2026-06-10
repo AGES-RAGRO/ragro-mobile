@@ -29,6 +29,33 @@ class _RouteCalculationView extends StatefulWidget {
 }
 
 class _RouteCalculationViewState extends State<_RouteCalculationView> {
+  GoogleMapController? _miniMapController;
+
+  /// Enquadra o mini-mapa no traçado real da rota (a câmera seguia o GPS do
+  /// produtor — ou o fallback de Goiânia quando o GPS é nulo — deixando a rota
+  /// fora de tela). Roda pós-frame porque newLatLngBounds exige o mapa já medido.
+  void _fitMiniMap(List<LatLng> points) {
+    final controller = _miniMapController;
+    if (controller == null || points.length < 2) return;
+    var minLat = points.first.latitude;
+    var maxLat = points.first.latitude;
+    var minLng = points.first.longitude;
+    var maxLng = points.first.longitude;
+    for (final p in points) {
+      minLat = p.latitude < minLat ? p.latitude : minLat;
+      maxLat = p.latitude > maxLat ? p.latitude : maxLat;
+      minLng = p.longitude < minLng ? p.longitude : minLng;
+      maxLng = p.longitude > maxLng ? p.longitude : maxLng;
+    }
+    final bounds = LatLngBounds(
+      southwest: LatLng(minLat, minLng),
+      northeast: LatLng(maxLat, maxLng),
+    );
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      controller.animateCamera(CameraUpdate.newLatLngBounds(bounds, 32));
+    });
+  }
+
   Future<void> _openGoogleMaps() async {
     final state = context.read<RouteCalculationCubit>().state;
     final stops = state.orderedStops;
@@ -209,10 +236,21 @@ class _RouteCalculationViewState extends State<_RouteCalculationView> {
                         ),
                         const SizedBox(height: 16),
 
-                        BlocBuilder<
+                        BlocConsumer<
                           RouteCalculationCubit,
                           RouteCalculationState
                         >(
+                          listenWhen: (p, c) =>
+                              p.overviewPolyline != c.overviewPolyline,
+                          listener: (context, state) {
+                            final encoded = state.overviewPolyline;
+                            if (encoded == null) return;
+                            _fitMiniMap(
+                              decodePolyline(encoded)
+                                  .map((p) => LatLng(p.$1, p.$2))
+                                  .toList(),
+                            );
+                          },
                           builder: (context, state) {
                             final lat = state.producerLat ?? -16.6868;
                             final lng = state.producerLng ?? -49.2647;
@@ -241,23 +279,32 @@ class _RouteCalculationViewState extends State<_RouteCalculationView> {
                                   children: [
                                     GoogleMap(
                                       initialCameraPosition: CameraPosition(
-                                        target: loc,
+                                        target: routePoints.isNotEmpty
+                                            ? routePoints.first
+                                            : loc,
                                         zoom: 13,
                                       ),
+                                      onMapCreated: (controller) {
+                                        _miniMapController = controller;
+                                        _fitMiniMap(routePoints);
+                                      },
                                       zoomControlsEnabled: false,
                                       scrollGesturesEnabled: false,
                                       rotateGesturesEnabled: false,
                                       tiltGesturesEnabled: false,
                                       mapToolbarEnabled: false,
                                       markers: {
-                                        Marker(
-                                          markerId: const MarkerId('producer'),
-                                          position: loc,
-                                          icon:
-                                              BitmapDescriptor.defaultMarkerWithHue(
-                                                BitmapDescriptor.hueGreen,
-                                              ),
-                                        ),
+                                        // Só marca o produtor quando há GPS real
+                                        // (sem isto, caía no fallback de Goiânia).
+                                        if (state.producerLat != null)
+                                          Marker(
+                                            markerId: const MarkerId('producer'),
+                                            position: loc,
+                                            icon:
+                                                BitmapDescriptor.defaultMarkerWithHue(
+                                                  BitmapDescriptor.hueGreen,
+                                                ),
+                                          ),
                                       },
                                       polylines: routePoints.isEmpty
                                           ? const <Polyline>{}
