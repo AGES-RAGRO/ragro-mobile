@@ -30,6 +30,7 @@ class DeliveryTrackingState extends Equatable {
     this.stopsBefore = 0,
     this.live = false,
     this.updatedAt,
+    this.routePolyline,
   });
 
   final DeliveryTrackingPhase phase;
@@ -44,6 +45,10 @@ class DeliveryTrackingState extends Equatable {
   final bool live;
   final DateTime? updatedAt;
 
+  /// Polyline codificada (Google) da rota — desenhada no mapa. Vem no snapshot
+  /// inicial e não muda durante a entrega.
+  final String? routePolyline;
+
   DeliveryTrackingState copyWith({
     DeliveryTrackingPhase? phase,
     double? producerLat,
@@ -54,6 +59,7 @@ class DeliveryTrackingState extends Equatable {
     int? stopsBefore,
     bool? live,
     DateTime? updatedAt,
+    String? routePolyline,
   }) {
     return DeliveryTrackingState(
       phase: phase ?? this.phase,
@@ -65,6 +71,7 @@ class DeliveryTrackingState extends Equatable {
       stopsBefore: stopsBefore ?? this.stopsBefore,
       live: live ?? this.live,
       updatedAt: updatedAt ?? this.updatedAt,
+      routePolyline: routePolyline ?? this.routePolyline,
     );
   }
 
@@ -79,6 +86,7 @@ class DeliveryTrackingState extends Equatable {
     stopsBefore,
     live,
     updatedAt,
+    routePolyline,
   ];
 }
 
@@ -192,6 +200,7 @@ class DeliveryTrackingCubit extends Cubit<DeliveryTrackingState> {
           stopsBefore: tracking.stopsBefore,
           live: false,
           updatedAt: DateTime.now(),
+          routePolyline: tracking.overviewPolyline,
         ),
       );
     } on Exception {

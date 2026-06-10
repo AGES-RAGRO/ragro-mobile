@@ -18,6 +18,7 @@ class OrderTracking {
     this.etaSeconds,
     this.stopsBefore = 0,
     this.stopStatus,
+    this.overviewPolyline,
   });
 
   final bool available;
@@ -33,6 +34,9 @@ class OrderTracking {
   /// PENDING | ARRIVED | DELIVERED | FAILED.
   final String? stopStatus;
 
+  /// Polyline codificada (Google) da rota completa — desenha o caminho no mapa.
+  final String? overviewPolyline;
+
   factory OrderTracking.fromJson(Map<String, dynamic> json) {
     return OrderTracking(
       available: json['available'] as bool? ?? false,
@@ -45,6 +49,7 @@ class OrderTracking {
       etaSeconds: (json['etaSeconds'] as num?)?.toInt(),
       stopsBefore: (json['stopsBefore'] as num? ?? 0).toInt(),
       stopStatus: json['stopStatus'] as String?,
+      overviewPolyline: json['overviewPolyline'] as String?,
     );
   }
 }

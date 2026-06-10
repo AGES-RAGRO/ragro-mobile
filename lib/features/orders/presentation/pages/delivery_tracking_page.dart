@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:ragro_mobile/core/di/injection.dart';
 import 'package:ragro_mobile/core/theme/app_colors.dart';
+import 'package:ragro_mobile/core/utils/polyline_decoder.dart';
 import 'package:ragro_mobile/features/orders/presentation/bloc/delivery_tracking_cubit.dart';
 
 /// Acompanhamento da entrega em tempo real (cliente): mapa com o produtor se
@@ -235,6 +236,12 @@ class _DeliveryTrackingViewState extends State<_DeliveryTrackingView>
           final producer = _displayedProducer;
           final initialTarget =
               producer ?? destination ?? const LatLng(-30.0346, -51.2177);
+          // Caminho calculado pelo Google (overviewPolyline) desenhado em verde.
+          final routePoints = state.routePolyline == null
+              ? const <LatLng>[]
+              : decodePolyline(state.routePolyline!)
+                    .map((p) => LatLng(p.$1, p.$2))
+                    .toList();
 
           final showMap =
               state.phase != DeliveryTrackingPhase.loading &&
@@ -254,6 +261,15 @@ class _DeliveryTrackingViewState extends State<_DeliveryTrackingView>
                             _mapController = controller,
                         myLocationButtonEnabled: false,
                         mapToolbarEnabled: false,
+                        polylines: {
+                          if (routePoints.length >= 2)
+                            Polyline(
+                              polylineId: const PolylineId('route'),
+                              points: routePoints,
+                              color: AppColors.lightGreen,
+                              width: 5,
+                            ),
+                        },
                         markers: {
                           if (producer != null)
                             Marker(
