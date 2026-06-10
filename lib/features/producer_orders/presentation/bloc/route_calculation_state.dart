@@ -9,9 +9,10 @@ class RouteDelivery extends Equatable {
     required this.title,
     required this.subtitle,
     required this.stop,
+    this.eta,
   });
 
-  /// Order id.
+  /// Route stop id (a parada referencia o pedido no backend).
   final String id;
 
   /// Customer name.
@@ -23,8 +24,11 @@ class RouteDelivery extends Equatable {
   /// Routing point: "lat,lng" when coordinates exist, otherwise the address.
   final String stop;
 
+  /// ETA absoluto estimado na criação da rota (com trânsito do momento).
+  final DateTime? eta;
+
   @override
-  List<Object?> get props => [id, title, subtitle, stop];
+  List<Object?> get props => [id, title, subtitle, stop, eta];
 }
 
 class RouteCalculationState extends Equatable {
@@ -39,6 +43,15 @@ class RouteCalculationState extends Equatable {
   final double totalDistanceKm;
   final double? producerLat;
   final double? producerLng;
+
+  /// Id da rota persistida no backend (null enquanto não criada/carregada).
+  final String? routeId;
+
+  /// Baseline de CO2 do servidor (idas-e-voltas individuais, km).
+  final double? baselineDistanceKm;
+
+  /// Polyline codificada da rota completa, desenhada no mini-mapa.
+  final String? overviewPolyline;
 
   /// Displayed deliveries, already in optimized order (unconfirmed first).
   final List<RouteDelivery> deliveries;
@@ -58,6 +71,9 @@ class RouteCalculationState extends Equatable {
     this.totalDistanceKm = 0.0,
     this.producerLat,
     this.producerLng,
+    this.routeId,
+    this.baselineDistanceKm,
+    this.overviewPolyline,
     this.deliveries = const [],
     this.orderedStops = const [],
   });
@@ -78,6 +94,9 @@ class RouteCalculationState extends Equatable {
     double? totalDistanceKm,
     double? producerLat,
     double? producerLng,
+    String? routeId,
+    double? baselineDistanceKm,
+    String? overviewPolyline,
     List<RouteDelivery>? deliveries,
     List<String>? orderedStops,
   }) {
@@ -93,6 +112,9 @@ class RouteCalculationState extends Equatable {
       totalDistanceKm: totalDistanceKm ?? this.totalDistanceKm,
       producerLat: producerLat ?? this.producerLat,
       producerLng: producerLng ?? this.producerLng,
+      routeId: routeId ?? this.routeId,
+      baselineDistanceKm: baselineDistanceKm ?? this.baselineDistanceKm,
+      overviewPolyline: overviewPolyline ?? this.overviewPolyline,
       deliveries: deliveries ?? this.deliveries,
       orderedStops: orderedStops ?? this.orderedStops,
     );
@@ -111,6 +133,9 @@ class RouteCalculationState extends Equatable {
     totalDistanceKm,
     producerLat,
     producerLng,
+    routeId,
+    baselineDistanceKm,
+    overviewPolyline,
     deliveries,
     orderedStops,
   ];

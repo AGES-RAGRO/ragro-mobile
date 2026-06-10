@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:ragro_mobile/core/di/injection.dart';
 import 'package:ragro_mobile/core/theme/app_colors.dart';
+import 'package:ragro_mobile/core/utils/polyline_decoder.dart';
 import 'package:ragro_mobile/features/producer_orders/presentation/bloc/route_calculation_cubit.dart';
 import 'package:ragro_mobile/features/producer_orders/presentation/bloc/route_calculation_state.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -216,6 +217,14 @@ class _RouteCalculationViewState extends State<_RouteCalculationView> {
                             final lat = state.producerLat ?? -16.6868;
                             final lng = state.producerLng ?? -49.2647;
                             final loc = LatLng(lat, lng);
+                            // Rota persistida: desenha a polyline real (antes o
+                            // backend retornava a polyline e ela era descartada).
+                            final encoded = state.overviewPolyline;
+                            final routePoints = encoded == null
+                                ? const <LatLng>[]
+                                : decodePolyline(encoded)
+                                      .map((p) => LatLng(p.$1, p.$2))
+                                      .toList();
 
                             return ClipRRect(
                               borderRadius: BorderRadius.circular(16),
@@ -250,6 +259,18 @@ class _RouteCalculationViewState extends State<_RouteCalculationView> {
                                               ),
                                         ),
                                       },
+                                      polylines: routePoints.isEmpty
+                                          ? const <Polyline>{}
+                                          : {
+                                              Polyline(
+                                                polylineId: const PolylineId(
+                                                  'route',
+                                                ),
+                                                points: routePoints,
+                                                color: AppColors.lightGreen,
+                                                width: 4,
+                                              ),
+                                            },
                                     ),
                                     Positioned(
                                       bottom: 12,

@@ -27,20 +27,20 @@ class Co2CalculationRequest extends Equatable {
 }
 
 /// Records an optimized route's CO2 savings (POST /co2/record-savings). The
-/// backend computes savings = emission(round-trip sum) − emission(optimized).
+/// backend computes savings = emission(baseline) − emission(optimized).
 class Co2SavingRequest extends Equatable {
   final double distanceOptimized;
 
-  /// Origin→each-stop distances (km); the backend doubles each (round-trip) as
-  /// the "separate deliveries" baseline.
-  final List<double> separateDeliveryDistances;
+  /// Baseline já em ida-e-volta (km): vem do servidor (Route Matrix) junto com
+  /// a rota persistida — antes era linha reta calculada no app.
+  final double distanceNonOptimized;
   final String vehicleType;
   final String fuelType;
   final double? averageConsumption;
 
   const Co2SavingRequest({
     required this.distanceOptimized,
-    required this.separateDeliveryDistances,
+    required this.distanceNonOptimized,
     required this.vehicleType,
     required this.fuelType,
     this.averageConsumption,
@@ -49,7 +49,7 @@ class Co2SavingRequest extends Equatable {
   Map<String, dynamic> toJson() {
     return {
       'distanceOptimized': distanceOptimized,
-      'separateDeliveryDistances': separateDeliveryDistances,
+      'distanceNonOptimized': distanceNonOptimized,
       'vehicleType': vehicleType,
       'fuelType': fuelType,
       if (averageConsumption != null) 'averageConsumption': averageConsumption,
@@ -59,7 +59,7 @@ class Co2SavingRequest extends Equatable {
   @override
   List<Object?> get props => [
     distanceOptimized,
-    separateDeliveryDistances,
+    distanceNonOptimized,
     vehicleType,
     fuelType,
     averageConsumption,

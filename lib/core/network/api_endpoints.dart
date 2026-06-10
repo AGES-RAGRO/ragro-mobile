@@ -80,8 +80,11 @@ abstract final class ApiEndpoints {
   static String get co2RecordSavings => '$_base/co2/record-savings';
   static String get co2Options => '$_base/co2/options';
 
-  // Routes (optimized via backend; the Google key stays on the server)
-  static String get routesOptimize => '$_base/routes/optimize';
+  // Routes (persisted delivery routes; the Google key stays on the server)
+  static String get routes => '$_base/routes';
+  static String get activeRoute => '$_base/routes/active';
+  static String routeStop(String routeId, String stopId) =>
+      '$_base/routes/$routeId/stops/$stopId';
 
   // Orders
   static String get orders => '$_base/orders';
