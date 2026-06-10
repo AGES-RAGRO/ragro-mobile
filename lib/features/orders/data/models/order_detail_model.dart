@@ -1,3 +1,4 @@
+import 'package:ragro_mobile/core/domain/order_status.dart';
 import 'package:ragro_mobile/core/network/api_endpoints.dart';
 import 'package:ragro_mobile/core/utils/api_date_time.dart';
 import 'package:ragro_mobile/features/orders/domain/entities/order_detail.dart';
@@ -241,13 +242,8 @@ class OrderDetailModel extends OrderDetail {
     return false;
   }
 
-  static String _normalizeStatus(String? status) {
-    return switch (status?.trim().toUpperCase()) {
-      'ACCEPTED' || 'CONFIRMED' => 'CONFIRMED',
-      'INDELIVERY' || 'IN_DELIVERY' || 'OUT_FOR_DELIVERY' => 'IN_DELIVERY',
-      'DELIVERED' => 'DELIVERED',
-      'CANCELED' || 'CANCELLED' => 'CANCELLED',
-      _ => 'PENDING',
-    };
-  }
+  // OrderDetail keeps the status as a normalized backend string; the parsing
+  // itself is centralized in the canonical OrderStatus enum.
+  static String _normalizeStatus(String? status) =>
+      (OrderStatus.tryParse(status) ?? OrderStatus.pending).apiValue;
 }

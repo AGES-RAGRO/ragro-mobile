@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:ragro_mobile/core/di/injection.dart';
+import 'package:ragro_mobile/core/formatters/currency.dart';
 import 'package:ragro_mobile/core/theme/app_colors.dart';
 import 'package:ragro_mobile/features/cart/presentation/bloc/cart_bloc.dart';
 import 'package:ragro_mobile/features/cart/presentation/bloc/cart_event.dart';
@@ -154,7 +155,7 @@ class _ProductDetailView extends StatelessWidget {
                                     ),
                                   ),
                                   Text(
-                                    'R\$ ${product.price.toStringAsFixed(2).replaceAll('.', ',')}',
+                                    formatCurrency(product.price),
                                     style: const TextStyle(
                                       fontFamily: 'Figtree',
                                       fontWeight: FontWeight.w600,

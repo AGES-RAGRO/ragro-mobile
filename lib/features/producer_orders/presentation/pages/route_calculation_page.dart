@@ -726,9 +726,7 @@ class _Co2BottomSheetContentState extends State<_Co2BottomSheetContent> {
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                items: RouteCalculationCubit.allowedFuelsByVehicle.keys.map((
-                  e,
-                ) {
+                items: state.allowedFuelsByVehicle.keys.map((e) {
                   return DropdownMenuItem(value: e, child: Text(e));
                 }).toList(),
                 onChanged: (val) {
@@ -763,8 +761,7 @@ class _Co2BottomSheetContentState extends State<_Co2BottomSheetContent> {
                   ),
                 ),
                 items:
-                    (RouteCalculationCubit.allowedFuelsByVehicle[state
-                                .selectedVehicle] ??
+                    (state.allowedFuelsByVehicle[state.selectedVehicle] ??
                             const ['Gasolina'])
                         .map((e) {
                           return DropdownMenuItem(value: e, child: Text(e));

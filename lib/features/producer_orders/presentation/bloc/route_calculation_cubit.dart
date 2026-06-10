@@ -43,6 +43,10 @@ class RouteCalculationCubit extends Cubit<RouteCalculationState> {
   }
 
   Future<void> _initRoute() async {
+    // Best-effort: troca a matriz hardcoded de combustíveis pela do backend
+    // sem bloquear o carregamento da rota.
+    unawaited(_loadCo2Options());
+
     if (state.averageConsumption.trim().isEmpty) {
       emit(
         state.copyWith(
@@ -79,15 +83,57 @@ class RouteCalculationCubit extends Cubit<RouteCalculationState> {
     await loadRoute();
   }
 
-  /// Fuels allowed per vehicle, mirroring the backend matrix (Co2Service /
-  /// `GET /co2/options`). Keeps the dropdowns dependent so the app never sends
-  /// a combination the backend rejects with HTTP 400.
-  static const Map<String, List<String>> allowedFuelsByVehicle = {
-    'Carro': ['Gasolina', 'Etanol', 'Diesel', 'Elétrico'],
-    'Moto': ['Gasolina', 'Etanol', 'Elétrico'],
-    'Van': ['Gasolina', 'Diesel', 'Elétrico'],
-    'Caminhão': ['Diesel', 'Elétrico'],
-  };
+  /// Best-effort: busca a matriz veículo -> combustíveis do backend
+  /// (`GET /co2/options`) e a aplica nos dropdowns. Em caso de falha mantém o
+  /// FALLBACK hardcoded já presente no estado
+  /// ([RouteCalculationState.fallbackAllowedFuelsByVehicle]), para o fluxo
+  /// continuar funcionando offline ou com o endpoint indisponível.
+  Future<void> _loadCo2Options() async {
+    try {
+      final options = await _co2Repository.getOptions();
+      if (isClosed) return;
+
+      // A API envia enums EN (CAR/GASOLINE...); a UI trabalha com labels PT.
+      final mapped = <String, List<String>>{};
+      for (final entry in options.entries) {
+        final vehicle = _vehicleLabelFromApi(entry.key);
+        if (vehicle == null) continue;
+        final fuels = entry.value
+            .map(_fuelLabelFromApi)
+            .whereType<String>()
+            .toList();
+        if (fuels.isNotEmpty) mapped[vehicle] = fuels;
+      }
+      if (mapped.isEmpty) return;
+
+      // Ordem estável dos veículos (o mapa do backend não tem ordem definida).
+      final ordered = <String, List<String>>{
+        for (final vehicle
+            in RouteCalculationState.fallbackAllowedFuelsByVehicle.keys)
+          if (mapped.containsKey(vehicle)) vehicle: mapped[vehicle]!,
+      };
+
+      // Garante que a seleção atual continua válida nos novos dropdowns.
+      var selectedVehicle = state.selectedVehicle;
+      if (!ordered.containsKey(selectedVehicle)) {
+        selectedVehicle = ordered.keys.first;
+      }
+      var selectedFuel = state.selectedFuel;
+      final allowed = ordered[selectedVehicle]!;
+      if (!allowed.contains(selectedFuel)) selectedFuel = allowed.first;
+
+      emit(
+        state.copyWith(
+          allowedFuelsByVehicle: ordered,
+          selectedVehicle: selectedVehicle,
+          selectedFuel: selectedFuel,
+        ),
+      );
+    } on Exception {
+      // FALLBACK: estado já nasce com a matriz hardcoded (espelho local do
+      // backend); nada a fazer.
+    }
+  }
 
   /// Default consumption (km/L) per vehicle, used when the producer leaves it
   /// blank to avoid the backend's "consumption required" error and still
@@ -103,7 +149,8 @@ class RouteCalculationCubit extends Cubit<RouteCalculationState> {
     final nextVehicle = vehicle ?? state.selectedVehicle;
     var nextFuel = fuel ?? state.selectedFuel;
 
-    final allowed = allowedFuelsByVehicle[nextVehicle] ?? const ['Gasolina'];
+    final allowed =
+        state.allowedFuelsByVehicle[nextVehicle] ?? const ['Gasolina'];
     if (!allowed.contains(nextFuel)) {
       nextFuel = allowed.first;
     }
@@ -314,6 +361,28 @@ class RouteCalculationCubit extends Cubit<RouteCalculationState> {
           )
           .catchError((_) {}),
     );
+  }
+
+  /// Inverso de [_mapVehicleType]: enum EN do backend -> label PT da UI.
+  String? _vehicleLabelFromApi(String apiVehicle) {
+    return switch (apiVehicle.toUpperCase()) {
+      'MOTORCYCLE' => 'Moto',
+      'CAR' => 'Carro',
+      'VAN' => 'Van',
+      'LIGHT_TRUCK' => 'Caminhão',
+      _ => null,
+    };
+  }
+
+  /// Inverso de [_mapFuelType]: enum EN do backend -> label PT da UI.
+  String? _fuelLabelFromApi(String apiFuel) {
+    return switch (apiFuel.toUpperCase()) {
+      'GASOLINE' => 'Gasolina',
+      'ETHANOL' => 'Etanol',
+      'DIESEL' => 'Diesel',
+      'ELECTRIC' => 'Elétrico',
+      _ => null,
+    };
   }
 
   String _mapVehicleType(String uiVehicle) {

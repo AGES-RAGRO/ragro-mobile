@@ -32,6 +32,17 @@ class RouteDelivery extends Equatable {
 }
 
 class RouteCalculationState extends Equatable {
+  /// FALLBACK local da matriz veículo -> combustíveis do backend (Co2Service /
+  /// `GET /co2/options`): usado como valor inicial e mantido quando a chamada
+  /// falha, para os dropdowns continuarem dependentes e o app não enviar uma
+  /// combinação que o backend rejeita com HTTP 400.
+  static const Map<String, List<String>> fallbackAllowedFuelsByVehicle = {
+    'Carro': ['Gasolina', 'Etanol', 'Diesel', 'Elétrico'],
+    'Moto': ['Gasolina', 'Etanol', 'Elétrico'],
+    'Van': ['Gasolina', 'Diesel', 'Elétrico'],
+    'Caminhão': ['Diesel', 'Elétrico'],
+  };
+
   final RouteCalculationStatus status;
   final double? calculatedCo2;
   final String? errorMessage;
@@ -59,6 +70,11 @@ class RouteCalculationState extends Equatable {
   /// Unconfirmed stops in optimized order, used to build the Google Maps deep-link.
   final List<String> orderedStops;
 
+  /// Fuels allowed per vehicle (PT labels for the dropdowns). Starts with
+  /// [fallbackAllowedFuelsByVehicle] and is replaced by the backend matrix
+  /// when `GET /co2/options` succeeds.
+  final Map<String, List<String>> allowedFuelsByVehicle;
+
   const RouteCalculationState({
     this.status = RouteCalculationStatus.initial,
     this.calculatedCo2,
@@ -76,6 +92,7 @@ class RouteCalculationState extends Equatable {
     this.overviewPolyline,
     this.deliveries = const [],
     this.orderedStops = const [],
+    this.allowedFuelsByVehicle = fallbackAllowedFuelsByVehicle,
   });
 
   /// Whether there are pending (unconfirmed) deliveries to route.
@@ -99,6 +116,7 @@ class RouteCalculationState extends Equatable {
     String? overviewPolyline,
     List<RouteDelivery>? deliveries,
     List<String>? orderedStops,
+    Map<String, List<String>>? allowedFuelsByVehicle,
   }) {
     return RouteCalculationState(
       status: status ?? this.status,
@@ -117,6 +135,8 @@ class RouteCalculationState extends Equatable {
       overviewPolyline: overviewPolyline ?? this.overviewPolyline,
       deliveries: deliveries ?? this.deliveries,
       orderedStops: orderedStops ?? this.orderedStops,
+      allowedFuelsByVehicle:
+          allowedFuelsByVehicle ?? this.allowedFuelsByVehicle,
     );
   }
 
@@ -138,5 +158,6 @@ class RouteCalculationState extends Equatable {
     overviewPolyline,
     deliveries,
     orderedStops,
+    allowedFuelsByVehicle,
   ];
 }

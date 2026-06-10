@@ -112,15 +112,8 @@ class OrderModel extends Order {
     return false;
   }
 
-  static OrderStatus _parseStatus(String? status) {
-    return switch (status?.toLowerCase()) {
-      'confirmed' || 'accepted' => OrderStatus.accepted,
-      'in_delivery' || 'indelivery' => OrderStatus.inDelivery,
-      'delivered' => OrderStatus.delivered,
-      'cancelled' || 'canceled' => OrderStatus.cancelled,
-      _ => OrderStatus.pending,
-    };
-  }
+  static OrderStatus _parseStatus(String? status) =>
+      OrderStatus.tryParse(status) ?? OrderStatus.pending;
 
   static DateTime _parseDate(String? value) {
     if (value == null || value.isEmpty) return DateTime.now();

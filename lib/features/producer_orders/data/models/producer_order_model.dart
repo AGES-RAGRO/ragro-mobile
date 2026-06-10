@@ -88,17 +88,8 @@ class ProducerOrderModel extends ProducerOrder {
     );
   }
 
-  static ProducerOrderStatus _parseStatus(String? status) {
-    return switch (status?.trim().toUpperCase()) {
-      'CONFIRMED' || 'ACCEPTED' => ProducerOrderStatus.accepted,
-      'OUT_FOR_DELIVERY' ||
-      'INDELIVERY' ||
-      'IN_DELIVERY' => ProducerOrderStatus.inDelivery,
-      'DELIVERED' => ProducerOrderStatus.delivered,
-      'CANCELLED' || 'CANCELED' => ProducerOrderStatus.cancelled,
-      _ => ProducerOrderStatus.pending,
-    };
-  }
+  static ProducerOrderStatus _parseStatus(String? status) =>
+      ProducerOrderStatus.tryParse(status) ?? ProducerOrderStatus.pending;
 
   static DateTime _parseDate(String? value) {
     if (value == null || value.isEmpty) return DateTime.now();

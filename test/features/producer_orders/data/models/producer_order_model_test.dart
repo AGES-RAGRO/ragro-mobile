@@ -68,7 +68,9 @@ void main() {
         ProducerOrderStatus.cancelled,
       );
       expect(
-        ProducerOrderModel.fromJson(baseJson()..['status'] = 'ACCEPTED').status,
+        ProducerOrderModel.fromJson(
+          baseJson()..['status'] = 'CONFIRMED',
+        ).status,
         ProducerOrderStatus.accepted,
       );
       expect(

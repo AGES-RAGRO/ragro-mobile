@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:ragro_mobile/core/formatters/currency.dart';
 import 'package:ragro_mobile/core/theme/app_colors.dart';
 import 'package:ragro_mobile/features/search/domain/entities/search_result.dart';
 import 'package:ragro_mobile/shared/utils/unity_type_label.dart';
@@ -79,7 +80,7 @@ class ProductTile extends StatelessWidget {
                   Row(
                     children: [
                       Text(
-                        'R\$ ${result.price!.toStringAsFixed(2).replaceAll('.', ',')}',
+                        formatCurrency(result.price!),
                         style: const TextStyle(
                           fontFamily: 'Manrope',
                           fontWeight: FontWeight.w700,

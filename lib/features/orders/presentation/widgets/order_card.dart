@@ -2,13 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:ragro_mobile/core/di/injection.dart';
+import 'package:ragro_mobile/core/formatters/currency.dart';
 import 'package:ragro_mobile/core/theme/app_colors.dart';
 import 'package:ragro_mobile/features/orders/domain/entities/order.dart';
 import 'package:ragro_mobile/features/orders/domain/entities/order_status.dart';
 import 'package:ragro_mobile/features/orders/domain/repositories/orders_repository.dart';
 import 'package:ragro_mobile/features/orders/presentation/bloc/orders_bloc.dart';
 import 'package:ragro_mobile/features/orders/presentation/bloc/orders_event.dart';
-import 'package:ragro_mobile/features/orders/presentation/widgets/order_status_badge.dart';
+import 'package:ragro_mobile/shared/widgets/order_detail/order_status_badge.dart';
 
 class OrderCard extends StatelessWidget {
   const OrderCard({required this.order, super.key});
@@ -138,7 +139,10 @@ class OrderCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 8),
-              OrderStatusBadge(status: order.status),
+              OrderStatusBadge(
+                status: order.status.apiValue,
+                variant: OrderStatusBadgeVariant.list,
+              ),
             ],
           ),
           if (order.shortItemsPreview.isNotEmpty) ...[
@@ -173,7 +177,7 @@ class OrderCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    'R\$ ${order.totalAmount.toStringAsFixed(2).replaceAll('.', ',')}',
+                    formatCurrency(order.totalAmount),
                     style: const TextStyle(
                       fontFamily: 'Manrope',
                       fontWeight: FontWeight.w700,

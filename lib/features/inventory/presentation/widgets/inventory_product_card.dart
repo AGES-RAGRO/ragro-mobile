@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:ragro_mobile/core/formatters/currency.dart';
 import 'package:ragro_mobile/core/theme/app_colors.dart';
 import 'package:ragro_mobile/features/inventory/domain/entities/inventory_product.dart';
 import 'package:ragro_mobile/shared/utils/unity_type_label.dart';
@@ -20,9 +21,6 @@ class InventoryProductCard extends StatelessWidget {
   final VoidCallback onExitTap;
   final VoidCallback onHistoryTap;
   final VoidCallback onDeleteTap;
-
-  String _formatPrice(double price) =>
-      'R\$ ${price.toStringAsFixed(2).replaceAll('.', ',')}';
 
   @override
   Widget build(BuildContext context) {
@@ -139,7 +137,7 @@ class InventoryProductCard extends StatelessWidget {
                 const SizedBox(height: 4),
 
                 Text(
-                  '${_formatPrice(product.price)} / ${localizeUnityType(product.unit)}',
+                  '${formatCurrency(product.price)} / ${localizeUnityType(product.unit)}',
                   style: const TextStyle(
                     fontFamily: 'Figtree',
                     fontWeight: FontWeight.w700,

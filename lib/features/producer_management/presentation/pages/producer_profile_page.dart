@@ -3,8 +3,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
 import 'package:ragro_mobile/core/di/injection.dart';
+import 'package:ragro_mobile/core/formatters/currency.dart';
 import 'package:ragro_mobile/core/theme/app_colors.dart';
 import 'package:ragro_mobile/features/producer_management/domain/entities/producer_dashboard.dart';
 
@@ -57,10 +57,6 @@ class _ProducerProfileView extends StatelessWidget {
     context.read<ProducerManagementBloc>().add(
       const ProducerManagementRefreshed(),
     );
-  }
-
-  String _formatPrice(double price) {
-    return NumberFormat.currency(locale: 'pt_BR', symbol: r'R$').format(price);
   }
 
   String _formatPercent(double value) {
@@ -480,7 +476,7 @@ class _ProducerProfileView extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: _SalesCard(
-              value: _formatPrice(dashboard.totalSales),
+              value: formatCurrency(dashboard.totalSales),
               percentText: _formatSignedPercent(dashboard.salesGrowthPercent),
               previousMonth: _previousMonthName(state.selectedMonth),
               positive: dashboard.salesGrowthPercent >= 0,

@@ -9,6 +9,7 @@ import 'package:geocoding/geocoding.dart' as geo;
 import 'package:go_router/go_router.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:ragro_mobile/core/di/injection.dart';
+import 'package:ragro_mobile/core/formatters/currency.dart';
 import 'package:ragro_mobile/core/theme/app_colors.dart';
 import 'package:ragro_mobile/features/auth/domain/entities/address.dart';
 import 'package:ragro_mobile/features/cart/domain/entities/cart.dart';
@@ -160,9 +161,6 @@ class _CheckoutView extends StatelessWidget {
 
   final Cart cart;
   final bool isConfirming;
-
-  String _formatPrice(double price) =>
-      'R\$ ${price.toStringAsFixed(2).replaceAll('.', ',')}';
 
   @override
   Widget build(BuildContext context) {
@@ -556,7 +554,7 @@ class _CheckoutView extends StatelessWidget {
                         ),
                       ),
                       Text(
-                        _formatPrice(cart.totalAmount),
+                        formatCurrency(cart.totalAmount),
                         style: const TextStyle(
                           fontFamily: 'Manrope',
                           fontSize: 14,
@@ -602,7 +600,7 @@ class _CheckoutView extends StatelessWidget {
                         ),
                       ),
                       Text(
-                        _formatPrice(cart.totalAmount),
+                        formatCurrency(cart.totalAmount),
                         style: const TextStyle(
                           fontFamily: 'Manrope',
                           fontWeight: FontWeight.w700,
@@ -652,7 +650,7 @@ class _CheckoutView extends StatelessWidget {
                             final confirmed = await ConfirmDialog.show(
                               context: context,
                               title: 'Confirmar pedido de ',
-                              highlight: _formatPrice(cart.totalAmount),
+                              highlight: formatCurrency(cart.totalAmount),
                               highlightColor: AppColors.lightGreen,
                               trailingTitle: '?',
                               confirmLabel: 'Sim',
@@ -725,9 +723,6 @@ class _CartItemRow extends StatelessWidget {
 
   final CartItem item;
 
-  String _formatPrice(double price) =>
-      'R\$ ${price.toStringAsFixed(2).replaceAll('.', ',')}';
-
   String _formatQuantity(double quantity) {
     if (quantity % 1 == 0) return quantity.toInt().toString();
     return quantity.toStringAsFixed(2).replaceAll('.', ',');
@@ -777,7 +772,7 @@ class _CartItemRow extends StatelessWidget {
             ),
           ),
           Text(
-            _formatPrice(item.subtotal),
+            formatCurrency(item.subtotal),
             style: const TextStyle(
               fontFamily: 'Manrope',
               fontWeight: FontWeight.w700,

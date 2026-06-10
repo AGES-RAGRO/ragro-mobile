@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:ragro_mobile/core/formatters/currency.dart';
 import 'package:ragro_mobile/core/theme/app_colors.dart';
 import 'package:ragro_mobile/features/cart/domain/entities/cart_item.dart';
 import 'package:ragro_mobile/features/cart/presentation/bloc/cart_bloc.dart';
@@ -13,9 +14,6 @@ class CartItemTile extends StatelessWidget {
 
   final CartItem item;
   final String producerId;
-
-  String _formatPrice(double price) =>
-      'R\$ ${price.toStringAsFixed(2).replaceAll('.', ',')}';
 
   String _formatQuantity(double qty) {
     final fixed = qty.toStringAsFixed(3);
@@ -115,7 +113,7 @@ class CartItemTile extends StatelessWidget {
                         ),
                       ),
                       Text(
-                        _formatPrice(item.totalPrice),
+                        formatCurrency(item.totalPrice),
                         style: const TextStyle(
                           fontFamily: 'Manrope',
                           fontWeight: FontWeight.w700,
@@ -128,8 +126,8 @@ class CartItemTile extends StatelessWidget {
                   const SizedBox(height: 4),
                   Text(
                     item.unityType.isEmpty
-                        ? _formatPrice(item.unitPrice)
-                        : '${_formatPrice(item.unitPrice)} / '
+                        ? formatCurrency(item.unitPrice)
+                        : '${formatCurrency(item.unitPrice)} / '
                               '${localizeUnityType(item.unityType)}',
                     style: const TextStyle(
                       fontFamily: 'Manrope',

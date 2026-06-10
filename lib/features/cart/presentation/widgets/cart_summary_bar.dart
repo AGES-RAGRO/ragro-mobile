@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:ragro_mobile/core/formatters/currency.dart';
 import 'package:ragro_mobile/core/theme/app_colors.dart';
 
 class CartSummaryBar extends StatelessWidget {
@@ -11,9 +12,6 @@ class CartSummaryBar extends StatelessWidget {
 
   final int itemCount;
   final double totalAmount;
-
-  String _formatPrice(double price) =>
-      'R\$ ${price.toStringAsFixed(2).replaceAll('.', ',')}';
 
   @override
   Widget build(BuildContext context) {
@@ -37,7 +35,7 @@ class CartSummaryBar extends StatelessWidget {
               ),
             ),
             Text(
-              '${_formatPrice(totalAmount)} / $itemCount ${itemCount == 1 ? 'item' : 'itens'}',
+              '${formatCurrency(totalAmount)} / $itemCount ${itemCount == 1 ? 'item' : 'itens'}',
               style: const TextStyle(
                 fontFamily: 'Manrope',
                 fontWeight: FontWeight.w700,

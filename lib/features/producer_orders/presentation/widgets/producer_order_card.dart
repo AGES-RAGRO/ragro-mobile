@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:ragro_mobile/core/formatters/currency.dart';
 import 'package:ragro_mobile/core/theme/app_colors.dart';
 import 'package:ragro_mobile/features/producer_orders/domain/entities/producer_order.dart';
 import 'package:ragro_mobile/features/producer_orders/domain/entities/producer_order_status.dart';
+import 'package:ragro_mobile/shared/widgets/order_detail/order_status_badge.dart';
 
 class ProducerOrderCard extends StatelessWidget {
   const ProducerOrderCard({
@@ -31,9 +33,6 @@ class ProducerOrderCard extends StatelessWidget {
     ProducerOrderStatus.delivered => 'Pedido entregue',
     ProducerOrderStatus.cancelled => 'Pedido cancelado',
   };
-
-  String _formatPrice(double price) =>
-      r'R$ ' + price.toStringAsFixed(2).replaceAll('.', ',');
 
   @override
   Widget build(BuildContext context) {
@@ -114,7 +113,10 @@ class ProducerOrderCard extends StatelessWidget {
                   visualDensity: VisualDensity.compact,
                 )
               else ...[
-                _StatusBadge(status: order.status),
+                OrderStatusBadge(
+                  status: order.status.apiValue,
+                  variant: OrderStatusBadgeVariant.list,
+                ),
                 if (order.isNew &&
                     order.status != ProducerOrderStatus.accepted) ...[
                   const SizedBox(width: 6),
@@ -180,7 +182,7 @@ class ProducerOrderCard extends StatelessWidget {
                 ),
               ),
               Text(
-                _formatPrice(order.totalPrice),
+                formatCurrency(order.totalPrice),
                 style: const TextStyle(
                   fontFamily: 'Figtree',
                   fontWeight: FontWeight.w700,
@@ -252,66 +254,5 @@ class ProducerOrderCard extends StatelessWidget {
       return GestureDetector(onTap: onSelect, child: card);
     }
     return card;
-  }
-}
-
-class _StatusBadge extends StatelessWidget {
-  const _StatusBadge({required this.status});
-
-  final ProducerOrderStatus status;
-
-  static Color _colorFor(ProducerOrderStatus s) => switch (s) {
-    ProducerOrderStatus.pending => AppColors.yellow,
-    ProducerOrderStatus.accepted => AppColors.darkGreen,
-    ProducerOrderStatus.inDelivery => AppColors.orange,
-    ProducerOrderStatus.delivered => AppColors.blue,
-    ProducerOrderStatus.cancelled => AppColors.red,
-  };
-
-  static IconData? _iconFor(ProducerOrderStatus s) => switch (s) {
-    ProducerOrderStatus.pending => Icons.schedule,
-    ProducerOrderStatus.accepted => Icons.check_circle_outline,
-    ProducerOrderStatus.inDelivery => Icons.local_shipping_outlined,
-    ProducerOrderStatus.delivered => Icons.check_circle_outline,
-    ProducerOrderStatus.cancelled => null,
-  };
-
-  @override
-  Widget build(BuildContext context) {
-    final color = _colorFor(status);
-    final icon = _iconFor(status);
-    // Pick a readable foreground over the badge color: dark on light colors
-    // (yellow/orange), white on dark colors.
-    final foreground =
-        ThemeData.estimateBrightnessForColor(color) == Brightness.dark
-        ? AppColors.white
-        : AppColors.black;
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-      decoration: BoxDecoration(
-        color: color,
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (icon != null) ...[
-            Icon(icon, color: foreground, size: 12),
-            const SizedBox(width: 4),
-          ],
-          Text(
-            status.label.toUpperCase(),
-            style: TextStyle(
-              fontFamily: 'Manrope',
-              fontWeight: FontWeight.w700,
-              fontSize: 11,
-              color: foreground,
-              letterSpacing: 0.5,
-            ),
-          ),
-        ],
-      ),
-    );
   }
 }

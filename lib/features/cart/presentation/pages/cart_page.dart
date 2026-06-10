@@ -10,6 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:ragro_mobile/core/di/injection.dart';
+import 'package:ragro_mobile/core/formatters/currency.dart';
 import 'package:ragro_mobile/core/theme/app_colors.dart';
 import 'package:ragro_mobile/features/cart/domain/entities/cart.dart';
 import 'package:ragro_mobile/features/cart/presentation/bloc/cart_bloc.dart';
@@ -22,9 +23,6 @@ import 'package:ragro_mobile/shared/widgets/confirm_dialog.dart';
 
 class CartPage extends StatelessWidget {
   const CartPage({super.key});
-
-  String _formatPrice(double price) =>
-      'R\$ ${price.toStringAsFixed(2).replaceAll('.', ',')}';
 
   Cart? _cartFromState(CartState state) => switch (state) {
     CartLoaded(:final cart) => cart,
@@ -308,7 +306,7 @@ class CartPage extends StatelessWidget {
                                 ),
                               ),
                               Text(
-                                _formatPrice(cart.totalAmount),
+                                formatCurrency(cart.totalAmount),
                                 style: const TextStyle(
                                   fontFamily: 'Manrope',
                                   fontWeight: FontWeight.w800,

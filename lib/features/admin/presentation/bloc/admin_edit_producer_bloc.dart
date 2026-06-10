@@ -8,6 +8,7 @@ import 'package:ragro_mobile/features/admin/domain/usecases/get_admin_producer_b
 import 'package:ragro_mobile/features/admin/domain/usecases/update_admin_producer.dart';
 import 'package:ragro_mobile/features/admin/presentation/bloc/admin_edit_producer_event.dart';
 import 'package:ragro_mobile/features/admin/presentation/bloc/admin_edit_producer_state.dart';
+import 'package:ragro_mobile/shared/widgets/producer_form/weekday_mapper.dart';
 
 @injectable
 class AdminEditProducerBloc
@@ -49,7 +50,7 @@ class AdminEditProducerBloc
         if (event.scheduleWeekdays[i]) {
           selectedDays.add(
             AdminAvailability(
-              weekday: i == 6 ? 0 : i + 1,
+              weekday: WeekdayMapper.toApi(i),
               opensAt: event.scheduleStart,
               closesAt: event.scheduleEnd,
             ),
