@@ -1,3 +1,4 @@
+import 'package:ragro_mobile/core/utils/api_date_time.dart';
 import 'package:ragro_mobile/features/admin/domain/entities/admin_producer_summary.dart';
 
 class AdminProducerSummaryModel extends AdminProducerSummary {
@@ -20,8 +21,8 @@ class AdminProducerSummaryModel extends AdminProducerSummary {
       phone: json['phone'] as String? ?? '',
       address: json['address'] as String? ?? '',
       active: json['active'] as bool,
-      createdAt: DateTime.parse(json['createdAt'] as String),
-      updatedAt: DateTime.parse(json['updatedAt'] as String),
+      createdAt: parseApiDateTime(json['createdAt']) ?? DateTime.now(),
+      updatedAt: parseApiDateTime(json['updatedAt']) ?? DateTime.now(),
     );
   }
 }

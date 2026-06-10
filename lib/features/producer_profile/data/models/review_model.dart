@@ -1,4 +1,5 @@
 import 'package:ragro_mobile/core/network/api_endpoints.dart';
+import 'package:ragro_mobile/core/utils/api_date_time.dart';
 import 'package:ragro_mobile/features/producer_profile/domain/entities/review.dart';
 
 class ReviewModel extends Review {
@@ -23,9 +24,7 @@ class ReviewModel extends Review {
           'Anônimo',
       rating: (json['rating'] as num?)?.toDouble() ?? 0.0,
       comment: json['comment'] as String? ?? json['text'] as String? ?? '',
-      createdAt: createdAtRaw != null
-          ? DateTime.parse(createdAtRaw)
-          : DateTime.now(),
+      createdAt: parseApiDateTime(createdAtRaw) ?? DateTime.now(),
       authorAvatarUrl: () {
         final raw =
             json['authorAvatarUrl'] as String? ??

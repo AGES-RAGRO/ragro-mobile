@@ -530,8 +530,12 @@ class _ProducerOrderItemRow extends StatelessWidget {
     symbol: r'R$',
   );
 
-  String get _quantity =>
-      'Qtd: ${item.quantity} ${localizeUnityType(item.unityType)}';
+  String get _quantity {
+    final value = item.quantity % 1 == 0
+        ? item.quantity.toInt().toString()
+        : item.quantity.toStringAsFixed(2).replaceAll('.', ',');
+    return 'Qtd: $value ${localizeUnityType(item.unityType)}';
+  }
 
   @override
   Widget build(BuildContext context) {

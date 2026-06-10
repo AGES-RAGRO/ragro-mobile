@@ -1,4 +1,5 @@
 import 'package:ragro_mobile/core/network/api_endpoints.dart';
+import 'package:ragro_mobile/core/utils/api_date_time.dart';
 import 'package:ragro_mobile/features/producer_profile/domain/entities/public_producer.dart';
 
 class PublicProducerModel extends PublicProducer {
@@ -61,9 +62,7 @@ class PublicProducerModel extends PublicProducer {
       totalReviews: json['totalReviews'] as int? ?? 0,
       phone: json['phone'] as String? ?? '',
       availability: _parseAvailability(json['availability']),
-      memberSince: memberSinceRaw != null
-          ? DateTime.parse(memberSinceRaw)
-          : DateTime(2016),
+      memberSince: parseApiDateTime(memberSinceRaw) ?? DateTime(2016),
       photoUrl: () {
         final raw = json['photoUrl'] as String?;
         if (raw == null || raw.isEmpty) return null;

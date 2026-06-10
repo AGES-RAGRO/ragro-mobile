@@ -16,7 +16,7 @@ class ProducerOrderItem extends Equatable {
   final String imageUrl;
   final double unitPrice;
   final double totalPrice;
-  final int quantity;
+  final double quantity;
   final String unityType;
 
   @override

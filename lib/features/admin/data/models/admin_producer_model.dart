@@ -1,3 +1,4 @@
+import 'package:ragro_mobile/core/utils/api_date_time.dart';
 import 'package:ragro_mobile/features/admin/domain/entities/admin_address.dart';
 import 'package:ragro_mobile/features/admin/domain/entities/admin_availability.dart';
 import 'package:ragro_mobile/features/admin/domain/entities/admin_payment_method.dart';
@@ -108,9 +109,6 @@ class AdminProducerModel extends AdminProducer {
   }
 
   static DateTime _parseDate(dynamic value) {
-    if (value is String && value.isNotEmpty) {
-      return DateTime.parse(value);
-    }
-    return DateTime.now();
+    return parseApiDateTime(value) ?? DateTime.now();
   }
 }

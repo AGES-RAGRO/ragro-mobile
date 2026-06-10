@@ -57,7 +57,6 @@ abstract final class ApiEndpoints {
   static bool isPublic(String path) => _publicPathSuffixes.any(path.endsWith);
 
   // Customers
-  static String get customers => '$_base/customers';
   static String get customerMe => '$_base/customers/me';
   static String get customerFavorites => '$_base/customers/me/favorites';
   static String customerFavorite(String producerId) =>
@@ -87,8 +86,9 @@ abstract final class ApiEndpoints {
   // Orders
   static String get orders => '$_base/orders';
   static String get consumerOrders => '$_base/orders/consumer';
-  static String order(String id) => '$_base/orders/$id';
   static String customerOrder(String id) => '$_base/orders/customer/$id';
+  // Rota de cancelamento dedicada do backend (preferencial ao legado /orders/{id}/cancel);
+  // ainda sem consumidor — migração pendente de decisão de produto (plano Etapa 1, §5).
   static String customerOrderCancel(String id) =>
       '$_base/orders/customer/$id/cancel';
   static String customerOrderConfirmDelivery(String id) =>
@@ -106,7 +106,6 @@ abstract final class ApiEndpoints {
       '$_base/customers/carts/items/$id';
 
   // Products / Inventory
-  static String get products => '$_base/products';
   static String product(String id) => '$_base/products/$id';
 
   // Producer inventory (authenticated as FARMER)

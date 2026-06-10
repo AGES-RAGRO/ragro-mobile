@@ -322,15 +322,11 @@ class _CustomerRegisterViewState extends State<_CustomerRegisterView> {
                 ),
                 const SizedBox(height: 16),
                 AuthTextField(
-                  label: 'Complemento',
+                  // Opcional: o backend não exige complemento (AddressRequest) e nem todo
+                  // endereço tem um — antes o form forçava o usuário a inventar.
+                  label: 'Complemento (opcional)',
                   icon: Icons.apartment_outlined,
                   controller: _complementController,
-                  validator: (v) {
-                    if (v == null || v.trim().isEmpty) {
-                      return 'Informe o complemento';
-                    }
-                    return null;
-                  },
                 ),
                 const SizedBox(height: 16),
                 AuthTextField(

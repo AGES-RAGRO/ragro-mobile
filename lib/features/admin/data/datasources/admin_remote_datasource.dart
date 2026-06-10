@@ -52,6 +52,14 @@ class AdminRemoteDataSource {
         'Ao menos um método de pagamento é obrigatório',
       );
     }
+    // O backend exige availability @NotEmpty; sem esta checagem o campo era omitido
+    // do JSON e o usuário recebia um 400 em inglês sem validação amigável.
+    final availability = producer.availability ?? [];
+    if (availability.isEmpty) {
+      throw const UnknownApiException(
+        'Informe ao menos um horário de disponibilidade',
+      );
+    }
     try {
       await _apiClient.dio.post<void>(
         ApiEndpoints.adminProducers,
@@ -66,11 +74,7 @@ class AdminRemoteDataSource {
           'description': producer.description,
           'address': address.toJson(),
           'paymentMethods': paymentMethods.map((pm) => pm.toJson()).toList(),
-          if (producer.availability != null &&
-              producer.availability!.isNotEmpty)
-            'availability': producer.availability!
-                .map((a) => a.toJson())
-                .toList(),
+          'availability': availability.map((a) => a.toJson()).toList(),
         },
       );
     } on DioException catch (e) {

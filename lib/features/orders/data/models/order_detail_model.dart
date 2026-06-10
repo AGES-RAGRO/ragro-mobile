@@ -1,4 +1,5 @@
 import 'package:ragro_mobile/core/network/api_endpoints.dart';
+import 'package:ragro_mobile/core/utils/api_date_time.dart';
 import 'package:ragro_mobile/features/orders/domain/entities/order_detail.dart';
 
 class OrderDetailActionsModel extends OrderDetailActions {
@@ -157,7 +158,7 @@ class OrderDetailModel extends OrderDetail {
       id: json['id'] as String? ?? '',
       status: _normalizeStatus(json['status'] as String?),
       statusLabel: json['statusLabel'] as String?,
-      createdAt: DateTime.tryParse(json['createdAt'] as String? ?? ''),
+      createdAt: parseApiDateTime(json['createdAt']),
       producerId:
           json['producerId'] as String? ?? producerJson?['id'] as String? ?? '',
       producerName:

@@ -1,3 +1,4 @@
+import 'package:ragro_mobile/core/utils/api_date_time.dart';
 import 'package:ragro_mobile/features/producer_orders/data/models/producer_order_item_model.dart';
 import 'package:ragro_mobile/features/producer_orders/domain/entities/producer_order.dart';
 import 'package:ragro_mobile/features/producer_orders/domain/entities/producer_order_status.dart';
@@ -101,11 +102,11 @@ class ProducerOrderModel extends ProducerOrder {
 
   static DateTime _parseDate(String? value) {
     if (value == null || value.isEmpty) return DateTime.now();
-    return DateTime.tryParse(value)?.toLocal() ?? DateTime.now();
+    return parseApiDateTime(value) ?? DateTime.now();
   }
 
   static bool _isNew(String? value) {
-    final createdAt = DateTime.tryParse(value ?? '')?.toLocal();
+    final createdAt = parseApiDateTime(value);
     if (createdAt == null) return false;
     return DateTime.now().difference(createdAt) < const Duration(hours: 2);
   }

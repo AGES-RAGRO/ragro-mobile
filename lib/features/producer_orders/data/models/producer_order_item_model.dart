@@ -33,7 +33,9 @@ class ProducerOrderItemModel extends ProducerOrderItem {
                   json['total'] as num? ??
                   0)
               .toDouble(),
-      quantity: quantity.toInt(),
+      // O backend modela quantity como BigDecimal e aceita fração (ex.: 0.5 kg);
+      // toInt() truncava 0.5 para 0 na visão do produtor.
+      quantity: quantity.toDouble(),
       unityType:
           json['unityType'] as String? ??
           json['unit'] as String? ??

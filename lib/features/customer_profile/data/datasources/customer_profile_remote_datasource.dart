@@ -42,7 +42,9 @@ class CustomerProfileRemoteDataSource {
         ApiEndpoints.customerMe,
         data: CustomerUpdateRequest(
           name: name.trim(),
-          phone: phone.trim(),
+          // Backend exige 11 dígitos puros (mesma regra do registro); a UI exibe com
+          // máscara, então normaliza aqui — mesmo tratamento já dado ao zipCode.
+          phone: digitsOnly(phone),
           address: AddressRequest(
             street: street.trim(),
             number: number.trim(),

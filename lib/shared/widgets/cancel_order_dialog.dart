@@ -144,6 +144,8 @@ class _CancelOrderDialogState extends State<CancelOrderDialog> {
               TextField(
                 controller: _detailsController,
                 maxLines: 3,
+                // Backend rejeita details > 1000 chars (@Size); limita na origem.
+                maxLength: 1000,
                 style: const TextStyle(
                   fontFamily: 'Manrope',
                   fontSize: 14,

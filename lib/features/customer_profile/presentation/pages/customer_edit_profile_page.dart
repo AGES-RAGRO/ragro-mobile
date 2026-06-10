@@ -209,8 +209,7 @@ class _CustomerEditProfilePageState extends State<CustomerEditProfilePage> {
                           label: 'Complemento',
                           controller: _complementController,
                           icon: Icons.apartment_outlined,
-                          hint: 'Apto 42',
-                          validator: _requiredValidator,
+                          hint: 'Apto 42 (opcional)',
                         ),
                         const SizedBox(height: 24),
                         _buildField(

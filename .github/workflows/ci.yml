@@ -1,0 +1,37 @@
+name: CI
+
+# Espelha o CI do backend: análise estática + testes em todo PR para main/develop.
+# Os 29 arquivos de teste e o analysis_options estrito já existiam, mas nada os
+# executava automaticamente (auditoria Fase 0).
+on:
+  pull_request:
+    branches: [main, develop]
+  push:
+    branches: [main, develop]
+
+permissions:
+  contents: read
+
+jobs:
+  analyze-and-test:
+    name: Analyze & Test
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Analyze
+        run: flutter analyze
+
+      - name: Test
+        run: flutter test
