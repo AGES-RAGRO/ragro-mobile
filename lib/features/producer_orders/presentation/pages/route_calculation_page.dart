@@ -235,6 +235,8 @@ class _RouteCalculationViewState extends State<_RouteCalculationView> {
                                         target: loc,
                                         zoom: 13,
                                       ),
+                                      myLocationEnabled: true,
+                                      myLocationButtonEnabled: false,
                                       zoomControlsEnabled: false,
                                       scrollGesturesEnabled: false,
                                       rotateGesturesEnabled: false,
