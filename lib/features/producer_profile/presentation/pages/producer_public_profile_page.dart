@@ -197,14 +197,32 @@ class _ProducerPublicProfileViewState
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
                                     children: [
-                                      Text(
-                                        producer.name,
-                                        style: const TextStyle(
-                                          fontFamily: 'Figtree',
-                                          fontWeight: FontWeight.w500,
-                                          fontSize: 24,
-                                          color: AppColors.darkGreen,
-                                        ),
+                                      Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            producer.farmName.isNotEmpty
+                                                ? producer.farmName
+                                                : producer.name,
+                                            style: const TextStyle(
+                                              fontFamily: 'Figtree',
+                                              fontWeight: FontWeight.w700,
+                                              fontSize: 22,
+                                              color: AppColors.darkGreen,
+                                            ),
+                                          ),
+                                          if (producer.farmName.isNotEmpty)
+                                            Text(
+                                              producer.name,
+                                              style: const TextStyle(
+                                                fontFamily: 'Figtree',
+                                                fontWeight: FontWeight.w500,
+                                                fontSize: 14,
+                                                color: Color(0xFF475569),
+                                              ),
+                                            ),
+                                        ],
                                       ),
                                       const SizedBox(height: 4),
                                       Row(
