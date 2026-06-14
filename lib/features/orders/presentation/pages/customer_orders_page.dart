@@ -6,6 +6,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ragro_mobile/core/di/injection.dart';
+import 'package:ragro_mobile/core/navigation/orders_route_observer.dart';
 import 'package:ragro_mobile/core/theme/app_colors.dart';
 import 'package:ragro_mobile/features/orders/domain/entities/order.dart';
 import 'package:ragro_mobile/features/orders/domain/entities/order_status.dart';
@@ -35,7 +36,8 @@ class _OrdersView extends StatefulWidget {
 }
 
 class _OrdersViewState extends State<_OrdersView>
-    with SingleTickerProviderStateMixin {
+    with SingleTickerProviderStateMixin
+    implements RouteAware {
   static const _tabs = [
     (OrderStatus.pending, 'Pendentes'),
     (OrderStatus.accepted, 'Aceitos'),
@@ -55,12 +57,38 @@ class _OrdersViewState extends State<_OrdersView>
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final route = ModalRoute.of(context);
+    if (route != null) {
+      ordersRouteObserver.subscribe(this, route);
+    }
+  }
+
+  @override
   void dispose() {
+    ordersRouteObserver.unsubscribe(this);
     _tabController
       ..removeListener(_onTabChanged)
       ..dispose();
     super.dispose();
   }
+
+  // Called when a sub-route (e.g. OrderDetailPage) is popped and this page
+  // becomes visible again — refresh to show any newly created orders.
+  @override
+  void didPopNext() {
+    context.read<OrdersBloc>().add(const OrdersRefreshed());
+  }
+
+  @override
+  void didPush() {}
+
+  @override
+  void didPop() {}
+
+  @override
+  void didPushNext() {}
 
   void _onTabChanged() {
     if (_tabController.indexIsChanging ||

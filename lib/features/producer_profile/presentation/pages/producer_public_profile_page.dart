@@ -231,7 +231,7 @@ class _ProducerPublicProfileViewState
                                       const SizedBox(height: 8),
                                       GestureDetector(
                                         onTap: () => context.push(
-                                          '/customer/home/producer/${producer.id}/reviews',
+                                          '/customer/producer/${producer.id}/reviews',
                                           extra: {
                                             'producerName': producer.name,
                                             'producerLocation':
