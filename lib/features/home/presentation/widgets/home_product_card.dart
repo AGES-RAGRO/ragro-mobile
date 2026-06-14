@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:ragro_mobile/core/theme/app_colors.dart';
 import 'package:ragro_mobile/features/home/domain/entities/home_product.dart';
+import 'package:ragro_mobile/shared/utils/unity_type_label.dart';
 
 class HomeProductCard extends StatelessWidget {
   const HomeProductCard({
@@ -113,16 +114,31 @@ class HomeProductCard extends StatelessWidget {
                   Row(
                     children: [
                       Expanded(
-                        child: Text(
-                          'R\$ ${product.price.toStringAsFixed(2).replaceAll('.', ',')}',
-                          style: const TextStyle(
-                            fontFamily: 'Figtree',
-                            fontWeight: FontWeight.w700,
-                            fontSize: 16,
-                            color: AppColors.black,
-                          ),
+                        child: RichText(
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
+                          text: TextSpan(
+                            text:
+                                'R\$ ${product.price.toStringAsFixed(2).replaceAll('.', ',')}',
+                            style: const TextStyle(
+                              fontFamily: 'Figtree',
+                              fontWeight: FontWeight.w700,
+                              fontSize: 16,
+                              color: AppColors.black,
+                            ),
+                            children: [
+                              if (product.unityType.isNotEmpty)
+                                TextSpan(
+                                  text:
+                                      ' /${localizeUnityType(product.unityType)}',
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.w400,
+                                    fontSize: 12,
+                                    color: AppColors.placeholder,
+                                  ),
+                                ),
+                            ],
+                          ),
                         ),
                       ),
                       GestureDetector(
@@ -165,7 +181,9 @@ class _RecommendationBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final label = aiRanked
-        ? (score != null && score! > 0 ? 'IA recomenda · $score%' : 'IA recomenda')
+        ? (score != null && score! > 0
+              ? 'IA recomenda · $score%'
+              : 'IA recomenda')
         : 'Para você';
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
