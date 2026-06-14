@@ -47,7 +47,8 @@ class PublicProducerModel extends PublicProducer {
     return PublicProducerModel(
       id: json['id'] as String? ?? '',
       name: json['name'] as String? ?? '',
-      farmName: json['farmName'] as String? ?? '',
+      farmName:
+          json['farmName'] as String? ?? json['farm_name'] as String? ?? '',
       location: location,
       description: json['description'] as String? ?? '',
       story: json['story'] as String? ?? '',
