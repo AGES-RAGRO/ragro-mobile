@@ -18,6 +18,7 @@ import 'package:ragro_mobile/core/di/shared_preferences_module.dart' as _i55;
 import 'package:ragro_mobile/core/network/api_client.dart' as _i873;
 import 'package:ragro_mobile/core/router/app_router.dart' as _i419;
 import 'package:ragro_mobile/core/services/cep_service.dart' as _i305;
+import 'package:ragro_mobile/core/services/notification_service.dart' as _i658;
 import 'package:ragro_mobile/features/admin/data/datasources/admin_remote_datasource.dart'
     as _i16;
 import 'package:ragro_mobile/features/admin/data/repositories/admin_repository_impl.dart'
@@ -339,6 +340,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i362.MapRepository>(
       () => _i362.MapRepository(gh<_i873.ApiClient>()),
     );
+    gh.lazySingleton<_i658.NotificationService>(
+      () => _i658.NotificationService(gh<_i873.ApiClient>()),
+    );
     gh.lazySingleton<_i16.AdminRemoteDataSource>(
       () => _i16.AdminRemoteDataSource(gh<_i873.ApiClient>()),
     );
@@ -517,13 +521,6 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i285.HomeRepository>(
       () => _i1055.HomeRepositoryImpl(gh<_i904.HomeRemoteDataSource>()),
     );
-    gh.lazySingleton<_i475.AuthBloc>(
-      () => _i475.AuthBloc(
-        gh<_i846.GetCurrentUser>(),
-        gh<_i418.Logout>(),
-        gh<_i485.RequestPasswordReset>(),
-      ),
-    );
     gh.lazySingleton<_i788.CustomerProfileRepository>(
       () => _i866.CustomerProfileRepositoryImpl(
         gh<_i666.CustomerProfileRemoteDataSource>(),
@@ -593,6 +590,14 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i1054.GetAdminProducers>(),
         gh<_i514.DeactivateAdminProducer>(),
         gh<_i671.ActivateAdminProducer>(),
+      ),
+    );
+    gh.lazySingleton<_i475.AuthBloc>(
+      () => _i475.AuthBloc(
+        gh<_i846.GetCurrentUser>(),
+        gh<_i418.Logout>(),
+        gh<_i485.RequestPasswordReset>(),
+        gh<_i658.NotificationService>(),
       ),
     );
     gh.lazySingleton<_i141.ConfirmProducerOrder>(

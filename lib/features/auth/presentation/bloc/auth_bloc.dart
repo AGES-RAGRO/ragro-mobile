@@ -1,6 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 import 'package:ragro_mobile/core/network/api_exception.dart';
+import 'package:ragro_mobile/core/services/notification_service.dart';
 import 'package:ragro_mobile/features/auth/domain/usecases/get_current_user.dart';
 import 'package:ragro_mobile/features/auth/domain/usecases/logout.dart';
 import 'package:ragro_mobile/features/auth/domain/usecases/request_password_reset.dart';
@@ -9,10 +10,14 @@ import 'package:ragro_mobile/features/auth/presentation/bloc/auth_state.dart';
 
 @lazySingleton
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
-  AuthBloc(this._getCurrentUser, this._logout, this._requestPasswordReset)
-    : super(const AuthInitial()) {
+  AuthBloc(
+    this._getCurrentUser,
+    this._logout,
+    this._requestPasswordReset,
+    this._notificationService,
+  ) : super(const AuthInitial()) {
     on<AuthStarted>(_onStarted);
-    on<AuthLoggedIn>((event, emit) => emit(AuthAuthenticated(event.user)));
+    on<AuthLoggedIn>(_onLoggedIn);
     on<AuthLogoutRequested>(_onLogout);
     on<AuthPasswordResetRequested>(_onPasswordResetRequested);
   }
@@ -20,15 +25,22 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final GetCurrentUser _getCurrentUser;
   final Logout _logout;
   final RequestPasswordReset _requestPasswordReset;
+  final NotificationService _notificationService;
 
   Future<void> _onStarted(AuthStarted event, Emitter<AuthState> emit) async {
     emit(const AuthLoading());
     final user = await _getCurrentUser();
     if (user != null) {
       emit(AuthAuthenticated(user));
+      await _notificationService.registerToken();
     } else {
       emit(const AuthUnauthenticated());
     }
+  }
+
+  Future<void> _onLoggedIn(AuthLoggedIn event, Emitter<AuthState> emit) async {
+    emit(AuthAuthenticated(event.user));
+    await _notificationService.registerToken();
   }
 
   Future<void> _onLogout(

@@ -5,6 +5,15 @@ plugins {
     id("kotlin-android")
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id("dev.flutter.flutter-gradle-plugin")
+
+    // Dependency for the Google services Gradle plugin - Firebase configuration
+    id("com.google.gms.google-services")
+}
+
+dependencies{
+    implementation(platform("com.google.firebase:firebase-bom:34.14.0"))
+    implementation("com.google.firebase:firebase-analytics")
+    implementation("com.google.firebase:firebase-messaging")
 }
 
 // Release signing config, loaded from android/key.properties (gitignored). See

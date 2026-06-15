@@ -135,6 +135,9 @@ abstract final class ApiEndpoints {
   static String producerOrderStatus(String id) => orderStatus(id);
   static String producerOrderCancel(String id) => orderCancel(id);
 
+  // Notifications
+  static String get fcmToken => '$_base/notifications/token';
+
   // Admin
   static String get adminProducers => '$_base/admin/producers';
   static String adminProducer(String id) => '$_base/admin/producers/$id';
