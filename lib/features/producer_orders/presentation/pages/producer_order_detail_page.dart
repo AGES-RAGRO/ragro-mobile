@@ -73,18 +73,6 @@ class ProducerOrderDetailPage extends StatelessWidget {
                   ),
                 );
                 if (context.mounted) context.pop('in_delivery');
-              } else if (state.order.status == ProducerOrderStatus.delivered) {
-                await showDialog<void>(
-                  context: context,
-                  barrierColor: Colors.black.withValues(alpha: 0.55),
-                  builder: (_) => const _ProducerSuccessDialog(
-                    icon: Icons.check_circle_outline,
-                    title: 'Entrega confirmada\ncom sucesso!',
-                    description:
-                        'O pedido foi entregue ao cliente e está concluído.',
-                  ),
-                );
-                if (context.mounted) context.pop('delivered');
               }
             }
           }
@@ -807,7 +795,7 @@ class _ActionFooter extends StatelessWidget {
                 onTap: isProcessing
                     ? null
                     : () async {
-                        await showDialog<void>(
+                        final success = await showDialog<bool>(
                           context: context,
                           barrierDismissible: false,
                           builder: (dialogContext) => ConfirmDeliveryCodeDialog(
@@ -818,10 +806,25 @@ class _ActionFooter extends StatelessWidget {
                                   code,
                                 ),
                               );
-                              return await _waitForBlocConfirmation(bloc);
+                              return _waitForBlocConfirmation(bloc);
                             },
                           ),
                         );
+                        if (success ?? false) {
+                          if (context.mounted) {
+                            await showDialog<void>(
+                              context: context,
+                              barrierColor: Colors.black.withValues(alpha: 0.55),
+                              builder: (_) => const _ProducerSuccessDialog(
+                                icon: Icons.check_circle_outline,
+                                title: 'Entrega confirmada\ncom sucesso!',
+                                description:
+                                    'O pedido foi entregue ao cliente e está concluído.',
+                              ),
+                            );
+                            if (context.mounted) context.pop('delivered');
+                          }
+                        }
                       },
               ),
             ),

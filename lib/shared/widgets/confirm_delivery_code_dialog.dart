@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:ragro_mobile/core/theme/app_colors.dart';
 
 class ConfirmDeliveryCodeDialog extends StatefulWidget {
@@ -49,7 +50,7 @@ class _ConfirmDeliveryCodeDialogState extends State<ConfirmDeliveryCodeDialog> {
     if (!mounted) return;
 
     if (success) {
-      Navigator.of(context).pop();
+      Navigator.of(context).pop(true);
     } else {
       setState(() {
         _isLoading = false;
@@ -115,6 +116,7 @@ class _ConfirmDeliveryCodeDialogState extends State<ConfirmDeliveryCodeDialog> {
                     controller: _controllers[i],
                     focusNode: _focusNodes[i],
                     keyboardType: TextInputType.number,
+                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                     textAlign: TextAlign.center,
                     maxLength: 1,
                     style: TextStyle(
