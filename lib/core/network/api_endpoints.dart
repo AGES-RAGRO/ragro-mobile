@@ -132,6 +132,8 @@ abstract final class ApiEndpoints {
   // Producer orders
   static String get producerOrders => '$_base/orders/producer';
   static String producerOrderConfirm(String id) => orderConfirm(id);
+  static String producerOrderConfirmDeliveryWithCode(String id) =>
+      '$_base/orders/$id/confirm-delivery-with-code';
   static String producerOrderStatus(String id) => orderStatus(id);
   static String producerOrderCancel(String id) => orderCancel(id);
 

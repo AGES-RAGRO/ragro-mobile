@@ -189,6 +189,25 @@ class RouteCalculationCubit extends Cubit<RouteCalculationState> {
     }
   }
 
+  Future<bool> confirmDeliveryWithCode(String deliveryId, String code) async {
+    if (state.confirmedDeliveries.contains(deliveryId)) return true;
+
+    try {
+      await _ordersRepository.confirmDeliveryWithCode(deliveryId, code);
+      if (isClosed) return false;
+
+      final updatedDeliveries = Set<String>.from(state.confirmedDeliveries)
+        ..add(deliveryId);
+      emit(state.copyWith(confirmedDeliveries: updatedDeliveries));
+
+      _refreshProducerDashboard();
+      await _recalculateRoute();
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
   /// Fetches the producer's accepted (CONFIRMED) and in-delivery (IN_DELIVERY)
   /// orders, builds the stops, and computes the best route.
   Future<void> loadDeliveries() async {

@@ -33,4 +33,8 @@ class ProducerOrdersRepositoryImpl implements ProducerOrdersRepository {
 
   @override
   Future<void> markAsSeen(String id) => _dataSource.markAsSeen(id);
+
+  @override
+  Future<void> confirmDeliveryWithCode(String id, String code) =>
+      _dataSource.confirmDeliveryWithCode(id, code);
 }

@@ -273,6 +273,12 @@ class _OrderDetailView extends StatelessWidget {
                   const SizedBox(height: 18),
                   const _SectionTitle('ENTREGA'),
                   _DeliveryCard(address: order.deliveryAddress),
+                  if (order.isInDelivery &&
+                      (order.confirmationCode?.isNotEmpty ?? false)) ...[
+                    const SizedBox(height: 18),
+                    const _SectionTitle('CÓDIGO DE CONFIRMAÇÃO'),
+                    _ConfirmationCodeCard(code: order.confirmationCode!),
+                  ],
                   if (order.isCancelled &&
                       (order.cancellationReason?.isNotEmpty ?? false)) ...[
                     const SizedBox(height: 18),
@@ -596,6 +602,57 @@ class _DeliveryCard extends StatelessWidget {
                   ),
                 ),
               ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ConfirmationCodeCard extends StatelessWidget {
+  const _ConfirmationCodeCard({required this.code});
+
+  final String code;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16),
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: AppColors.darkGreen),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x1A000000),
+            blurRadius: 18,
+            offset: Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          const Text(
+            'Informe este código ao produtor',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontFamily: 'Manrope',
+              fontWeight: FontWeight.w600,
+              fontSize: 14,
+              color: AppColors.placeholder,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            code,
+            style: const TextStyle(
+              fontFamily: 'Manrope',
+              fontWeight: FontWeight.w800,
+              fontSize: 32,
+              letterSpacing: 8,
+              color: AppColors.darkGreen,
             ),
           ),
         ],

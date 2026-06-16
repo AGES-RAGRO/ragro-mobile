@@ -14,6 +14,7 @@ import 'package:ragro_mobile/features/producer_orders/presentation/bloc/producer
 import 'package:ragro_mobile/features/producer_orders/presentation/bloc/producer_order_detail_state.dart';
 import 'package:ragro_mobile/shared/utils/unity_type_label.dart';
 import 'package:ragro_mobile/shared/widgets/cancel_order_dialog.dart';
+import 'package:ragro_mobile/shared/widgets/confirm_delivery_code_dialog.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class ProducerOrderDetailPage extends StatelessWidget {
@@ -805,12 +806,23 @@ class _ActionFooter extends StatelessWidget {
                 color: AppColors.darkGreen,
                 onTap: isProcessing
                     ? null
-                    : () => bloc.add(
-                        ProducerOrderDetailStatusUpdated(
-                          order.id,
-                          ProducerOrderStatus.delivered,
-                        ),
-                      ),
+                    : () async {
+                        await showDialog<void>(
+                          context: context,
+                          barrierDismissible: false,
+                          builder: (dialogContext) => ConfirmDeliveryCodeDialog(
+                            onConfirm: (code) async {
+                              bloc.add(
+                                ProducerOrderDetailDeliveryConfirmedWithCode(
+                                  order.id,
+                                  code,
+                                ),
+                              );
+                              return await _waitForBlocConfirmation(bloc);
+                            },
+                          ),
+                        );
+                      },
               ),
             ),
           ],
@@ -882,6 +894,19 @@ class _ActionFooter extends StatelessWidget {
           backgroundColor: AppColors.red,
         ),
       );
+    }
+  }
+
+  Future<bool> _waitForBlocConfirmation(ProducerOrderDetailBloc bloc) async {
+    try {
+      final state = await bloc.stream.firstWhere((state) => 
+        (state is ProducerOrderDetailSuccess && state.action == 'status_updated') || 
+        state is ProducerOrderDetailActionError
+      );
+      if (state is ProducerOrderDetailSuccess) return true;
+      return false;
+    } catch (_) {
+      return false;
     }
   }
 }

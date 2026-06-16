@@ -43,3 +43,12 @@ class ProducerOrderDetailStatusUpdated extends ProducerOrderDetailEvent {
   @override
   List<Object?> get props => [orderId, status];
 }
+
+class ProducerOrderDetailDeliveryConfirmedWithCode
+    extends ProducerOrderDetailEvent {
+  const ProducerOrderDetailDeliveryConfirmedWithCode(this.orderId, this.code);
+  final String orderId;
+  final String code;
+  @override
+  List<Object?> get props => [orderId, code];
+}

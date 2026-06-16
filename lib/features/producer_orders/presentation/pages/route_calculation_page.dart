@@ -6,6 +6,8 @@ import 'package:ragro_mobile/core/di/injection.dart';
 import 'package:ragro_mobile/core/theme/app_colors.dart';
 import 'package:ragro_mobile/features/producer_orders/presentation/bloc/route_calculation_cubit.dart';
 import 'package:ragro_mobile/features/producer_orders/presentation/bloc/route_calculation_state.dart';
+import 'package:ragro_mobile/shared/utils/unity_type_label.dart';
+import 'package:ragro_mobile/shared/widgets/confirm_delivery_code_dialog.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class RouteCalculationPage extends StatelessWidget {
@@ -612,9 +614,16 @@ class _DeliveryItem extends StatelessWidget {
             GestureDetector(
               onTap: isConfirmed
                   ? null
-                  : () => context.read<RouteCalculationCubit>().confirmDelivery(
-                      id,
-                    ),
+                  : () async {
+                      await showDialog<void>(
+                        context: context,
+                        barrierDismissible: false,
+                        builder: (dialogContext) => ConfirmDeliveryCodeDialog(
+                          onConfirm: (code) =>
+                              context.read<RouteCalculationCubit>().confirmDeliveryWithCode(id, code),
+                        ),
+                      );
+                    },
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 300),
                 padding: const EdgeInsets.symmetric(

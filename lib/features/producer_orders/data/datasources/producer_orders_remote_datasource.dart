@@ -80,6 +80,17 @@ class ProducerOrdersRemoteDataSource {
     }
   }
 
+  Future<void> confirmDeliveryWithCode(String id, String code) async {
+    try {
+      await _apiClient.dio.patch<void>(
+        ApiEndpoints.producerOrderConfirmDeliveryWithCode(id),
+        data: {'code': code},
+      );
+    } on DioException catch (e) {
+      throw e.error as ApiException? ?? const UnknownApiException();
+    }
+  }
+
   List<Map<String, dynamic>> _readList(dynamic data) {
     final rawList = switch (data) {
       final List<dynamic> list => list,
