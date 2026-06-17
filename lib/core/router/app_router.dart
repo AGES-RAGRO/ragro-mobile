@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:injectable/injectable.dart';
 import 'package:ragro_mobile/core/di/injection.dart';
+import 'package:ragro_mobile/core/navigation/orders_route_observer.dart';
 import 'package:ragro_mobile/features/admin/presentation/pages/admin_create_producer_page.dart';
 import 'package:ragro_mobile/features/admin/presentation/pages/admin_edit_producer_page.dart';
 import 'package:ragro_mobile/features/admin/presentation/pages/admin_producers_page.dart';
@@ -65,8 +66,7 @@ class AppRouter {
         }
         if (authState is AuthAuthenticated && isAuthRoute) {
           return switch (authState.user.type) {
-            UserType.customer =>
-              '/customer/impact',
+            UserType.customer => '/customer/impact',
             UserType.producer => '/producer/home',
             UserType.admin => '/admin/producers',
           };
@@ -140,6 +140,7 @@ class AppRouter {
               ],
             ),
             StatefulShellBranch(
+              observers: [ordersRouteObserver],
               routes: [
                 GoRoute(
                   path: '/customer/orders',
@@ -245,12 +246,30 @@ class AppRouter {
           builder: (_, __) => const CustomerEditAddressPage(),
         ),
 
-        // Top-level producer profile (fullscreen)
+        // Top-level producer profile (fullscreen) — used by map and other contexts
+        // outside the shell; reviews sub-route lives here so navigation from both
+        // the home branch and the map never crosses shell boundaries.
         GoRoute(
           path: '/customer/producer/:producerId',
           builder: (context, state) => ProducerPublicProfilePage(
             producerId: state.pathParameters['producerId']!,
           ),
+          routes: [
+            GoRoute(
+              path: 'reviews',
+              builder: (context, state) {
+                final extra = state.extra as Map<String, dynamic>? ?? {};
+                return ReviewsPage(
+                  producerId: state.pathParameters['producerId']!,
+                  producerName: extra['producerName'] as String? ?? '',
+                  producerLocation: extra['producerLocation'] as String? ?? '',
+                  averageRating:
+                      (extra['averageRating'] as num?)?.toDouble() ?? 0.0,
+                  totalReviews: extra['totalReviews'] as int? ?? 0,
+                );
+              },
+            ),
+          ],
         ),
 
         // Producer shell with 3 tabs

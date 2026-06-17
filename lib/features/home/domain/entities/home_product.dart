@@ -6,6 +6,7 @@ class HomeProduct extends Equatable {
     required this.name,
     required this.category,
     required this.price,
+    required this.unityType,
     required this.imageUrl,
     required this.farmName,
     required this.producerId,
@@ -15,6 +16,7 @@ class HomeProduct extends Equatable {
   final String name;
   final String category;
   final double price;
+  final String unityType;
   final String imageUrl;
   final String farmName;
   final String producerId;
@@ -25,6 +27,7 @@ class HomeProduct extends Equatable {
     name,
     category,
     price,
+    unityType,
     imageUrl,
     farmName,
     producerId,

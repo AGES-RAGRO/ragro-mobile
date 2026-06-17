@@ -26,6 +26,7 @@ dependencies:
   google_maps_flutter: ^2.17.0
   geolocator: ^14.0.2
   geocoding: ^4.0.0
+  flutter_markdown: ^0.6.10
 
 dev_dependencies:
   flutter_test:
@@ -42,6 +43,7 @@ flutter:
   uses-material-design: true
   assets:
     - assets/images/
+    - assets/terms/termos_de_uso.md
 
 flutter_launcher_icons:
   image_path: "assets/icon/ic_launcher.png"

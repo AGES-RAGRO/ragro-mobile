@@ -1,21 +1,28 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show rootBundle;
+import 'package:flutter_markdown/flutter_markdown.dart';
 
-/// Shows the Terms of Use to the user.
-///
-/// The body is a placeholder — replace it with the real Terms of Use text (or open the hosted
-/// terms URL via `url_launcher`) once legal provides the final content.
 Future<void> showTermsOfUseDialog(BuildContext context) {
   return showDialog<void>(
     context: context,
     builder: (dialogContext) => AlertDialog(
       title: const Text('Termos de uso'),
-      content: const SingleChildScrollView(
-        child: Text(
-          'Ao usar o RAGRO você concorda em fornecer informações verídicas, '
-          'utilizar a plataforma de forma legal e respeitar produtores e '
-          'consumidores.\n\n'
-          'A versão completa dos Termos de Uso e da Política de Privacidade '
-          'será disponibilizada em breve.',
+      content: SizedBox(
+        width: double.maxFinite,
+        child: FutureBuilder<String>(
+          future: rootBundle.loadString('assets/terms/termos_de_uso.md'),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const SizedBox(
+                height: 120,
+                child: Center(child: CircularProgressIndicator()),
+              );
+            }
+            final md = snapshot.data ?? 'Conteúdo dos Termos indisponível.';
+            return SingleChildScrollView(
+              child: MarkdownBody(data: md),
+            );
+          },
         ),
       ),
       actions: [

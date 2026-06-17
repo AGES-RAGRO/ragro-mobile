@@ -11,6 +11,7 @@ import 'package:ragro_mobile/features/cart/presentation/bloc/cart_event.dart';
 import 'package:ragro_mobile/features/product_detail/presentation/bloc/product_detail_bloc.dart';
 import 'package:ragro_mobile/features/product_detail/presentation/bloc/product_detail_event.dart';
 import 'package:ragro_mobile/features/product_detail/presentation/bloc/product_detail_state.dart';
+import 'package:ragro_mobile/shared/utils/unity_type_label.dart';
 
 class ProductDetailPage extends StatelessWidget {
   const ProductDetailPage({
@@ -153,13 +154,31 @@ class _ProductDetailView extends StatelessWidget {
                                       ),
                                     ),
                                   ),
-                                  Text(
-                                    'R\$ ${product.price.toStringAsFixed(2).replaceAll('.', ',')}',
-                                    style: const TextStyle(
-                                      fontFamily: 'Figtree',
-                                      fontWeight: FontWeight.w600,
-                                      fontSize: 24,
-                                      color: AppColors.black,
+                                  RichText(
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    textAlign: TextAlign.end,
+                                    text: TextSpan(
+                                      text:
+                                          'R\$ ${product.price.toStringAsFixed(2).replaceAll('.', ',')}',
+                                      style: const TextStyle(
+                                        fontFamily: 'Figtree',
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 24,
+                                        color: AppColors.black,
+                                      ),
+                                      children: [
+                                        if (product.unityType.isNotEmpty)
+                                          TextSpan(
+                                            text:
+                                                ' /${localizeUnityType(product.unityType)}',
+                                            style: const TextStyle(
+                                              fontWeight: FontWeight.w400,
+                                              fontSize: 14,
+                                              color: AppColors.placeholder,
+                                            ),
+                                          ),
+                                      ],
                                     ),
                                   ),
                                 ],
