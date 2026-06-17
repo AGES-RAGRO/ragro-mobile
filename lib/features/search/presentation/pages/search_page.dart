@@ -8,6 +8,8 @@ import 'package:ragro_mobile/features/search/presentation/bloc/search_event.dart
 import 'package:ragro_mobile/features/search/presentation/bloc/search_state.dart';
 import 'package:ragro_mobile/features/search/presentation/pages/search_result_page.dart';
 import 'package:ragro_mobile/features/search/presentation/widgets/category_chip.dart';
+import 'package:ragro_mobile/features/home/presentation/widgets/products_grid.dart';
+import 'package:ragro_mobile/features/home/domain/entities/home_product.dart';
 
 class SearchPage extends StatelessWidget {
   const SearchPage({super.key});
@@ -85,6 +87,53 @@ class _SearchViewState extends State<_SearchView> {
                   ),
                 ),
               ),
+              // Category products (below recent searches)
+              BlocBuilder<SearchBloc, SearchState>(
+                buildWhen: (prev, curr) =>
+                    curr is SearchCategoryLoading ||
+                    curr is SearchCategoryLoaded ||
+                    curr is SearchCategoryFailure,
+                builder: (context, state) {
+                  if (state is SearchCategoryLoading) {
+                    return const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 12),
+                      child: Center(child: CircularProgressIndicator()),
+                    );
+                  }
+                  if (state is SearchCategoryLoaded) {
+                    final results = state.products;
+                    if (results.isEmpty) return const SizedBox.shrink();
+                    final homeProducts = results
+                        .map((r) => HomeProduct(
+                              id: r.id,
+                              name: r.name,
+                              category: r.category ?? '',
+                              price: r.price ?? 0.0,
+                              unityType: r.unit ?? '',
+                              imageUrl: r.imageUrl,
+                              farmName: r.subtitle,
+                              producerId: r.producerId ?? '',
+                            ))
+                        .toList();
+                    return Padding(
+                      padding: const EdgeInsets.fromLTRB(0, 16, 0, 24),
+                      child: ProductsGrid(
+                        products: homeProducts,
+                        recommendations: const [],
+                        onProductTap: (p) {},
+                        onAddToCart: (p) {},
+                      ),
+                    );
+                  }
+                  if (state is SearchCategoryFailure) {
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      child: Center(child: Text(state.message)),
+                    );
+                  }
+                  return const SizedBox.shrink();
+                },
+              ),
               // Search bar
               Padding(
                 padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
@@ -151,15 +200,21 @@ class _SearchViewState extends State<_SearchView> {
                         padding: const EdgeInsets.symmetric(horizontal: 16),
                         itemCount: _categories.length,
                         separatorBuilder: (_, __) => const SizedBox(width: 8),
-                        itemBuilder: (_, i) => CategoryChip(
-                          label: _categories[i],
-                          isSelected: _selectedCategory == _categories[i],
-                          onTap: () {
-                            setState(() => _selectedCategory = _categories[i]);
-                          },
-                        ),
+                        itemBuilder: (_, i) {
+                          final c = _categories[i];
+                          return CategoryChip(
+                            label: c,
+                            isSelected: _selectedCategory == c,
+                            onTap: () {
+                              setState(() => _selectedCategory = c);
+                              context.read<SearchBloc>().add(SearchCategoryChanged(c));
+                              context.read<SearchBloc>().add(SearchCategoryProductsRequested(c));
+                            },
+                          );
+                        },
                       ),
                     ),
+                    const SizedBox(height: 12),
                   ],
                 ),
               ),

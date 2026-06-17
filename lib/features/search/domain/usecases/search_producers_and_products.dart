@@ -10,4 +10,17 @@ class SearchProducersAndProducts {
 
   Future<List<SearchResult>> call({required String query, String? category}) =>
       _repository.search(query: query, category: category);
+
+    Future<List<SearchResult>> getProductsByCategory({required String category}) =>
+      _repository.getProductsByCategory(category: category);
+}
+
+@lazySingleton
+class GetProductsByCategory {
+  const GetProductsByCategory(this._repository);
+
+  final SearchRepository _repository;
+
+  Future<List<SearchResult>> call({required String category}) =>
+      _repository.getProductsByCategory(category: category);
 }

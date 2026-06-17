@@ -475,6 +475,8 @@ class _TermsCheckboxState extends State<_TermsCheckbox> {
   }
 }
 
+// Mantido intencionalmente: widget privado usado condicionalmente em formulários.
+// ignore: unused_element
 class _UfAutocomplete extends StatelessWidget {
   const _UfAutocomplete({
     super.key,

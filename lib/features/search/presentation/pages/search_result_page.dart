@@ -132,27 +132,36 @@ class _SearchResultsViewState extends State<_SearchResultsView> {
         ),
         body: BlocBuilder<SearchBloc, SearchState>(
           builder: (context, state) {
-            return switch (state) {
-              SearchIdle() => const SizedBox.shrink(),
-              SearchLoading() => const Center(
+            if (state is SearchIdle) {
+              return const SizedBox.shrink();
+            }
+            if (state is SearchLoading) {
+              return const Center(
                 child: CircularProgressIndicator(color: AppColors.darkGreen),
-              ),
-              SearchLoaded(:final results) =>
-                results.isEmpty
-                    ? const Center(
-                        child: Text(
-                          'Nenhum resultado encontrado.',
-                          style: TextStyle(color: AppColors.placeholder),
-                        ),
-                      )
-                    : _buildTabs(results),
-              SearchFailure(:final message) => Center(
+              );
+            }
+            if (state is SearchLoaded) {
+              final results = state.results;
+              if (results.isEmpty) {
+                return const Center(
+                  child: Text(
+                    'Nenhum resultado encontrado.',
+                    style: TextStyle(color: AppColors.placeholder),
+                  ),
+                );
+              }
+              return _buildTabs(results);
+            }
+            if (state is SearchFailure) {
+              return Center(
                 child: Text(
-                  message,
+                  state.message,
                   style: const TextStyle(color: AppColors.placeholder),
                 ),
-              ),
-            };
+              );
+            }
+
+            return const SizedBox.shrink();
           },
         ),
       ),
@@ -465,12 +474,15 @@ class _SearchDropdownFilter extends StatelessWidget {
           switch (value) {
             case _SortMenuAction.ascending:
               onSelected(_SortDirection.ascending);
+              return;
             case _SortMenuAction.descending:
               onSelected(_SortDirection.descending);
+              return;
             case _SortMenuAction.clear:
               onSelected(null);
+              return;
             case null:
-              break;
+              return;
           }
         },
         child: Container(

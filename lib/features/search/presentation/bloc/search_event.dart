@@ -42,3 +42,11 @@ class SearchRecentItemRemoved extends SearchEvent {
 class SearchLoadRecentSearches extends SearchEvent {
   const SearchLoadRecentSearches();
 }
+
+class SearchCategoryProductsRequested extends SearchEvent {
+  const SearchCategoryProductsRequested(this.category);
+  final String category;
+
+  @override
+  List<Object?> get props => [category];
+}

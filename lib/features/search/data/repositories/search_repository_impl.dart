@@ -13,5 +13,14 @@ class SearchRepositoryImpl implements SearchRepository {
   Future<List<SearchResult>> search({
     required String query,
     String? category,
-  }) => _dataSource.search(query: query, category: category);
+  }) async {
+    final list = await _dataSource.search(query: query, category: category);
+    return List<SearchResult>.from(list);
+  }
+
+  @override
+  Future<List<SearchResult>> getProductsByCategory({required String category}) async {
+    final list = await _dataSource.getProductsByCategory(category: category);
+    return List<SearchResult>.from(list);
+  }
 }

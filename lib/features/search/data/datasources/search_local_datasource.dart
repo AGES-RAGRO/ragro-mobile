@@ -9,7 +9,7 @@ class SearchLocalDataSource {
   final SharedPreferences _prefs;
 
   static const _recentSearchesKey = 'search_recent_searches';
-  static const _maxRecent = 10;
+  static const _maxRecent = 4;
 
   List<String> getRecentSearches() {
     final json = _prefs.getString(_recentSearchesKey);

@@ -36,4 +36,81 @@ class SearchRemoteDataSource {
       throw e.error as ApiException? ?? const UnknownApiException();
     }
   }
+
+  Future<List<SearchResultModel>> getProductsByCategory({
+    required String category,
+  }) async {
+    try {
+      final response = await _apiClient.dio.get<dynamic>(
+        ApiEndpoints.recommendations,
+        queryParameters: {
+          if (category.isNotEmpty) 'category': category,
+          'limit': 6,
+        },
+      );
+
+      final data = response.data;
+      if (data == null) throw const UnknownApiException();
+
+      List<Map<String, dynamic>> readList(dynamic d) {
+        if (d is List<dynamic>) return d.whereType<Map<String, dynamic>>().toList();
+        if (d is Map<String, dynamic>) {
+          for (final key in const [
+            'data',
+            'content',
+            'items',
+            'recommendations',
+            'result',
+            'list',
+          ]) {
+            if (d[key] is List<dynamic>) {
+              return (d[key] as List<dynamic>).whereType<Map<String, dynamic>>().toList();
+            }
+          }
+        }
+        return const [];
+      }
+
+      final list = readList(data);
+      if (list.isEmpty) return const [];
+
+      return list.map((e) {
+        final map = Map<String, dynamic>.from(e);
+
+        // Normalize to the shape expected by SearchResultModel
+        map['type'] = 'product';
+
+        // image handling: recommendation items use 'imageS3'
+        if (map['imageS3'] is String && (map['imageS3'] as String).isNotEmpty) {
+          map['image_url'] = ApiEndpoints.resolveMediaUrl(map['imageS3'] as String);
+        } else if (map['image_url'] is String && (map['image_url'] as String).isNotEmpty) {
+          map['image_url'] = ApiEndpoints.resolveMediaUrl(map['image_url'] as String);
+        } else {
+          map['image_url'] = '';
+        }
+
+        // farm/farmer -> subtitle/producerId
+        if (map['farmName'] != null && map['subtitle'] == null) {
+          map['subtitle'] = map['farmName'];
+        }
+        if (map['farmerId'] != null && map['producerId'] == null) {
+          map['producerId'] = map['farmerId'];
+        }
+
+        // unity/unit
+        if (map['unityType'] != null && map['unit'] == null) {
+          map['unit'] = map['unityType'];
+        }
+
+        // categories -> category (pick first)
+        if (map['categoryNames'] is List && (map['categoryNames'] as List).isNotEmpty) {
+          map['category'] = (map['categoryNames'] as List).first as String;
+        }
+
+        return SearchResultModel.fromJson(map);
+      }).toList();
+    } on DioException catch (e) {
+      throw e.error as ApiException? ?? const UnknownApiException();
+    }
+  }
 }

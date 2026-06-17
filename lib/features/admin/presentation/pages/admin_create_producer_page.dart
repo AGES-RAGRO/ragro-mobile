@@ -1106,6 +1106,8 @@ class _TextField extends StatelessWidget {
   }
 }
 
+// Mantido intencionalmente: widget privado usado condicionalmente em formulários.
+// ignore: unused_element
 class _UfAutocomplete extends StatelessWidget {
   const _UfAutocomplete({
     super.key,
