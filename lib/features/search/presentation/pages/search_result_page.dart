@@ -132,36 +132,30 @@ class _SearchResultsViewState extends State<_SearchResultsView> {
         ),
         body: BlocBuilder<SearchBloc, SearchState>(
           builder: (context, state) {
-            if (state is SearchIdle) {
-              return const SizedBox.shrink();
-            }
-            if (state is SearchLoading) {
-              return const Center(
+            return switch (state) {
+              SearchIdle() => const SizedBox.shrink(),
+              SearchLoading() => const Center(
                 child: CircularProgressIndicator(color: AppColors.darkGreen),
-              );
-            }
-            if (state is SearchLoaded) {
-              final results = state.results;
-              if (results.isEmpty) {
-                return const Center(
-                  child: Text(
-                    'Nenhum resultado encontrado.',
-                    style: TextStyle(color: AppColors.placeholder),
-                  ),
-                );
-              }
-              return _buildTabs(results);
-            }
-            if (state is SearchFailure) {
-              return Center(
+              ),
+              SearchLoaded(:final results) =>
+                results.isEmpty
+                    ? const Center(
+                        child: Text(
+                          'Nenhum resultado encontrado.',
+                          style: TextStyle(color: AppColors.placeholder),
+                        ),
+                      )
+                    : _buildTabs(results),
+              SearchFailure(:final message) => Center(
                 child: Text(
-                  state.message,
+                  message,
                   style: const TextStyle(color: AppColors.placeholder),
                 ),
-              );
-            }
-
-            return const SizedBox.shrink();
+              ),
+              SearchCategoryLoading() ||
+              SearchCategoryLoaded() ||
+              SearchCategoryFailure() => const SizedBox.shrink(),
+            };
           },
         ),
       ),

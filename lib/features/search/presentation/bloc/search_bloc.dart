@@ -60,12 +60,16 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
   ) async {
     emit(const SearchCategoryLoading());
     try {
-      final products = await _search.getProductsByCategory(category: event.category);
+      final products = await _search.getProductsByCategory(
+        category: event.category == 'Tudo' ? '' : event.category,
+      );
       emit(SearchCategoryLoaded(products: products));
     } on ApiException catch (e) {
       emit(SearchCategoryFailure(e.message));
     } on Exception catch (_) {
-      emit(const SearchCategoryFailure('Erro ao buscar produtos da categoria.'));
+      emit(
+        const SearchCategoryFailure('Erro ao buscar produtos da categoria.'),
+      );
     }
   }
 
