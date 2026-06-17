@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:ragro_mobile/core/constants/product_category.dart';
 import 'package:ragro_mobile/core/di/injection.dart';
 import 'package:ragro_mobile/core/theme/app_colors.dart';
 import 'package:ragro_mobile/features/cart/presentation/bloc/cart_bloc.dart';
@@ -34,20 +35,8 @@ class _SearchView extends StatefulWidget {
 
 class _SearchViewState extends State<_SearchView> {
   final _controller = TextEditingController();
-  String _selectedCategory = 'Tudo';
-  final _categories = const [
-    'Tudo',
-    'Frutas',
-    'Verduras',
-    'Legumes',
-    'Laticínios',
-    'Ovos',
-    'Grãos e Cereais',
-    'Carnes',
-    'Mel e Derivados',
-    'Processados Artesanais',
-    'Plantas e Mudas',
-  ];
+  ProductCategory? _selectedCategory;
+  final _categories = [null, ...ProductCategory.values];
 
   @override
   void dispose() {
@@ -62,7 +51,7 @@ class _SearchViewState extends State<_SearchView> {
       '/customer/search/results',
       extra: SearchRouteParams(
         query: query.trim(),
-        category: _selectedCategory == 'Tudo' ? null : _selectedCategory,
+        category: _selectedCategory?.name,
       ),
     );
   }
@@ -158,16 +147,17 @@ class _SearchViewState extends State<_SearchView> {
                         separatorBuilder: (_, __) => const SizedBox(width: 8),
                         itemBuilder: (_, i) {
                           final c = _categories[i];
+                          final label = c?.label ?? 'Tudo';
                           return CategoryChip(
-                            label: c,
+                            label: label,
                             isSelected: _selectedCategory == c,
                             onTap: () {
                               setState(() => _selectedCategory = c);
                               context.read<SearchBloc>().add(
-                                SearchCategoryChanged(c),
+                                SearchCategoryChanged(c?.name),
                               );
                               context.read<SearchBloc>().add(
-                                SearchCategoryProductsRequested(c),
+                                SearchCategoryProductsRequested(c?.name ?? ''),
                               );
                             },
                           );

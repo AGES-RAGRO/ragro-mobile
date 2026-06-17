@@ -38,13 +38,13 @@ class SearchRemoteDataSource {
   }
 
   Future<List<SearchResultModel>> getProductsByCategory({
-    required String category,
+    String? category,
   }) async {
     try {
       final response = await _apiClient.dio.get<dynamic>(
         ApiEndpoints.recommendations,
         queryParameters: {
-          if (category.isNotEmpty) 'category': category,
+          if (category != null && category.isNotEmpty) 'category': category,
           'limit': 6,
         },
       );
