@@ -42,7 +42,7 @@ class PublicProducerModel extends PublicProducer {
       );
     }
 
-    final memberSinceRaw = json['memberSince'] as String?;
+    final memberSinceRaw = json['memberSince']?.toString().trim();
 
     return PublicProducerModel(
       id: json['id'] as String? ?? '',
@@ -62,11 +62,7 @@ class PublicProducerModel extends PublicProducer {
       totalReviews: json['totalReviews'] as int? ?? 0,
       phone: json['phone'] as String? ?? '',
       availability: _parseAvailability(json['availability']),
-      memberSince: memberSinceRaw != null
-          ? DateTime.parse(memberSinceRaw)
-          : throw FormatException(
-              'memberSince is required in producer profile response for producer ${json['id']}',
-            ),
+      memberSince: _parseMemberSince(memberSinceRaw),
       photoUrl: () {
         final raw = json['photoUrl'] as String?;
         if (raw == null || raw.isEmpty) return null;
@@ -76,6 +72,14 @@ class PublicProducerModel extends PublicProducer {
       paymentMethods: _parsePaymentMethods(json['paymentMethods']),
       products: const [],
     );
+  }
+
+  static DateTime? _parseMemberSince(String? value) {
+    if (value == null || value.isEmpty) {
+      return null;
+    }
+
+    return DateTime.tryParse(value);
   }
 
   static String _deriveLocation(

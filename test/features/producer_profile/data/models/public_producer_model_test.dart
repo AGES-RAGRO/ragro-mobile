@@ -77,7 +77,7 @@ void main() {
       expect(model.location, '');
     });
 
-    test('falha quando memberSince esta ausente', () {
+    test('mantem memberSince nulo quando esta ausente', () {
       final json = {
         'id': 'abc-sem-data',
         'name': 'Sem data',
@@ -85,10 +85,10 @@ void main() {
         'farmName': 'Fazenda X',
       };
 
-      expect(
-        () => PublicProducerModel.fromJson(json),
-        throwsA(isA<FormatException>()),
-      );
+      final model = PublicProducerModel.fromJson(json);
+
+      expect(model.memberSince, isNull);
+      expect(model.yearsOnPlatform, isNull);
     });
 
     test('parseia resposta camelCase com photoUrl opcional', () {
