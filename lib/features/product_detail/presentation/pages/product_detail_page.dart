@@ -325,7 +325,6 @@ class _ProductDetailView extends StatelessWidget {
                                 quantity: quantity.toDouble(),
                               ),
                             );
-                            context.push('/customer/cart');
                           },
                           child: Container(
                             height: 53,

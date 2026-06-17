@@ -424,7 +424,6 @@ class _ProducerPublicProfileViewState
                                           quantity: 1,
                                         ),
                                       );
-                                      context.push('/customer/cart');
                                     },
                                   );
                                 },
