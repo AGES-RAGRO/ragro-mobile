@@ -53,8 +53,9 @@ class SearchRemoteDataSource {
       if (data == null) throw const UnknownApiException();
 
       List<Map<String, dynamic>> readList(dynamic d) {
-        if (d is List<dynamic>)
+        if (d is List<dynamic>) {
           return d.whereType<Map<String, dynamic>>().toList();
+        }
         if (d is Map<String, dynamic>) {
           for (final key in const [
             'data',
