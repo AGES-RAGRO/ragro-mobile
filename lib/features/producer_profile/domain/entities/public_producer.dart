@@ -137,7 +137,15 @@ class PublicProducer extends Equatable {
   final List<Review>? reviews;
 
   int get yearsOnPlatform {
-    return DateTime.now().difference(memberSince).inDays ~/ 365;
+    final now = DateTime.now();
+    var years = now.year - memberSince.year;
+    final anniversaryThisYear = DateTime(
+      now.year,
+      memberSince.month,
+      memberSince.day,
+    );
+    if (now.isBefore(anniversaryThisYear)) years--;
+    return years;
   }
 
   @override

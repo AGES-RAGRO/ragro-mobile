@@ -64,7 +64,9 @@ class PublicProducerModel extends PublicProducer {
       availability: _parseAvailability(json['availability']),
       memberSince: memberSinceRaw != null
           ? DateTime.parse(memberSinceRaw)
-          : DateTime(2016),
+          : throw FormatException(
+              'memberSince is required in producer profile response for producer ${json['id']}',
+            ),
       photoUrl: () {
         final raw = json['photoUrl'] as String?;
         if (raw == null || raw.isEmpty) return null;

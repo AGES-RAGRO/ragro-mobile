@@ -54,6 +54,7 @@ void main() {
         'name': 'Ana',
         'phone': '',
         'farmName': 'Sítio',
+        'memberSince': '2020-03-15',
         'address': {'city': 'Curitiba'},
       };
 
@@ -68,11 +69,26 @@ void main() {
         'name': 'Sem endereço',
         'phone': '',
         'farmName': 'Fazenda X',
+        'memberSince': '2020-03-15',
       };
 
       final model = PublicProducerModel.fromJson(json);
 
       expect(model.location, '');
+    });
+
+    test('falha quando memberSince esta ausente', () {
+      final json = {
+        'id': 'abc-sem-data',
+        'name': 'Sem data',
+        'phone': '',
+        'farmName': 'Fazenda X',
+      };
+
+      expect(
+        () => PublicProducerModel.fromJson(json),
+        throwsA(isA<FormatException>()),
+      );
     });
 
     test('parseia resposta camelCase com photoUrl opcional', () {
