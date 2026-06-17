@@ -15,6 +15,7 @@ import 'package:ragro_mobile/features/producer_orders/presentation/bloc/producer
 import 'package:ragro_mobile/shared/utils/unity_type_label.dart';
 import 'package:ragro_mobile/shared/widgets/cancel_order_dialog.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class ProducerOrderDetailPage extends StatelessWidget {
   const ProducerOrderDetailPage({
@@ -784,6 +785,7 @@ class _ActionFooter extends StatelessWidget {
           label: 'Cancelar Pedido',
           icon: Icons.cancel_outlined,
           color: AppColors.red,
+          isOutlined: true,
           onTap: isProcessing ? null : () => _confirmRefuse(context),
         ),
       if (order.status == ProducerOrderStatus.inDelivery)
@@ -794,6 +796,7 @@ class _ActionFooter extends StatelessWidget {
                 label: 'Cancelar Pedido',
                 icon: Icons.cancel_outlined,
                 color: AppColors.red,
+                isOutlined: true,
                 onTap: isProcessing ? null : () => _confirmRefuse(context),
               ),
             ),
@@ -818,8 +821,9 @@ class _ActionFooter extends StatelessWidget {
       if (order.consumerPhone.isNotEmpty)
         _ActionButton(
           label: 'Contatar Cliente',
-          icon: Icons.chat,
+          iconAsset: 'assets/images/whatsapp.svg',
           color: const Color(0xFF25D366),
+          isOutlined: true,
           onTap: isProcessing ? null : () => _contactCustomer(context),
         ),
     ];
@@ -889,15 +893,19 @@ class _ActionFooter extends StatelessWidget {
 class _ActionButton extends StatelessWidget {
   const _ActionButton({
     required this.label,
-    required this.icon,
     required this.color,
     required this.onTap,
+    this.icon,
+    this.iconAsset,
+    this.isOutlined = false,
   });
 
   final String label;
-  final IconData icon;
+  final IconData? icon;
+  final String? iconAsset;
   final Color color;
   final VoidCallback? onTap;
+  final bool isOutlined;
 
   @override
   Widget build(BuildContext context) {
@@ -906,25 +914,41 @@ class _ActionButton extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        height: 52,
+        height: 48,
         decoration: BoxDecoration(
-          color: effectiveColor,
-          borderRadius: BorderRadius.circular(24),
+          color: isOutlined ? Colors.transparent : effectiveColor,
+          borderRadius: BorderRadius.circular(36),
+          border: isOutlined ? Border.all(color: effectiveColor) : null,
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, color: AppColors.white, size: 20),
+            if (iconAsset != null)
+              SvgPicture.asset(
+                iconAsset!,
+                colorFilter: ColorFilter.mode(
+                  isOutlined ? effectiveColor : AppColors.white,
+                  BlendMode.srcIn,
+                ),
+                width: 20,
+                height: 20,
+              )
+            else if (icon != null)
+              Icon(
+                icon,
+                color: isOutlined ? effectiveColor : AppColors.white,
+                size: 20,
+              ),
             const SizedBox(width: 8),
             Flexible(
               child: Text(
                 label,
                 overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
+                style: TextStyle(
                   fontFamily: 'Manrope',
                   fontWeight: FontWeight.w700,
                   fontSize: 15,
-                  color: AppColors.white,
+                  color: isOutlined ? effectiveColor : AppColors.white,
                 ),
               ),
             ),
