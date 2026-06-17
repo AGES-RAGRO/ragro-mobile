@@ -137,6 +137,7 @@ class OrderDetailModel extends OrderDetail {
     super.reviewed,
     super.cancellationReason,
     super.cancellationDetails,
+    super.confirmationCode,
   });
 
   factory OrderDetailModel.fromJson(Map<String, dynamic> json) {
@@ -204,6 +205,7 @@ class OrderDetailModel extends OrderDetail {
           json['cancellationDetails'] as String? ??
           json['cancelDetails'] as String? ??
           json['details'] as String?,
+      confirmationCode: json['confirmationCode'] as String?,
     );
   }
 
