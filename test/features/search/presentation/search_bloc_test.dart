@@ -36,7 +36,7 @@ void main() {
     name: 'Tomate',
     subtitle: 'Sítio Boa Vista',
     imageUrl: '',
-    price: 5.0,
+    price: 5,
   );
 
   setUp(() async {
