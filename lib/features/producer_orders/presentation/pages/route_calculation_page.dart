@@ -231,6 +231,7 @@ class _RouteCalculationViewState extends State<_RouteCalculationView> {
                                 child: Stack(
                                   children: [
                                     GoogleMap(
+                                      key: ValueKey(loc),
                                       initialCameraPosition: CameraPosition(
                                         target: loc,
                                         zoom: 13,
