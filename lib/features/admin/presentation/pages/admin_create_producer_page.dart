@@ -1,4 +1,5 @@
 // Admin create-producer screen (US-31). Backed by POST /admin/producers.
+// ignore_for_file: unused_element, unused_element_parameter
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -1106,12 +1107,13 @@ class _TextField extends StatelessWidget {
   }
 }
 
+// Mantido intencionalmente: widget privado usado condicionalmente em formulários.
 class _UfAutocomplete extends StatelessWidget {
   const _UfAutocomplete({
-    super.key,
     required this.initialValue,
     required this.onSelected,
     this.enabled = true,
+    super.key,
   });
 
   final String? initialValue;

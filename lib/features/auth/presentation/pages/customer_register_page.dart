@@ -1,4 +1,5 @@
 // Customer registration screen (US-01). Backed by POST /auth/register/customer.
+// ignore_for_file: unused_element, unused_element_parameter
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -475,11 +476,12 @@ class _TermsCheckboxState extends State<_TermsCheckbox> {
   }
 }
 
+// Mantido intencionalmente: widget privado usado condicionalmente em formulários.
 class _UfAutocomplete extends StatelessWidget {
   const _UfAutocomplete({
-    super.key,
     required this.initialValue,
     required this.onSelected,
+    super.key,
   });
 
   final String? initialValue;

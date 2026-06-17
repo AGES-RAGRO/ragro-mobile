@@ -152,6 +152,9 @@ class _SearchResultsViewState extends State<_SearchResultsView> {
                   style: const TextStyle(color: AppColors.placeholder),
                 ),
               ),
+              SearchCategoryLoading() ||
+              SearchCategoryLoaded() ||
+              SearchCategoryFailure() => const SizedBox.shrink(),
             };
           },
         ),
@@ -465,12 +468,15 @@ class _SearchDropdownFilter extends StatelessWidget {
           switch (value) {
             case _SortMenuAction.ascending:
               onSelected(_SortDirection.ascending);
+              return;
             case _SortMenuAction.descending:
               onSelected(_SortDirection.descending);
+              return;
             case _SortMenuAction.clear:
               onSelected(null);
+              return;
             case null:
-              break;
+              return;
           }
         },
         child: Container(

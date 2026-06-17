@@ -30,6 +30,15 @@ void main() {
     rating: 0,
   );
 
+  const tProduct = SearchResult(
+    id: 'b0000000-0000-0000-0000-000000000001',
+    type: SearchResultType.product,
+    name: 'Tomate',
+    subtitle: 'Sítio Boa Vista',
+    imageUrl: '',
+    price: 5,
+  );
+
   setUp(() async {
     SharedPreferences.setMockInitialValues({});
     final prefs = await SharedPreferences.getInstance();
@@ -168,6 +177,63 @@ void main() {
       verify: (_) {
         verify(() => mockRepository.search(query: 'tomate')).called(1);
       },
+    );
+  });
+
+  group('SearchCategoryProductsRequested', () {
+    blocTest<SearchBloc, SearchState>(
+      'emite [SearchCategoryLoading, SearchCategoryLoaded] quando retorna produtos',
+      build: () {
+        when(
+          () => mockRepository.getProductsByCategory(category: 'Horta'),
+        ).thenAnswer((_) async => [tProduct]);
+        return bloc;
+      },
+      act: (b) => b.add(const SearchCategoryProductsRequested('Horta')),
+      expect: () => [
+        const SearchCategoryLoading(),
+        const SearchCategoryLoaded(products: [tProduct]),
+      ],
+      verify: (_) {
+        verify(
+          () => mockRepository.getProductsByCategory(category: 'Horta'),
+        ).called(1);
+      },
+    );
+
+    blocTest<SearchBloc, SearchState>(
+      'envia categoria vazia quando categoria é Tudo',
+      build: () {
+        when(
+          () => mockRepository.getProductsByCategory(category: ''),
+        ).thenAnswer((_) async => []);
+        return bloc;
+      },
+      act: (b) => b.add(const SearchCategoryProductsRequested('Tudo')),
+      expect: () => [
+        const SearchCategoryLoading(),
+        const SearchCategoryLoaded(products: []),
+      ],
+      verify: (_) {
+        verify(
+          () => mockRepository.getProductsByCategory(category: ''),
+        ).called(1);
+      },
+    );
+
+    blocTest<SearchBloc, SearchState>(
+      'emite [SearchCategoryLoading, SearchCategoryFailure] quando ocorre ApiException',
+      build: () {
+        when(
+          () => mockRepository.getProductsByCategory(category: 'Horta'),
+        ).thenThrow(const UnknownApiException());
+        return bloc;
+      },
+      act: (b) => b.add(const SearchCategoryProductsRequested('Horta')),
+      expect: () => [
+        const SearchCategoryLoading(),
+        isA<SearchCategoryFailure>(),
+      ],
     );
   });
 

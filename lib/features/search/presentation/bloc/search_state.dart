@@ -36,3 +36,23 @@ class SearchFailure extends SearchState {
   @override
   List<Object?> get props => [message];
 }
+
+class SearchCategoryLoaded extends SearchState {
+  const SearchCategoryLoaded({required this.products});
+  final List<SearchResult> products;
+
+  @override
+  List<Object?> get props => [products];
+}
+
+class SearchCategoryLoading extends SearchState {
+  const SearchCategoryLoading();
+}
+
+class SearchCategoryFailure extends SearchState {
+  const SearchCategoryFailure(this.message);
+  final String message;
+
+  @override
+  List<Object?> get props => [message];
+}

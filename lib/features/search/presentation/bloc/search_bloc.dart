@@ -14,6 +14,7 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
     on<SearchQuerySubmitted>(_onQuerySubmitted);
     on<SearchRecentItemRemoved>(_onRecentRemoved);
     on<SearchLoadRecentSearches>(_onLoadRecent);
+    on<SearchCategoryProductsRequested>(_onCategoryProductsRequested);
     add(const SearchLoadRecentSearches());
   }
 
@@ -51,6 +52,25 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
     Emitter<SearchState> emit,
   ) async {
     _currentCategory = event.category ?? 'Tudo';
+  }
+
+  Future<void> _onCategoryProductsRequested(
+    SearchCategoryProductsRequested event,
+    Emitter<SearchState> emit,
+  ) async {
+    emit(const SearchCategoryLoading());
+    try {
+      final products = await _search.getProductsByCategory(
+        category: event.category == 'Tudo' ? '' : event.category,
+      );
+      emit(SearchCategoryLoaded(products: products));
+    } on ApiException catch (e) {
+      emit(SearchCategoryFailure(e.message));
+    } on Exception catch (_) {
+      emit(
+        const SearchCategoryFailure('Erro ao buscar produtos da categoria.'),
+      );
+    }
   }
 
   Future<void> _onQuerySubmitted(
