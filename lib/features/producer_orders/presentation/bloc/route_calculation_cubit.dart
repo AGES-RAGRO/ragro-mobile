@@ -37,12 +37,12 @@ class RouteCalculationCubit extends Cubit<RouteCalculationState> {
   }
 
   Future<void> _initRoute() async {
-    // Pre-fill an editable default consumption for the CO2 calculation.
+    // Pre-fill the default consumption based on the initial vehicle+fuel selection.
     if (state.averageConsumption.trim().isEmpty) {
       emit(
         state.copyWith(
           averageConsumption:
-              defaultConsumptionByVehicle[state.selectedVehicle] ?? '10',
+              defaultConsumption(state.selectedVehicle, state.selectedFuel) ?? '',
         ),
       );
     }
@@ -85,15 +85,17 @@ class RouteCalculationCubit extends Cubit<RouteCalculationState> {
     'Caminhão': ['Diesel', 'Elétrico'],
   };
 
-  /// Default consumption (km/L) per vehicle, used when the producer leaves it
-  /// blank to avoid the backend's "consumption required" error and still
-  /// estimate CO2. The producer can override it.
-  static const Map<String, String> defaultConsumptionByVehicle = {
-    'Carro': '12',
-    'Moto': '35',
-    'Van': '9',
-    'Caminhão': '5',
+  /// Default consumption (km/L) per vehicle+fuel combination.
+  /// null means electric (no consumption applicable).
+  static const Map<String, Map<String, String?>> defaultConsumptionByVehicleAndFuel = {
+    'Moto': {'Gasolina': '30', 'Etanol': '22', 'Elétrico': null},
+    'Carro': {'Gasolina': '12', 'Etanol': '8,5', 'Diesel': '14', 'Elétrico': null},
+    'Van': {'Gasolina': '8', 'Diesel': '8', 'Elétrico': null},
+    'Caminhão': {'Diesel': '6', 'Elétrico': null},
   };
+
+  static String? defaultConsumption(String vehicle, String fuel) =>
+      defaultConsumptionByVehicleAndFuel[vehicle]?[fuel];
 
   void updateFormData({String? vehicle, String? fuel, String? consumption}) {
     final nextVehicle = vehicle ?? state.selectedVehicle;
@@ -106,13 +108,16 @@ class RouteCalculationCubit extends Cubit<RouteCalculationState> {
       nextFuel = allowed.first;
     }
 
-    // When switching vehicle with no consumption set, use the new vehicle's default.
-    final nextConsumption =
-        consumption ??
-        (vehicle != null && state.averageConsumption.trim().isEmpty
-            ? (defaultConsumptionByVehicle[nextVehicle] ??
-                  state.averageConsumption)
-            : state.averageConsumption);
+    // When vehicle or fuel selection changes, reset to the preset consumption.
+    // When the user manually types a value, keep it as-is.
+    final String nextConsumption;
+    if (consumption != null) {
+      nextConsumption = consumption;
+    } else if (vehicle != null || fuel != null) {
+      nextConsumption = defaultConsumption(nextVehicle, nextFuel) ?? '';
+    } else {
+      nextConsumption = state.averageConsumption;
+    }
 
     emit(
       state.copyWith(

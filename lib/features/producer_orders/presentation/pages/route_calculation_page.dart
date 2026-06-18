@@ -6,7 +6,6 @@ import 'package:ragro_mobile/core/di/injection.dart';
 import 'package:ragro_mobile/core/theme/app_colors.dart';
 import 'package:ragro_mobile/features/producer_orders/presentation/bloc/route_calculation_cubit.dart';
 import 'package:ragro_mobile/features/producer_orders/presentation/bloc/route_calculation_state.dart';
-import 'package:ragro_mobile/shared/utils/unity_type_label.dart';
 import 'package:ragro_mobile/shared/widgets/confirm_delivery_code_dialog.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -723,14 +722,15 @@ class _Co2BottomSheetContentState extends State<_Co2BottomSheetContent> {
                   context.read<RouteCalculationCubit>().updateFormData(
                     vehicle: val,
                   );
-                  // Sync the field with the new vehicle's default consumption
-                  // when no value has been entered yet.
-                  final preset =
-                      RouteCalculationCubit.defaultConsumptionByVehicle[val];
-                  if (preset != null &&
-                      _consumptionController.text.trim().isEmpty) {
-                    _consumptionController.text = preset;
-                  }
+                  final currentFuel = context
+                      .read<RouteCalculationCubit>()
+                      .state
+                      .selectedFuel;
+                  final preset = RouteCalculationCubit.defaultConsumption(
+                    val ?? state.selectedVehicle,
+                    currentFuel,
+                  );
+                  _consumptionController.text = preset ?? '';
                 },
               ),
               const SizedBox(height: 16),
@@ -758,9 +758,16 @@ class _Co2BottomSheetContentState extends State<_Co2BottomSheetContent> {
                           return DropdownMenuItem(value: e, child: Text(e));
                         })
                         .toList(),
-                onChanged: (val) => context
-                    .read<RouteCalculationCubit>()
-                    .updateFormData(fuel: val),
+                onChanged: (val) {
+                  context.read<RouteCalculationCubit>().updateFormData(
+                    fuel: val,
+                  );
+                  final preset = RouteCalculationCubit.defaultConsumption(
+                    state.selectedVehicle,
+                    val ?? state.selectedFuel,
+                  );
+                  _consumptionController.text = preset ?? '';
+                },
               ),
               const SizedBox(height: 16),
               const Text(
