@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:ragro_mobile/core/constants/product_category.dart';
 import 'package:ragro_mobile/core/di/injection.dart';
 import 'package:ragro_mobile/core/theme/app_colors.dart';
 import 'package:ragro_mobile/features/cart/presentation/bloc/cart_bloc.dart';
@@ -34,20 +35,15 @@ class _SearchView extends StatefulWidget {
 
 class _SearchViewState extends State<_SearchView> {
   final _controller = TextEditingController();
-  String _selectedCategory = 'Tudo';
-  final _categories = const [
-    'Tudo',
-    'Frutas',
-    'Verduras',
-    'Legumes',
-    'Laticínios',
-    'Ovos',
-    'Grãos e Cereais',
-    'Carnes',
-    'Mel e Derivados',
-    'Processados Artesanais',
-    'Plantas e Mudas',
-  ];
+  ProductCategory? _selectedCategory;
+  final _categories = ProductCategory.values;
+
+  @override
+  void initState() {
+    super.initState();
+    // Ao entrar na tela, carrega as recomendações gerais (/recommendations?limit=6).
+    context.read<SearchBloc>().add(const SearchCategoryProductsRequested(''));
+  }
 
   @override
   void dispose() {
@@ -62,7 +58,7 @@ class _SearchViewState extends State<_SearchView> {
       '/customer/search/results',
       extra: SearchRouteParams(
         query: query.trim(),
-        category: _selectedCategory == 'Tudo' ? null : _selectedCategory,
+        category: _selectedCategory?.wireValue,
       ),
     );
   }
@@ -159,15 +155,15 @@ class _SearchViewState extends State<_SearchView> {
                         itemBuilder: (_, i) {
                           final c = _categories[i];
                           return CategoryChip(
-                            label: c,
+                            label: c.label,
                             isSelected: _selectedCategory == c,
                             onTap: () {
                               setState(() => _selectedCategory = c);
                               context.read<SearchBloc>().add(
-                                SearchCategoryChanged(c),
+                                SearchCategoryChanged(c.wireValue),
                               );
                               context.read<SearchBloc>().add(
-                                SearchCategoryProductsRequested(c),
+                                SearchCategoryProductsRequested(c.wireValue),
                               );
                             },
                           );
@@ -236,7 +232,19 @@ class _SearchViewState extends State<_SearchView> {
                   }
                   if (state is SearchCategoryLoaded) {
                     final results = state.products;
-                    if (results.isEmpty) return const SizedBox.shrink();
+                    if (results.isEmpty) {
+                      return const Padding(
+                        padding: EdgeInsets.fromLTRB(16, 24, 16, 24),
+                        child: Text(
+                          'Nenhum produto encontrado para essa categoria.',
+                          style: TextStyle(
+                            fontFamily: 'Figtree',
+                            fontSize: 14,
+                            color: AppColors.placeholder,
+                          ),
+                        ),
+                      );
+                    }
                     final homeProducts = results
                         .map(
                           (r) => HomeProduct(
