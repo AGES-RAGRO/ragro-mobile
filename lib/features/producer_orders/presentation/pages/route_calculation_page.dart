@@ -403,57 +403,13 @@ class _RouteCalculationViewState extends State<_RouteCalculationView> {
                 padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
                 color: Colors.white,
                 child: GestureDetector(
-                  onTap: () async {
-                    final cubit = context.read<RouteCalculationCubit>();
-                    final state = cubit.state;
-
-                    if (state.hasPendingDeliveries) {
-                      final pending = state.deliveries
-                          .where((d) =>
-                              !state.confirmedDeliveries.contains(d.id))
-                          .length;
-                      await showDialog<void>(
-                        context: context,
-                        builder: (ctx) => AlertDialog(
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          title: const Text(
-                            'Entregas pendentes',
-                            style: TextStyle(fontWeight: FontWeight.w700),
-                          ),
-                          content: Text(
-                            'Você ainda tem $pending entrega${pending > 1 ? 's' : ''} sem confirmação de código. Confirme o código com o cliente antes de finalizar.',
-                          ),
-                          actionsPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                          actions: [
-                            SizedBox(
-                              width: double.infinity,
-                              child: ElevatedButton(
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: AppColors.darkGreen,
-                                  padding: const EdgeInsets.symmetric(vertical: 14),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(20),
-                                  ),
-                                ),
-                                onPressed: () => Navigator.of(ctx).pop(),
-                                child: const Text(
-                                  'Entendido',
-                                  style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      );
-                      return;
-                    }
-
-                    if (context.mounted) {
-                      context.pop(state.confirmedDeliveries.toList());
-                    }
-                  },
+                  onTap: () => context.pop(
+                    context
+                        .read<RouteCalculationCubit>()
+                        .state
+                        .confirmedDeliveries
+                        .toList(),
+                  ),
                   child: Container(
                     height: 50,
                     decoration: BoxDecoration(
@@ -701,6 +657,69 @@ class _DeliveryItem extends StatelessWidget {
                               context.read<RouteCalculationCubit>().confirmDeliveryWithCode(id, code),
                         ),
                       );
+                      if (!context.mounted) return;
+                      if (context.read<RouteCalculationCubit>().state.confirmedDeliveries.contains(id)) {
+                        await showDialog<void>(
+                          context: context,
+                          builder: (ctx) => Dialog(
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(24),
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.fromLTRB(24, 32, 24, 24),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const Icon(
+                                    Icons.check_circle,
+                                    color: AppColors.darkGreen,
+                                    size: 64,
+                                  ),
+                                  const SizedBox(height: 16),
+                                  const Text(
+                                    'Pedido entregue!',
+                                    style: TextStyle(
+                                      fontFamily: 'Figtree',
+                                      fontWeight: FontWeight.w700,
+                                      fontSize: 20,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    title,
+                                    textAlign: TextAlign.center,
+                                    style: const TextStyle(
+                                      fontSize: 14,
+                                      color: Colors.grey,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 24),
+                                  SizedBox(
+                                    width: double.infinity,
+                                    child: ElevatedButton(
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: AppColors.darkGreen,
+                                        padding: const EdgeInsets.symmetric(vertical: 14),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(24),
+                                        ),
+                                      ),
+                                      onPressed: () => Navigator.of(ctx).pop(),
+                                      child: const Text(
+                                        'Continuar',
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.w700,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        );
+                      }
                     },
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 300),
