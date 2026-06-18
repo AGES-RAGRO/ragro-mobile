@@ -71,13 +71,22 @@ class _ImpactDetailPageState extends State<ImpactDetailPage> {
     }
   }
 
+  ({String value, String unit}) get _co2Display {
+    if (_totalCo2Saved < 1000) {
+      return (
+        value: _totalCo2Saved.toStringAsFixed(1).replaceAll('.', ','),
+        unit: 'kg de CO₂',
+      );
+    }
+    return (
+      value: (_totalCo2Saved / 1000).toStringAsFixed(2).replaceAll('.', ','),
+      unit: 't de CO₂',
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    // _totalCo2Saved is in kg -> tonnes, 2 decimals (comma), so partial values
-    // (< 1 t) show instead of rounding to 0.
-    final co2Value = (_totalCo2Saved / 1000)
-        .toStringAsFixed(2)
-        .replaceAll('.', ',');
+    final display = _co2Display;
 
     return Scaffold(
       backgroundColor: AppColors.white,
@@ -158,63 +167,62 @@ class _ImpactDetailPageState extends State<ImpactDetailPage> {
                                 ),
                               ),
                               const SizedBox(width: 16),
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  const Text(
-                                    'Mais de',
-                                    style: TextStyle(
-                                      fontFamily: 'Figtree',
-                                      fontSize: 14,
-                                      color: Color(0xFF64748B),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const Text(
+                                      'Mais de',
+                                      style: TextStyle(
+                                        fontFamily: 'Figtree',
+                                        fontSize: 14,
+                                        color: Color(0xFF64748B),
+                                      ),
                                     ),
-                                  ),
-                                  const SizedBox(height: 2),
-                                  Row(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.baseline,
-                                    textBaseline: TextBaseline.alphabetic,
-                                    children: [
-                                      Text(
-                                        co2Value,
-                                        style: const TextStyle(
-                                          fontFamily: 'Figtree',
-                                          fontWeight: FontWeight.w700,
-                                          fontSize: 56,
-                                          color: AppColors.darkGreen,
-                                          height: 1,
-                                        ),
+                                    const SizedBox(height: 2),
+                                    FittedBox(
+                                      fit: BoxFit.scaleDown,
+                                      alignment: Alignment.centerLeft,
+                                      child: Row(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.baseline,
+                                        textBaseline: TextBaseline.alphabetic,
+                                        children: [
+                                          Text(
+                                            display.value,
+                                            style: const TextStyle(
+                                              fontFamily: 'Figtree',
+                                              fontWeight: FontWeight.w700,
+                                              fontSize: 56,
+                                              color: AppColors.darkGreen,
+                                              height: 1,
+                                            ),
+                                          ),
+                                          const SizedBox(width: 4),
+                                          Text(
+                                            display.unit,
+                                            style: const TextStyle(
+                                              fontFamily: 'Figtree',
+                                              fontWeight: FontWeight.w500,
+                                              fontSize: 18,
+                                              color: AppColors.darkGreen,
+                                            ),
+                                          ),
+                                        ],
                                       ),
-                                      const Text(
-                                        't de CO',
-                                        style: TextStyle(
-                                          fontFamily: 'Figtree',
-                                          fontWeight: FontWeight.w500,
-                                          fontSize: 18,
-                                          color: AppColors.darkGreen,
-                                        ),
-                                      ),
-                                      const Text(
-                                        '₂',
-                                        style: TextStyle(
-                                          fontFamily: 'Figtree',
-                                          fontSize: 12,
-                                          color: AppColors.darkGreen,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 4),
-                                  const Text(
-                                    'poupadas com a Ragro',
-                                    style: TextStyle(
-                                      fontFamily: 'Figtree',
-                                      fontSize: 13,
-                                      color: Color(0xFF64748B),
                                     ),
-                                  ),
-                                ],
+                                    const SizedBox(height: 4),
+                                    const Text(
+                                      'poupadas com a Ragro',
+                                      style: TextStyle(
+                                        fontFamily: 'Figtree',
+                                        fontSize: 13,
+                                        color: Color(0xFF64748B),
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
                             ],
                           ),

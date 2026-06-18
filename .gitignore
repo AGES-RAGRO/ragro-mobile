@@ -69,4 +69,4 @@ test-*.png
 env/prod.json
 env/staging.json
 
-Env.xcconfig
+Env.xcconfigPITCH_RAGRO.md

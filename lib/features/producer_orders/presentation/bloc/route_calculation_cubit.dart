@@ -220,12 +220,11 @@ class RouteCalculationCubit extends Cubit<RouteCalculationState> {
       final orders = await _ordersRepository.getOrders();
       if (isClosed) return;
 
+      // Only include orders explicitly selected for this delivery session
+      // (IN_DELIVERY). CONFIRMED (accepted) orders that were not selected
+      // by the producer should not appear in the route calculation.
       _allDeliveries = orders
-          .where(
-            (o) =>
-                o.status == ProducerOrderStatus.accepted ||
-                o.status == ProducerOrderStatus.inDelivery,
-          )
+          .where((o) => o.status == ProducerOrderStatus.inDelivery)
           .map(_toDelivery)
           .where((d) => d.stop.isNotEmpty)
           .toList();

@@ -403,13 +403,57 @@ class _RouteCalculationViewState extends State<_RouteCalculationView> {
                 padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
                 color: Colors.white,
                 child: GestureDetector(
-                  onTap: () => context.pop(
-                    context
-                        .read<RouteCalculationCubit>()
-                        .state
-                        .confirmedDeliveries
-                        .toList(),
-                  ),
+                  onTap: () async {
+                    final cubit = context.read<RouteCalculationCubit>();
+                    final state = cubit.state;
+
+                    if (state.hasPendingDeliveries) {
+                      final pending = state.deliveries
+                          .where((d) =>
+                              !state.confirmedDeliveries.contains(d.id))
+                          .length;
+                      await showDialog<void>(
+                        context: context,
+                        builder: (ctx) => AlertDialog(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          title: const Text(
+                            'Entregas pendentes',
+                            style: TextStyle(fontWeight: FontWeight.w700),
+                          ),
+                          content: Text(
+                            'Você ainda tem $pending entrega${pending > 1 ? 's' : ''} sem confirmação de código. Confirme o código com o cliente antes de finalizar.',
+                          ),
+                          actionsPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                          actions: [
+                            SizedBox(
+                              width: double.infinity,
+                              child: ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: AppColors.darkGreen,
+                                  padding: const EdgeInsets.symmetric(vertical: 14),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                ),
+                                onPressed: () => Navigator.of(ctx).pop(),
+                                child: const Text(
+                                  'Entendido',
+                                  style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                      return;
+                    }
+
+                    if (context.mounted) {
+                      context.pop(state.confirmedDeliveries.toList());
+                    }
+                  },
                   child: Container(
                     height: 50,
                     decoration: BoxDecoration(
