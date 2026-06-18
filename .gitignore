@@ -69,5 +69,7 @@ test-*.png
 env/prod.json
 env/staging.json
 
-Env.xcconfigPITCH_RAGRO.md
+PITCH_RAGRO.md
 env/local-device.json
+ios/.xcode.env
+ios/.xcode.env.local
