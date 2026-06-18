@@ -272,7 +272,7 @@ class AppRouter {
           ],
         ),
 
-        // Producer shell with 3 tabs
+        // Producer shell with 4 tabs
         StatefulShellRoute.indexedStack(
           builder: (_, __, shell) => ProducerShell(navigationShell: shell),
           branches: [
@@ -387,6 +387,14 @@ class AppRouter {
                       },
                     ),
                   ],
+                ),
+              ],
+            ),
+            StatefulShellBranch(
+              routes: [
+                GoRoute(
+                  path: '/producer/notifications',
+                  builder: (_, __) => const NotificationsPage(),
                 ),
               ],
             ),

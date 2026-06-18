@@ -63,12 +63,25 @@ abstract final class ApiEndpoints {
   static String customerFavorite(String producerId) =>
       '$_base/customers/me/favorites/$producerId';
 
-  // Notifications
-  static String get notifications => '$_base/notifications';
-  static String get notificationsUnreadCount =>
-      '$_base/notifications/unread-count';
-  static String notificationRead(String id) => '$_base/notifications/$id/read';
-  static String get notificationsReadAll => '$_base/notifications/read-all';
+  // Notifications — role-scoped. The backend serves identical operations under
+  // /customers/me/notifications (CustomerNotificationController, role CUSTOMER)
+  // and /producers/me/notifications (ProducerNotificationController, role FARMER).
+  // NotificationsRemoteDataSource picks the right set from the logged-in role.
+  static String get customerNotifications => '$_base/customers/me/notifications';
+  static String get customerNotificationsUnreadCount =>
+      '$_base/customers/me/notifications/unread-count';
+  static String customerNotificationRead(String id) =>
+      '$_base/customers/me/notifications/$id/read';
+  static String get customerNotificationsReadAll =>
+      '$_base/customers/me/notifications/read-all';
+
+  static String get producerNotifications => '$_base/producers/me/notifications';
+  static String get producerNotificationsUnreadCount =>
+      '$_base/producers/me/notifications/unread-count';
+  static String producerNotificationRead(String id) =>
+      '$_base/producers/me/notifications/$id/read';
+  static String get producerNotificationsReadAll =>
+      '$_base/producers/me/notifications/read-all';
 
   // Producers / Farmers
   static String get producers => '$_base/producers';

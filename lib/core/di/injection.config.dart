@@ -329,6 +329,12 @@ extension GetItInjectableX on _i174.GetIt {
       () =>
           _i805.GetProducerDashboard(gh<_i570.ProducerManagementRepository>()),
     );
+    gh.lazySingleton<_i733.NotificationsRemoteDataSource>(
+      () => _i733.NotificationsRemoteDataSource(
+        gh<_i873.ApiClient>(),
+        gh<_i209.AuthLocalDataSource>(),
+      ),
+    );
     gh.lazySingleton<_i52.SearchLocalDataSource>(
       () => _i52.SearchLocalDataSource(gh<_i460.SharedPreferences>()),
     );
@@ -369,9 +375,6 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i904.HomeRemoteDataSource>(
       () => _i904.HomeRemoteDataSource(gh<_i873.ApiClient>()),
-    );
-    gh.lazySingleton<_i733.NotificationsRemoteDataSource>(
-      () => _i733.NotificationsRemoteDataSource(gh<_i873.ApiClient>()),
     );
     gh.lazySingleton<_i384.OrdersRemoteDatasource>(
       () => _i384.OrdersRemoteDatasource(gh<_i873.ApiClient>()),
