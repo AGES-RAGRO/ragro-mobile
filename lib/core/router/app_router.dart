@@ -20,6 +20,7 @@ import 'package:ragro_mobile/features/customer_profile/presentation/bloc/custome
 import 'package:ragro_mobile/features/customer_profile/presentation/pages/customer_edit_address_page.dart';
 import 'package:ragro_mobile/features/customer_profile/presentation/pages/customer_edit_profile_page.dart';
 import 'package:ragro_mobile/features/customer_profile/presentation/pages/customer_profile_page.dart';
+import 'package:ragro_mobile/features/customer_profile/presentation/pages/faq_page.dart';
 import 'package:ragro_mobile/features/home/presentation/pages/customer_home_page.dart';
 import 'package:ragro_mobile/features/impact/presentation/pages/impact_detail_page.dart';
 import 'package:ragro_mobile/features/impact/presentation/pages/impact_page.dart';
@@ -196,6 +197,10 @@ class AppRouter {
                         GoRoute(
                           path: 'edit',
                           builder: (_, __) => const CustomerEditProfilePage(),
+                        ),
+                        GoRoute(
+                          path: 'faq',
+                          builder: (_, __) => const FaqPage(),
                         ),
                       ],
                     ),
