@@ -149,7 +149,7 @@ class _ProductDetailView extends StatelessWidget {
                                       style: const TextStyle(
                                         fontFamily: 'Figtree',
                                         fontWeight: FontWeight.w700,
-                                        fontSize: 32,
+                                        fontSize: 24,
                                         color: AppColors.black,
                                       ),
                                     ),
@@ -185,12 +185,60 @@ class _ProductDetailView extends StatelessWidget {
                               ),
                               const SizedBox(height: 16),
                               if (product.producerName.isNotEmpty)
-                                Text(
-                                  'Produtor: ${product.producerName}',
-                                  style: const TextStyle(
-                                    fontFamily: 'Figtree',
-                                    fontSize: 14,
-                                    color: AppColors.black,
+                                GestureDetector(
+                                  behavior: HitTestBehavior.opaque,
+                                  onTap: product.producerId.isEmpty
+                                      ? null
+                                      : () => context.push(
+                                          '/customer/producer/'
+                                          '${product.producerId}',
+                                        ),
+                                  child: Row(
+                                    children: [
+                                      Flexible(
+                                        child: RichText(
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          text: TextSpan(
+                                            text: 'Produtor: ',
+                                            style: const TextStyle(
+                                              fontFamily: 'Figtree',
+                                              fontSize: 14,
+                                              color: AppColors.black,
+                                            ),
+                                            children: [
+                                              TextSpan(
+                                                text: product.producerName,
+                                                style: TextStyle(
+                                                  fontFamily: 'Figtree',
+                                                  fontWeight: FontWeight.w600,
+                                                  fontSize: 14,
+                                                  color: product
+                                                          .producerId.isEmpty
+                                                      ? AppColors.black
+                                                      : AppColors.darkGreen,
+                                                  decoration: product
+                                                          .producerId.isEmpty
+                                                      ? null
+                                                      : TextDecoration
+                                                          .underline,
+                                                  decorationColor:
+                                                      AppColors.darkGreen,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                      if (product.producerId.isNotEmpty) ...[
+                                        const SizedBox(width: 4),
+                                        const Icon(
+                                          Icons.chevron_right,
+                                          size: 16,
+                                          color: AppColors.darkGreen,
+                                        ),
+                                      ],
+                                    ],
                                   ),
                                 ),
                               if (product.producerName.isNotEmpty)
