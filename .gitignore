@@ -69,4 +69,4 @@ test-*.png
 env/prod.json
 env/staging.json
 
-Env.xcconfig
+Env.xcconfigtest/visual/goldens/
