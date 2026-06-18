@@ -36,7 +36,14 @@ class _SearchView extends StatefulWidget {
 class _SearchViewState extends State<_SearchView> {
   final _controller = TextEditingController();
   ProductCategory? _selectedCategory;
-  final _categories = [null, ...ProductCategory.values];
+  final _categories = ProductCategory.values;
+
+  @override
+  void initState() {
+    super.initState();
+    // Ao entrar na tela, carrega as recomendações gerais (/recommendations?limit=6).
+    context.read<SearchBloc>().add(const SearchCategoryProductsRequested(''));
+  }
 
   @override
   void dispose() {
@@ -51,7 +58,7 @@ class _SearchViewState extends State<_SearchView> {
       '/customer/search/results',
       extra: SearchRouteParams(
         query: query.trim(),
-        category: _selectedCategory?.name,
+        category: _selectedCategory?.wireValue,
       ),
     );
   }
@@ -147,17 +154,16 @@ class _SearchViewState extends State<_SearchView> {
                         separatorBuilder: (_, __) => const SizedBox(width: 8),
                         itemBuilder: (_, i) {
                           final c = _categories[i];
-                          final label = c?.label ?? 'Tudo';
                           return CategoryChip(
-                            label: label,
+                            label: c.label,
                             isSelected: _selectedCategory == c,
                             onTap: () {
                               setState(() => _selectedCategory = c);
                               context.read<SearchBloc>().add(
-                                SearchCategoryChanged(c?.name),
+                                SearchCategoryChanged(c.wireValue),
                               );
                               context.read<SearchBloc>().add(
-                                SearchCategoryProductsRequested(c?.name ?? ''),
+                                SearchCategoryProductsRequested(c.wireValue),
                               );
                             },
                           );
@@ -226,7 +232,19 @@ class _SearchViewState extends State<_SearchView> {
                   }
                   if (state is SearchCategoryLoaded) {
                     final results = state.products;
-                    if (results.isEmpty) return const SizedBox.shrink();
+                    if (results.isEmpty) {
+                      return const Padding(
+                        padding: EdgeInsets.fromLTRB(16, 24, 16, 24),
+                        child: Text(
+                          'Nenhum produto encontrado para essa categoria.',
+                          style: TextStyle(
+                            fontFamily: 'Figtree',
+                            fontSize: 14,
+                            color: AppColors.placeholder,
+                          ),
+                        ),
+                      );
+                    }
                     final homeProducts = results
                         .map(
                           (r) => HomeProduct(

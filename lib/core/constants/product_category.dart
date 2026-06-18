@@ -1,21 +1,23 @@
 /// Product categories shared between mobile and backend.
 ///
-/// The enum name is the wire value sent to the backend. The [label] is the
-/// Portuguese display name shown in the UI. Both sides must keep this list in
-/// sync with the backend `ProductCategory` enum.
+/// [wireValue] is the exact backend `ProductCategory` enum constant sent to the
+/// API (Spring parses the query param with a case-sensitive `valueOf`). [label]
+/// is the Portuguese display name shown in the UI. Keep both in sync with the
+/// backend `br.com.ragro.domain.enums.ProductCategory` enum.
 enum ProductCategory {
-  fruits('Frutas'),
-  vegetables('Verduras'),
-  legumes('Legumes'),
-  dairy('Laticínios'),
-  eggs('Ovos'),
-  grainsCereals('Grãos e Cereais'),
-  meats('Carnes'),
-  honeyDerivatives('Mel e Derivados'),
-  artisanalProcessed('Processados Artesanais'),
-  plantsSeedlings('Plantas e Mudas');
+  fruits('Frutas', 'FRUTAS'),
+  vegetables('Verduras', 'VERDURAS'),
+  legumes('Legumes', 'LEGUMES'),
+  dairy('Laticínios', 'LATICINIOS'),
+  eggs('Ovos', 'OVOS'),
+  grainsCereals('Grãos e Cereais', 'GRAOS_E_CEREAIS'),
+  meats('Carnes', 'CARNES'),
+  honeyDerivatives('Mel e Derivados', 'MEL_E_DERIVADOS'),
+  artisanalProcessed('Processados Artesanais', 'PROCESSADOS_ARTESANAIS'),
+  plantsSeedlings('Plantas e Mudas', 'PLANTAS_E_MUDAS');
 
-  const ProductCategory(this.label);
+  const ProductCategory(this.label, this.wireValue);
 
   final String label;
+  final String wireValue;
 }
