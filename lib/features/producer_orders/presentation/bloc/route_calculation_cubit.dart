@@ -21,11 +21,9 @@ class RouteCalculationCubit extends Cubit<RouteCalculationState> {
   final ProducerOrdersRepository _ordersRepository;
   final RouteRepository _routeRepository;
 
-  /// Source of truth for all routable deliveries; the displayed list is derived
-  /// from this plus already-confirmed deliveries.
+
   List<RouteDelivery> _allDeliveries = const [];
 
-  /// Ensures CO2 savings are recorded only once per route session.
   bool _savingsRecorded = false;
 
   RouteCalculationCubit(
@@ -42,7 +40,9 @@ class RouteCalculationCubit extends Cubit<RouteCalculationState> {
       emit(
         state.copyWith(
           averageConsumption:
-              defaultConsumptionByVehicle[state.selectedVehicle] ?? '10',
+              defaultConsumptionByVehicleAndFuel[state.selectedVehicle]
+                  ?[state.selectedFuel] ??
+              '',
         ),
       );
     }
@@ -85,14 +85,14 @@ class RouteCalculationCubit extends Cubit<RouteCalculationState> {
     'Caminhão': ['Diesel', 'Elétrico'],
   };
 
-  /// Default consumption (km/L) per vehicle, used when the producer leaves it
-  /// blank to avoid the backend's "consumption required" error and still
-  /// estimate CO2. The producer can override it.
-  static const Map<String, String> defaultConsumptionByVehicle = {
-    'Carro': '12',
-    'Moto': '35',
-    'Van': '9',
-    'Caminhão': '5',
+  /// Default consumption (km/L) per vehicle+fuel combination, mirroring the
+  /// backend table (Co2Service.DEFAULT_AVERAGE_CONSUMPTION). Null means the
+  /// combination produces no emissions (electric), so the field is left blank.
+  static const Map<String, Map<String, String?>> defaultConsumptionByVehicleAndFuel = {
+    'Moto':     {'Gasolina': '30',  'Etanol': '22',  'Elétrico': null},
+    'Carro':    {'Gasolina': '12',  'Etanol': '8,5', 'Diesel': '14', 'Elétrico': null},
+    'Van':      {'Gasolina': '8',   'Diesel': '8',   'Elétrico': null},
+    'Caminhão': {'Diesel': '6',     'Elétrico': null},
   };
 
   void updateFormData({String? vehicle, String? fuel, String? consumption}) {
@@ -106,13 +106,17 @@ class RouteCalculationCubit extends Cubit<RouteCalculationState> {
       nextFuel = allowed.first;
     }
 
-    // When switching vehicle with no consumption set, use the new vehicle's default.
-    final nextConsumption =
-        consumption ??
-        (vehicle != null && state.averageConsumption.trim().isEmpty
-            ? (defaultConsumptionByVehicle[nextVehicle] ??
-                  state.averageConsumption)
-            : state.averageConsumption);
+    // When vehicle or fuel changes, reset to the table default for that combination.
+    // Null default (electric) becomes an empty string so the field is cleared.
+    final String nextConsumption;
+    if (consumption != null) {
+      nextConsumption = consumption;
+    } else if (vehicle != null || fuel != null) {
+      nextConsumption =
+          defaultConsumptionByVehicleAndFuel[nextVehicle]?[nextFuel] ?? '';
+    } else {
+      nextConsumption = state.averageConsumption;
+    }
 
     emit(
       state.copyWith(

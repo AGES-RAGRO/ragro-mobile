@@ -723,14 +723,8 @@ class _Co2BottomSheetContentState extends State<_Co2BottomSheetContent> {
                   context.read<RouteCalculationCubit>().updateFormData(
                     vehicle: val,
                   );
-                  // Sync the field with the new vehicle's default consumption
-                  // when no value has been entered yet.
-                  final preset =
-                      RouteCalculationCubit.defaultConsumptionByVehicle[val];
-                  if (preset != null &&
-                      _consumptionController.text.trim().isEmpty) {
-                    _consumptionController.text = preset;
-                  }
+                  _consumptionController.text =
+                      context.read<RouteCalculationCubit>().state.averageConsumption;
                 },
               ),
               const SizedBox(height: 16),
@@ -758,9 +752,13 @@ class _Co2BottomSheetContentState extends State<_Co2BottomSheetContent> {
                           return DropdownMenuItem(value: e, child: Text(e));
                         })
                         .toList(),
-                onChanged: (val) => context
-                    .read<RouteCalculationCubit>()
-                    .updateFormData(fuel: val),
+                onChanged: (val) {
+                  context.read<RouteCalculationCubit>().updateFormData(
+                    fuel: val,
+                  );
+                  _consumptionController.text =
+                      context.read<RouteCalculationCubit>().state.averageConsumption;
+                },
               ),
               const SizedBox(height: 16),
               const Text(
