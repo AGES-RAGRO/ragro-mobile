@@ -70,3 +70,4 @@ env/prod.json
 env/staging.json
 
 Env.xcconfigPITCH_RAGRO.md
+env/local-device.json
