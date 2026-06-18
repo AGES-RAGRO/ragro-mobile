@@ -282,20 +282,24 @@ class _ProductDetailView extends StatelessWidget {
                     children: [
                       Container(
                         height: 53,
-                        width: 113,
                         decoration: BoxDecoration(
                           color: const Color(0xFFF1F5F9),
                           borderRadius: BorderRadius.circular(9999),
                         ),
                         child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          mainAxisSize: MainAxisSize.min,
                           children: [
                             GestureDetector(
+                              behavior: HitTestBehavior.opaque,
                               onTap: () =>
                                   context.read<ProductDetailBloc>().add(
                                     const ProductDetailQuantityDecremented(),
                                   ),
-                              child: const Icon(Icons.remove, size: 16),
+                              child: const SizedBox(
+                                width: 48,
+                                height: 53,
+                                child: Icon(Icons.remove, size: 16),
+                              ),
                             ),
                             Text(
                               quantity.toString(),
@@ -306,11 +310,16 @@ class _ProductDetailView extends StatelessWidget {
                               ),
                             ),
                             GestureDetector(
+                              behavior: HitTestBehavior.opaque,
                               onTap: () =>
                                   context.read<ProductDetailBloc>().add(
                                     const ProductDetailQuantityIncremented(),
                                   ),
-                              child: const Icon(Icons.add, size: 14),
+                              child: const SizedBox(
+                                width: 48,
+                                height: 53,
+                                child: Icon(Icons.add, size: 16),
+                              ),
                             ),
                           ],
                         ),
