@@ -158,12 +158,13 @@ class _SearchViewState extends State<_SearchView> {
                             label: c.label,
                             isSelected: _selectedCategory == c,
                             onTap: () {
-                              setState(() => _selectedCategory = c);
+                              final isDeselecting = _selectedCategory == c;
+                              setState(() => _selectedCategory = isDeselecting ? null : c);
                               context.read<SearchBloc>().add(
-                                SearchCategoryChanged(c.wireValue),
+                                SearchCategoryChanged(isDeselecting ? null : c.wireValue),
                               );
                               context.read<SearchBloc>().add(
-                                SearchCategoryProductsRequested(c.wireValue),
+                                SearchCategoryProductsRequested(isDeselecting ? '' : c.wireValue),
                               );
                             },
                           );

@@ -16,6 +16,17 @@ abstract final class ApiEndpoints {
       return _normalizeForRuntime(normalized);
     }
 
+    // Fallback: read from process environment (set via Xcode scheme LaunchAction
+    // or `flutter run --dart-define` equivalent via shell env). This lets a
+    // physical iOS device pick up the Mac's LAN IP without a recompile.
+    if (!kIsWeb) {
+      final runtimeBase = Platform.environment['API_BASE_URL'] ?? '';
+      if (runtimeBase.trim().isNotEmpty) {
+        final normalized = runtimeBase.trim().replaceFirst(RegExp(r'\/+$'), '');
+        return _normalizeForRuntime(normalized);
+      }
+    }
+
     return _normalizeForRuntime(_localBase);
   }
 

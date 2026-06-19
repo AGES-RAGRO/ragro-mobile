@@ -391,25 +391,29 @@ class _ProducerProfileView extends StatelessWidget {
                       ],
                     ),
                   ),
-                  const SizedBox(height: 12),
-                  OutlinedButton.icon(
-                    onPressed: () => _openEditProfile(context),
-                    icon: const Icon(Icons.edit_outlined, size: 16),
-                    label: const Text('Editar Perfil'),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: AppColors.darkGreen,
-                      side: const BorderSide(color: AppColors.darkGreen),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(24),
-                      ),
-                      textStyle: const TextStyle(
-                        fontFamily: 'Manrope',
-                        fontWeight: FontWeight.w600,
-                        fontSize: 14,
-                      ),
-                    ),
-                  ),
                 ],
+              ),
+            ),
+          ),
+
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
+            child: FilledButton.icon(
+              onPressed: () => _openEditProfile(context),
+              icon: const Icon(Icons.edit_outlined, size: 16),
+              label: const Text('Editar Perfil'),
+              style: FilledButton.styleFrom(
+                backgroundColor: AppColors.darkGreen,
+                foregroundColor: AppColors.white,
+                minimumSize: const Size(double.infinity, 48),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(24),
+                ),
+                textStyle: const TextStyle(
+                  fontFamily: 'Manrope',
+                  fontWeight: FontWeight.w600,
+                  fontSize: 14,
+                ),
               ),
             ),
           ),
