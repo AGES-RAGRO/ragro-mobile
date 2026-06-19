@@ -104,6 +104,7 @@ class _ConfirmDeliveryCodeDialogState extends State<ConfirmDeliveryCodeDialog> {
                   width: 56,
                   height: 64,
                   decoration: BoxDecoration(
+                    color: Colors.white,
                     border: Border.all(
                       color: _hasError
                           ? AppColors.red
@@ -112,32 +113,41 @@ class _ConfirmDeliveryCodeDialogState extends State<ConfirmDeliveryCodeDialog> {
                     ),
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: TextField(
-                    controller: _controllers[i],
-                    focusNode: _focusNodes[i],
-                    keyboardType: TextInputType.number,
-                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                    textAlign: TextAlign.center,
-                    maxLength: 1,
-                    style: TextStyle(
-                      fontFamily: 'Manrope',
-                      fontWeight: FontWeight.w800,
-                      fontSize: 28,
-                      color: _hasError ? AppColors.red : AppColors.darkGreen,
+                  child: Theme(
+                    data: Theme.of(context).copyWith(
+                      inputDecorationTheme: const InputDecorationTheme(
+                        filled: false,
+                      ),
                     ),
-                    decoration: const InputDecoration(
-                      counterText: '',
-                      border: InputBorder.none,
+                    child: TextField(
+                      controller: _controllers[i],
+                      focusNode: _focusNodes[i],
+                      keyboardType: TextInputType.number,
+                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                      textAlign: TextAlign.center,
+                      maxLength: 1,
+                      cursorColor: AppColors.darkGreen,
+                      style: TextStyle(
+                        fontFamily: 'Manrope',
+                        fontWeight: FontWeight.w800,
+                        fontSize: 28,
+                        color: _hasError ? AppColors.red : AppColors.darkGreen,
+                      ),
+                      decoration: const InputDecoration(
+                        counterText: '',
+                        border: InputBorder.none,
+                        filled: false,
+                      ),
+                      onChanged: (value) {
+                        if (value.isNotEmpty && i < 3) {
+                          _focusNodes[i + 1].requestFocus();
+                        }
+                        if (value.isEmpty && i > 0) {
+                          _focusNodes[i - 1].requestFocus();
+                        }
+                        setState(() => _hasError = false);
+                      },
                     ),
-                    onChanged: (value) {
-                      if (value.isNotEmpty && i < 3) {
-                        _focusNodes[i + 1].requestFocus();
-                      }
-                      if (value.isEmpty && i > 0) {
-                        _focusNodes[i - 1].requestFocus();
-                      }
-                      setState(() => _hasError = false);
-                    },
                   ),
                 );
               }),
