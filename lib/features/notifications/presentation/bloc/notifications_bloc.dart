@@ -21,6 +21,7 @@ class NotificationsBloc extends Bloc<NotificationsEvent, NotificationsState> {
     on<NotificationsRefreshed>(_onRefreshed);
     on<NotificationMarkedAsRead>(_onMarkedAsRead);
     on<NotificationsAllMarkedAsRead>(_onAllMarkedAsRead);
+    on<NotificationsReset>(_onReset);
   }
 
   final GetNotifications _getNotifications;
@@ -104,6 +105,12 @@ class NotificationsBloc extends Bloc<NotificationsEvent, NotificationsState> {
         ),
       );
     }
+  }
+
+  void _onReset(NotificationsReset event, Emitter<NotificationsState> emit) {
+    _notifications = const [];
+    _unreadCount = 0;
+    emit(const NotificationsInitial());
   }
 
   Future<void> _loadNotifications(Emitter<NotificationsState> emit) async {

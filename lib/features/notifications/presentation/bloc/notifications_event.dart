@@ -31,3 +31,8 @@ class NotificationMarkedAsRead extends NotificationsEvent {
 class NotificationsAllMarkedAsRead extends NotificationsEvent {
   const NotificationsAllMarkedAsRead();
 }
+
+/// Clears in-memory state on logout so notifications don't leak across sessions.
+class NotificationsReset extends NotificationsEvent {
+  const NotificationsReset();
+}

@@ -145,4 +145,21 @@ void main() {
     ],
     verify: (_) => verify(markAll.call).called(1),
   );
+
+  blocTest<NotificationsBloc, NotificationsState>(
+    'NotificationsReset clears state back to initial (logout)',
+    setUp: () {
+      when(getUnreadCount.call).thenAnswer((_) async => 5);
+    },
+    build: buildBloc,
+    act: (bloc) async {
+      bloc.add(const NotificationsUnreadCountRequested());
+      await bloc.stream.firstWhere((s) => s is NotificationsLoaded);
+      bloc.add(const NotificationsReset());
+    },
+    expect: () => [
+      isA<NotificationsLoaded>().having((s) => s.unreadCount, 'unreadCount', 5),
+      const NotificationsInitial(),
+    ],
+  );
 }

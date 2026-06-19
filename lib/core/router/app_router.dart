@@ -224,15 +224,14 @@ class AppRouter {
                 ),
               ],
             ),
-            StatefulShellBranch(
-              routes: [
-                GoRoute(
-                  path: '/customer/notifications',
-                  builder: (_, __) => const NotificationsPage(),
-                ),
-              ],
-            ),
           ],
+        ),
+
+        // Notifications — pushed routes (not shell tabs) so the back button
+        // pops to the screen that opened them, from any origin.
+        GoRoute(
+          path: '/customer/notifications',
+          builder: (_, __) => const NotificationsPage(),
         ),
 
         // Cart & Checkout routes
@@ -272,7 +271,7 @@ class AppRouter {
           ],
         ),
 
-        // Producer shell with 4 tabs
+        // Producer shell with 3 tabs
         StatefulShellRoute.indexedStack(
           builder: (_, __, shell) => ProducerShell(navigationShell: shell),
           branches: [
@@ -390,15 +389,13 @@ class AppRouter {
                 ),
               ],
             ),
-            StatefulShellBranch(
-              routes: [
-                GoRoute(
-                  path: '/producer/notifications',
-                  builder: (_, __) => const NotificationsPage(),
-                ),
-              ],
-            ),
           ],
+        ),
+
+        // Producer notifications — pushed route (mirrors the customer one).
+        GoRoute(
+          path: '/producer/notifications',
+          builder: (_, __) => const NotificationsPage(),
         ),
 
         // Admin routes

@@ -75,6 +75,9 @@ abstract final class ApiEndpoints {
   static String get customerNotificationsReadAll =>
       '$_base/customers/me/notifications/read-all';
 
+  // FCM device-token registration (role-agnostic; any authenticated user).
+  static String get notificationToken => '$_base/notifications/token';
+
   static String get producerNotifications => '$_base/producers/me/notifications';
   static String get producerNotificationsUnreadCount =>
       '$_base/producers/me/notifications/unread-count';

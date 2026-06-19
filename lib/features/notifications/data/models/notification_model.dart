@@ -23,6 +23,15 @@ class AppNotificationModel extends AppNotificationEntity {
     );
   }
 
+  /// Canonical JSON used for the local cache; round-trips with fromJson.
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'title': title,
+    'message': message,
+    'read': read,
+    'createdAt': createdAt.toIso8601String(),
+  };
+
   static bool _parseRead(Map<String, dynamic> json) {
     for (final key in const ['read', 'isRead', 'is_read', 'visualized']) {
       final value = json[key];
