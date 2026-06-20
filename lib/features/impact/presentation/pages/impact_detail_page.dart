@@ -2,10 +2,12 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 import 'package:ragro_mobile/core/di/injection.dart';
 import 'package:ragro_mobile/core/network/api_client.dart';
 import 'package:ragro_mobile/core/network/api_endpoints.dart';
 import 'package:ragro_mobile/core/theme/app_colors.dart';
+import 'package:ragro_mobile/features/producer_orders/data/models/co2_response_model.dart';
 
 const _kCloudSvg = '''
 <svg width="43" height="32" viewBox="0 0 43 32" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -25,6 +27,7 @@ class ImpactDetailPage extends StatefulWidget {
 class _ImpactDetailPageState extends State<ImpactDetailPage> {
   double _totalCo2Saved = 0;
   int _totalProducers = 0;
+  List<Co2EmissionRecord> _emissions = [];
   bool _loading = true;
 
   @override
@@ -42,21 +45,26 @@ class _ImpactDetailPageState extends State<ImpactDetailPage> {
           ApiEndpoints.producers,
           queryParameters: {'page': 0, 'size': 1},
         ),
+        apiClient.dio.get<List<dynamic>>(ApiEndpoints.co2Emissions),
       ]);
 
-      final co2Response = results[0];
-      final producersResponse = results[1];
+      final co2Response = results[0] as Response<Map<String, dynamic>>;
+      final producersResponse = results[1] as Response<Map<String, dynamic>>;
+      final emissionsResponse = results[2] as Response<List<dynamic>>;
 
       final total =
           (co2Response.data?['totalCo2Saved'] as num?)?.toDouble() ?? 0;
-
       final totalProducers =
           (producersResponse.data?['totalElements'] as num?)?.toInt() ?? 0;
+      final emissions = (emissionsResponse.data ?? [])
+          .map((e) => Co2EmissionRecord.fromJson(e as Map<String, dynamic>))
+          .toList();
 
       if (mounted) {
         setState(() {
           _totalCo2Saved = total;
           _totalProducers = totalProducers;
+          _emissions = emissions;
           _loading = false;
         });
       }
@@ -71,13 +79,22 @@ class _ImpactDetailPageState extends State<ImpactDetailPage> {
     }
   }
 
+  ({String value, String unit}) get _co2Display {
+    if (_totalCo2Saved < 1000) {
+      return (
+        value: _totalCo2Saved.toStringAsFixed(1).replaceAll('.', ','),
+        unit: 'kg de CO₂',
+      );
+    }
+    return (
+      value: (_totalCo2Saved / 1000).toStringAsFixed(2).replaceAll('.', ','),
+      unit: 't de CO₂',
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    // _totalCo2Saved is in kg -> tonnes, 2 decimals (comma), so partial values
-    // (< 1 t) show instead of rounding to 0.
-    final co2Value = (_totalCo2Saved / 1000)
-        .toStringAsFixed(2)
-        .replaceAll('.', ',');
+    final display = _co2Display;
 
     return Scaffold(
       backgroundColor: AppColors.white,
@@ -158,63 +175,62 @@ class _ImpactDetailPageState extends State<ImpactDetailPage> {
                                 ),
                               ),
                               const SizedBox(width: 16),
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  const Text(
-                                    'Mais de',
-                                    style: TextStyle(
-                                      fontFamily: 'Figtree',
-                                      fontSize: 14,
-                                      color: Color(0xFF64748B),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const Text(
+                                      'Mais de',
+                                      style: TextStyle(
+                                        fontFamily: 'Figtree',
+                                        fontSize: 14,
+                                        color: Color(0xFF64748B),
+                                      ),
                                     ),
-                                  ),
-                                  const SizedBox(height: 2),
-                                  Row(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.baseline,
-                                    textBaseline: TextBaseline.alphabetic,
-                                    children: [
-                                      Text(
-                                        co2Value,
-                                        style: const TextStyle(
-                                          fontFamily: 'Figtree',
-                                          fontWeight: FontWeight.w700,
-                                          fontSize: 56,
-                                          color: AppColors.darkGreen,
-                                          height: 1,
-                                        ),
+                                    const SizedBox(height: 2),
+                                    FittedBox(
+                                      fit: BoxFit.scaleDown,
+                                      alignment: Alignment.centerLeft,
+                                      child: Row(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.baseline,
+                                        textBaseline: TextBaseline.alphabetic,
+                                        children: [
+                                          Text(
+                                            display.value,
+                                            style: const TextStyle(
+                                              fontFamily: 'Figtree',
+                                              fontWeight: FontWeight.w700,
+                                              fontSize: 56,
+                                              color: AppColors.darkGreen,
+                                              height: 1,
+                                            ),
+                                          ),
+                                          const SizedBox(width: 4),
+                                          Text(
+                                            display.unit,
+                                            style: const TextStyle(
+                                              fontFamily: 'Figtree',
+                                              fontWeight: FontWeight.w500,
+                                              fontSize: 18,
+                                              color: AppColors.darkGreen,
+                                            ),
+                                          ),
+                                        ],
                                       ),
-                                      const Text(
-                                        't de CO',
-                                        style: TextStyle(
-                                          fontFamily: 'Figtree',
-                                          fontWeight: FontWeight.w500,
-                                          fontSize: 18,
-                                          color: AppColors.darkGreen,
-                                        ),
-                                      ),
-                                      const Text(
-                                        '₂',
-                                        style: TextStyle(
-                                          fontFamily: 'Figtree',
-                                          fontSize: 12,
-                                          color: AppColors.darkGreen,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 4),
-                                  const Text(
-                                    'poupadas com a Ragro',
-                                    style: TextStyle(
-                                      fontFamily: 'Figtree',
-                                      fontSize: 13,
-                                      color: Color(0xFF64748B),
                                     ),
-                                  ),
-                                ],
+                                    const SizedBox(height: 4),
+                                    const Text(
+                                      'poupadas com a Ragro',
+                                      style: TextStyle(
+                                        fontFamily: 'Figtree',
+                                        fontSize: 13,
+                                        color: Color(0xFF64748B),
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
                             ],
                           ),
@@ -233,7 +249,7 @@ class _ImpactDetailPageState extends State<ImpactDetailPage> {
                         ),
                         const SizedBox(height: 16),
 
-                        IntrinsicHeight(
+                        const IntrinsicHeight(
                           child: Row(
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
@@ -245,7 +261,7 @@ class _ImpactDetailPageState extends State<ImpactDetailPage> {
                                       'Conectamos você a produtores da sua região',
                                 ),
                               ),
-                              const SizedBox(width: 10),
+                              SizedBox(width: 10),
                               Expanded(
                                 child: _ImpactCard(
                                   icon: Icons.local_shipping_outlined,
@@ -254,7 +270,7 @@ class _ImpactDetailPageState extends State<ImpactDetailPage> {
                                       'Menor distância, menos emissões',
                                 ),
                               ),
-                              const SizedBox(width: 10),
+                              SizedBox(width: 10),
                               Expanded(
                                 child: _ImpactCard(
                                   icon: Icons.eco_outlined,
@@ -268,6 +284,28 @@ class _ImpactDetailPageState extends State<ImpactDetailPage> {
                         ),
 
                         const SizedBox(height: 36),
+
+                        if (_emissions.isNotEmpty) ...[
+                          const Text(
+                            'Seus trajetos',
+                            style: TextStyle(
+                              fontFamily: 'Figtree',
+                              fontWeight: FontWeight.w700,
+                              fontSize: 16,
+                              color: AppColors.darkGreen,
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          ListView.separated(
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            itemCount: _emissions.length,
+                            separatorBuilder: (_, __) =>
+                                const SizedBox(height: 8),
+                            itemBuilder: (_, i) => _EmissionTile(_emissions[i]),
+                          ),
+                          const SizedBox(height: 36),
+                        ],
 
                         const Text(
                           'Nosso impacto juntos',
@@ -429,6 +467,115 @@ class _ImpactDetailPageState extends State<ImpactDetailPage> {
                 ),
               ],
             ),
+    );
+  }
+}
+
+class _EmissionTile extends StatelessWidget {
+  const _EmissionTile(this.record);
+
+  final Co2EmissionRecord record;
+
+  static const _vehicleLabels = {
+    'MOTORCYCLE': 'Moto',
+    'CAR': 'Carro',
+    'VAN': 'Van',
+    'LIGHT_TRUCK': 'Caminhão leve',
+  };
+
+  static const _vehicleIcons = {
+    'MOTORCYCLE': Icons.two_wheeler,
+    'CAR': Icons.directions_car_outlined,
+    'VAN': Icons.airport_shuttle_outlined,
+    'LIGHT_TRUCK': Icons.local_shipping_outlined,
+  };
+
+  static const _fuelLabels = {
+    'GASOLINE': 'Gasolina',
+    'ETHANOL': 'Etanol',
+    'DIESEL': 'Diesel',
+    'ELECTRIC': 'Elétrico',
+  };
+
+  @override
+  Widget build(BuildContext context) {
+    final date = DateFormat('dd/MM/yyyy').format(record.createdAt.toLocal());
+    final vehicleLabel =
+        _vehicleLabels[record.vehicleType] ?? record.vehicleType;
+    final fuelLabel = _fuelLabels[record.fuelType] ?? record.fuelType;
+    final icon =
+        _vehicleIcons[record.vehicleType] ?? Icons.directions_car_outlined;
+    final emissionKg = record.co2Emission.toStringAsFixed(2);
+    final distanceKm = record.routeDistanceKm.toStringAsFixed(1);
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: const Color(0xFFE2E8F0)),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 44,
+            height: 44,
+            decoration: const BoxDecoration(
+              color: _kIconBg,
+              shape: BoxShape.circle,
+            ),
+            child: Icon(icon, color: AppColors.darkGreen, size: 22),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '$vehicleLabel · $fuelLabel',
+                  style: const TextStyle(
+                    fontFamily: 'Figtree',
+                    fontWeight: FontWeight.w600,
+                    fontSize: 14,
+                    color: AppColors.darkGreen,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  '$distanceKm km · $date',
+                  style: const TextStyle(
+                    fontFamily: 'Figtree',
+                    fontSize: 12,
+                    color: Color(0xFF64748B),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(
+                '$emissionKg kg',
+                style: const TextStyle(
+                  fontFamily: 'Figtree',
+                  fontWeight: FontWeight.w700,
+                  fontSize: 14,
+                  color: AppColors.darkGreen,
+                ),
+              ),
+              const Text(
+                'CO₂',
+                style: TextStyle(
+                  fontFamily: 'Figtree',
+                  fontSize: 11,
+                  color: Color(0xFF64748B),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }

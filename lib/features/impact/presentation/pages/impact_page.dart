@@ -63,13 +63,22 @@ class _ImpactPageState extends State<ImpactPage> {
     }
   }
 
+  ({String value, String unit}) get _co2Display {
+    if (_totalCo2Saved < 1000) {
+      return (
+        value: _totalCo2Saved.toStringAsFixed(1).replaceAll('.', ','),
+        unit: 'kg de CO₂',
+      );
+    }
+    return (
+      value: (_totalCo2Saved / 1000).toStringAsFixed(2).replaceAll('.', ','),
+      unit: 'toneladas de CO₂',
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    // _totalCo2Saved is in kg -> tonnes, 2 decimals (comma), so partial values
-    // (< 1 t) show instead of rounding to 0.
-    final co2Value = (_totalCo2Saved / 1000)
-        .toStringAsFixed(2)
-        .replaceAll('.', ',');
+    final display = _co2Display;
 
     return Scaffold(
       backgroundColor: AppColors.white,
@@ -95,20 +104,23 @@ class _ImpactPageState extends State<ImpactPage> {
               const SizedBox(height: 16),
               _loading
                   ? const CircularProgressIndicator(color: AppColors.darkGreen)
-                  : Text(
-                      co2Value,
-                      style: const TextStyle(
-                        fontFamily: 'Figtree',
-                        fontWeight: FontWeight.w700,
-                        fontSize: 96,
-                        color: AppColors.darkGreen,
-                        height: 1,
+                  : FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text(
+                        display.value,
+                        style: const TextStyle(
+                          fontFamily: 'Figtree',
+                          fontWeight: FontWeight.w700,
+                          fontSize: 96,
+                          color: AppColors.darkGreen,
+                          height: 1,
+                        ),
                       ),
                     ),
               const SizedBox(height: 8),
-              const Text(
-                'toneladas de CO₂',
-                style: TextStyle(
+              Text(
+                display.unit,
+                style: const TextStyle(
                   fontFamily: 'Figtree',
                   fontWeight: FontWeight.w500,
                   fontSize: 20,
