@@ -11,6 +11,7 @@ import 'package:ragro_mobile/features/producer_orders/presentation/bloc/producer
 import 'package:ragro_mobile/features/producer_orders/presentation/bloc/producer_orders_event.dart';
 import 'package:ragro_mobile/features/producer_orders/presentation/bloc/producer_orders_state.dart';
 import 'package:ragro_mobile/features/producer_orders/presentation/widgets/producer_order_card.dart';
+import 'package:ragro_mobile/shared/widgets/notification_bell.dart';
 
 class ProducerOrdersPage extends StatelessWidget {
   const ProducerOrdersPage({super.key});
@@ -117,15 +118,21 @@ class _ProducerOrdersViewState extends State<_ProducerOrdersView> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Padding(
-                padding: EdgeInsets.fromLTRB(20, 16, 20, 4),
-                child: Text(
-                  'Pedidos',
-                  style: TextStyle(
-                    fontFamily: 'Figtree',
-                    fontWeight: FontWeight.w700,
-                    fontSize: 34,
-                    color: AppColors.darkGreen,
-                  ),
+                padding: EdgeInsets.fromLTRB(20, 12, 6, 4),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Pedidos',
+                      style: TextStyle(
+                        fontFamily: 'Figtree',
+                        fontWeight: FontWeight.w700,
+                        fontSize: 34,
+                        color: AppColors.darkGreen,
+                      ),
+                    ),
+                    NotificationBell(),
+                  ],
                 ),
               ),
               Padding(

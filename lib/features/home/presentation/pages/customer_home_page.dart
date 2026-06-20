@@ -15,6 +15,7 @@ import 'package:ragro_mobile/features/recommendations/domain/entities/recommenda
 import 'package:ragro_mobile/features/recommendations/presentation/bloc/recommendations_bloc.dart';
 import 'package:ragro_mobile/features/recommendations/presentation/bloc/recommendations_event.dart';
 import 'package:ragro_mobile/features/recommendations/presentation/bloc/recommendations_state.dart';
+import 'package:ragro_mobile/shared/widgets/notification_bell.dart';
 
 class CustomerHomePage extends StatelessWidget {
   const CustomerHomePage({super.key});
@@ -99,15 +100,22 @@ class _CustomerHomeViewState extends State<_CustomerHomeView> {
                         slivers: [
                           const SliverToBoxAdapter(
                             child: Padding(
-                              padding: EdgeInsets.fromLTRB(16, 16, 16, 0),
-                              child: Text(
-                                'Início',
-                                style: TextStyle(
-                                  fontFamily: 'Figtree',
-                                  fontWeight: FontWeight.w700,
-                                  fontSize: 34,
-                                  color: AppColors.darkGreen,
-                                ),
+                              padding: EdgeInsets.fromLTRB(16, 12, 6, 0),
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    'Início',
+                                    style: TextStyle(
+                                      fontFamily: 'Figtree',
+                                      fontWeight: FontWeight.w700,
+                                      fontSize: 34,
+                                      color: AppColors.darkGreen,
+                                    ),
+                                  ),
+                                  NotificationBell(),
+                                ],
                               ),
                             ),
                           ),
