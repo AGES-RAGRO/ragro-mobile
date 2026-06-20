@@ -202,7 +202,7 @@ import 'package:ragro_mobile/features/producer_orders/data/repositories/route_re
 import 'package:ragro_mobile/features/producer_orders/domain/repositories/producer_orders_repository.dart'
     as _i649;
 import 'package:ragro_mobile/features/producer_orders/domain/usecases/confirm_producer_delivery_with_code.dart'
-    as _i742;
+    as _i474;
 import 'package:ragro_mobile/features/producer_orders/domain/usecases/confirm_producer_order.dart'
     as _i141;
 import 'package:ragro_mobile/features/producer_orders/domain/usecases/get_producer_order_detail.dart'
@@ -597,9 +597,10 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i671.ActivateAdminProducer>(),
       ),
     );
-    gh.lazySingleton<_i742.ConfirmProducerDeliveryWithCode>(
-      () => _i742.ConfirmProducerDeliveryWithCode(
-          gh<_i649.ProducerOrdersRepository>()),
+    gh.lazySingleton<_i474.ConfirmProducerDeliveryWithCode>(
+      () => _i474.ConfirmProducerDeliveryWithCode(
+        gh<_i649.ProducerOrdersRepository>(),
+      ),
     );
     gh.lazySingleton<_i141.ConfirmProducerOrder>(
       () => _i141.ConfirmProducerOrder(gh<_i649.ProducerOrdersRepository>()),
@@ -691,17 +692,17 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i774.ConfirmCustomerDelivery>(),
       ),
     );
+    gh.factory<_i432.RateProducerBloc>(
+      () => _i432.RateProducerBloc(gh<_i5.CreateReview>()),
+    );
     gh.factory<_i921.ProducerOrderDetailBloc>(
       () => _i921.ProducerOrderDetailBloc(
         gh<_i181.GetProducerOrderDetail>(),
         gh<_i141.ConfirmProducerOrder>(),
         gh<_i885.RefuseProducerOrder>(),
         gh<_i1038.UpdateProducerOrderStatus>(),
-        gh<_i742.ConfirmProducerDeliveryWithCode>(),
+        gh<_i474.ConfirmProducerDeliveryWithCode>(),
       ),
-    );
-    gh.factory<_i432.RateProducerBloc>(
-      () => _i432.RateProducerBloc(gh<_i5.CreateReview>()),
     );
     return this;
   }

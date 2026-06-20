@@ -149,7 +149,7 @@ class _ProductDetailView extends StatelessWidget {
                                       style: const TextStyle(
                                         fontFamily: 'Figtree',
                                         fontWeight: FontWeight.w700,
-                                        fontSize: 32,
+                                        fontSize: 24,
                                         color: AppColors.black,
                                       ),
                                     ),
@@ -185,12 +185,60 @@ class _ProductDetailView extends StatelessWidget {
                               ),
                               const SizedBox(height: 16),
                               if (product.producerName.isNotEmpty)
-                                Text(
-                                  'Produtor: ${product.producerName}',
-                                  style: const TextStyle(
-                                    fontFamily: 'Figtree',
-                                    fontSize: 14,
-                                    color: AppColors.black,
+                                GestureDetector(
+                                  behavior: HitTestBehavior.opaque,
+                                  onTap: product.producerId.isEmpty
+                                      ? null
+                                      : () => context.push(
+                                          '/customer/producer/'
+                                          '${product.producerId}',
+                                        ),
+                                  child: Row(
+                                    children: [
+                                      Flexible(
+                                        child: RichText(
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          text: TextSpan(
+                                            text: 'Produtor: ',
+                                            style: const TextStyle(
+                                              fontFamily: 'Figtree',
+                                              fontSize: 14,
+                                              color: AppColors.black,
+                                            ),
+                                            children: [
+                                              TextSpan(
+                                                text: product.producerName,
+                                                style: TextStyle(
+                                                  fontFamily: 'Figtree',
+                                                  fontWeight: FontWeight.w600,
+                                                  fontSize: 14,
+                                                  color: product
+                                                          .producerId.isEmpty
+                                                      ? AppColors.black
+                                                      : AppColors.darkGreen,
+                                                  decoration: product
+                                                          .producerId.isEmpty
+                                                      ? null
+                                                      : TextDecoration
+                                                          .underline,
+                                                  decorationColor:
+                                                      AppColors.darkGreen,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                      if (product.producerId.isNotEmpty) ...[
+                                        const SizedBox(width: 4),
+                                        const Icon(
+                                          Icons.chevron_right,
+                                          size: 16,
+                                          color: AppColors.darkGreen,
+                                        ),
+                                      ],
+                                    ],
                                   ),
                                 ),
                               if (product.producerName.isNotEmpty)
@@ -282,20 +330,24 @@ class _ProductDetailView extends StatelessWidget {
                     children: [
                       Container(
                         height: 53,
-                        width: 113,
                         decoration: BoxDecoration(
                           color: const Color(0xFFF1F5F9),
                           borderRadius: BorderRadius.circular(9999),
                         ),
                         child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          mainAxisSize: MainAxisSize.min,
                           children: [
                             GestureDetector(
+                              behavior: HitTestBehavior.opaque,
                               onTap: () =>
                                   context.read<ProductDetailBloc>().add(
                                     const ProductDetailQuantityDecremented(),
                                   ),
-                              child: const Icon(Icons.remove, size: 16),
+                              child: const SizedBox(
+                                width: 48,
+                                height: 53,
+                                child: Icon(Icons.remove, size: 16),
+                              ),
                             ),
                             Text(
                               quantity.toString(),
@@ -306,11 +358,16 @@ class _ProductDetailView extends StatelessWidget {
                               ),
                             ),
                             GestureDetector(
+                              behavior: HitTestBehavior.opaque,
                               onTap: () =>
                                   context.read<ProductDetailBloc>().add(
                                     const ProductDetailQuantityIncremented(),
                                   ),
-                              child: const Icon(Icons.add, size: 14),
+                              child: const SizedBox(
+                                width: 48,
+                                height: 53,
+                                child: Icon(Icons.add, size: 16),
+                              ),
                             ),
                           ],
                         ),

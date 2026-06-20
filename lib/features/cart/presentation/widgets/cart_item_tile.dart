@@ -141,21 +141,22 @@ class CartItemTile extends StatelessWidget {
                   Row(
                     children: [
                       Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 4,
-                        ),
                         decoration: BoxDecoration(
                           color: const Color(0xFFF1F5F9),
                           borderRadius: BorderRadius.circular(9999),
                         ),
                         child: Row(
+                          mainAxisSize: MainAxisSize.min,
                           children: [
                             GestureDetector(
+                              behavior: HitTestBehavior.opaque,
                               onTap: () => _decrement(context),
-                              child: const Icon(Icons.remove, size: 14),
+                              child: const SizedBox(
+                                width: 44,
+                                height: 44,
+                                child: Icon(Icons.remove, size: 16),
+                              ),
                             ),
-                            const SizedBox(width: 12),
                             Text(
                               _formatQuantity(item.quantity),
                               style: const TextStyle(
@@ -164,10 +165,14 @@ class CartItemTile extends StatelessWidget {
                                 fontSize: 14,
                               ),
                             ),
-                            const SizedBox(width: 12),
                             GestureDetector(
+                              behavior: HitTestBehavior.opaque,
                               onTap: () => _increment(context),
-                              child: const Icon(Icons.add, size: 14),
+                              child: const SizedBox(
+                                width: 44,
+                                height: 44,
+                                child: Icon(Icons.add, size: 16),
+                              ),
                             ),
                           ],
                         ),
