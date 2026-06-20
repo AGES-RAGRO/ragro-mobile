@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:developer' as developer;
 
 import 'package:firebase_core/firebase_core.dart';
@@ -7,35 +8,51 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'package:ragro_mobile/app.dart';
 import 'package:ragro_mobile/core/di/injection.dart';
 
-/// Background/terminated message handler. Runs in its own isolate, so it cannot
-/// touch the app's DI/widget tree. The backend sends a `notification` payload,
-/// which the OS displays automatically — this handler just satisfies the FCM
-/// requirement and ensures Firebase is ready in the isolate.
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp();
 }
 
 Future<void> main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  await initializeDateFormatting('pt_BR');
+  await runZonedGuarded(() async {
+    debugPrint('>>> [RAGRO] main: start');
+    WidgetsFlutterBinding.ensureInitialized();
+    debugPrint('>>> [RAGRO] main: WidgetsFlutterBinding ok');
 
-  try {
-    await Firebase.initializeApp();
-    FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
-  } on Object catch (e, st) {
-    // No google-services.json / Firebase config: the app keeps working without
-    // push (R1/R2/R5 unaffected); FCM stays disabled until config is added.
+    await initializeDateFormatting('pt_BR');
+    debugPrint('>>> [RAGRO] main: dateFormatting ok');
+
+    try {
+      debugPrint('>>> [RAGRO] main: Firebase.initializeApp...');
+      await Firebase.initializeApp();
+      debugPrint('>>> [RAGRO] main: Firebase ok');
+      FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+      debugPrint('>>> [RAGRO] main: onBackgroundMessage ok');
+    } on Object catch (e, st) {
+      developer.log(
+        'Firebase init falhou; push desabilitado',
+        name: 'RAGRO',
+        level: 900,
+        error: e,
+        stackTrace: st,
+      );
+      debugPrint('>>> [RAGRO] main: Firebase falhou: $e');
+    }
+
+    debugPrint('>>> [RAGRO] main: configureDependencies...');
+    await configureDependencies();
+    debugPrint('>>> [RAGRO] main: configureDependencies ok');
+
+    debugPrint('>>> [RAGRO] main: runApp...');
+    runApp(const App());
+  }, (error, stack) {
+    debugPrint('>>> [RAGRO] UNCAUGHT ERROR: $error\n$stack');
     developer.log(
-      'Firebase init falhou; push desabilitado',
+      'Uncaught error em main',
       name: 'RAGRO',
-      level: 900,
-      error: e,
-      stackTrace: st,
+      level: 1000,
+      error: error,
+      stackTrace: stack,
     );
-  }
-
-  await configureDependencies();
-
-  runApp(const App());
+  });
 }

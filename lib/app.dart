@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:app_badge_plus/app_badge_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ragro_mobile/core/di/injection.dart';
@@ -11,6 +12,7 @@ import 'package:ragro_mobile/features/auth/presentation/bloc/auth_state.dart';
 import 'package:ragro_mobile/features/notifications/data/services/notification_service.dart';
 import 'package:ragro_mobile/features/notifications/presentation/bloc/notifications_bloc.dart';
 import 'package:ragro_mobile/features/notifications/presentation/bloc/notifications_event.dart';
+import 'package:ragro_mobile/features/notifications/presentation/bloc/notifications_state.dart';
 
 class App extends StatefulWidget {
   const App({super.key});
@@ -19,7 +21,7 @@ class App extends StatefulWidget {
   State<App> createState() => _AppState();
 }
 
-class _AppState extends State<App> {
+class _AppState extends State<App> with WidgetsBindingObserver {
   // The notifications bloc lives at the app root (above MaterialApp.router) so
   // every screen's bell badge AND the pushed notifications page share a single
   // source of truth, regardless of which shell/route renders them.
@@ -29,10 +31,12 @@ class _AppState extends State<App> {
 
   StreamSubscription<void>? _foregroundSub;
   bool _fcmInitialized = false;
+  int? _lastAppliedBadgeCount;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     // A foreground push means the badge may have changed: refresh from backend.
     _foregroundSub = _notificationService.onForegroundMessage.listen((_) {
       _notificationsBloc.add(const NotificationsUnreadCountRequested());
@@ -41,10 +45,20 @@ class _AppState extends State<App> {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _foregroundSub?.cancel();
     _notificationsBloc.close();
     _authBloc.close();
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state != AppLifecycleState.resumed) return;
+
+    // The backend unread count may change while the app is backgrounded or
+    // when a notification is delivered outside the foreground FCM stream.
+    _notificationsBloc.add(const NotificationsUnreadCountRequested());
   }
 
   void _onAuthChanged(AuthState state) {
@@ -55,7 +69,35 @@ class _AppState extends State<App> {
         unawaited(_notificationService.initialize());
       }
     } else {
+      _lastAppliedBadgeCount = null;
+      unawaited(_applyAppIconBadge(0));
       _notificationsBloc.add(const NotificationsReset());
+    }
+  }
+
+  Future<void> _syncAppIconBadge(NotificationsState state) async {
+    final unreadCount = switch (state) {
+      NotificationsInitial(:final unreadCount) => unreadCount,
+      NotificationsLoading(:final unreadCount) => unreadCount,
+      NotificationsLoaded(:final unreadCount) => unreadCount,
+      NotificationsFailure(:final unreadCount) => unreadCount,
+    };
+
+    if (_lastAppliedBadgeCount == unreadCount) return;
+    _lastAppliedBadgeCount = unreadCount;
+    await _applyAppIconBadge(unreadCount);
+  }
+
+  Future<void> _applyAppIconBadge(int unreadCount) async {
+    try {
+      if (!await AppBadgePlus.isSupported()) return;
+      if (unreadCount > 0) {
+        await AppBadgePlus.updateBadge(unreadCount);
+      } else {
+        await AppBadgePlus.removeBadge();
+      }
+    } on Object {
+      // Badge sync is best-effort and should never disrupt app rendering.
     }
   }
 
@@ -66,10 +108,18 @@ class _AppState extends State<App> {
         BlocProvider.value(value: _authBloc),
         BlocProvider.value(value: _notificationsBloc),
       ],
-      child: BlocListener<AuthBloc, AuthState>(
-        listenWhen: (previous, current) =>
-            (previous is AuthAuthenticated) != (current is AuthAuthenticated),
-        listener: (_, state) => _onAuthChanged(state),
+      child: MultiBlocListener(
+        listeners: [
+          BlocListener<AuthBloc, AuthState>(
+            listenWhen: (previous, current) =>
+                (previous is AuthAuthenticated) !=
+                (current is AuthAuthenticated),
+            listener: (_, state) => _onAuthChanged(state),
+          ),
+          BlocListener<NotificationsBloc, NotificationsState>(
+            listener: (_, state) => unawaited(_syncAppIconBadge(state)),
+          ),
+        ],
         child: MaterialApp.router(
           title: 'RAGRO',
           debugShowCheckedModeBanner: false,

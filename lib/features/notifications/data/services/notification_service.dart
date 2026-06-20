@@ -65,6 +65,11 @@ class NotificationService {
     try {
       final messaging = FirebaseMessaging.instance;
       await messaging.requestPermission();
+      await messaging.setForegroundNotificationPresentationOptions(
+        alert: true,
+        badge: true,
+        sound: true,
+      );
       await _setupLocalNotifications();
 
       _subs
