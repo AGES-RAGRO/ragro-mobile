@@ -302,18 +302,21 @@ class _ProducerProfileView extends StatelessWidget {
                           ),
                         ),
                         Positioned(
-                          bottom: 4,
-                          right: 4,
-                          child: Container(
-                            padding: const EdgeInsets.all(6),
-                            decoration: const BoxDecoration(
-                              color: AppColors.darkGreen,
-                              shape: BoxShape.circle,
-                            ),
-                            child: const Icon(
-                              Icons.camera_alt,
-                              size: 14,
-                              color: AppColors.white,
+                          bottom: 0,
+                          right: 0,
+                          child: GestureDetector(
+                            onTap: () => _openEditProfile(context),
+                            child: Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: const BoxDecoration(
+                                color: AppColors.darkGreen,
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(
+                                Icons.camera_alt,
+                                size: 18,
+                                color: AppColors.white,
+                              ),
                             ),
                           ),
                         ),
@@ -521,7 +524,6 @@ class _ProducerProfileView extends StatelessWidget {
           ),
 
           const SizedBox(height: 24),
-          const SizedBox(height: 20),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: _WeeklyChart(data: dashboard.weeklyChartData),
@@ -786,20 +788,20 @@ class _StatCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-            width: 24,
-            height: 24,
+            width: 40,
+            height: 40,
             decoration: BoxDecoration(
               color: iconColor.withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
-            child: Icon(icon, size: 14, color: iconColor),
+            child: Icon(icon, size: 20, color: iconColor),
           ),
-          const SizedBox(height: 26),
+          const SizedBox(height: 16),
           Text(
             label,
             style: const TextStyle(
               fontFamily: 'Manrope',
-              fontSize: 11,
+              fontSize: 14,
               color: AppColors.placeholder,
             ),
           ),
@@ -809,7 +811,7 @@ class _StatCard extends StatelessWidget {
             style: const TextStyle(
               fontFamily: 'Figtree',
               fontWeight: FontWeight.w800,
-              fontSize: 22,
+              fontSize: 28,
               color: AppColors.black,
             ),
           ),
@@ -819,7 +821,7 @@ class _StatCard extends StatelessWidget {
             style: TextStyle(
               fontFamily: 'Manrope',
               fontWeight: FontWeight.w700,
-              fontSize: 10,
+              fontSize: 12,
               color: positive ? AppColors.lightGreen : AppColors.red,
             ),
           ),

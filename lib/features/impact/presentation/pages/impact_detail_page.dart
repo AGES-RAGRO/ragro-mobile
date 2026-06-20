@@ -79,13 +79,22 @@ class _ImpactDetailPageState extends State<ImpactDetailPage> {
     }
   }
 
+  ({String value, String unit}) get _co2Display {
+    if (_totalCo2Saved < 1000) {
+      return (
+        value: _totalCo2Saved.toStringAsFixed(1).replaceAll('.', ','),
+        unit: 'kg de CO₂',
+      );
+    }
+    return (
+      value: (_totalCo2Saved / 1000).toStringAsFixed(2).replaceAll('.', ','),
+      unit: 't de CO₂',
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    // _totalCo2Saved is in kg -> tonnes, 2 decimals (comma), so partial values
-    // (< 1 t) show instead of rounding to 0.
-    final co2Value = (_totalCo2Saved / 1000)
-        .toStringAsFixed(2)
-        .replaceAll('.', ',');
+    final display = _co2Display;
 
     return Scaffold(
       backgroundColor: AppColors.white,
@@ -189,7 +198,7 @@ class _ImpactDetailPageState extends State<ImpactDetailPage> {
                                         textBaseline: TextBaseline.alphabetic,
                                         children: [
                                           Text(
-                                            co2Value,
+                                            display.value,
                                             style: const TextStyle(
                                               fontFamily: 'Figtree',
                                               fontWeight: FontWeight.w700,
@@ -198,20 +207,13 @@ class _ImpactDetailPageState extends State<ImpactDetailPage> {
                                               height: 1,
                                             ),
                                           ),
-                                          const Text(
-                                            't de CO',
-                                            style: TextStyle(
+                                          const SizedBox(width: 4),
+                                          Text(
+                                            display.unit,
+                                            style: const TextStyle(
                                               fontFamily: 'Figtree',
                                               fontWeight: FontWeight.w500,
                                               fontSize: 18,
-                                              color: AppColors.darkGreen,
-                                            ),
-                                          ),
-                                          const Text(
-                                            '₂',
-                                            style: TextStyle(
-                                              fontFamily: 'Figtree',
-                                              fontSize: 12,
                                               color: AppColors.darkGreen,
                                             ),
                                           ),

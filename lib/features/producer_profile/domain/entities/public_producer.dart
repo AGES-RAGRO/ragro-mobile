@@ -128,7 +128,7 @@ class PublicProducer extends Equatable {
   final int totalReviews;
   final String phone;
   final List<AvailabilitySlot> availability;
-  final DateTime memberSince;
+  final DateTime? memberSince;
 
   final String? photoUrl;
   final ProducerAddress? producerAddress;
@@ -136,8 +136,19 @@ class PublicProducer extends Equatable {
   final List<HomeProduct>? products;
   final List<Review>? reviews;
 
-  int get yearsOnPlatform {
-    return DateTime.now().difference(memberSince).inDays ~/ 365;
+  int? get yearsOnPlatform {
+    final memberSince = this.memberSince;
+    if (memberSince == null) return null;
+
+    final now = DateTime.now();
+    var years = now.year - memberSince.year;
+    final anniversaryThisYear = DateTime(
+      now.year,
+      memberSince.month,
+      memberSince.day,
+    );
+    if (now.isBefore(anniversaryThisYear)) years--;
+    return years;
   }
 
   @override

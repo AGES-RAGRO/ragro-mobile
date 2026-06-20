@@ -6,7 +6,6 @@ import 'package:ragro_mobile/core/di/injection.dart';
 import 'package:ragro_mobile/core/theme/app_colors.dart';
 import 'package:ragro_mobile/features/producer_orders/presentation/bloc/route_calculation_cubit.dart';
 import 'package:ragro_mobile/features/producer_orders/presentation/bloc/route_calculation_state.dart';
-import 'package:ragro_mobile/shared/utils/unity_type_label.dart';
 import 'package:ragro_mobile/shared/widgets/confirm_delivery_code_dialog.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -43,8 +42,6 @@ class _RouteCalculationViewState extends State<_RouteCalculationView> {
       return;
     }
 
-    final lat = state.producerLat ?? -16.6868;
-    final lng = state.producerLng ?? -49.2647;
     final destination = stops.last;
     final waypoints = stops.length > 1
         ? stops.sublist(0, stops.length - 1)
@@ -53,14 +50,18 @@ class _RouteCalculationViewState extends State<_RouteCalculationView> {
     // Navigation deep-link (no API key needed). Stops already come in the
     // backend's optimized order; `dir_action=navigate` opens directly into
     // turn-by-turn driving navigation.
-    final uri = Uri.https('www.google.com', '/maps/dir/', {
+    // When the producer's location is unknown, omit the origin so Google Maps
+    // uses the device's current position instead of a hardcoded fallback.
+    final params = <String, String>{
       'api': '1',
-      'origin': '$lat,$lng',
+      if (state.producerLat != null && state.producerLng != null)
+        'origin': '${state.producerLat},${state.producerLng}',
       'destination': destination,
       if (waypoints.isNotEmpty) 'waypoints': waypoints.join('|'),
       'travelmode': 'driving',
       'dir_action': 'navigate',
-    });
+    };
+    final uri = Uri.https('www.google.com', '/maps/dir/', params);
 
     if (await canLaunchUrl(uri)) {
       await launchUrl(uri, mode: LaunchMode.externalApplication);
@@ -204,7 +205,7 @@ class _RouteCalculationViewState extends State<_RouteCalculationView> {
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             fontFamily: 'Manrope',
-                            fontSize: 12,
+                            fontSize: 14,
                             color: AppColors.black,
                           ),
                         ),
@@ -215,14 +216,14 @@ class _RouteCalculationViewState extends State<_RouteCalculationView> {
                           RouteCalculationState
                         >(
                           builder: (context, state) {
-                            final lat = state.producerLat ?? -16.6868;
-                            final lng = state.producerLng ?? -49.2647;
-                            final loc = LatLng(lat, lng);
+                            final hasLocation =
+                                state.producerLat != null &&
+                                state.producerLng != null;
 
                             return ClipRRect(
                               borderRadius: BorderRadius.circular(16),
                               child: Container(
-                                height: 160,
+                                height: 180,
                                 width: double.infinity,
                                 decoration: BoxDecoration(
                                   border: Border.all(
@@ -232,27 +233,60 @@ class _RouteCalculationViewState extends State<_RouteCalculationView> {
                                 ),
                                 child: Stack(
                                   children: [
-                                    GoogleMap(
-                                      initialCameraPosition: CameraPosition(
-                                        target: loc,
-                                        zoom: 13,
-                                      ),
-                                      zoomControlsEnabled: false,
-                                      scrollGesturesEnabled: false,
-                                      rotateGesturesEnabled: false,
-                                      tiltGesturesEnabled: false,
-                                      mapToolbarEnabled: false,
-                                      markers: {
-                                        Marker(
-                                          markerId: const MarkerId('producer'),
-                                          position: loc,
-                                          icon:
-                                              BitmapDescriptor.defaultMarkerWithHue(
-                                                BitmapDescriptor.hueGreen,
-                                              ),
+                                    if (hasLocation)
+                                      GoogleMap(
+                                        initialCameraPosition: CameraPosition(
+                                          target: LatLng(
+                                            state.producerLat!,
+                                            state.producerLng!,
+                                          ),
+                                          zoom: 13,
                                         ),
-                                      },
-                                    ),
+                                        zoomControlsEnabled: false,
+                                        myLocationButtonEnabled: false,
+                                        scrollGesturesEnabled: false,
+                                        rotateGesturesEnabled: false,
+                                        tiltGesturesEnabled: false,
+                                        mapToolbarEnabled: false,
+                                        markers: {
+                                          Marker(
+                                            markerId:
+                                                const MarkerId('producer'),
+                                            position: LatLng(
+                                              state.producerLat!,
+                                              state.producerLng!,
+                                            ),
+                                            icon:
+                                                BitmapDescriptor.defaultMarkerWithHue(
+                                                  BitmapDescriptor.hueGreen,
+                                                ),
+                                          ),
+                                        },
+                                      )
+                                    else
+                                      Container(
+                                        color: const Color(0xFFF1F5F9),
+                                        child: const Center(
+                                          child: Column(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              Icon(
+                                                Icons.location_off_outlined,
+                                                color: Colors.grey,
+                                                size: 32,
+                                              ),
+                                              SizedBox(height: 8),
+                                              Text(
+                                                'Localização não disponível',
+                                                style: TextStyle(
+                                                  fontSize: 13,
+                                                  color: Colors.grey,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
                                     Positioned(
                                       bottom: 12,
                                       left: 0,
@@ -262,13 +296,13 @@ class _RouteCalculationViewState extends State<_RouteCalculationView> {
                                           onTap: _openGoogleMaps,
                                           child: Container(
                                             padding: const EdgeInsets.symmetric(
-                                              horizontal: 16,
-                                              vertical: 10,
+                                              horizontal: 20,
+                                              vertical: 12,
                                             ),
                                             decoration: BoxDecoration(
                                               color: AppColors.darkGreen,
                                               borderRadius:
-                                                  BorderRadius.circular(20),
+                                                  BorderRadius.circular(24),
                                             ),
                                             child: const Row(
                                               mainAxisSize: MainAxisSize.min,
@@ -276,7 +310,7 @@ class _RouteCalculationViewState extends State<_RouteCalculationView> {
                                                 Icon(
                                                   Icons.location_on,
                                                   color: Colors.white,
-                                                  size: 16,
+                                                  size: 22,
                                                 ),
                                                 SizedBox(width: 8),
                                                 Text(
@@ -284,14 +318,14 @@ class _RouteCalculationViewState extends State<_RouteCalculationView> {
                                                   style: TextStyle(
                                                     color: Colors.white,
                                                     fontWeight: FontWeight.w600,
-                                                    fontSize: 13,
+                                                    fontSize: 15,
                                                   ),
                                                 ),
                                                 SizedBox(width: 8),
                                                 Icon(
                                                   Icons.open_in_new,
                                                   color: Colors.white,
-                                                  size: 14,
+                                                  size: 20,
                                                 ),
                                               ],
                                             ),
@@ -432,7 +466,7 @@ class _RouteStatCard extends StatelessWidget {
             label,
             style: const TextStyle(
               fontFamily: 'Manrope',
-              fontSize: 12,
+              fontSize: 14,
               color: Colors.white70,
             ),
           ),
@@ -472,7 +506,7 @@ class _Co2CalculateCard extends StatelessWidget {
                 ),
                 Text(
                   'Calcule o CO₂ estimado',
-                  style: TextStyle(fontSize: 12, color: AppColors.darkGreen),
+                  style: TextStyle(fontSize: 14, color: AppColors.darkGreen),
                 ),
               ],
             ),
@@ -487,7 +521,7 @@ class _Co2CalculateCard extends StatelessWidget {
             ),
             child: const Text(
               'Calcular CO₂',
-              style: TextStyle(color: AppColors.darkGreen, fontSize: 12),
+              style: TextStyle(color: AppColors.darkGreen, fontSize: 14),
             ),
           ),
         ],
@@ -539,7 +573,7 @@ class _Co2ResultCard extends StatelessWidget {
                 Text(
                   '$vehicle • $fuel • $consumption km/L',
                   style: const TextStyle(
-                    fontSize: 11,
+                    fontSize: 13,
                     color: AppColors.darkGreen,
                   ),
                 ),
@@ -556,7 +590,7 @@ class _Co2ResultCard extends StatelessWidget {
             ),
             child: const Text(
               'Recalcular CO₂',
-              style: TextStyle(color: AppColors.darkGreen, fontSize: 12),
+              style: TextStyle(color: AppColors.darkGreen, fontSize: 14),
             ),
           ),
         ],
@@ -601,12 +635,12 @@ class _DeliveryItem extends StatelessWidget {
                     title,
                     style: const TextStyle(
                       fontWeight: FontWeight.bold,
-                      fontSize: 14,
+                      fontSize: 16,
                     ),
                   ),
                   Text(
                     subtitle,
-                    style: const TextStyle(fontSize: 12, color: Colors.grey),
+                    style: const TextStyle(fontSize: 14, color: Colors.grey),
                   ),
                 ],
               ),
@@ -623,6 +657,69 @@ class _DeliveryItem extends StatelessWidget {
                               context.read<RouteCalculationCubit>().confirmDeliveryWithCode(id, code),
                         ),
                       );
+                      if (!context.mounted) return;
+                      if (context.read<RouteCalculationCubit>().state.confirmedDeliveries.contains(id)) {
+                        await showDialog<void>(
+                          context: context,
+                          builder: (ctx) => Dialog(
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(24),
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.fromLTRB(24, 32, 24, 24),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const Icon(
+                                    Icons.check_circle,
+                                    color: AppColors.darkGreen,
+                                    size: 64,
+                                  ),
+                                  const SizedBox(height: 16),
+                                  const Text(
+                                    'Pedido entregue!',
+                                    style: TextStyle(
+                                      fontFamily: 'Figtree',
+                                      fontWeight: FontWeight.w700,
+                                      fontSize: 20,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    title,
+                                    textAlign: TextAlign.center,
+                                    style: const TextStyle(
+                                      fontSize: 14,
+                                      color: Colors.grey,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 24),
+                                  SizedBox(
+                                    width: double.infinity,
+                                    child: ElevatedButton(
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: AppColors.darkGreen,
+                                        padding: const EdgeInsets.symmetric(vertical: 14),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(24),
+                                        ),
+                                      ),
+                                      onPressed: () => Navigator.of(ctx).pop(),
+                                      child: const Text(
+                                        'Continuar',
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.w700,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        );
+                      }
                     },
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 300),
@@ -640,7 +737,7 @@ class _DeliveryItem extends StatelessWidget {
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     color: isConfirmed ? Colors.white : AppColors.darkGreen,
-                    fontSize: 10,
+                    fontSize: 12,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -723,14 +820,15 @@ class _Co2BottomSheetContentState extends State<_Co2BottomSheetContent> {
                   context.read<RouteCalculationCubit>().updateFormData(
                     vehicle: val,
                   );
-                  // Sync the field with the new vehicle's default consumption
-                  // when no value has been entered yet.
-                  final preset =
-                      RouteCalculationCubit.defaultConsumptionByVehicle[val];
-                  if (preset != null &&
-                      _consumptionController.text.trim().isEmpty) {
-                    _consumptionController.text = preset;
-                  }
+                  final currentFuel = context
+                      .read<RouteCalculationCubit>()
+                      .state
+                      .selectedFuel;
+                  final preset = RouteCalculationCubit.defaultConsumption(
+                    val ?? state.selectedVehicle,
+                    currentFuel,
+                  );
+                  _consumptionController.text = preset ?? '';
                 },
               ),
               const SizedBox(height: 16),
@@ -758,9 +856,16 @@ class _Co2BottomSheetContentState extends State<_Co2BottomSheetContent> {
                           return DropdownMenuItem(value: e, child: Text(e));
                         })
                         .toList(),
-                onChanged: (val) => context
-                    .read<RouteCalculationCubit>()
-                    .updateFormData(fuel: val),
+                onChanged: (val) {
+                  context.read<RouteCalculationCubit>().updateFormData(
+                    fuel: val,
+                  );
+                  final preset = RouteCalculationCubit.defaultConsumption(
+                    state.selectedVehicle,
+                    val ?? state.selectedFuel,
+                  );
+                  _consumptionController.text = preset ?? '';
+                },
               ),
               const SizedBox(height: 16),
               const Text(
