@@ -701,7 +701,7 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i141.ConfirmProducerOrder>(),
         gh<_i885.RefuseProducerOrder>(),
         gh<_i1038.UpdateProducerOrderStatus>(),
-        gh<_i742.ConfirmProducerDeliveryWithCode>(),
+        gh<_i474.ConfirmProducerDeliveryWithCode>(),
       ),
     );
     return this;
