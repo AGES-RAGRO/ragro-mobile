@@ -5,10 +5,15 @@ import 'package:ragro_mobile/core/theme/app_colors.dart';
 class ConfirmDeliveryCodeDialog extends StatefulWidget {
   const ConfirmDeliveryCodeDialog({
     required this.onConfirm,
+    this.onCancelOrder,
     super.key,
   });
 
   final Future<bool> Function(String code) onConfirm;
+
+  /// Quando informado, exibe uma ação secundária "Cancelar pedido" abaixo dos
+  /// botões. Ao tocar, o modal fecha e este callback é chamado.
+  final VoidCallback? onCancelOrder;
 
   @override
   State<ConfirmDeliveryCodeDialog> createState() =>
@@ -229,6 +234,25 @@ class _ConfirmDeliveryCodeDialogState extends State<ConfirmDeliveryCodeDialog> {
                 ),
               ],
             ),
+            if (widget.onCancelOrder != null) ...[
+              const SizedBox(height: 8),
+              TextButton(
+                onPressed: _isLoading
+                    ? null
+                    : () {
+                        Navigator.of(context).pop(false);
+                        widget.onCancelOrder!();
+                      },
+                style: TextButton.styleFrom(foregroundColor: AppColors.red),
+                child: const Text(
+                  'Cancelar pedido',
+                  style: TextStyle(
+                    fontFamily: 'Manrope',
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+            ],
           ],
         ),
       ),

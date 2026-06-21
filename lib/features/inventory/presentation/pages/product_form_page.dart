@@ -175,7 +175,7 @@ class _ProductFormViewState extends State<_ProductFormView> {
               backgroundColor: AppColors.darkGreen,
             ),
           );
-          context.pop();
+          context.pop(true);
         }
         if (state is ProductFormFailure) {
           ScaffoldMessenger.of(context).showSnackBar(

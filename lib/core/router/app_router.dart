@@ -30,6 +30,8 @@ import 'package:ragro_mobile/features/inventory/presentation/pages/stock_entry_p
 import 'package:ragro_mobile/features/inventory/presentation/pages/stock_exit_page.dart';
 import 'package:ragro_mobile/features/inventory/presentation/pages/stock_movements_page.dart';
 import 'package:ragro_mobile/features/map/presentation/pages/map_page.dart';
+import 'package:ragro_mobile/features/notifications/domain/entities/notification.dart';
+import 'package:ragro_mobile/features/notifications/presentation/pages/notification_detail_page.dart';
 import 'package:ragro_mobile/features/notifications/presentation/pages/notifications_page.dart';
 import 'package:ragro_mobile/features/orders/presentation/pages/customer_orders_page.dart';
 import 'package:ragro_mobile/features/orders/presentation/pages/order_confirmation_page.dart';
@@ -237,6 +239,14 @@ class AppRouter {
         GoRoute(
           path: '/customer/notifications',
           builder: (_, __) => const NotificationsPage(),
+          routes: [
+            GoRoute(
+              path: 'detail',
+              builder: (_, state) => NotificationDetailPage(
+                notification: state.extra! as AppNotificationEntity,
+              ),
+            ),
+          ],
         ),
 
         // Cart & Checkout routes
@@ -374,6 +384,10 @@ class AppRouter {
                       builder: (_, __) => const ProducerSettingsPage(),
                     ),
                     GoRoute(
+                      path: 'faq',
+                      builder: (_, __) => const FaqPage(),
+                    ),
+                    GoRoute(
                       path: 'reviews',
                       builder: (context, state) {
                         final extra =
@@ -401,6 +415,14 @@ class AppRouter {
         GoRoute(
           path: '/producer/notifications',
           builder: (_, __) => const NotificationsPage(),
+          routes: [
+            GoRoute(
+              path: 'detail',
+              builder: (_, state) => NotificationDetailPage(
+                notification: state.extra! as AppNotificationEntity,
+              ),
+            ),
+          ],
         ),
 
         // Admin routes

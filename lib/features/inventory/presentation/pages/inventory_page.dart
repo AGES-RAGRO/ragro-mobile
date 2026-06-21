@@ -16,11 +16,39 @@ class InventoryPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (_) => getIt<InventoryBloc>()..add(const InventoryStarted()),
-      child: const _InventoryView(),
+    // Bloc is a singleton (see InventoryBloc): the shell triggers a refresh when
+    // the Estoque tab is reopened. Here we only provide the value; the loader
+    // handles the initial load.
+    return BlocProvider.value(
+      value: getIt<InventoryBloc>(),
+      child: const _InventoryLoader(),
     );
   }
+}
+
+class _InventoryLoader extends StatefulWidget {
+  const _InventoryLoader();
+
+  @override
+  State<_InventoryLoader> createState() => _InventoryLoaderState();
+}
+
+class _InventoryLoaderState extends State<_InventoryLoader> {
+  @override
+  void initState() {
+    super.initState();
+    final bloc = context.read<InventoryBloc>();
+    // First ever mount → load. Re-mount on a fresh session (singleton survived a
+    // previous login) → refresh, so stale data from another user never shows.
+    if (bloc.state is InventoryInitial) {
+      bloc.add(const InventoryStarted());
+    } else {
+      bloc.add(const InventoryRefreshed());
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) => const _InventoryView();
 }
 
 class _InventoryView extends StatelessWidget {

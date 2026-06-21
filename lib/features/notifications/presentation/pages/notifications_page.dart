@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:ragro_mobile/core/theme/app_colors.dart';
 import 'package:ragro_mobile/features/notifications/domain/entities/notification.dart';
@@ -373,11 +374,18 @@ class _NotificationTile extends StatelessWidget {
       borderRadius: BorderRadius.circular(6),
       child: InkWell(
         borderRadius: BorderRadius.circular(6),
-        onTap: read
-            ? null
-            : () => context.read<NotificationsBloc>().add(
-                NotificationMarkedAsRead(notification.id),
-              ),
+        onTap: () {
+          if (!read) {
+            context.read<NotificationsBloc>().add(
+              NotificationMarkedAsRead(notification.id),
+            );
+          }
+          final base =
+              GoRouterState.of(context).matchedLocation.startsWith('/producer')
+              ? '/producer'
+              : '/customer';
+          context.push('$base/notifications/detail', extra: notification);
+        },
         child: Container(
           constraints: const BoxConstraints(minHeight: 62),
           padding: const EdgeInsets.fromLTRB(14, 11, 12, 10),

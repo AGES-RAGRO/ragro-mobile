@@ -511,7 +511,7 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i485.RequestPasswordReset>(
       () => _i485.RequestPasswordReset(gh<_i43.AuthRepository>()),
     );
-    gh.factory<_i205.InventoryBloc>(
+    gh.lazySingleton<_i205.InventoryBloc>(
       () => _i205.InventoryBloc(
         gh<_i252.GetInventoryProducts>(),
         gh<_i481.DeleteInventoryProduct>(),

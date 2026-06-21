@@ -8,6 +8,7 @@ import 'package:ragro_mobile/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:ragro_mobile/features/auth/presentation/bloc/auth_event.dart';
 import 'package:ragro_mobile/features/auth/presentation/bloc/auth_state.dart';
 import 'package:ragro_mobile/shared/widgets/app_notification.dart';
+import 'package:ragro_mobile/shared/widgets/terms_of_use_dialog.dart';
 
 class ProducerSettingsPage extends StatelessWidget {
   const ProducerSettingsPage({super.key});
@@ -101,6 +102,52 @@ class ProducerSettingsPage extends StatelessWidget {
                       ),
                     );
                   },
+                ),
+                const Divider(height: 1, color: Color(0xFFE2E8F0)),
+                ListTile(
+                  onTap: () => showTermsOfUseDialog(context),
+                  leading: const Icon(
+                    Icons.help_outline,
+                    color: AppColors.black,
+                    size: 20,
+                  ),
+                  title: const Text(
+                    'Termos de uso',
+                    style: TextStyle(
+                      fontFamily: 'Figtree',
+                      fontWeight: FontWeight.w500,
+                      fontSize: 16,
+                      color: AppColors.black,
+                    ),
+                  ),
+                  trailing: const Icon(
+                    Icons.chevron_right,
+                    color: AppColors.placeholder,
+                    size: 20,
+                  ),
+                ),
+                const Divider(height: 1, color: Color(0xFFE2E8F0)),
+                ListTile(
+                  onTap: () => context.push('/producer/profile/faq'),
+                  leading: const Icon(
+                    Icons.quiz_outlined,
+                    color: AppColors.black,
+                    size: 20,
+                  ),
+                  title: const Text(
+                    'FAQ',
+                    style: TextStyle(
+                      fontFamily: 'Figtree',
+                      fontWeight: FontWeight.w500,
+                      fontSize: 16,
+                      color: AppColors.black,
+                    ),
+                  ),
+                  trailing: const Icon(
+                    Icons.chevron_right,
+                    color: AppColors.placeholder,
+                    size: 20,
+                  ),
                 ),
                 const Divider(height: 1, color: Color(0xFFE2E8F0)),
                 ListTile(
