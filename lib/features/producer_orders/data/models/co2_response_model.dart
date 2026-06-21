@@ -27,10 +27,49 @@ class Co2CalculationResponse extends Equatable {
 
   @override
   List<Object?> get props => [
-        co2Emission,
-        distanceKm,
-        vehicleType,
-        fuelType,
-        averageConsumption,
-      ];
+    co2Emission,
+    distanceKm,
+    vehicleType,
+    fuelType,
+    averageConsumption,
+  ];
+}
+
+class Co2EmissionRecord extends Equatable {
+  const Co2EmissionRecord({
+    required this.id,
+    required this.routeDistanceKm,
+    required this.co2Emission,
+    required this.vehicleType,
+    required this.fuelType,
+    required this.createdAt,
+  });
+
+  factory Co2EmissionRecord.fromJson(Map<String, dynamic> json) {
+    return Co2EmissionRecord(
+      id: json['id'] as String,
+      routeDistanceKm: (json['routeDistanceKm'] as num).toDouble(),
+      co2Emission: (json['co2Emission'] as num).toDouble(),
+      vehicleType: json['vehicleType'] as String,
+      fuelType: json['fuelType'] as String,
+      createdAt: DateTime.parse(json['createdAt'] as String),
+    );
+  }
+
+  final String id;
+  final double routeDistanceKm;
+  final double co2Emission;
+  final String vehicleType;
+  final String fuelType;
+  final DateTime createdAt;
+
+  @override
+  List<Object?> get props => [
+    id,
+    routeDistanceKm,
+    co2Emission,
+    vehicleType,
+    fuelType,
+    createdAt,
+  ];
 }

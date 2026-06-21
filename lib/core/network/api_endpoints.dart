@@ -114,6 +114,7 @@ abstract final class ApiEndpoints {
   static String get co2Calculate => '$_base/co2/calculate';
   static String get co2RecordSavings => '$_base/co2/record-savings';
   static String get co2Options => '$_base/co2/options';
+  static String get co2Emissions => '$_base/co2/emissions';
 
   // Routes (optimized via backend; the Google key stays on the server)
   static String get routesOptimize => '$_base/routes/optimize';

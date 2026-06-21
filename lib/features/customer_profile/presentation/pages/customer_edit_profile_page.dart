@@ -283,12 +283,12 @@ class _CustomerEditProfilePageState extends State<CustomerEditProfilePage> {
                                           const Icon(
                                             Icons.save_outlined,
                                             color: AppColors.white,
-                                            size: 18,
+                                            size: 22,
                                           ),
                                           const SizedBox(width: 8),
                                         ],
                                         const Text(
-                                          'Salvar Alteracoes',
+                                          'Salvar Alterações',
                                           style: TextStyle(
                                             fontFamily: 'Figtree',
                                             fontWeight: FontWeight.w700,

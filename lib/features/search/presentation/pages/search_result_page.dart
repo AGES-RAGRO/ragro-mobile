@@ -330,7 +330,6 @@ class _SearchResultsViewState extends State<_SearchResultsView> {
   void _onAddToCart(SearchResult result) {
     if (result.type != SearchResultType.product) return;
     getIt<CartBloc>().add(CartItemAdded(productId: result.id, quantity: 1));
-    context.push('/customer/cart');
   }
 
   String? _resolveProducerId(SearchResult result) {

@@ -146,7 +146,6 @@ class _CustomerHomeViewState extends State<_CustomerHomeView> {
                                     quantity: 1,
                                   ),
                                 );
-                                context.push('/customer/cart');
                               },
                             ),
                           ),
