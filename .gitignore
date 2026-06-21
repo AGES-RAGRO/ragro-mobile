@@ -75,7 +75,3 @@ PITCH_RAGRO.md
 env/local-device.json
 ios/.xcode.env
 ios/.xcode.env.local
-
-# Firebase Android config (carries an API key; package-specific).
-# Provido por ambiente/CI, não versionado. Ver android/app/build.gradle.kts.
-android/app/google-services.json
