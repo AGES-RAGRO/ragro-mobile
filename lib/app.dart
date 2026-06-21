@@ -91,11 +91,8 @@ class _AppState extends State<App> with WidgetsBindingObserver {
   Future<void> _applyAppIconBadge(int unreadCount) async {
     try {
       if (!await AppBadgePlus.isSupported()) return;
-      if (unreadCount > 0) {
-        await AppBadgePlus.updateBadge(unreadCount);
-      } else {
-        await AppBadgePlus.removeBadge();
-      }
+      // updateBadge(0) clears the badge; any positive count sets it.
+      await AppBadgePlus.updateBadge(unreadCount);
     } on Object {
       // Badge sync is best-effort and should never disrupt app rendering.
     }
