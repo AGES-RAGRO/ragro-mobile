@@ -32,6 +32,7 @@ migrate_working_dir/
 .pub-cache/
 .pub/
 /build/
+ios/build/
 /coverage/
 
 # Symbolication related
@@ -67,9 +68,14 @@ test-*.png
 # Environment files with real secrets (prod, staging, etc.)
 # Commite apenas env/local.json e env/*.example.json
 env/prod.json
+env/prodages.json
 env/staging.json
 
 PITCH_RAGRO.md
 env/local-device.json
 ios/.xcode.env
 ios/.xcode.env.local
+
+# Firebase Android config (carries an API key; package-specific).
+# Provido por ambiente/CI, não versionado. Ver android/app/build.gradle.kts.
+android/app/google-services.json
