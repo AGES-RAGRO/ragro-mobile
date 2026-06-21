@@ -57,6 +57,7 @@ class Order extends Equatable {
     required this.deliveryAddress,
     required this.bankInfo,
     this.avaliado = false,
+    this.confirmationCode,
   });
 
   final String id;
@@ -73,6 +74,10 @@ class Order extends Equatable {
   final ProducerBankInfo bankInfo;
   final bool avaliado;
 
+  /// Código de confirmação de entrega. O backend só o expõe enquanto o pedido
+  /// está IN_DELIVERY (a caminho); nos demais estados vem nulo.
+  final String? confirmationCode;
+
   Order copyWith({
     String? id,
     String? producerId,
@@ -87,6 +92,7 @@ class Order extends Equatable {
     DeliveryAddress? deliveryAddress,
     ProducerBankInfo? bankInfo,
     bool? avaliado,
+    String? confirmationCode,
   }) {
     return Order(
       id: id ?? this.id,
@@ -102,6 +108,7 @@ class Order extends Equatable {
       deliveryAddress: deliveryAddress ?? this.deliveryAddress,
       bankInfo: bankInfo ?? this.bankInfo,
       avaliado: avaliado ?? this.avaliado,
+      confirmationCode: confirmationCode ?? this.confirmationCode,
     );
   }
 
@@ -137,5 +144,6 @@ class Order extends Equatable {
     deliveryAddress,
     bankInfo,
     avaliado,
+    confirmationCode,
   ];
 }

@@ -18,6 +18,7 @@ class OrderModel extends Order {
     required super.deliveryAddress,
     required super.bankInfo,
     super.avaliado,
+    super.confirmationCode,
   });
 
   factory OrderModel.fromJson(Map<String, dynamic> json) {
@@ -75,6 +76,7 @@ class OrderModel extends Order {
       deliveryAddress: _parseAddress(addressJson),
       bankInfo: _parseBankInfo(bankJson),
       avaliado: _parseRated(json),
+      confirmationCode: json['confirmationCode'] as String?,
     );
   }
 

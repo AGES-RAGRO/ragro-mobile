@@ -11,6 +11,7 @@ import 'package:ragro_mobile/features/cart/presentation/widgets/cart_summary_bar
 import 'package:ragro_mobile/features/home/presentation/bloc/home_bloc.dart';
 import 'package:ragro_mobile/features/home/presentation/bloc/home_event.dart';
 import 'package:ragro_mobile/features/home/presentation/bloc/home_state.dart';
+import 'package:ragro_mobile/features/orders/presentation/bloc/active_delivery_cubit.dart';
 import 'package:ragro_mobile/shared/widgets/app_notification.dart';
 
 class CustomerShell extends StatefulWidget {
@@ -143,6 +144,11 @@ class _CustomerShellState extends State<CustomerShell> {
       index,
       initialLocation: index == widget.navigationShell.currentIndex,
     );
+    // Início (0): recarrega o banner "pedido a caminho" ao reabrir a aba, para
+    // refletir um pedido que saiu para entrega sem precisar reabrir o app.
+    if (index == 0) {
+      getIt<ActiveDeliveryCubit>().load();
+    }
   }
 }
 
