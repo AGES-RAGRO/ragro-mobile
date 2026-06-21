@@ -399,35 +399,47 @@ class _RouteCalculationViewState extends State<_RouteCalculationView> {
               left: 0,
               right: 0,
               bottom: 0,
-              child: Container(
-                padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
-                color: Colors.white,
-                child: GestureDetector(
-                  onTap: () => context.pop(
-                    context
-                        .read<RouteCalculationCubit>()
-                        .state
-                        .confirmedDeliveries
-                        .toList(),
-                  ),
-                  child: Container(
-                    height: 50,
-                    decoration: BoxDecoration(
-                      color: AppColors.darkGreen,
-                      borderRadius: BorderRadius.circular(25),
-                    ),
-                    child: const Center(
-                      child: Text(
-                        'Finalizar Entrega',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w700,
-                          fontSize: 16,
+              child: BlocBuilder<RouteCalculationCubit, RouteCalculationState>(
+                buildWhen: (prev, curr) =>
+                    prev.confirmedDeliveries != curr.confirmedDeliveries ||
+                    prev.deliveries != curr.deliveries,
+                builder: (context, state) {
+                  final allConfirmed =
+                      state.deliveries.isNotEmpty &&
+                      !state.hasPendingDeliveries;
+                  return Container(
+                    padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+                    color: Colors.white,
+                    child: GestureDetector(
+                      onTap: allConfirmed
+                          ? () => context.pop(
+                                state.confirmedDeliveries.toList(),
+                              )
+                          : null,
+                      child: Container(
+                        height: 50,
+                        decoration: BoxDecoration(
+                          color: allConfirmed
+                              ? AppColors.darkGreen
+                              : AppColors.darkGreen.withValues(alpha: 0.35),
+                          borderRadius: BorderRadius.circular(25),
+                        ),
+                        child: Center(
+                          child: Text(
+                            'Finalizar Entrega',
+                            style: TextStyle(
+                              color: allConfirmed
+                                  ? Colors.white
+                                  : Colors.white.withValues(alpha: 0.6),
+                              fontWeight: FontWeight.w700,
+                              fontSize: 16,
+                            ),
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                ),
+                  );
+                },
               ),
             ),
           ],

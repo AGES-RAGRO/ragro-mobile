@@ -99,9 +99,9 @@ class _ConfirmDeliveryCodeDialogState extends State<ConfirmDeliveryCodeDialog> {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: List.generate(4, (i) {
-                return Container(
+                return Expanded(
+                  child: Container(
                   margin: const EdgeInsets.symmetric(horizontal: 6),
-                  width: 56,
                   height: 64,
                   decoration: BoxDecoration(
                     color: Colors.white,
@@ -149,7 +149,7 @@ class _ConfirmDeliveryCodeDialogState extends State<ConfirmDeliveryCodeDialog> {
                       },
                     ),
                   ),
-                );
+                ));
               }),
             ),
             // Error message

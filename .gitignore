@@ -32,6 +32,7 @@ migrate_working_dir/
 .pub-cache/
 .pub/
 /build/
+ios/build/
 /coverage/
 
 # Symbolication related
@@ -67,6 +68,7 @@ test-*.png
 # Environment files with real secrets (prod, staging, etc.)
 # Commite apenas env/local.json e env/*.example.json
 env/prod.json
+env/prodages.json
 env/staging.json
 
 PITCH_RAGRO.md

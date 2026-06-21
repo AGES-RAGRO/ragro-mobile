@@ -30,6 +30,7 @@ import 'package:ragro_mobile/features/inventory/presentation/pages/stock_entry_p
 import 'package:ragro_mobile/features/inventory/presentation/pages/stock_exit_page.dart';
 import 'package:ragro_mobile/features/inventory/presentation/pages/stock_movements_page.dart';
 import 'package:ragro_mobile/features/map/presentation/pages/map_page.dart';
+import 'package:ragro_mobile/features/notifications/presentation/pages/notifications_page.dart';
 import 'package:ragro_mobile/features/orders/presentation/pages/customer_orders_page.dart';
 import 'package:ragro_mobile/features/orders/presentation/pages/order_confirmation_page.dart';
 import 'package:ragro_mobile/features/orders/presentation/pages/order_detail_page.dart';
@@ -231,6 +232,13 @@ class AppRouter {
           ],
         ),
 
+        // Notifications — pushed routes (not shell tabs) so the back button
+        // pops to the screen that opened them, from any origin.
+        GoRoute(
+          path: '/customer/notifications',
+          builder: (_, __) => const NotificationsPage(),
+        ),
+
         // Cart & Checkout routes
         GoRoute(path: '/customer/cart', builder: (_, __) => const CartPage()),
         GoRoute(
@@ -387,6 +395,12 @@ class AppRouter {
               ],
             ),
           ],
+        ),
+
+        // Producer notifications — pushed route (mirrors the customer one).
+        GoRoute(
+          path: '/producer/notifications',
+          builder: (_, __) => const NotificationsPage(),
         ),
 
         // Admin routes

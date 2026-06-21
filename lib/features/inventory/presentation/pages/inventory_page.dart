@@ -394,27 +394,31 @@ class _SummaryCard extends StatelessWidget {
             child: Icon(icon, size: 20, color: AppColors.darkGreen),
           ),
           const SizedBox(width: 12),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                label,
-                style: const TextStyle(
-                  fontFamily: 'Manrope',
-                  fontSize: 12,
-                  color: AppColors.placeholder,
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: const TextStyle(
+                    fontFamily: 'Manrope',
+                    fontSize: 12,
+                    color: AppColors.placeholder,
+                  ),
+                  overflow: TextOverflow.ellipsis,
                 ),
-              ),
-              Text(
-                value,
-                style: const TextStyle(
-                  fontFamily: 'Figtree',
-                  fontWeight: FontWeight.w700,
-                  fontSize: 16,
-                  color: AppColors.black,
+                Text(
+                  value,
+                  style: const TextStyle(
+                    fontFamily: 'Figtree',
+                    fontWeight: FontWeight.w700,
+                    fontSize: 16,
+                    color: AppColors.black,
+                  ),
+                  overflow: TextOverflow.ellipsis,
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ],
       ),

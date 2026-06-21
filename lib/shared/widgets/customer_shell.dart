@@ -30,6 +30,7 @@ class _CustomerShellState extends State<CustomerShell> {
     if (cartBloc.state is CartInitial) {
       cartBloc.add(const CartStarted());
     }
+
     final homeBloc = getIt<HomeBloc>();
     if (homeBloc.state is HomeInitial) {
       homeBloc.add(const HomeStarted());
@@ -177,10 +178,12 @@ class _NavItem extends StatelessWidget {
             const SizedBox(height: 4),
             Text(
               label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
               style: TextStyle(
                 fontFamily: 'Figtree',
                 fontWeight: FontWeight.w500,
-                fontSize: 12,
+                fontSize: 11,
                 color: isActive ? AppColors.darkGreen : AppColors.placeholder,
               ),
             ),

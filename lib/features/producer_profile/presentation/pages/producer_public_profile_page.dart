@@ -369,17 +369,17 @@ class _ProducerPublicProfileViewState
                               ),
                               textAlign: TextAlign.center,
                             ),
-                            const SizedBox(height: 32),
+                            const SizedBox(height: 16),
                             AvailabilitySection(
                               availability: producer.availability,
                             ),
-                            const SizedBox(height: 32),
+                            const SizedBox(height: 16),
                             ProducerStatsRow(
                               productCount: producer.products?.length ?? 0,
                               rating: producer.averageRating,
                               yearsOnPlatform: producer.yearsOnPlatform,
                             ),
-                            const SizedBox(height: 32),
+                            const SizedBox(height: 20),
                             if ((producer.products ?? const []).isNotEmpty)
                               const Align(
                                 alignment: Alignment.centerLeft,
@@ -394,7 +394,7 @@ class _ProducerPublicProfileViewState
                                 ),
                               ),
                             if ((producer.products ?? const []).isNotEmpty)
-                              const SizedBox(height: 16),
+                              const SizedBox(height: 12),
                             if ((producer.products ?? const []).isNotEmpty)
                               GridView.builder(
                                 shrinkWrap: true,

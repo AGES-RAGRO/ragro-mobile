@@ -16,6 +16,17 @@ abstract final class ApiEndpoints {
       return _normalizeForRuntime(normalized);
     }
 
+    // Fallback: read from process environment (set via Xcode scheme LaunchAction
+    // or `flutter run --dart-define` equivalent via shell env). This lets a
+    // physical iOS device pick up the Mac's LAN IP without a recompile.
+    if (!kIsWeb) {
+      final runtimeBase = Platform.environment['API_BASE_URL'] ?? '';
+      if (runtimeBase.trim().isNotEmpty) {
+        final normalized = runtimeBase.trim().replaceFirst(RegExp(r'\/+$'), '');
+        return _normalizeForRuntime(normalized);
+      }
+    }
+
     return _normalizeForRuntime(_localBase);
   }
 
@@ -62,6 +73,29 @@ abstract final class ApiEndpoints {
   static String get customerFavorites => '$_base/customers/me/favorites';
   static String customerFavorite(String producerId) =>
       '$_base/customers/me/favorites/$producerId';
+
+  // Notifications — role-scoped. The backend serves identical operations under
+  // /customers/me/notifications (CustomerNotificationController, role CUSTOMER)
+  // and /producers/me/notifications (ProducerNotificationController, role FARMER).
+  // NotificationsRemoteDataSource picks the right set from the logged-in role.
+  static String get customerNotifications => '$_base/customers/me/notifications';
+  static String get customerNotificationsUnreadCount =>
+      '$_base/customers/me/notifications/unread-count';
+  static String customerNotificationRead(String id) =>
+      '$_base/customers/me/notifications/$id/read';
+  static String get customerNotificationsReadAll =>
+      '$_base/customers/me/notifications/read-all';
+
+  // FCM device-token registration (role-agnostic; any authenticated user).
+  static String get notificationToken => '$_base/notifications/token';
+
+  static String get producerNotifications => '$_base/producers/me/notifications';
+  static String get producerNotificationsUnreadCount =>
+      '$_base/producers/me/notifications/unread-count';
+  static String producerNotificationRead(String id) =>
+      '$_base/producers/me/notifications/$id/read';
+  static String get producerNotificationsReadAll =>
+      '$_base/producers/me/notifications/read-all';
 
   // Producers / Farmers
   static String get producers => '$_base/producers';

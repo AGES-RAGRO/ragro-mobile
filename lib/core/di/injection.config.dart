@@ -15,6 +15,7 @@ import 'package:get_it/get_it.dart' as _i174;
 import 'package:injectable/injectable.dart' as _i526;
 import 'package:ragro_mobile/core/di/network_module.dart' as _i1002;
 import 'package:ragro_mobile/core/di/shared_preferences_module.dart' as _i55;
+import 'package:ragro_mobile/core/logging/app_logger.dart' as _i955;
 import 'package:ragro_mobile/core/network/api_client.dart' as _i873;
 import 'package:ragro_mobile/core/router/app_router.dart' as _i419;
 import 'package:ragro_mobile/core/services/cep_service.dart' as _i305;
@@ -155,6 +156,28 @@ import 'package:ragro_mobile/features/inventory/presentation/bloc/stock_exit_blo
 import 'package:ragro_mobile/features/inventory/presentation/bloc/stock_movements_bloc.dart'
     as _i67;
 import 'package:ragro_mobile/features/map/data/map_repository.dart' as _i362;
+import 'package:ragro_mobile/features/notifications/data/datasources/fcm_token_remote_datasource.dart'
+    as _i869;
+import 'package:ragro_mobile/features/notifications/data/datasources/notifications_local_datasource.dart'
+    as _i1068;
+import 'package:ragro_mobile/features/notifications/data/datasources/notifications_remote_datasource.dart'
+    as _i733;
+import 'package:ragro_mobile/features/notifications/data/repositories/notifications_repository_impl.dart'
+    as _i801;
+import 'package:ragro_mobile/features/notifications/data/services/notification_service.dart'
+    as _i179;
+import 'package:ragro_mobile/features/notifications/domain/repositories/notifications_repository.dart'
+    as _i853;
+import 'package:ragro_mobile/features/notifications/domain/usecases/get_notifications.dart'
+    as _i1023;
+import 'package:ragro_mobile/features/notifications/domain/usecases/get_unread_notifications_count.dart'
+    as _i684;
+import 'package:ragro_mobile/features/notifications/domain/usecases/mark_all_notifications_as_read.dart'
+    as _i218;
+import 'package:ragro_mobile/features/notifications/domain/usecases/mark_notification_as_read.dart'
+    as _i208;
+import 'package:ragro_mobile/features/notifications/presentation/bloc/notifications_bloc.dart'
+    as _i888;
 import 'package:ragro_mobile/features/orders/data/datasources/orders_remote_datasource.dart'
     as _i384;
 import 'package:ragro_mobile/features/orders/data/repositories/orders_repository_impl.dart'
@@ -284,6 +307,7 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i558.FlutterSecureStorage>(
       () => sharedPreferencesModule.secureStorage,
     );
+    gh.lazySingleton<_i955.AppLogger>(() => const _i955.AppLogger());
     gh.lazySingleton<_i305.CepService>(() => _i305.CepService());
     gh.lazySingleton<_i870.InventoryRemoteDataSource>(
       () => _i870.InventoryRemoteDataSource(),
@@ -315,6 +339,15 @@ extension GetItInjectableX on _i174.GetIt {
       () =>
           _i805.GetProducerDashboard(gh<_i570.ProducerManagementRepository>()),
     );
+    gh.lazySingleton<_i733.NotificationsRemoteDataSource>(
+      () => _i733.NotificationsRemoteDataSource(
+        gh<_i873.ApiClient>(),
+        gh<_i209.AuthLocalDataSource>(),
+      ),
+    );
+    gh.lazySingleton<_i1068.NotificationsLocalDataSource>(
+      () => _i1068.NotificationsLocalDataSource(gh<_i460.SharedPreferences>()),
+    );
     gh.lazySingleton<_i52.SearchLocalDataSource>(
       () => _i52.SearchLocalDataSource(gh<_i460.SharedPreferences>()),
     );
@@ -322,6 +355,27 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i619.StockMovementRepositoryImpl(
         gh<_i456.StockMovementRemoteDataSource>(),
       ),
+    );
+    gh.lazySingleton<_i853.NotificationsRepository>(
+      () => _i801.NotificationsRepositoryImpl(
+        gh<_i733.NotificationsRemoteDataSource>(),
+        gh<_i1068.NotificationsLocalDataSource>(),
+      ),
+    );
+    gh.lazySingleton<_i1023.GetNotifications>(
+      () => _i1023.GetNotifications(gh<_i853.NotificationsRepository>()),
+    );
+    gh.lazySingleton<_i684.GetUnreadNotificationsCount>(
+      () => _i684.GetUnreadNotificationsCount(
+        gh<_i853.NotificationsRepository>(),
+      ),
+    );
+    gh.lazySingleton<_i218.MarkAllNotificationsAsRead>(
+      () =>
+          _i218.MarkAllNotificationsAsRead(gh<_i853.NotificationsRepository>()),
+    );
+    gh.lazySingleton<_i208.MarkNotificationAsRead>(
+      () => _i208.MarkNotificationAsRead(gh<_i853.NotificationsRepository>()),
     );
     gh.lazySingleton<_i291.CreateInventoryProduct>(
       () => _i291.CreateInventoryProduct(gh<_i276.InventoryRepository>()),
@@ -355,6 +409,9 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i904.HomeRemoteDataSource>(
       () => _i904.HomeRemoteDataSource(gh<_i873.ApiClient>()),
+    );
+    gh.lazySingleton<_i869.FcmTokenRemoteDataSource>(
+      () => _i869.FcmTokenRemoteDataSource(gh<_i873.ApiClient>()),
     );
     gh.lazySingleton<_i384.OrdersRemoteDatasource>(
       () => _i384.OrdersRemoteDatasource(gh<_i873.ApiClient>()),
@@ -421,6 +478,14 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i38.SearchRepository>(
       () => _i563.SearchRepositoryImpl(gh<_i987.SearchRemoteDataSource>()),
+    );
+    gh.factory<_i888.NotificationsBloc>(
+      () => _i888.NotificationsBloc(
+        gh<_i1023.GetNotifications>(),
+        gh<_i684.GetUnreadNotificationsCount>(),
+        gh<_i218.MarkAllNotificationsAsRead>(),
+        gh<_i208.MarkNotificationAsRead>(),
+      ),
     );
     gh.lazySingleton<_i680.GetProductDetail>(
       () => _i680.GetProductDetail(gh<_i818.ProductDetailRepository>()),
@@ -702,6 +767,14 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i885.RefuseProducerOrder>(),
         gh<_i1038.UpdateProducerOrderStatus>(),
         gh<_i474.ConfirmProducerDeliveryWithCode>(),
+      ),
+    );
+    gh.lazySingleton<_i179.NotificationService>(
+      () => _i179.NotificationService(
+        gh<_i869.FcmTokenRemoteDataSource>(),
+        gh<_i209.AuthLocalDataSource>(),
+        gh<_i419.AppRouter>(),
+        gh<_i955.AppLogger>(),
       ),
     );
     return this;
