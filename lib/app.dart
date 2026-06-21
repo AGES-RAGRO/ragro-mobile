@@ -67,6 +67,11 @@ class _AppState extends State<App> with WidgetsBindingObserver {
       if (!_fcmInitialized) {
         _fcmInitialized = true;
         unawaited(_notificationService.initialize());
+      } else {
+        // FCM já iniciado: re-vincula o token ao usuário que acabou de entrar
+        // (troca de conta no mesmo device). O backend faz upsert pela coluna
+        // `token` (unique), então o re-POST move o device para o novo usuário.
+        unawaited(_notificationService.registerCurrentToken());
       }
     } else {
       _lastAppliedBadgeCount = null;

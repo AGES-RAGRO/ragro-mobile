@@ -44,7 +44,8 @@ class NotificationService {
 
   final FlutterLocalNotificationsPlugin _localNotifications =
       FlutterLocalNotificationsPlugin();
-  final StreamController<void> _onForeground = StreamController<void>.broadcast();
+  final StreamController<void> _onForeground =
+      StreamController<void>.broadcast();
 
   /// Emits whenever a push arrives while the app is in the foreground, so the
   /// app can refresh the unread badge from the backend (source of truth).
@@ -87,6 +88,23 @@ class NotificationService {
     }
   }
 
+  /// Re-registers this device's current FCM token for the now-authenticated
+  /// user. The backend upserts by the unique `token` column, so calling this on
+  /// every login re-binds the device to whoever just signed in — fixing pushes
+  /// after a same-device account switch (login A → logout → login B).
+  Future<void> registerCurrentToken() async {
+    if (Firebase.apps.isEmpty) return;
+    try {
+      await _registerToken(await FirebaseMessaging.instance.getToken());
+    } on Object catch (e, st) {
+      _logger.error(
+        'Falha ao re-registrar token FCM no login',
+        error: e,
+        stackTrace: st,
+      );
+    }
+  }
+
   Future<void> _setupLocalNotifications() async {
     const initSettings = InitializationSettings(
       android: AndroidInitializationSettings('@mipmap/ic_launcher'),
@@ -113,23 +131,25 @@ class NotificationService {
   void _onForegroundReceived(RemoteMessage message) {
     final notification = message.notification;
     if (notification != null) {
-      unawaited(_localNotifications.show(
-        id: notification.hashCode,
-        title: notification.title,
-        body: notification.body,
-        notificationDetails: NotificationDetails(
-          android: AndroidNotificationDetails(
-            _androidChannel.id,
-            _androidChannel.name,
-            channelDescription: _androidChannel.description,
-            importance: Importance.high,
-            priority: Priority.high,
-            icon: '@mipmap/ic_launcher',
+      unawaited(
+        _localNotifications.show(
+          id: notification.hashCode,
+          title: notification.title,
+          body: notification.body,
+          notificationDetails: NotificationDetails(
+            android: AndroidNotificationDetails(
+              _androidChannel.id,
+              _androidChannel.name,
+              channelDescription: _androidChannel.description,
+              importance: Importance.high,
+              priority: Priority.high,
+              icon: '@mipmap/ic_launcher',
+            ),
+            iOS: const DarwinNotificationDetails(),
           ),
-          iOS: const DarwinNotificationDetails(),
+          payload: jsonEncode(message.data),
         ),
-        payload: jsonEncode(message.data),
-      ));
+      );
     }
     _onForeground.add(null);
   }
