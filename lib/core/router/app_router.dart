@@ -242,6 +242,11 @@ class AppRouter {
           routes: [
             GoRoute(
               path: 'detail',
+              // Sem a notificação no `extra` (ex.: deep link / refresh da URL no
+              // web) não há o que exibir — volta para a lista em vez de quebrar.
+              redirect: (_, state) => state.extra is AppNotificationEntity
+                  ? null
+                  : '/customer/notifications',
               builder: (_, state) => NotificationDetailPage(
                 notification: state.extra! as AppNotificationEntity,
               ),
@@ -418,6 +423,11 @@ class AppRouter {
           routes: [
             GoRoute(
               path: 'detail',
+              // Sem a notificação no `extra` (ex.: deep link / refresh da URL no
+              // web) não há o que exibir — volta para a lista em vez de quebrar.
+              redirect: (_, state) => state.extra is AppNotificationEntity
+                  ? null
+                  : '/producer/notifications',
               builder: (_, state) => NotificationDetailPage(
                 notification: state.extra! as AppNotificationEntity,
               ),
