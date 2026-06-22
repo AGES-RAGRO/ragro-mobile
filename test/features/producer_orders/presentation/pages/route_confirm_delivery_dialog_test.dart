@@ -11,7 +11,9 @@ import 'package:ragro_mobile/features/producer_management/presentation/bloc/prod
 import 'package:ragro_mobile/features/producer_orders/data/repositories/co2_repository.dart';
 import 'package:ragro_mobile/features/producer_orders/data/repositories/route_repository.dart';
 import 'package:ragro_mobile/features/producer_orders/data/services/route_tracking_publisher.dart';
+import 'package:ragro_mobile/features/producer_orders/domain/usecases/refuse_producer_order.dart';
 import 'package:ragro_mobile/features/producer_orders/presentation/bloc/route_calculation_cubit.dart';
+import 'package:ragro_mobile/shared/widgets/cancel_order_dialog.dart';
 import 'package:ragro_mobile/shared/widgets/confirm_delivery_code_dialog.dart';
 
 class MockRouteRepository extends Mock implements RouteRepository {}
@@ -20,6 +22,8 @@ class MockCo2Repository extends Mock implements Co2Repository {}
 
 class MockRouteTrackingPublisher extends Mock
     implements RouteTrackingPublisher {}
+
+class MockRefuseProducerOrder extends Mock implements RefuseProducerOrder {}
 
 class MockProducerManagementBloc
     extends MockBloc<ProducerManagementEvent, ProducerManagementState>
@@ -58,6 +62,7 @@ void main() {
   late MockRouteRepository routeRepository;
   late MockCo2Repository co2Repository;
   late MockRouteTrackingPublisher trackingPublisher;
+  late MockRefuseProducerOrder refuseProducerOrder;
   late MockProducerManagementBloc dashboardBloc;
 
   setUp(() {
@@ -73,6 +78,7 @@ void main() {
     routeRepository = MockRouteRepository();
     co2Repository = MockCo2Repository();
     trackingPublisher = MockRouteTrackingPublisher();
+    refuseProducerOrder = MockRefuseProducerOrder();
     dashboardBloc = MockProducerManagementBloc();
 
     if (getIt.isRegistered<ProducerManagementBloc>()) {
@@ -111,6 +117,18 @@ void main() {
                   builder: (_) => ConfirmDeliveryCodeDialog(
                     onConfirm: (code) =>
                         cubit.confirmDelivery('stop-1', code),
+                    // Mirrors the page: the secondary action opens the reason
+                    // dialog; the refuse only fires after confirming there.
+                    onCancelOrder: () async {
+                      final result =
+                          await CancelOrderDialog.showForProducer(context);
+                      if (result == null) return;
+                      await cubit.cancelOrder(
+                        'stop-1',
+                        reason: result.reason,
+                        details: result.details,
+                      );
+                    },
                   ),
                 ),
                 child: const Text('Confirmar Entrega'),
@@ -130,6 +148,7 @@ void main() {
         co2Repository,
         routeRepository,
         trackingPublisher,
+        refuseProducerOrder,
       );
       await tester.pump(); // settle _initRoute/loadRoute
       await tester.pump();
@@ -195,6 +214,49 @@ void main() {
           code: '1234',
         ),
       ).called(1);
+
+      await cubit.close();
+    },
+  );
+
+  testWidgets(
+    'the per-stop dialog renders "Cancelar pedido"; tapping it opens '
+    'CancelOrderDialog and does NOT refuse until confirmed there',
+    (tester) async {
+      final cubit = RouteCalculationCubit(
+        co2Repository,
+        routeRepository,
+        trackingPublisher,
+        refuseProducerOrder,
+      );
+      await tester.pump(); // settle _initRoute/loadRoute
+      await tester.pump();
+
+      await tester.pumpWidget(harness(cubit));
+      await tester.pumpAndSettle();
+
+      // Open the per-stop code dialog.
+      await tester.tap(find.text('Confirmar Entrega'));
+      await tester.pumpAndSettle();
+
+      // The secondary "Cancelar pedido" action is present in the route flow.
+      expect(find.text('Cancelar pedido'), findsOneWidget);
+
+      // Tapping it closes the code dialog and opens the reason dialog.
+      await tester.tap(find.text('Cancelar pedido'));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(ConfirmDeliveryCodeDialog), findsNothing);
+      expect(find.byType(CancelOrderDialog), findsOneWidget);
+
+      // No refuse happens just by opening the reason dialog.
+      verifyNever(
+        () => refuseProducerOrder(
+          any(),
+          reason: any(named: 'reason'),
+          details: any(named: 'details'),
+        ),
+      );
 
       await cubit.close();
     },

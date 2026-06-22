@@ -6,6 +6,7 @@ enum RouteCalculationStatus { initial, calculating, calculated, error }
 class RouteDelivery extends Equatable {
   const RouteDelivery({
     required this.id,
+    required this.orderId,
     required this.title,
     required this.subtitle,
     required this.stop,
@@ -14,6 +15,9 @@ class RouteDelivery extends Equatable {
 
   /// Route stop id (a parada referencia o pedido no backend).
   final String id;
+
+  /// Id do pedido associado à parada (usado para cancelar/recusar o pedido).
+  final String orderId;
 
   /// Customer name.
   final String title;
@@ -28,7 +32,7 @@ class RouteDelivery extends Equatable {
   final DateTime? eta;
 
   @override
-  List<Object?> get props => [id, title, subtitle, stop, eta];
+  List<Object?> get props => [id, orderId, title, subtitle, stop, eta];
 }
 
 class RouteCalculationState extends Equatable {

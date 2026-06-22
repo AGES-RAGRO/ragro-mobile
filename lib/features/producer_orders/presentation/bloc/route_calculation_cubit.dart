@@ -12,6 +12,7 @@ import 'package:ragro_mobile/features/producer_orders/data/models/co2_request_mo
 import 'package:ragro_mobile/features/producer_orders/data/repositories/co2_repository.dart';
 import 'package:ragro_mobile/features/producer_orders/data/repositories/route_repository.dart';
 import 'package:ragro_mobile/features/producer_orders/data/services/route_tracking_publisher.dart';
+import 'package:ragro_mobile/features/producer_orders/domain/usecases/refuse_producer_order.dart';
 import 'package:ragro_mobile/features/producer_orders/presentation/bloc/route_calculation_state.dart';
 
 /// Rota de entrega PERSISTIDA no backend: criada uma vez (1 chamada Google),
@@ -25,12 +26,14 @@ class RouteCalculationCubit extends Cubit<RouteCalculationState> {
     this._co2Repository,
     this._routeRepository,
     this._trackingPublisher,
+    this._refuseProducerOrder,
   ) : super(const RouteCalculationState()) {
     _initRoute();
   }
   final Co2Repository _co2Repository;
   final RouteRepository _routeRepository;
   final RouteTrackingPublisher _trackingPublisher;
+  final RefuseProducerOrder _refuseProducerOrder;
 
   /// Garante o registro de economia de CO2 só na CRIAÇÃO da rota (retomar uma
   /// rota ativa não re-registra a mesma economia).
@@ -254,6 +257,83 @@ class RouteCalculationCubit extends Cubit<RouteCalculationState> {
     }
   }
 
+  /// Cancela (recusa) o PEDIDO associado a uma parada da rota e atualiza a tela.
+  ///
+  /// A parada referencia um pedido; o backend recusa o pedido (transição para
+  /// CANCELLED) e o `RouteStopSyncListener` sincroniza a parada para um estado
+  /// terminal (FAILED). Como NÃO há um PATCH de "cancelar parada" no app, o
+  /// refresh re-busca a rota ativa (`GET /routes/active`) e a reaplica: a parada
+  /// recusada deixa de aparecer como pendente. Se era a ÚLTIMA parada, a rota
+  /// completa no backend e `getActiveRoute()` devolve `null` — o estado é
+  /// esvaziado de forma graciosa (sem entregas pendentes), sem crash.
+  ///
+  /// Devolve `true` no sucesso e `false` no erro (emitindo estado de erro, como
+  /// em [confirmDelivery]).
+  Future<bool> cancelOrder(
+    String stopId, {
+    required String reason,
+    String? details,
+  }) async {
+    final routeId = state.routeId;
+    if (routeId == null) return false;
+
+    // Resolve o id do pedido a partir da parada (a recusa age sobre o PEDIDO,
+    // não sobre a parada).
+    final orderId = state.deliveries
+        .where((d) => d.id == stopId)
+        .map((d) => d.orderId)
+        .firstWhere((id) => id.isNotEmpty, orElse: () => '');
+    if (orderId.isEmpty) return false;
+
+    try {
+      await _refuseProducerOrder(orderId, reason: reason, details: details);
+      if (isClosed) return false;
+
+      // O backend já sincronizou a parada (terminal); re-busca a rota ativa para
+      // refletir a remoção da parada cancelada.
+      final route = await _routeRepository.getActiveRoute();
+      if (isClosed) return false;
+
+      if (route == null) {
+        // Era a única/última parada: a rota completou no backend. Esvazia o
+        // estado de forma graciosa (tela mostra "nenhuma entrega pendente").
+        unawaited(_trackingPublisher.stop());
+        emit(
+          state.copyWith(
+            deliveries: const [],
+            orderedStops: const [],
+            confirmedDeliveries: const {},
+            totalDistanceKm: 0,
+            totalDurationMins: 0,
+          ),
+        );
+      } else {
+        _applyRoute(route);
+      }
+
+      _refreshProducerDashboard();
+      return true;
+    } on ApiException catch (e) {
+      if (isClosed) return false;
+      emit(
+        state.copyWith(
+          status: RouteCalculationStatus.error,
+          errorMessage: e.message,
+        ),
+      );
+      return false;
+    } on Exception {
+      if (isClosed) return false;
+      emit(
+        state.copyWith(
+          status: RouteCalculationStatus.error,
+          errorMessage: 'Erro ao cancelar o pedido. Tente novamente.',
+        ),
+      );
+      return false;
+    }
+  }
+
   /// Retoma a rota ativa ou cria uma nova a partir dos pedidos do produtor.
   Future<void> loadRoute() async {
     try {
@@ -314,6 +394,7 @@ class RouteCalculationCubit extends Cubit<RouteCalculationState> {
 
     RouteDelivery toDelivery(DeliveryRouteStop stop) => RouteDelivery(
       id: stop.id,
+      orderId: stop.orderId,
       title: stop.customerName.isNotEmpty ? stop.customerName : 'Cliente',
       subtitle: stop.addressText,
       stop: '${stop.latitude},${stop.longitude}',

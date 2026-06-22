@@ -7,6 +7,7 @@ import 'package:ragro_mobile/core/theme/app_colors.dart';
 import 'package:ragro_mobile/core/utils/polyline_decoder.dart';
 import 'package:ragro_mobile/features/producer_orders/presentation/bloc/route_calculation_cubit.dart';
 import 'package:ragro_mobile/features/producer_orders/presentation/bloc/route_calculation_state.dart';
+import 'package:ragro_mobile/shared/widgets/cancel_order_dialog.dart';
 import 'package:ragro_mobile/shared/widgets/confirm_delivery_code_dialog.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -658,7 +659,26 @@ class _DeliveryItem extends StatelessWidget {
       barrierDismissible: false,
       builder: (_) => ConfirmDeliveryCodeDialog(
         onConfirm: (code) => cubit.confirmDelivery(id, code),
+        // Espelha o fluxo do detalhe do pedido: a ação secundária só abre o
+        // diálogo de motivo (CancelOrderDialog); a recusa só acontece quando o
+        // produtor confirma lá dentro.
+        onCancelOrder: () => _confirmCancelOrder(context, cubit),
       ),
+    );
+  }
+
+  /// Coleta o motivo (CancelOrderDialog) e, se confirmado, recusa o pedido da
+  /// parada e atualiza a rota. Espelha `_confirmRefuse` do detalhe do pedido.
+  Future<void> _confirmCancelOrder(
+    BuildContext context,
+    RouteCalculationCubit cubit,
+  ) async {
+    final cancelResult = await CancelOrderDialog.showForProducer(context);
+    if (cancelResult == null) return;
+    await cubit.cancelOrder(
+      id,
+      reason: cancelResult.reason,
+      details: cancelResult.details,
     );
   }
 

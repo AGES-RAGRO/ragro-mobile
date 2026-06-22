@@ -463,13 +463,6 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i127.ProductDetailRemoteDataSource>(),
       ),
     );
-    gh.factory<_i48.RouteCalculationCubit>(
-      () => _i48.RouteCalculationCubit(
-        gh<_i206.Co2Repository>(),
-        gh<_i609.RouteRepository>(),
-        gh<_i180.RouteTrackingPublisher>(),
-      ),
-    );
     gh.lazySingleton<_i240.GetProductMovements>(
       () => _i240.GetProductMovements(gh<_i1067.StockMovementRepository>()),
     );
@@ -761,6 +754,14 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i526.CustomerProfileBloc(
         gh<_i626.GetCustomerProfile>(),
         gh<_i436.UpdateCustomerProfile>(),
+      ),
+    );
+    gh.factory<_i48.RouteCalculationCubit>(
+      () => _i48.RouteCalculationCubit(
+        gh<_i206.Co2Repository>(),
+        gh<_i609.RouteRepository>(),
+        gh<_i180.RouteTrackingPublisher>(),
+        gh<_i885.RefuseProducerOrder>(),
       ),
     );
     gh.factory<_i721.RecommendationsBloc>(

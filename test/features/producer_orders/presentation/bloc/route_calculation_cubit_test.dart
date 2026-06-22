@@ -10,6 +10,7 @@ import 'package:ragro_mobile/features/producer_management/presentation/bloc/prod
 import 'package:ragro_mobile/features/producer_orders/data/repositories/co2_repository.dart';
 import 'package:ragro_mobile/features/producer_orders/data/repositories/route_repository.dart';
 import 'package:ragro_mobile/features/producer_orders/data/services/route_tracking_publisher.dart';
+import 'package:ragro_mobile/features/producer_orders/domain/usecases/refuse_producer_order.dart';
 import 'package:ragro_mobile/features/producer_orders/presentation/bloc/route_calculation_cubit.dart';
 import 'package:ragro_mobile/features/producer_orders/presentation/bloc/route_calculation_state.dart';
 
@@ -19,6 +20,8 @@ class MockCo2Repository extends Mock implements Co2Repository {}
 
 class MockRouteTrackingPublisher extends Mock
     implements RouteTrackingPublisher {}
+
+class MockRefuseProducerOrder extends Mock implements RefuseProducerOrder {}
 
 class MockProducerManagementBloc
     extends MockBloc<ProducerManagementEvent, ProducerManagementState>
@@ -67,6 +70,7 @@ void main() {
   late MockRouteRepository routeRepository;
   late MockCo2Repository co2Repository;
   late MockRouteTrackingPublisher trackingPublisher;
+  late MockRefuseProducerOrder refuseProducerOrder;
   late MockProducerManagementBloc dashboardBloc;
 
   setUp(() {
@@ -82,6 +86,7 @@ void main() {
     routeRepository = MockRouteRepository();
     co2Repository = MockCo2Repository();
     trackingPublisher = MockRouteTrackingPublisher();
+    refuseProducerOrder = MockRefuseProducerOrder();
     dashboardBloc = MockProducerManagementBloc();
 
     // Dashboard refresh after a successful delivery resolves through getIt.
@@ -114,6 +119,7 @@ void main() {
       co2Repository,
       routeRepository,
       trackingPublisher,
+      refuseProducerOrder,
     );
     // Let _initRoute() settle (Geolocator throws MissingPluginException in
     // pure-dart tests and is swallowed; loadRoute then applies the active route).
@@ -183,6 +189,7 @@ void main() {
         co2Repository,
         routeRepository,
         trackingPublisher,
+        refuseProducerOrder,
       );
       await Future<void>.delayed(Duration.zero);
       // No GPS in tests -> loadRoute can't create a route -> routeId stays null.
@@ -199,6 +206,125 @@ void main() {
           stopId: any(named: 'stopId'),
           status: any(named: 'status'),
           code: any(named: 'code'),
+        ),
+      );
+      await cubit.close();
+    });
+  });
+
+  group('cancelOrder', () {
+    test(
+      'refuses the order (by order id + reason) and refreshes the route',
+      () async {
+        final cubit = await buildLoadedCubit();
+        when(
+          () => refuseProducerOrder(
+            any(),
+            reason: any(named: 'reason'),
+            details: any(named: 'details'),
+          ),
+        ).thenAnswer((_) async {});
+        // After the refuse, the backend synced the stop to terminal; the refresh
+        // re-fetches the active route with the cancelled stop removed.
+        when(() => routeRepository.getActiveRoute()).thenAnswer(
+          (_) async => _route(),
+        );
+
+        final ok = await cubit.cancelOrder(
+          'stop-1',
+          reason: 'Estoque insuficiente',
+        );
+
+        expect(ok, isTrue);
+        // The refuse acts on the ORDER id (order-stop-1 per the _stop helper),
+        // not the route stop id.
+        verify(
+          () => refuseProducerOrder(
+            'order-stop-1',
+            reason: 'Estoque insuficiente',
+          ),
+        ).called(1);
+        // Route was refreshed: getActiveRoute is called again after the refuse
+        // (once on load, once on refresh).
+        verify(() => routeRepository.getActiveRoute()).called(greaterThan(1));
+        // The cancelled stop no longer shows as a pending delivery.
+        expect(cubit.state.deliveries, isEmpty);
+        await cubit.close();
+      },
+    );
+
+    test(
+      'empties the route gracefully when the last stop is cancelled '
+      '(active route now 404 -> null)',
+      () async {
+        final cubit = await buildLoadedCubit();
+        when(
+          () => refuseProducerOrder(
+            any(),
+            reason: any(named: 'reason'),
+            details: any(named: 'details'),
+          ),
+        ).thenAnswer((_) async {});
+        // Last stop cancelled: backend completes the route, /routes/active 404s.
+        when(() => routeRepository.getActiveRoute())
+            .thenAnswer((_) async => null);
+
+        final ok = await cubit.cancelOrder(
+          'stop-1',
+          reason: 'Cliente solicitou cancelamento',
+        );
+
+        expect(ok, isTrue);
+        expect(cubit.state.deliveries, isEmpty);
+        expect(cubit.state.orderedStops, isEmpty);
+        expect(cubit.state.status, isNot(RouteCalculationStatus.error));
+        await cubit.close();
+      },
+    );
+
+    test('emits error state and returns false when the refuse fails', () async {
+      final cubit = await buildLoadedCubit();
+      when(
+        () => refuseProducerOrder(
+          any(),
+          reason: any(named: 'reason'),
+          details: any(named: 'details'),
+        ),
+      ).thenThrow(const UnknownApiException('Não foi possível cancelar'));
+
+      final ok = await cubit.cancelOrder(
+        'stop-1',
+        reason: 'Outro',
+        details: 'motivo',
+      );
+
+      expect(ok, isFalse);
+      expect(cubit.state.status, RouteCalculationStatus.error);
+      expect(cubit.state.errorMessage, 'Não foi possível cancelar');
+      await cubit.close();
+    });
+
+    test('returns false without refusing when no routeId', () async {
+      when(() => routeRepository.getActiveRoute()).thenAnswer((_) async => null);
+      final cubit = RouteCalculationCubit(
+        co2Repository,
+        routeRepository,
+        trackingPublisher,
+        refuseProducerOrder,
+      );
+      await Future<void>.delayed(Duration.zero);
+      await cubit.stream.firstWhere(
+        (s) => s.status == RouteCalculationStatus.error,
+      ).timeout(const Duration(seconds: 2), onTimeout: () => cubit.state);
+
+      final ok = await cubit.cancelOrder('stop-1', reason: 'Outro');
+
+      expect(ok, isFalse);
+      verifyNever(
+        () => refuseProducerOrder(
+          any(),
+          reason: any(named: 'reason'),
+          details: any(named: 'details'),
         ),
       );
       await cubit.close();
