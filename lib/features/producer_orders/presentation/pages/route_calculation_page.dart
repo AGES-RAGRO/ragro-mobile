@@ -4,8 +4,10 @@ import 'package:go_router/go_router.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:ragro_mobile/core/di/injection.dart';
 import 'package:ragro_mobile/core/theme/app_colors.dart';
+import 'package:ragro_mobile/core/utils/polyline_decoder.dart';
 import 'package:ragro_mobile/features/producer_orders/presentation/bloc/route_calculation_cubit.dart';
 import 'package:ragro_mobile/features/producer_orders/presentation/bloc/route_calculation_state.dart';
+import 'package:ragro_mobile/shared/widgets/cancel_order_dialog.dart';
 import 'package:ragro_mobile/shared/widgets/confirm_delivery_code_dialog.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -29,6 +31,33 @@ class _RouteCalculationView extends StatefulWidget {
 }
 
 class _RouteCalculationViewState extends State<_RouteCalculationView> {
+  GoogleMapController? _miniMapController;
+
+  /// Enquadra o mini-mapa no traçado real da rota (a câmera seguia o GPS do
+  /// produtor — ou o fallback de Goiânia quando o GPS é nulo — deixando a rota
+  /// fora de tela). Roda pós-frame porque newLatLngBounds exige o mapa já medido.
+  void _fitMiniMap(List<LatLng> points) {
+    final controller = _miniMapController;
+    if (controller == null || points.length < 2) return;
+    var minLat = points.first.latitude;
+    var maxLat = points.first.latitude;
+    var minLng = points.first.longitude;
+    var maxLng = points.first.longitude;
+    for (final p in points) {
+      minLat = p.latitude < minLat ? p.latitude : minLat;
+      maxLat = p.latitude > maxLat ? p.latitude : maxLat;
+      minLng = p.longitude < minLng ? p.longitude : minLng;
+      maxLng = p.longitude > maxLng ? p.longitude : maxLng;
+    }
+    final bounds = LatLngBounds(
+      southwest: LatLng(minLat, minLng),
+      northeast: LatLng(maxLat, maxLng),
+    );
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      controller.animateCamera(CameraUpdate.newLatLngBounds(bounds, 32));
+    });
+  }
+
   Future<void> _openGoogleMaps() async {
     final state = context.read<RouteCalculationCubit>().state;
     final stops = state.orderedStops;
@@ -42,6 +71,8 @@ class _RouteCalculationViewState extends State<_RouteCalculationView> {
       return;
     }
 
+    final lat = state.producerLat;
+    final lng = state.producerLng;
     final destination = stops.last;
     final waypoints = stops.length > 1
         ? stops.sublist(0, stops.length - 1)
@@ -49,19 +80,17 @@ class _RouteCalculationViewState extends State<_RouteCalculationView> {
 
     // Navigation deep-link (no API key needed). Stops already come in the
     // backend's optimized order; `dir_action=navigate` opens directly into
-    // turn-by-turn driving navigation.
-    // When the producer's location is unknown, omit the origin so Google Maps
-    // uses the device's current position instead of a hardcoded fallback.
-    final params = <String, String>{
+    // turn-by-turn driving navigation. Only pin an `origin` when the producer's
+    // real GPS is known; otherwise omit it so Maps starts from the device's
+    // current location instead of a hardcoded fallback (Goiânia).
+    final uri = Uri.https('www.google.com', '/maps/dir/', {
       'api': '1',
-      if (state.producerLat != null && state.producerLng != null)
-        'origin': '${state.producerLat},${state.producerLng}',
+      if (lat != null && lng != null) 'origin': '$lat,$lng',
       'destination': destination,
       if (waypoints.isNotEmpty) 'waypoints': waypoints.join('|'),
       'travelmode': 'driving',
       'dir_action': 'navigate',
-    };
-    final uri = Uri.https('www.google.com', '/maps/dir/', params);
+    });
 
     if (await canLaunchUrl(uri)) {
       await launchUrl(uri, mode: LaunchMode.externalApplication);
@@ -205,25 +234,44 @@ class _RouteCalculationViewState extends State<_RouteCalculationView> {
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             fontFamily: 'Manrope',
-                            fontSize: 14,
+                            fontSize: 12,
                             color: AppColors.black,
                           ),
                         ),
                         const SizedBox(height: 16),
 
-                        BlocBuilder<
+                        BlocConsumer<
                           RouteCalculationCubit,
                           RouteCalculationState
                         >(
+                          listenWhen: (p, c) =>
+                              p.overviewPolyline != c.overviewPolyline,
+                          listener: (context, state) {
+                            final encoded = state.overviewPolyline;
+                            if (encoded == null) return;
+                            _fitMiniMap(
+                              decodePolyline(encoded)
+                                  .map((p) => LatLng(p.$1, p.$2))
+                                  .toList(),
+                            );
+                          },
                           builder: (context, state) {
-                            final hasLocation =
-                                state.producerLat != null &&
-                                state.producerLng != null;
+                            final lat = state.producerLat ?? -16.6868;
+                            final lng = state.producerLng ?? -49.2647;
+                            final loc = LatLng(lat, lng);
+                            // Rota persistida: desenha a polyline real (antes o
+                            // backend retornava a polyline e ela era descartada).
+                            final encoded = state.overviewPolyline;
+                            final routePoints = encoded == null
+                                ? const <LatLng>[]
+                                : decodePolyline(encoded)
+                                      .map((p) => LatLng(p.$1, p.$2))
+                                      .toList();
 
                             return ClipRRect(
                               borderRadius: BorderRadius.circular(16),
                               child: Container(
-                                height: 180,
+                                height: 160,
                                 width: double.infinity,
                                 decoration: BoxDecoration(
                                   border: Border.all(
@@ -233,60 +281,48 @@ class _RouteCalculationViewState extends State<_RouteCalculationView> {
                                 ),
                                 child: Stack(
                                   children: [
-                                    if (hasLocation)
-                                      GoogleMap(
-                                        initialCameraPosition: CameraPosition(
-                                          target: LatLng(
-                                            state.producerLat!,
-                                            state.producerLng!,
-                                          ),
-                                          zoom: 13,
-                                        ),
-                                        zoomControlsEnabled: false,
-                                        myLocationButtonEnabled: false,
-                                        scrollGesturesEnabled: false,
-                                        rotateGesturesEnabled: false,
-                                        tiltGesturesEnabled: false,
-                                        mapToolbarEnabled: false,
-                                        markers: {
+                                    GoogleMap(
+                                      initialCameraPosition: CameraPosition(
+                                        target: routePoints.isNotEmpty
+                                            ? routePoints.first
+                                            : loc,
+                                        zoom: 13,
+                                      ),
+                                      onMapCreated: (controller) {
+                                        _miniMapController = controller;
+                                        _fitMiniMap(routePoints);
+                                      },
+                                      zoomControlsEnabled: false,
+                                      scrollGesturesEnabled: false,
+                                      rotateGesturesEnabled: false,
+                                      tiltGesturesEnabled: false,
+                                      mapToolbarEnabled: false,
+                                      markers: {
+                                        // Só marca o produtor quando há GPS real
+                                        // (sem isto, caía no fallback de Goiânia).
+                                        if (state.producerLat != null)
                                           Marker(
-                                            markerId:
-                                                const MarkerId('producer'),
-                                            position: LatLng(
-                                              state.producerLat!,
-                                              state.producerLng!,
-                                            ),
+                                            markerId: const MarkerId('producer'),
+                                            position: loc,
                                             icon:
                                                 BitmapDescriptor.defaultMarkerWithHue(
                                                   BitmapDescriptor.hueGreen,
                                                 ),
                                           ),
-                                        },
-                                      )
-                                    else
-                                      Container(
-                                        color: const Color(0xFFF1F5F9),
-                                        child: const Center(
-                                          child: Column(
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: [
-                                              Icon(
-                                                Icons.location_off_outlined,
-                                                color: Colors.grey,
-                                                size: 32,
-                                              ),
-                                              SizedBox(height: 8),
-                                              Text(
-                                                'Localização não disponível',
-                                                style: TextStyle(
-                                                  fontSize: 13,
-                                                  color: Colors.grey,
+                                      },
+                                      polylines: routePoints.isEmpty
+                                          ? const <Polyline>{}
+                                          : {
+                                              Polyline(
+                                                polylineId: const PolylineId(
+                                                  'route',
                                                 ),
+                                                points: routePoints,
+                                                color: AppColors.lightGreen,
+                                                width: 4,
                                               ),
-                                            ],
-                                          ),
-                                        ),
-                                      ),
+                                            },
+                                    ),
                                     Positioned(
                                       bottom: 12,
                                       left: 0,
@@ -296,13 +332,13 @@ class _RouteCalculationViewState extends State<_RouteCalculationView> {
                                           onTap: _openGoogleMaps,
                                           child: Container(
                                             padding: const EdgeInsets.symmetric(
-                                              horizontal: 20,
-                                              vertical: 12,
+                                              horizontal: 16,
+                                              vertical: 10,
                                             ),
                                             decoration: BoxDecoration(
                                               color: AppColors.darkGreen,
                                               borderRadius:
-                                                  BorderRadius.circular(24),
+                                                  BorderRadius.circular(20),
                                             ),
                                             child: const Row(
                                               mainAxisSize: MainAxisSize.min,
@@ -310,7 +346,7 @@ class _RouteCalculationViewState extends State<_RouteCalculationView> {
                                                 Icon(
                                                   Icons.location_on,
                                                   color: Colors.white,
-                                                  size: 22,
+                                                  size: 16,
                                                 ),
                                                 SizedBox(width: 8),
                                                 Text(
@@ -318,14 +354,14 @@ class _RouteCalculationViewState extends State<_RouteCalculationView> {
                                                   style: TextStyle(
                                                     color: Colors.white,
                                                     fontWeight: FontWeight.w600,
-                                                    fontSize: 15,
+                                                    fontSize: 13,
                                                   ),
                                                 ),
                                                 SizedBox(width: 8),
                                                 Icon(
                                                   Icons.open_in_new,
                                                   color: Colors.white,
-                                                  size: 20,
+                                                  size: 14,
                                                 ),
                                               ],
                                             ),
@@ -399,47 +435,35 @@ class _RouteCalculationViewState extends State<_RouteCalculationView> {
               left: 0,
               right: 0,
               bottom: 0,
-              child: BlocBuilder<RouteCalculationCubit, RouteCalculationState>(
-                buildWhen: (prev, curr) =>
-                    prev.confirmedDeliveries != curr.confirmedDeliveries ||
-                    prev.deliveries != curr.deliveries,
-                builder: (context, state) {
-                  final allConfirmed =
-                      state.deliveries.isNotEmpty &&
-                      !state.hasPendingDeliveries;
-                  return Container(
-                    padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
-                    color: Colors.white,
-                    child: GestureDetector(
-                      onTap: allConfirmed
-                          ? () => context.pop(
-                                state.confirmedDeliveries.toList(),
-                              )
-                          : null,
-                      child: Container(
-                        height: 50,
-                        decoration: BoxDecoration(
-                          color: allConfirmed
-                              ? AppColors.darkGreen
-                              : AppColors.darkGreen.withValues(alpha: 0.35),
-                          borderRadius: BorderRadius.circular(25),
-                        ),
-                        child: Center(
-                          child: Text(
-                            'Finalizar Entrega',
-                            style: TextStyle(
-                              color: allConfirmed
-                                  ? Colors.white
-                                  : Colors.white.withValues(alpha: 0.6),
-                              fontWeight: FontWeight.w700,
-                              fontSize: 16,
-                            ),
-                          ),
+              child: Container(
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+                color: Colors.white,
+                child: GestureDetector(
+                  onTap: () => context.pop(
+                    context
+                        .read<RouteCalculationCubit>()
+                        .state
+                        .confirmedDeliveries
+                        .toList(),
+                  ),
+                  child: Container(
+                    height: 50,
+                    decoration: BoxDecoration(
+                      color: AppColors.darkGreen,
+                      borderRadius: BorderRadius.circular(25),
+                    ),
+                    child: const Center(
+                      child: Text(
+                        'Finalizar Entrega',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w700,
+                          fontSize: 16,
                         ),
                       ),
                     ),
-                  );
-                },
+                  ),
+                ),
               ),
             ),
           ],
@@ -478,7 +502,7 @@ class _RouteStatCard extends StatelessWidget {
             label,
             style: const TextStyle(
               fontFamily: 'Manrope',
-              fontSize: 14,
+              fontSize: 12,
               color: Colors.white70,
             ),
           ),
@@ -518,7 +542,7 @@ class _Co2CalculateCard extends StatelessWidget {
                 ),
                 Text(
                   'Calcule o CO₂ estimado',
-                  style: TextStyle(fontSize: 14, color: AppColors.darkGreen),
+                  style: TextStyle(fontSize: 12, color: AppColors.darkGreen),
                 ),
               ],
             ),
@@ -533,7 +557,7 @@ class _Co2CalculateCard extends StatelessWidget {
             ),
             child: const Text(
               'Calcular CO₂',
-              style: TextStyle(color: AppColors.darkGreen, fontSize: 14),
+              style: TextStyle(color: AppColors.darkGreen, fontSize: 12),
             ),
           ),
         ],
@@ -585,7 +609,7 @@ class _Co2ResultCard extends StatelessWidget {
                 Text(
                   '$vehicle • $fuel • $consumption km/L',
                   style: const TextStyle(
-                    fontSize: 13,
+                    fontSize: 11,
                     color: AppColors.darkGreen,
                   ),
                 ),
@@ -602,7 +626,7 @@ class _Co2ResultCard extends StatelessWidget {
             ),
             child: const Text(
               'Recalcular CO₂',
-              style: TextStyle(color: AppColors.darkGreen, fontSize: 14),
+              style: TextStyle(color: AppColors.darkGreen, fontSize: 12),
             ),
           ),
         ],
@@ -624,13 +648,46 @@ class _DeliveryItem extends StatelessWidget {
   final String title;
   final String subtitle;
 
+  /// Abre o diálogo COMPARTILHADO de código (mesmo do detalhe do pedido) e só
+  /// conclui a entrega quando o produtor digita os 4 dígitos do consumidor. O
+  /// backend exige o código — sem ele a confirmação direta era uma falha de
+  /// segurança (qualquer entrega era marcada como concluída sem validação).
+  void _openConfirmDeliveryDialog(BuildContext context) {
+    final cubit = context.read<RouteCalculationCubit>();
+    showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => ConfirmDeliveryCodeDialog(
+        onConfirm: (code) => cubit.confirmDelivery(id, code),
+        // Espelha o fluxo do detalhe do pedido: a ação secundária só abre o
+        // diálogo de motivo (CancelOrderDialog); a recusa só acontece quando o
+        // produtor confirma lá dentro.
+        onCancelOrder: () => _confirmCancelOrder(context, cubit),
+      ),
+    );
+  }
+
+  /// Coleta o motivo (CancelOrderDialog) e, se confirmado, recusa o pedido da
+  /// parada e atualiza a rota. Espelha `_confirmRefuse` do detalhe do pedido.
+  Future<void> _confirmCancelOrder(
+    BuildContext context,
+    RouteCalculationCubit cubit,
+  ) async {
+    final cancelResult = await CancelOrderDialog.showForProducer(context);
+    if (cancelResult == null) return;
+    await cubit.cancelOrder(
+      id,
+      reason: cancelResult.reason,
+      details: cancelResult.details,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<RouteCalculationCubit, RouteCalculationState>(
       builder: (context, state) {
         final isConfirmed = state.confirmedDeliveries.contains(id);
         return Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Text(
               number.toString(),
@@ -647,12 +704,12 @@ class _DeliveryItem extends StatelessWidget {
                     title,
                     style: const TextStyle(
                       fontWeight: FontWeight.bold,
-                      fontSize: 16,
+                      fontSize: 14,
                     ),
                   ),
                   Text(
                     subtitle,
-                    style: const TextStyle(fontSize: 14, color: Colors.grey),
+                    style: const TextStyle(fontSize: 12, color: Colors.grey),
                   ),
                 ],
               ),
@@ -660,79 +717,7 @@ class _DeliveryItem extends StatelessWidget {
             GestureDetector(
               onTap: isConfirmed
                   ? null
-                  : () async {
-                      await showDialog<void>(
-                        context: context,
-                        barrierDismissible: false,
-                        builder: (dialogContext) => ConfirmDeliveryCodeDialog(
-                          onConfirm: (code) =>
-                              context.read<RouteCalculationCubit>().confirmDeliveryWithCode(id, code),
-                        ),
-                      );
-                      if (!context.mounted) return;
-                      if (context.read<RouteCalculationCubit>().state.confirmedDeliveries.contains(id)) {
-                        await showDialog<void>(
-                          context: context,
-                          builder: (ctx) => Dialog(
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(24),
-                            ),
-                            child: Padding(
-                              padding: const EdgeInsets.fromLTRB(24, 32, 24, 24),
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  const Icon(
-                                    Icons.check_circle,
-                                    color: AppColors.darkGreen,
-                                    size: 64,
-                                  ),
-                                  const SizedBox(height: 16),
-                                  const Text(
-                                    'Pedido entregue!',
-                                    style: TextStyle(
-                                      fontFamily: 'Figtree',
-                                      fontWeight: FontWeight.w700,
-                                      fontSize: 20,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 8),
-                                  Text(
-                                    title,
-                                    textAlign: TextAlign.center,
-                                    style: const TextStyle(
-                                      fontSize: 14,
-                                      color: Colors.grey,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 24),
-                                  SizedBox(
-                                    width: double.infinity,
-                                    child: ElevatedButton(
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor: AppColors.darkGreen,
-                                        padding: const EdgeInsets.symmetric(vertical: 14),
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(24),
-                                        ),
-                                      ),
-                                      onPressed: () => Navigator.of(ctx).pop(),
-                                      child: const Text(
-                                        'Continuar',
-                                        style: TextStyle(
-                                          color: Colors.white,
-                                          fontWeight: FontWeight.w700,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        );
-                      }
-                    },
+                  : () => _openConfirmDeliveryDialog(context),
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 300),
                 padding: const EdgeInsets.symmetric(
@@ -749,7 +734,7 @@ class _DeliveryItem extends StatelessWidget {
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     color: isConfirmed ? Colors.white : AppColors.darkGreen,
-                    fontSize: 12,
+                    fontSize: 10,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -813,7 +798,7 @@ class _Co2BottomSheetContentState extends State<_Co2BottomSheetContent> {
               ),
               const SizedBox(height: 8),
               DropdownButtonFormField<String>(
-                value: state.selectedVehicle,
+                initialValue: state.selectedVehicle,
                 decoration: InputDecoration(
                   contentPadding: const EdgeInsets.symmetric(
                     horizontal: 16,
@@ -823,24 +808,21 @@ class _Co2BottomSheetContentState extends State<_Co2BottomSheetContent> {
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                items: RouteCalculationCubit.allowedFuelsByVehicle.keys.map((
-                  e,
-                ) {
+                items: state.allowedFuelsByVehicle.keys.map((e) {
                   return DropdownMenuItem(value: e, child: Text(e));
                 }).toList(),
                 onChanged: (val) {
                   context.read<RouteCalculationCubit>().updateFormData(
                     vehicle: val,
                   );
-                  final currentFuel = context
-                      .read<RouteCalculationCubit>()
-                      .state
-                      .selectedFuel;
-                  final preset = RouteCalculationCubit.defaultConsumption(
-                    val ?? state.selectedVehicle,
-                    currentFuel,
-                  );
-                  _consumptionController.text = preset ?? '';
+                  // Sync the field with the new vehicle's default consumption
+                  // when no value has been entered yet.
+                  final preset =
+                      RouteCalculationCubit.defaultConsumptionByVehicle[val];
+                  if (preset != null &&
+                      _consumptionController.text.trim().isEmpty) {
+                    _consumptionController.text = preset;
+                  }
                 },
               ),
               const SizedBox(height: 16),
@@ -850,7 +832,7 @@ class _Co2BottomSheetContentState extends State<_Co2BottomSheetContent> {
               ),
               const SizedBox(height: 8),
               DropdownButtonFormField<String>(
-                value: state.selectedFuel,
+                initialValue: state.selectedFuel,
                 decoration: InputDecoration(
                   contentPadding: const EdgeInsets.symmetric(
                     horizontal: 16,
@@ -861,23 +843,15 @@ class _Co2BottomSheetContentState extends State<_Co2BottomSheetContent> {
                   ),
                 ),
                 items:
-                    (RouteCalculationCubit.allowedFuelsByVehicle[state
-                                .selectedVehicle] ??
+                    (state.allowedFuelsByVehicle[state.selectedVehicle] ??
                             const ['Gasolina'])
                         .map((e) {
                           return DropdownMenuItem(value: e, child: Text(e));
                         })
                         .toList(),
-                onChanged: (val) {
-                  context.read<RouteCalculationCubit>().updateFormData(
-                    fuel: val,
-                  );
-                  final preset = RouteCalculationCubit.defaultConsumption(
-                    state.selectedVehicle,
-                    val ?? state.selectedFuel,
-                  );
-                  _consumptionController.text = preset ?? '';
-                },
+                onChanged: (val) => context
+                    .read<RouteCalculationCubit>()
+                    .updateFormData(fuel: val),
               ),
               const SizedBox(height: 16),
               const Text(

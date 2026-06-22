@@ -7,22 +7,19 @@ import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:ragro_mobile/core/di/injection.dart';
 import 'package:ragro_mobile/core/formatters/input_masks.dart';
-import 'package:ragro_mobile/core/services/cep_service.dart';
 import 'package:ragro_mobile/core/theme/app_colors.dart';
 import 'package:ragro_mobile/features/auth/data/datasources/auth_local_datasource.dart';
 import 'package:ragro_mobile/features/producer_profile/domain/entities/public_producer.dart';
 import 'package:ragro_mobile/features/producer_profile/presentation/bloc/producer_profile_bloc.dart';
 import 'package:ragro_mobile/features/producer_profile/presentation/bloc/producer_profile_event.dart';
 import 'package:ragro_mobile/features/producer_profile/presentation/bloc/producer_profile_state.dart';
-
-const _pixKeyTypes = ['cpf', 'cnpj', 'email', 'phone', 'random'];
-const _pixKeyTypeLabels = {
-  'cpf': 'CPF',
-  'cnpj': 'CNPJ',
-  'email': 'E-mail',
-  'phone': 'Telefone',
-  'random': 'Chave aleatória',
-};
+import 'package:ragro_mobile/shared/widgets/producer_form/cep_lookup.dart';
+import 'package:ragro_mobile/shared/widgets/producer_form/field_label.dart';
+import 'package:ragro_mobile/shared/widgets/producer_form/pix_mask.dart';
+import 'package:ragro_mobile/shared/widgets/producer_form/producer_form_controllers.dart';
+import 'package:ragro_mobile/shared/widgets/producer_form/producer_form_sections.dart';
+import 'package:ragro_mobile/shared/widgets/producer_form/producer_text_field.dart';
+import 'package:ragro_mobile/shared/widgets/producer_form/weekday_mapper.dart';
 
 class ProducerEditProfilePage extends StatelessWidget {
   const ProducerEditProfilePage({super.key});
@@ -56,36 +53,7 @@ class _ProducerEditProfileView extends StatefulWidget {
 
 class _ProducerEditProfileViewState extends State<_ProducerEditProfileView> {
   final _formKey = GlobalKey<FormState>();
-
-  // Personal data
-  final _nameController = TextEditingController();
-  final _bioController = TextEditingController();
-  final _phoneController = TextEditingController();
-  final _farmNameController = TextEditingController();
-
-  // Address
-  final _cepController = TextEditingController();
-  final _addressController = TextEditingController();
-  final _numberController = TextEditingController();
-  final _neighborhoodController = TextEditingController();
-  final _cityController = TextEditingController();
-  final _stateController = TextEditingController();
-
-  // Payment details
-  String? _pixKeyType;
-  final _pixKeyController = TextEditingController();
-
-  final _bankNameController = TextEditingController();
-  final _bankCodeController = TextEditingController();
-  final _agencyController = TextEditingController();
-  final _accountController = TextEditingController();
-  final _holderController = TextEditingController();
-  final _bankFiscalController = TextEditingController();
-
-  // Schedule: a single open/close window applied to the selected weekdays.
-  final _scheduleStartController = TextEditingController();
-  final _scheduleEndController = TextEditingController();
-  final List<bool> _weekdays = List.filled(7, false);
+  final _c = ProducerFormControllers();
 
   final _imagePicker = ImagePicker();
 
@@ -95,159 +63,22 @@ class _ProducerEditProfileViewState extends State<_ProducerEditProfileView> {
   @override
   void initState() {
     super.initState();
-    _cepController.addListener(_onCepChanged);
-  }
-
-  static const _weekdayLabels = [
-    'Seg',
-    'Ter',
-    'Qua',
-    'Qui',
-    'Sex',
-    'Sáb',
-    'Dom',
-  ];
-
-  String _digitsOnly(String v) => v.replaceAll(RegExp(r'\D'), '');
-
-  String _applyMask(String val, TextInputFormatter formatter) {
-    if (val.isEmpty) return val;
-    return formatter
-        .formatEditUpdate(TextEditingValue.empty, TextEditingValue(text: val))
-        .text;
-  }
-
-  void _onCepChanged() {
-    final cep = _digitsOnly(_cepController.text);
-    if (cep.length == 8) {
-      _lookupCep(cep);
-    }
-  }
-
-  Future<void> _lookupCep(String cep) async {
-    final address = await getIt<CepService>().fetchAddress(cep);
-    if (address != null && mounted) {
-      setState(() {
-        _addressController.text = address.street;
-        _neighborhoodController.text = address.neighborhood;
-        _cityController.text = address.city;
-        _stateController.text = address.state;
-      });
-    }
-  }
-
-  List<TextInputFormatter> _pixKeyFormatters() {
-    switch (_pixKeyType) {
-      case 'cpf':
-      case 'cnpj':
-        return [FiscalNumberInputFormatter()];
-      case 'phone':
-        return [PhoneInputFormatter()];
-      default:
-        return [];
-    }
+    CepLookup(
+      controllers: _c,
+      isMounted: () => mounted,
+      applyState: setState,
+    ).attach();
   }
 
   @override
   void dispose() {
-    _nameController.dispose();
-    _bioController.dispose();
-    _phoneController.dispose();
-    _farmNameController.dispose();
-    _cepController.dispose();
-    _addressController.dispose();
-    _numberController.dispose();
-    _neighborhoodController.dispose();
-    _cityController.dispose();
-    _stateController.dispose();
-    _pixKeyController.dispose();
-    _bankNameController.dispose();
-    _bankCodeController.dispose();
-    _agencyController.dispose();
-    _accountController.dispose();
-    _holderController.dispose();
-    _bankFiscalController.dispose();
-    _scheduleStartController.dispose();
-    _scheduleEndController.dispose();
+    _c.disposeAll();
     super.dispose();
   }
 
   void _hydrateFromState(ProducerProfileLoaded state) {
     if (_hydrated) return;
-    final producer = state.producer;
-
-    _nameController.text = producer.name;
-    _bioController.text = producer.description;
-    _phoneController.text = _applyMask(producer.phone, PhoneInputFormatter());
-    _farmNameController.text = producer.farmName;
-
-    if (producer.producerAddress != null) {
-      final addr = producer.producerAddress!;
-      _cepController.text = _applyMask(addr.zipCode, CepInputFormatter());
-      _addressController.text = addr.street;
-      _numberController.text = addr.number;
-      _neighborhoodController.text = addr.neighborhood ?? '';
-      _cityController.text = addr.city;
-      _stateController.text = addr.state;
-    }
-
-    if (producer.paymentMethods != null) {
-      final pix = producer.paymentMethods!
-          .where((pm) => pm.type == 'pix')
-          .firstOrNull;
-      if (pix != null) {
-        _pixKeyType = pix.pixKeyType;
-        if (_pixKeyType == 'cpf' || _pixKeyType == 'cnpj') {
-          _pixKeyController.text = _applyMask(
-            pix.pixKey ?? '',
-            FiscalNumberInputFormatter(),
-          );
-        } else if (_pixKeyType == 'phone') {
-          _pixKeyController.text = _applyMask(
-            pix.pixKey ?? '',
-            PhoneInputFormatter(),
-          );
-        } else {
-          _pixKeyController.text = pix.pixKey ?? '';
-        }
-      }
-
-      final bank = producer.paymentMethods!
-          .where((pm) => pm.type == 'bank_account')
-          .firstOrNull;
-      if (bank != null) {
-        _bankNameController.text = bank.bankName ?? '';
-        _bankCodeController.text = bank.bankCode ?? '';
-        _agencyController.text = bank.agency ?? '';
-        _accountController.text = _applyMask(
-          bank.accountNumber ?? '',
-          BankAccountInputFormatter(),
-        );
-        _holderController.text = bank.holderName ?? '';
-        _bankFiscalController.text = _applyMask(
-          bank.fiscalNumber ?? '',
-          FiscalNumberInputFormatter(),
-        );
-      }
-    }
-
-    if (producer.availability.isNotEmpty) {
-      _scheduleStartController.text = producer.availability.first.opensAt;
-      _scheduleEndController.text = producer.availability.first.closesAt;
-      for (var i = 0; i < 7; i++) {
-        _weekdays[i] = false;
-      }
-      for (final slot in producer.availability) {
-        final uiIndex = slot.weekday == 0 ? 6 : slot.weekday - 1;
-        if (uiIndex >= 0 && uiIndex < 7) {
-          _weekdays[uiIndex] = true;
-        }
-      }
-    } else {
-      _scheduleStartController.text = '08:00';
-      _scheduleEndController.text = '18:00';
-    }
-
+    _c.hydrateFromPublicProducer(state.producer);
     _hydrated = true;
   }
 
@@ -255,40 +86,38 @@ class _ProducerEditProfileViewState extends State<_ProducerEditProfileView> {
     if (!(_formKey.currentState?.validate() ?? false)) return;
 
     Map<String, dynamic>? addressPayload;
-    if (_addressController.text.trim().isNotEmpty) {
+    if (_c.address.text.trim().isNotEmpty) {
       addressPayload = {
-        'street': _addressController.text.trim(),
-        'number': _numberController.text.trim(),
-        'city': _cityController.text.trim(),
-        'state': _stateController.text.trim(),
-        'zipCode': _digitsOnly(_cepController.text),
-        if (_neighborhoodController.text.trim().isNotEmpty)
-          'neighborhood': _neighborhoodController.text.trim(),
+        'street': _c.address.text.trim(),
+        'number': _c.number.text.trim(),
+        'city': _c.city.text.trim(),
+        'state': _c.state.text.trim(),
+        'zipCode': digitsOnly(_c.cep.text),
+        if (_c.neighborhood.text.trim().isNotEmpty)
+          'neighborhood': _c.neighborhood.text.trim(),
       };
     }
 
     final paymentMethods = <Map<String, dynamic>>[];
-    final hasPix =
-        _pixKeyType != null && _pixKeyController.text.trim().isNotEmpty;
+    final hasPix = _c.pixKeyType != null && _c.pixKey.text.trim().isNotEmpty;
     if (hasPix) {
-      final raw = _pixKeyController.text.trim();
-      final pKey = (_pixKeyType == 'cpf' || _pixKeyType == 'phone')
-          ? _digitsOnly(raw)
+      final raw = _c.pixKey.text.trim();
+      final pKey =
+          (_c.pixKeyType == 'cpf' ||
+              _c.pixKeyType == 'phone' ||
+              _c.pixKeyType == 'cnpj')
+          ? digitsOnly(raw)
           : raw;
       paymentMethods.add({
         'type': 'pix',
-        'pixKeyType': _pixKeyType,
+        'pixKeyType': _c.pixKeyType,
         'pixKey': pKey,
       });
     }
 
-    final hasBank =
-        _bankNameController.text.trim().isNotEmpty &&
-        _agencyController.text.trim().isNotEmpty &&
-        _accountController.text.trim().isNotEmpty &&
-        _holderController.text.trim().isNotEmpty;
+    final hasBank = _c.hasCompleteBank;
 
-    if (_bankNameController.text.trim().isNotEmpty && !hasBank) {
+    if (_c.bankName.text.trim().isNotEmpty && !hasBank) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Preencha agência, conta e titular.'),
@@ -301,27 +130,24 @@ class _ProducerEditProfileViewState extends State<_ProducerEditProfileView> {
     if (hasBank) {
       paymentMethods.add({
         'type': 'bank_account',
-        'bankName': _bankNameController.text.trim(),
-        if (_bankCodeController.text.isNotEmpty)
-          'bankCode': _bankCodeController.text.trim(),
-        'agency': _agencyController.text.trim(),
-        'accountNumber': _accountController.text.trim(),
+        'bankName': _c.bankName.text.trim(),
+        if (_c.bankCode.text.isNotEmpty) 'bankCode': _c.bankCode.text.trim(),
+        'agency': _c.agency.text.trim(),
+        'accountNumber': _c.account.text.trim(),
         'accountType': 'checking',
-        'holderName': _holderController.text.trim(),
-        if (_bankFiscalController.text.isNotEmpty)
-          'fiscalNumber': _digitsOnly(_bankFiscalController.text),
+        'holderName': _c.holder.text.trim(),
+        if (_c.bankFiscal.text.isNotEmpty)
+          'fiscalNumber': digitsOnly(_c.bankFiscal.text),
       });
     }
 
     final availability = <Map<String, dynamic>>[];
-    final sStart = _scheduleStartController.text.trim();
-    final sEnd = _scheduleEndController.text.trim();
+    final sStart = _c.scheduleStart.text.trim();
+    final sEnd = _c.scheduleEnd.text.trim();
     for (var i = 0; i < 7; i++) {
-      if (_weekdays[i]) {
-        // UI weekday: 0=Mon..6=Sun. API weekday: 0=Sun, 1=Mon..6=Sat.
-        final apiWeekday = (i == 6) ? 0 : i + 1;
+      if (_c.weekdays[i]) {
         availability.add({
-          'weekday': apiWeekday,
+          'weekday': WeekdayMapper.toApi(i),
           'opensAt': sStart,
           'closesAt': sEnd,
         });
@@ -331,10 +157,10 @@ class _ProducerEditProfileViewState extends State<_ProducerEditProfileView> {
     context.read<ProducerProfileBloc>().add(
       ProducerProfileUpdateSubmitted(
         producerId: widget.producerId,
-        name: _nameController.text,
-        description: _bioController.text,
-        phone: _digitsOnly(_phoneController.text),
-        farmName: _farmNameController.text,
+        name: _c.name.text,
+        description: _c.description.text,
+        phone: digitsOnly(_c.phone.text),
+        farmName: _c.farmName.text,
         address: addressPayload,
         paymentMethods: paymentMethods.isNotEmpty ? paymentMethods : null,
         availability: availability.isNotEmpty ? availability : null,
@@ -377,63 +203,6 @@ class _ProducerEditProfileViewState extends State<_ProducerEditProfileView> {
     if (state is ProducerProfileLoaded) return state.producer;
     if (state is ProducerPhotoUploading) return state.producer;
     return null;
-  }
-
-  Widget _sectionTitle(String title) {
-    return Text(
-      title,
-      style: const TextStyle(
-        fontFamily: 'Figtree',
-        fontWeight: FontWeight.w700,
-        fontSize: 17,
-        color: AppColors.darkGreen,
-      ),
-    );
-  }
-
-  InputDecoration _dropdownDecoration() {
-    return InputDecoration(
-      filled: true,
-      fillColor: AppColors.inputBackground,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: AppColors.inputBorder),
-      ),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: AppColors.inputBorder),
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: AppColors.darkGreen, width: 1.5),
-      ),
-    );
-  }
-
-  String _pixKeyHint(String type) {
-    switch (type) {
-      case 'cpf':
-        return '000.000.000-00';
-      case 'cnpj':
-        return '00.000.000/0000-00';
-      case 'email':
-        return 'email@exemplo.com';
-      case 'phone':
-        return '(XX) XXXXX-XXXX';
-      default:
-        return 'Chave Aleatória';
-    }
-  }
-
-  TextInputType _pixKeyboardType(String type) {
-    if (type == 'cpf' || type == 'cnpj' || type == 'phone') {
-      return TextInputType.number;
-    }
-    if (type == 'email') {
-      return TextInputType.emailAddress;
-    }
-    return TextInputType.text;
   }
 
   @override
@@ -546,9 +315,8 @@ class _ProducerEditProfileViewState extends State<_ProducerEditProfileView> {
                                     : null,
                                 child: avatarUrl.isEmpty
                                     ? Text(
-                                        _nameController.text.isNotEmpty
-                                            ? _nameController.text[0]
-                                                  .toUpperCase()
+                                        _c.name.text.isNotEmpty
+                                            ? _c.name.text[0].toUpperCase()
                                             : '?',
                                         style: const TextStyle(
                                           fontFamily: 'Figtree',
@@ -599,14 +367,15 @@ class _ProducerEditProfileViewState extends State<_ProducerEditProfileView> {
                           ),
                         ),
                         const SizedBox(height: 28),
-                        _sectionTitle('Dados Pessoais'),
+                        const FormSectionTitle('Dados Pessoais'),
                         const SizedBox(height: 12),
-                        const _FieldLabel('Nome Completo'),
+                        const FieldLabel('Nome Completo'),
                         const SizedBox(height: 8),
-                        _FormField(
-                          controller: _nameController,
+                        ProducerTextField(
+                          controller: _c.name,
                           hint: 'Seu nome completo',
                           prefixIcon: Icons.person_outline,
+                          autovalidateMode: AutovalidateMode.onUserInteraction,
                           validator: (value) {
                             final trimmed = value?.trim() ?? '';
                             if (trimmed.isEmpty) {
@@ -619,13 +388,14 @@ class _ProducerEditProfileViewState extends State<_ProducerEditProfileView> {
                           },
                         ),
                         const SizedBox(height: 16),
-                        const _FieldLabel('Telefone'),
+                        const FieldLabel('Telefone'),
                         const SizedBox(height: 8),
-                        _FormField(
-                          controller: _phoneController,
+                        ProducerTextField(
+                          controller: _c.phone,
                           hint: '(XX) XXXXX-XXXX',
                           prefixIcon: Icons.phone_outlined,
                           keyboardType: TextInputType.phone,
+                          autovalidateMode: AutovalidateMode.onUserInteraction,
                           inputFormatters: [PhoneInputFormatter()],
                           validator: (value) {
                             final digits = (value ?? '').replaceAll(
@@ -642,12 +412,13 @@ class _ProducerEditProfileViewState extends State<_ProducerEditProfileView> {
                           },
                         ),
                         const SizedBox(height: 16),
-                        const _FieldLabel('Nome da Fazenda'),
+                        const FieldLabel('Nome da Fazenda'),
                         const SizedBox(height: 8),
-                        _FormField(
-                          controller: _farmNameController,
+                        ProducerTextField(
+                          controller: _c.farmName,
                           hint: 'Nome da sua propriedade rural',
                           prefixIcon: Icons.home_outlined,
+                          autovalidateMode: AutovalidateMode.onUserInteraction,
                           validator: (value) {
                             if (value?.trim().isEmpty ?? true) {
                               return 'Informe o nome da fazenda';
@@ -656,14 +427,15 @@ class _ProducerEditProfileViewState extends State<_ProducerEditProfileView> {
                           },
                         ),
                         const SizedBox(height: 16),
-                        const _FieldLabel('Descrição'),
+                        const FieldLabel('Descrição'),
                         const SizedBox(height: 8),
-                        _FormField(
-                          controller: _bioController,
+                        ProducerTextField(
+                          controller: _c.description,
                           hint: 'Conte um pouco sobre você...',
                           prefixIcon: Icons.description_outlined,
                           minLines: 1,
                           maxLines: null,
+                          autovalidateMode: AutovalidateMode.onUserInteraction,
                           validator: (value) {
                             if (value?.trim().isEmpty ?? true) {
                               return 'Conte um pouco sobre você';
@@ -673,112 +445,38 @@ class _ProducerEditProfileViewState extends State<_ProducerEditProfileView> {
                         ),
 
                         const SizedBox(height: 24),
-                        _sectionTitle('Endereço'),
+                        const FormSectionTitle('Endereço'),
                         const SizedBox(height: 12),
-                        const _FieldLabel('CEP'),
-                        const SizedBox(height: 8),
-                        _FormField(
-                          controller: _cepController,
-                          hint: '00000-000',
-                          prefixIcon: Icons.location_on_outlined,
-                          keyboardType: TextInputType.number,
-                          inputFormatters: [CepInputFormatter()],
-                          validator: (value) {
+                        AddressFields(
+                          controllers: _c,
+                          autovalidateMode: AutovalidateMode.onUserInteraction,
+                          cepValidator: (value) {
                             if (value == null || value.isEmpty) {
                               return null;
                             }
-                            final digits = _digitsOnly(value);
+                            final digits = digitsOnly(value);
                             if (digits.length != 8) {
                               return 'CEP deve ter 8 dígitos';
                             }
                             return null;
                           },
-                        ),
-                        const SizedBox(height: 12),
-                        const _FieldLabel('Endereço'),
-                        const SizedBox(height: 8),
-                        Row(
-                          children: [
-                            Expanded(
-                              flex: 3,
-                              child: _FormField(
-                                controller: _addressController,
-                                hint: 'Rua / Avenida',
-                                prefixIcon: Icons.location_on_outlined,
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: _FormField(
-                                controller: _numberController,
-                                hint: 'Nº',
-                                keyboardType: TextInputType.number,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 12),
-                        const _FieldLabel('Bairro'),
-                        const SizedBox(height: 8),
-                        _FormField(
-                          controller: _neighborhoodController,
-                          hint: 'Bairro',
-                          prefixIcon: Icons.map_outlined,
-                          validator: (value) {
+                          neighborhoodValidator: (value) {
                             if ((value ?? '').trim().isEmpty) {
                               return 'Informe o bairro';
                             }
                             return null;
                           },
-                        ),
-                        const SizedBox(height: 12),
-                        Row(
-                          children: [
-                            Expanded(
-                              flex: 2,
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  const _FieldLabel('Cidade'),
-                                  const SizedBox(height: 8),
-                                  _FormField(
-                                    controller: _cityController,
-                                    hint: 'Cidade',
-                                    prefixIcon: Icons.location_city_outlined,
-                                  ),
-                                ],
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  const _FieldLabel('Estado'),
-                                  const SizedBox(height: 8),
-                                  _FormField(
-                                    controller: _stateController,
-                                    hint: 'UF',
-                                    prefixIcon: Icons.map_outlined,
-                                    inputFormatters: [
-                                      LengthLimitingTextInputFormatter(2),
-                                      _UppercaseFormatter(),
-                                    ],
-                                    validator: (v) {
-                                      if ((v ?? '').trim().isEmpty) {
-                                        return 'UF';
-                                      }
-                                      return null;
-                                    },
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
+                          statePrefixIcon: Icons.map_outlined,
+                          stateValidator: (v) {
+                            if ((v ?? '').trim().isEmpty) {
+                              return 'UF';
+                            }
+                            return null;
+                          },
                         ),
 
                         const SizedBox(height: 24),
-                        _sectionTitle('Forma de Recebimento'),
+                        const FormSectionTitle('Forma de Recebimento'),
                         const SizedBox(height: 4),
                         const Text(
                           'Preencha apenas os campos que deseja atualizar.',
@@ -790,194 +488,34 @@ class _ProducerEditProfileViewState extends State<_ProducerEditProfileView> {
                         ),
                         const SizedBox(height: 12),
 
-                        Card(
-                          elevation: 0,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            side: const BorderSide(
-                              color: AppColors.inputBorder,
-                            ),
-                          ),
-                          child: Padding(
-                            padding: const EdgeInsets.all(16),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const Text(
-                                  'Chave PIX',
-                                  style: TextStyle(
-                                    fontFamily: 'Figtree',
-                                    fontWeight: FontWeight.w700,
-                                    fontSize: 15,
-                                    color: AppColors.darkGreen,
-                                  ),
-                                ),
-                                const SizedBox(height: 12),
-                                const _FieldLabel('Tipo da chave (opcional)'),
-                                const SizedBox(height: 8),
-                                DropdownButtonFormField<String>(
-                                  initialValue:
-                                      _pixKeyTypes.contains(_pixKeyType)
-                                      ? _pixKeyType
-                                      : null,
-                                  decoration: _dropdownDecoration(),
-                                  hint: const Text(
-                                    'Selecione',
-                                    style: TextStyle(
-                                      fontFamily: 'Manrope',
-                                      fontSize: 15,
-                                      color: AppColors.placeholder,
-                                    ),
-                                  ),
-                                  items: _pixKeyTypes
-                                      .map(
-                                        (t) => DropdownMenuItem(
-                                          value: t,
-                                          child: Text(
-                                            _pixKeyTypeLabels[t] ?? t,
-                                          ),
-                                        ),
-                                      )
-                                      .toList(),
-                                  onChanged: isSaving
-                                      ? null
-                                      : (v) => setState(() {
-                                          _pixKeyType = v;
-                                          _pixKeyController.clear();
-                                        }),
-                                ),
-                                if (_pixKeyType != null) ...[
-                                  const SizedBox(height: 12),
-                                  const _FieldLabel('Chave Pix'),
-                                  const SizedBox(height: 8),
-                                  _FormField(
-                                    key: ValueKey(_pixKeyType),
-                                    controller: _pixKeyController,
-                                    hint: _pixKeyHint(_pixKeyType!),
-                                    keyboardType: _pixKeyboardType(
-                                      _pixKeyType!,
-                                    ),
-                                    inputFormatters: _pixKeyFormatters(),
-                                  ),
-                                ],
-                              ],
-                            ),
-                          ),
+                        PixSectionCard(
+                          pixKeyType: _c.pixKeyType,
+                          dropdownValue: kPixKeyTypes.contains(_c.pixKeyType)
+                              ? _c.pixKeyType
+                              : null,
+                          pixKeyController: _c.pixKey,
+                          keyFormatters: pixMaskListFor(_c.pixKeyType),
+                          typeLabel: 'Tipo da chave (opcional)',
+                          randomKeyHint: 'Chave Aleatória',
+                          dropdownEnabled: !isSaving,
+                          autovalidateMode: AutovalidateMode.onUserInteraction,
+                          onTypeChanged: (v) => setState(() {
+                            _c.pixKeyType = v;
+                            _c.pixKey.clear();
+                          }),
                         ),
 
                         const SizedBox(height: 12),
 
-                        Card(
-                          elevation: 0,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            side: const BorderSide(
-                              color: AppColors.inputBorder,
-                            ),
-                          ),
-                          child: Padding(
-                            padding: const EdgeInsets.all(16),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const Text(
-                                  'Conta Bancária',
-                                  style: TextStyle(
-                                    fontFamily: 'Figtree',
-                                    fontWeight: FontWeight.w700,
-                                    fontSize: 15,
-                                    color: AppColors.darkGreen,
-                                  ),
-                                ),
-                                const SizedBox(height: 12),
-                                const _FieldLabel('Banco'),
-                                const SizedBox(height: 8),
-                                _FormField(
-                                  controller: _bankNameController,
-                                  hint: 'Nome do banco',
-                                  prefixIcon: Icons.account_balance_outlined,
-                                ),
-                                const SizedBox(height: 12),
-                                Row(
-                                  children: [
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          const _FieldLabel('Código'),
-                                          const SizedBox(height: 8),
-                                          _FormField(
-                                            controller: _bankCodeController,
-                                            hint: '001',
-                                            keyboardType: TextInputType.number,
-                                            inputFormatters: [
-                                              LengthLimitingTextInputFormatter(
-                                                3,
-                                              ),
-                                              FilteringTextInputFormatter
-                                                  .digitsOnly,
-                                            ],
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                    const SizedBox(width: 12),
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          const _FieldLabel('Agência'),
-                                          const SizedBox(height: 8),
-                                          _FormField(
-                                            controller: _agencyController,
-                                            hint: '0000',
-                                            keyboardType: TextInputType.number,
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(height: 12),
-                                const _FieldLabel('Conta'),
-                                const SizedBox(height: 8),
-                                _FormField(
-                                  controller: _accountController,
-                                  hint: '000000-0',
-                                  keyboardType: TextInputType.number,
-                                  inputFormatters: [
-                                    BankAccountInputFormatter(),
-                                  ],
-                                ),
-                                const SizedBox(height: 12),
-                                const _FieldLabel('Titular'),
-                                const SizedBox(height: 8),
-                                _FormField(
-                                  controller: _holderController,
-                                  hint: 'Nome completo do titular',
-                                  prefixIcon: Icons.account_circle_outlined,
-                                ),
-                                const SizedBox(height: 12),
-                                const _FieldLabel('CPF / CNPJ do Titular'),
-                                const SizedBox(height: 8),
-                                _FormField(
-                                  controller: _bankFiscalController,
-                                  hint: '000.000.000-00',
-                                  prefixIcon: Icons.badge_outlined,
-                                  keyboardType: TextInputType.number,
-                                  inputFormatters: [
-                                    FiscalNumberInputFormatter(),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ),
+                        BankSectionCard(
+                          controllers: _c,
+                          codeLabel: 'Código',
+                          fiscalLabel: 'CPF / CNPJ do Titular',
+                          autovalidateMode: AutovalidateMode.onUserInteraction,
                         ),
 
                         const SizedBox(height: 24),
-                        _sectionTitle('Horário de atendimento'),
+                        const FormSectionTitle('Horário de atendimento'),
                         const SizedBox(height: 12),
                         Row(
                           children: [
@@ -985,13 +523,15 @@ class _ProducerEditProfileViewState extends State<_ProducerEditProfileView> {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  const _FieldLabel('Abre às'),
+                                  const FieldLabel('Abre às'),
                                   const SizedBox(height: 8),
-                                  _FormField(
-                                    controller: _scheduleStartController,
+                                  ProducerTextField(
+                                    controller: _c.scheduleStart,
                                     hint: '08:00',
                                     prefixIcon: Icons.schedule_outlined,
                                     keyboardType: TextInputType.datetime,
+                                    autovalidateMode:
+                                        AutovalidateMode.onUserInteraction,
                                   ),
                                 ],
                               ),
@@ -1001,13 +541,15 @@ class _ProducerEditProfileViewState extends State<_ProducerEditProfileView> {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  const _FieldLabel('Fecha às'),
+                                  const FieldLabel('Fecha às'),
                                   const SizedBox(height: 8),
-                                  _FormField(
-                                    controller: _scheduleEndController,
+                                  ProducerTextField(
+                                    controller: _c.scheduleEnd,
                                     hint: '18:00',
                                     prefixIcon: Icons.schedule_outlined,
                                     keyboardType: TextInputType.datetime,
+                                    autovalidateMode:
+                                        AutovalidateMode.onUserInteraction,
                                   ),
                                 ],
                               ),
@@ -1015,74 +557,18 @@ class _ProducerEditProfileViewState extends State<_ProducerEditProfileView> {
                           ],
                         ),
                         const SizedBox(height: 12),
-                        Wrap(
-                          spacing: 8,
+                        WeekdaySelector(
+                          selected: _c.weekdays,
+                          onToggle: (i) =>
+                              setState(() => _c.weekdays[i] = !_c.weekdays[i]),
                           runSpacing: 8,
-                          children: List.generate(7, (i) {
-                            final isSelected = _weekdays[i];
-                            return GestureDetector(
-                              onTap: () =>
-                                  setState(() => _weekdays[i] = !_weekdays[i]),
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 12,
-                                  vertical: 8,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: isSelected
-                                      ? AppColors.darkGreen
-                                      : AppColors.inputBackground,
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: Text(
-                                  _weekdayLabels[i],
-                                  style: TextStyle(
-                                    fontFamily: 'Manrope',
-                                    fontWeight: FontWeight.w600,
-                                    fontSize: 13,
-                                    color: isSelected
-                                        ? AppColors.white
-                                        : AppColors.placeholder,
-                                  ),
-                                ),
-                              ),
-                            );
-                          }),
                         ),
 
                         const SizedBox(height: 32),
-                        SizedBox(
-                          width: double.infinity,
-                          child: ElevatedButton(
-                            onPressed: isSaving ? null : _submit,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: AppColors.darkGreen,
-                              foregroundColor: AppColors.white,
-                              disabledBackgroundColor: AppColors.darkGreen
-                                  .withValues(alpha: 0.5),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(24),
-                              ),
-                              padding: const EdgeInsets.symmetric(vertical: 16),
-                            ),
-                            child: isSaving
-                                ? const SizedBox(
-                                    height: 20,
-                                    width: 20,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                      color: AppColors.white,
-                                    ),
-                                  )
-                                : const Text(
-                                    'Salvar',
-                                    style: TextStyle(
-                                      fontFamily: 'Manrope',
-                                      fontWeight: FontWeight.w700,
-                                      fontSize: 16,
-                                    ),
-                                  ),
-                          ),
+                        ProducerFormSubmitButton(
+                          label: 'Salvar',
+                          busy: isSaving,
+                          onPressed: _submit,
                         ),
                         const SizedBox(height: 32),
                       ],
@@ -1157,99 +643,4 @@ class _CoverPhotoSection extends StatelessWidget {
       ),
     );
   }
-}
-
-class _FieldLabel extends StatelessWidget {
-  const _FieldLabel(this.text);
-  final String text;
-  @override
-  Widget build(BuildContext context) {
-    return Text(
-      text,
-      style: const TextStyle(
-        fontFamily: 'Manrope',
-        fontWeight: FontWeight.w600,
-        fontSize: 14,
-        color: AppColors.black,
-      ),
-    );
-  }
-}
-
-class _FormField extends StatelessWidget {
-  const _FormField({
-    required this.controller,
-    required this.hint,
-    this.prefixIcon,
-    this.maxLines = 1,
-    this.minLines,
-    this.keyboardType = TextInputType.text,
-    this.inputFormatters,
-    this.validator,
-    super.key,
-  });
-
-  final TextEditingController controller;
-  final String hint;
-  final IconData? prefixIcon;
-  final int? maxLines;
-  final int? minLines;
-  final TextInputType keyboardType;
-  final List<TextInputFormatter>? inputFormatters;
-  final String? Function(String?)? validator;
-
-  @override
-  Widget build(BuildContext context) {
-    return TextFormField(
-      controller: controller,
-      maxLines: maxLines,
-      minLines: minLines,
-      keyboardType: keyboardType,
-      inputFormatters: inputFormatters,
-      validator: validator,
-      autovalidateMode: AutovalidateMode.onUserInteraction,
-      decoration: InputDecoration(
-        hintText: hint,
-        hintStyle: const TextStyle(
-          fontFamily: 'Figtree',
-          fontSize: 17,
-          color: AppColors.placeholder,
-        ),
-        prefixIcon: prefixIcon != null
-            ? Icon(prefixIcon, size: 20, color: AppColors.placeholder)
-            : null,
-        filled: true,
-        fillColor: AppColors.inputBackground,
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 16,
-          vertical: 18,
-        ),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(24),
-          borderSide: const BorderSide(color: AppColors.inputBorder),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(24),
-          borderSide: const BorderSide(color: AppColors.inputBorder),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(24),
-          borderSide: const BorderSide(color: AppColors.darkGreen, width: 1.5),
-        ),
-      ),
-      style: const TextStyle(
-        fontFamily: 'Figtree',
-        fontSize: 17,
-        color: AppColors.black,
-      ),
-    );
-  }
-}
-
-class _UppercaseFormatter extends TextInputFormatter {
-  @override
-  TextEditingValue formatEditUpdate(
-    TextEditingValue oldValue,
-    TextEditingValue newValue,
-  ) => newValue.copyWith(text: newValue.text.toUpperCase());
 }

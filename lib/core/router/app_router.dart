@@ -34,6 +34,7 @@ import 'package:ragro_mobile/features/notifications/domain/entities/notification
 import 'package:ragro_mobile/features/notifications/presentation/pages/notification_detail_page.dart';
 import 'package:ragro_mobile/features/notifications/presentation/pages/notifications_page.dart';
 import 'package:ragro_mobile/features/orders/presentation/pages/customer_orders_page.dart';
+import 'package:ragro_mobile/features/orders/presentation/pages/delivery_tracking_page.dart';
 import 'package:ragro_mobile/features/orders/presentation/pages/order_confirmation_page.dart';
 import 'package:ragro_mobile/features/orders/presentation/pages/order_detail_page.dart';
 import 'package:ragro_mobile/features/orders/presentation/pages/rate_producer_page.dart';
@@ -155,6 +156,12 @@ class AppRouter {
                         orderId: state.pathParameters['orderId']!,
                       ),
                       routes: [
+                        GoRoute(
+                          path: 'tracking',
+                          builder: (context, state) => DeliveryTrackingPage(
+                            orderId: state.pathParameters['orderId']!,
+                          ),
+                        ),
                         GoRoute(
                           path: 'rate',
                           builder: (context, state) => RateProducerPage(

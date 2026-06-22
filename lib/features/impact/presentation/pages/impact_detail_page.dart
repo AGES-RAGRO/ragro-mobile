@@ -136,7 +136,6 @@ class _ImpactDetailPageState extends State<ImpactDetailPage> {
                           ),
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
-                            crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
                               Padding(
                                 padding: const EdgeInsets.only(
@@ -334,8 +333,6 @@ class _ImpactDetailPageState extends State<ImpactDetailPage> {
                                   ),
                                   child: Column(
                                     mainAxisAlignment: MainAxisAlignment.center,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.center,
                                     children: [
                                       Text(
                                         '$_totalProducers',
@@ -601,7 +598,6 @@ class _ImpactCard extends StatelessWidget {
         border: Border.all(color: const Color(0xFFE2E8F0)),
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Container(
             width: 48,

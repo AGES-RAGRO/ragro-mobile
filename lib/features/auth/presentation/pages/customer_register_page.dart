@@ -1,5 +1,4 @@
 // Customer registration screen (US-01). Backed by POST /auth/register/customer.
-// ignore_for_file: unused_element, unused_element_parameter
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -323,15 +322,11 @@ class _CustomerRegisterViewState extends State<_CustomerRegisterView> {
                 ),
                 const SizedBox(height: 16),
                 AuthTextField(
-                  label: 'Complemento',
+                  // Opcional: o backend não exige complemento (AddressRequest) e nem todo
+                  // endereço tem um — antes o form forçava o usuário a inventar.
+                  label: 'Complemento (opcional)',
                   icon: Icons.apartment_outlined,
                   controller: _complementController,
-                  validator: (v) {
-                    if (v == null || v.trim().isEmpty) {
-                      return 'Informe o complemento';
-                    }
-                    return null;
-                  },
                 ),
                 const SizedBox(height: 16),
                 AuthTextField(
@@ -472,126 +467,6 @@ class _TermsCheckboxState extends State<_TermsCheckbox> {
           ),
         ),
       ],
-    );
-  }
-}
-
-// Mantido intencionalmente: widget privado usado condicionalmente em formulários.
-class _UfAutocomplete extends StatelessWidget {
-  const _UfAutocomplete({
-    required this.initialValue,
-    required this.onSelected,
-    super.key,
-  });
-
-  final String? initialValue;
-  final ValueChanged<String> onSelected;
-
-  @override
-  Widget build(BuildContext context) {
-    return Autocomplete<String>(
-      initialValue: TextEditingValue(text: initialValue ?? ''),
-      optionsBuilder: (value) {
-        final query = value.text.toUpperCase();
-        if (query.isEmpty) return _brazilianStates;
-        return _brazilianStates.where((uf) => uf.startsWith(query));
-      },
-      onSelected: onSelected,
-      fieldViewBuilder: (context, controller, focusNode, onFieldSubmitted) {
-        return TextFormField(
-          controller: controller,
-          focusNode: focusNode,
-          textCapitalization: TextCapitalization.characters,
-          inputFormatters: [
-            LengthLimitingTextInputFormatter(2),
-            _UppercaseFormatter(),
-          ],
-          onChanged: (v) {
-            if (_brazilianStates.contains(v.toUpperCase())) {
-              onSelected(v.toUpperCase());
-            }
-          },
-          style: AppTextStyles.body.copyWith(color: AppColors.black),
-          decoration: InputDecoration(
-            labelText: 'UF',
-            labelStyle: AppTextStyles.textfieldLabel,
-            prefixIcon: const Icon(
-              Icons.map_outlined,
-              color: AppColors.darkGreen,
-              size: 20,
-            ),
-            filled: true,
-            fillColor: AppColors.inputBackground,
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: 12,
-              vertical: 18,
-            ),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide.none,
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide.none,
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(
-                color: AppColors.darkGreen,
-                width: 1.5,
-              ),
-            ),
-            errorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: AppColors.red, width: 1.5),
-            ),
-            focusedErrorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: AppColors.red, width: 1.5),
-            ),
-          ),
-          validator: (value) {
-            final v = value?.trim().toUpperCase() ?? '';
-            if (!_brazilianStates.contains(v)) return 'UF inválida';
-            return null;
-          },
-        );
-      },
-      optionsViewBuilder: (context, onSelected, options) {
-        return Align(
-          alignment: Alignment.topLeft,
-          child: Material(
-            elevation: 4,
-            borderRadius: BorderRadius.circular(12),
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxHeight: 220, maxWidth: 120),
-              child: ListView.builder(
-                padding: EdgeInsets.zero,
-                shrinkWrap: true,
-                itemCount: options.length,
-                itemBuilder: (context, index) {
-                  final option = options.elementAt(index);
-                  return InkWell(
-                    onTap: () => onSelected(option),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 12,
-                      ),
-                      child: Text(
-                        option,
-                        style: AppTextStyles.body.copyWith(
-                          color: AppColors.black,
-                        ),
-                      ),
-                    ),
-                  );
-                },
-              ),
-            ),
-          ),
-        );
-      },
     );
   }
 }

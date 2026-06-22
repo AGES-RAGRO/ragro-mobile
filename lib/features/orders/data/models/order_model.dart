@@ -1,4 +1,5 @@
 import 'package:ragro_mobile/core/network/api_endpoints.dart';
+import 'package:ragro_mobile/core/utils/api_date_time.dart';
 import 'package:ragro_mobile/features/orders/data/models/order_item_model.dart';
 import 'package:ragro_mobile/features/orders/domain/entities/order.dart';
 import 'package:ragro_mobile/features/orders/domain/entities/order_status.dart';
@@ -113,19 +114,12 @@ class OrderModel extends Order {
     return false;
   }
 
-  static OrderStatus _parseStatus(String? status) {
-    return switch (status?.toLowerCase()) {
-      'confirmed' || 'accepted' => OrderStatus.accepted,
-      'in_delivery' || 'indelivery' => OrderStatus.inDelivery,
-      'delivered' => OrderStatus.delivered,
-      'cancelled' || 'canceled' => OrderStatus.cancelled,
-      _ => OrderStatus.pending,
-    };
-  }
+  static OrderStatus _parseStatus(String? status) =>
+      OrderStatus.tryParse(status) ?? OrderStatus.pending;
 
   static DateTime _parseDate(String? value) {
     if (value == null || value.isEmpty) return DateTime.now();
-    return DateTime.tryParse(value)?.toLocal() ?? DateTime.now();
+    return parseApiDateTime(value) ?? DateTime.now();
   }
 
   static DeliveryAddress _parseAddress(Map<String, dynamic> json) {

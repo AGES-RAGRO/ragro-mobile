@@ -116,8 +116,15 @@ abstract final class ApiEndpoints {
   static String get co2Options => '$_base/co2/options';
   static String get co2Emissions => '$_base/co2/emissions';
 
-  // Routes (optimized via backend; the Google key stays on the server)
-  static String get routesOptimize => '$_base/routes/optimize';
+  // Rotas de entrega persistidas (E5) + rastreamento em tempo real (E6).
+  // O legado /routes/optimize foi substituído pela rota persistida (route_repository).
+  static String get routes => '$_base/routes';
+  static String get activeRoute => '$_base/routes/active';
+  static String routeStop(String routeId, String stopId) =>
+      '$_base/routes/$routeId/stops/$stopId';
+
+  /// Endpoint WebSocket (STOMP) do rastreamento em tempo real.
+  static String get wsUrl => '${_base.replaceFirst('http', 'ws')}/ws';
 
   // Orders
   static String get orders => '$_base/orders';
@@ -132,6 +139,7 @@ abstract final class ApiEndpoints {
   static String orderStatus(String id) => '$_base/orders/$id/status';
   static String orderConfirm(String id) => '$_base/orders/$id/confirm';
   static String orderSeen(String id) => '$_base/orders/$id/seen';
+  static String orderTracking(String id) => '$_base/orders/$id/tracking';
   static String get reviews => '$_base/reviews';
 
   // Customer cart

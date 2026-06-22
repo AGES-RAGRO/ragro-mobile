@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:ragro_mobile/core/formatters/currency.dart';
 import 'package:ragro_mobile/core/theme/app_colors.dart';
 import 'package:ragro_mobile/features/home/domain/entities/home_product.dart';
 import 'package:ragro_mobile/shared/utils/unity_type_label.dart';
@@ -118,8 +119,7 @@ class HomeProductCard extends StatelessWidget {
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           text: TextSpan(
-                            text:
-                                'R\$ ${product.price.toStringAsFixed(2).replaceAll('.', ',')}',
+                            text: formatCurrency(product.price),
                             style: const TextStyle(
                               fontFamily: 'Figtree',
                               fontWeight: FontWeight.w700,

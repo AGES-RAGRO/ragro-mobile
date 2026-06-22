@@ -19,6 +19,7 @@ import 'package:ragro_mobile/core/logging/app_logger.dart' as _i955;
 import 'package:ragro_mobile/core/network/api_client.dart' as _i873;
 import 'package:ragro_mobile/core/router/app_router.dart' as _i419;
 import 'package:ragro_mobile/core/services/cep_service.dart' as _i305;
+import 'package:ragro_mobile/core/services/tracking_socket.dart' as _i939;
 import 'package:ragro_mobile/features/admin/data/datasources/admin_remote_datasource.dart'
     as _i16;
 import 'package:ragro_mobile/features/admin/data/repositories/admin_repository_impl.dart'
@@ -180,6 +181,8 @@ import 'package:ragro_mobile/features/notifications/presentation/bloc/notificati
     as _i888;
 import 'package:ragro_mobile/features/orders/data/datasources/orders_remote_datasource.dart'
     as _i384;
+import 'package:ragro_mobile/features/orders/data/repositories/order_tracking_repository.dart'
+    as _i498;
 import 'package:ragro_mobile/features/orders/data/repositories/orders_repository_impl.dart'
     as _i962;
 import 'package:ragro_mobile/features/orders/domain/repositories/orders_repository.dart'
@@ -200,6 +203,8 @@ import 'package:ragro_mobile/features/orders/presentation/bloc/active_delivery_c
     as _i981;
 import 'package:ragro_mobile/features/orders/presentation/bloc/checkout_bloc.dart'
     as _i463;
+import 'package:ragro_mobile/features/orders/presentation/bloc/delivery_tracking_cubit.dart'
+    as _i280;
 import 'package:ragro_mobile/features/orders/presentation/bloc/order_detail_bloc.dart'
     as _i591;
 import 'package:ragro_mobile/features/orders/presentation/bloc/orders_bloc.dart'
@@ -224,6 +229,8 @@ import 'package:ragro_mobile/features/producer_orders/data/repositories/producer
     as _i182;
 import 'package:ragro_mobile/features/producer_orders/data/repositories/route_repository.dart'
     as _i609;
+import 'package:ragro_mobile/features/producer_orders/data/services/route_tracking_publisher.dart'
+    as _i180;
 import 'package:ragro_mobile/features/producer_orders/domain/repositories/producer_orders_repository.dart'
     as _i649;
 import 'package:ragro_mobile/features/producer_orders/domain/usecases/confirm_producer_delivery_with_code.dart'
@@ -336,6 +343,9 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i558.FlutterSecureStorage>(),
       ),
     );
+    gh.lazySingleton<_i939.TrackingSocket>(
+      () => _i939.TrackingSocket(gh<_i209.AuthLocalDataSource>()),
+    );
     gh.lazySingleton<_i873.ApiClient>(() => _i873.ApiClient(gh<_i361.Dio>()));
     gh.lazySingleton<_i805.GetProducerDashboard>(
       () =>
@@ -363,6 +373,9 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i733.NotificationsRemoteDataSource>(),
         gh<_i1068.NotificationsLocalDataSource>(),
       ),
+    );
+    gh.lazySingleton<_i180.RouteTrackingPublisher>(
+      () => _i180.RouteTrackingPublisher(gh<_i939.TrackingSocket>()),
     );
     gh.lazySingleton<_i1023.GetNotifications>(
       () => _i1023.GetNotifications(gh<_i853.NotificationsRepository>()),
@@ -417,6 +430,9 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i384.OrdersRemoteDatasource>(
       () => _i384.OrdersRemoteDatasource(gh<_i873.ApiClient>()),
+    );
+    gh.lazySingleton<_i498.OrderTrackingRepository>(
+      () => _i498.OrderTrackingRepository(gh<_i873.ApiClient>()),
     );
     gh.lazySingleton<_i608.ProducerOrdersRemoteDataSource>(
       () => _i608.ProducerOrdersRemoteDataSource(gh<_i873.ApiClient>()),
@@ -593,6 +609,12 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i485.RequestPasswordReset>(),
       ),
     );
+    gh.factory<_i280.DeliveryTrackingCubit>(
+      () => _i280.DeliveryTrackingCubit(
+        gh<_i498.OrderTrackingRepository>(),
+        gh<_i939.TrackingSocket>(),
+      ),
+    );
     gh.lazySingleton<_i788.CustomerProfileRepository>(
       () => _i866.CustomerProfileRepositoryImpl(
         gh<_i666.CustomerProfileRemoteDataSource>(),
@@ -617,13 +639,6 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i436.UpdateCustomerProfile>(
       () => _i436.UpdateCustomerProfile(gh<_i788.CustomerProfileRepository>()),
-    );
-    gh.factory<_i48.RouteCalculationCubit>(
-      () => _i48.RouteCalculationCubit(
-        gh<_i206.Co2Repository>(),
-        gh<_i649.ProducerOrdersRepository>(),
-        gh<_i609.RouteRepository>(),
-      ),
     );
     gh.lazySingleton<_i251.CancelCustomerOrder>(
       () => _i251.CancelCustomerOrder(gh<_i165.OrdersRepository>()),
@@ -739,6 +754,14 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i526.CustomerProfileBloc(
         gh<_i626.GetCustomerProfile>(),
         gh<_i436.UpdateCustomerProfile>(),
+      ),
+    );
+    gh.factory<_i48.RouteCalculationCubit>(
+      () => _i48.RouteCalculationCubit(
+        gh<_i206.Co2Repository>(),
+        gh<_i609.RouteRepository>(),
+        gh<_i180.RouteTrackingPublisher>(),
+        gh<_i885.RefuseProducerOrder>(),
       ),
     );
     gh.factory<_i721.RecommendationsBloc>(
