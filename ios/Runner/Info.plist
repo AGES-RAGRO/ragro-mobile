@@ -40,7 +40,9 @@
 	<key>NSCameraUsageDescription</key>
 	<string>Permita acesso à câmera para tirar uma foto de perfil ou capa.</string>
 	<key>NSLocationAlwaysUsageDescription</key>
-	<string>Necessário para mostrar o mapa de produtores próximos a você.</string>
+	<string>Durante uma entrega ativa, sua localização é compartilhada com os clientes da rota para acompanhamento em tempo real.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>Durante uma entrega ativa, sua localização é compartilhada com os clientes da rota para acompanhamento em tempo real.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Necessário para mostrar o mapa de produtores próximos a você.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
@@ -71,6 +73,7 @@
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>remote-notification</string>
+		<string>location</string>
 	</array>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
