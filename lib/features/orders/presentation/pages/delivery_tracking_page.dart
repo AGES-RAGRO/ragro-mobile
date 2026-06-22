@@ -388,7 +388,7 @@ class _DeliveryTrackingViewState extends State<_DeliveryTrackingView>
                     if (showMap && !state.live) ...[
                       const SizedBox(height: 6),
                       const Text(
-                        'Atualizando a cada 10s (modo econômico)',
+                        'Atualizando a cada 10s',
                         style: TextStyle(
                           fontFamily: 'Manrope',
                           fontSize: 11,
