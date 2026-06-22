@@ -88,7 +88,7 @@ void main() {
       final model = PublicProducerModel.fromJson(json);
 
       expect(model.memberSince, isNull);
-      expect(model.yearsOnPlatform, isNull);
+      expect(model.membershipLabel, isNull);
     });
 
     test('parseia resposta camelCase com photoUrl opcional', () {

@@ -196,6 +196,8 @@ import 'package:ragro_mobile/features/orders/domain/usecases/get_customer_order_
     as _i961;
 import 'package:ragro_mobile/features/orders/domain/usecases/get_orders.dart'
     as _i52;
+import 'package:ragro_mobile/features/orders/presentation/bloc/active_delivery_cubit.dart'
+    as _i981;
 import 'package:ragro_mobile/features/orders/presentation/bloc/checkout_bloc.dart'
     as _i463;
 import 'package:ragro_mobile/features/orders/presentation/bloc/order_detail_bloc.dart'
@@ -511,7 +513,7 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i485.RequestPasswordReset>(
       () => _i485.RequestPasswordReset(gh<_i43.AuthRepository>()),
     );
-    gh.factory<_i205.InventoryBloc>(
+    gh.lazySingleton<_i205.InventoryBloc>(
       () => _i205.InventoryBloc(
         gh<_i252.GetInventoryProducts>(),
         gh<_i481.DeleteInventoryProduct>(),
@@ -683,6 +685,9 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i1038.UpdateProducerOrderStatus(
         gh<_i649.ProducerOrdersRepository>(),
       ),
+    );
+    gh.lazySingleton<_i981.ActiveDeliveryCubit>(
+      () => _i981.ActiveDeliveryCubit(gh<_i52.GetOrders>()),
     );
     gh.factory<_i226.OrdersBloc>(() => _i226.OrdersBloc(gh<_i52.GetOrders>()));
     gh.factory<_i1.ProducerOrdersBloc>(

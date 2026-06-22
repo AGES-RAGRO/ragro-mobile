@@ -136,19 +136,23 @@ class PublicProducer extends Equatable {
   final List<HomeProduct>? products;
   final List<Review>? reviews;
 
-  int? get yearsOnPlatform {
+  /// Tempo no RAGRO formatado: anos quando >= 1 ano, senão meses (mínimo
+  /// "1 mês" para quem acabou de entrar). Null quando não há data de adesão.
+  String? get membershipLabel {
     final memberSince = this.memberSince;
     if (memberSince == null) return null;
 
     final now = DateTime.now();
-    var years = now.year - memberSince.year;
-    final anniversaryThisYear = DateTime(
-      now.year,
-      memberSince.month,
-      memberSince.day,
-    );
-    if (now.isBefore(anniversaryThisYear)) years--;
-    return years;
+    var months =
+        (now.year - memberSince.year) * 12 + (now.month - memberSince.month);
+    if (now.day < memberSince.day) months--;
+    if (months < 1) months = 1;
+
+    if (months < 12) {
+      return months == 1 ? '1 mês' : '$months meses';
+    }
+    final years = months ~/ 12;
+    return years == 1 ? '1 ano' : '$years anos';
   }
 
   @override

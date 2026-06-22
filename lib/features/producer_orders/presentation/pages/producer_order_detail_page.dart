@@ -811,6 +811,7 @@ class _ActionFooter extends StatelessWidget {
                               );
                               return _waitForBlocConfirmation(bloc);
                             },
+                            onCancelOrder: () => _confirmRefuse(context),
                           ),
                         );
                         if (success ?? false) {

@@ -377,7 +377,7 @@ class _ProducerPublicProfileViewState
                             ProducerStatsRow(
                               productCount: producer.products?.length ?? 0,
                               rating: producer.averageRating,
-                              yearsOnPlatform: producer.yearsOnPlatform,
+                              membershipLabel: producer.membershipLabel,
                             ),
                             const SizedBox(height: 20),
                             if ((producer.products ?? const []).isNotEmpty)

@@ -11,6 +11,8 @@ import 'package:ragro_mobile/features/home/presentation/bloc/home_event.dart';
 import 'package:ragro_mobile/features/home/presentation/bloc/home_state.dart';
 import 'package:ragro_mobile/features/home/presentation/widgets/producers_section.dart';
 import 'package:ragro_mobile/features/home/presentation/widgets/products_grid.dart';
+import 'package:ragro_mobile/features/orders/presentation/bloc/active_delivery_cubit.dart';
+import 'package:ragro_mobile/features/orders/presentation/widgets/active_delivery_banner.dart';
 import 'package:ragro_mobile/features/recommendations/domain/entities/recommendation.dart';
 import 'package:ragro_mobile/features/recommendations/presentation/bloc/recommendations_bloc.dart';
 import 'package:ragro_mobile/features/recommendations/presentation/bloc/recommendations_event.dart';
@@ -29,6 +31,7 @@ class CustomerHomePage extends StatelessWidget {
           create: (_) =>
               getIt<RecommendationsBloc>()..add(const RecommendationsStarted()),
         ),
+        BlocProvider.value(value: getIt<ActiveDeliveryCubit>()),
       ],
       child: const _CustomerHomeView(),
     );
@@ -49,6 +52,9 @@ class _CustomerHomeViewState extends State<_CustomerHomeView> {
   void initState() {
     super.initState();
     _scrollController.addListener(_onScroll);
+    // Carrega o pedido a caminho (banner do topo). Recarregado no pull-to-refresh
+    // e ao reabrir a aba Início (CustomerShell).
+    context.read<ActiveDeliveryCubit>().load();
   }
 
   @override
@@ -94,6 +100,7 @@ class _CustomerHomeViewState extends State<_CustomerHomeView> {
                         context.read<RecommendationsBloc>().add(
                           const RecommendationsRefreshRequested(),
                         );
+                        await context.read<ActiveDeliveryCubit>().load();
                       },
                       child: CustomScrollView(
                         controller: _scrollController,
@@ -119,6 +126,7 @@ class _CustomerHomeViewState extends State<_CustomerHomeView> {
                               ),
                             ),
                           ),
+                          const SliverToBoxAdapter(child: ActiveDeliveryBanner()),
                           const SliverToBoxAdapter(child: SizedBox(height: 24)),
                           SliverToBoxAdapter(
                             child: ProducersSection(
