@@ -1,11 +1,7 @@
-enum ProducerOrderStatus { pending, accepted, inDelivery, delivered, cancelled }
+import 'package:ragro_mobile/core/domain/order_status.dart';
 
-extension ProducerOrderStatusLabel on ProducerOrderStatus {
-  String get label => switch (this) {
-    ProducerOrderStatus.pending => 'Pendente',
-    ProducerOrderStatus.accepted => 'Aceito',
-    ProducerOrderStatus.inDelivery => 'A caminho',
-    ProducerOrderStatus.delivered => 'Entregue',
-    ProducerOrderStatus.cancelled => 'Cancelado',
-  };
-}
+export 'package:ragro_mobile/core/domain/order_status.dart';
+
+/// Compat alias: the producer feature historically had its own status enum;
+/// both sides now share the canonical [OrderStatus] from core.
+typedef ProducerOrderStatus = OrderStatus;

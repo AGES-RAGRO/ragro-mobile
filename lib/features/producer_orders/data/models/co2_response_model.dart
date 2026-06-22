@@ -1,11 +1,6 @@
 import 'package:equatable/equatable.dart';
 
 class Co2CalculationResponse extends Equatable {
-  final double co2Emission;
-  final double distanceKm;
-  final String vehicleType;
-  final String fuelType;
-  final double? averageConsumption;
 
   const Co2CalculationResponse({
     required this.co2Emission,
@@ -24,6 +19,11 @@ class Co2CalculationResponse extends Equatable {
       averageConsumption: (json['averageConsumption'] as num?)?.toDouble(),
     );
   }
+  final double co2Emission;
+  final double distanceKm;
+  final String vehicleType;
+  final String fuelType;
+  final double? averageConsumption;
 
   @override
   List<Object?> get props => [
