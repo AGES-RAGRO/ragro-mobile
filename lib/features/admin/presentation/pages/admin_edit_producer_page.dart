@@ -1,5 +1,4 @@
 // Admin edit-producer screen (US-30). Backed by PUT /admin/producers/{id}.
-// ignore_for_file: unused_element, unused_element_parameter
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -7,51 +6,17 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:ragro_mobile/core/di/injection.dart';
 import 'package:ragro_mobile/core/formatters/input_masks.dart';
-import 'package:ragro_mobile/core/services/cep_service.dart';
 import 'package:ragro_mobile/core/theme/app_colors.dart';
 import 'package:ragro_mobile/features/admin/domain/entities/admin_producer.dart';
 import 'package:ragro_mobile/features/admin/presentation/bloc/admin_edit_producer_bloc.dart';
 import 'package:ragro_mobile/features/admin/presentation/bloc/admin_edit_producer_event.dart';
 import 'package:ragro_mobile/features/admin/presentation/bloc/admin_edit_producer_state.dart';
-
-const _pixKeyTypes = ['cpf', 'cnpj', 'email', 'phone', 'random'];
-const _pixKeyTypeLabels = {
-  'cpf': 'CPF',
-  'cnpj': 'CNPJ',
-  'email': 'E-mail',
-  'phone': 'Telefone',
-  'random': 'Chave aleatória',
-};
-
-const List<String> _brazilianStates = [
-  'AC',
-  'AL',
-  'AP',
-  'AM',
-  'BA',
-  'CE',
-  'DF',
-  'ES',
-  'GO',
-  'MA',
-  'MT',
-  'MS',
-  'MG',
-  'PA',
-  'PB',
-  'PR',
-  'PE',
-  'PI',
-  'RJ',
-  'RN',
-  'RS',
-  'RO',
-  'RR',
-  'SC',
-  'SP',
-  'SE',
-  'TO',
-];
+import 'package:ragro_mobile/shared/widgets/producer_form/cep_lookup.dart';
+import 'package:ragro_mobile/shared/widgets/producer_form/field_label.dart';
+import 'package:ragro_mobile/shared/widgets/producer_form/pix_mask.dart';
+import 'package:ragro_mobile/shared/widgets/producer_form/producer_form_controllers.dart';
+import 'package:ragro_mobile/shared/widgets/producer_form/producer_form_sections.dart';
+import 'package:ragro_mobile/shared/widgets/producer_form/producer_text_field.dart';
 
 class AdminEditProducerPage extends StatelessWidget {
   const AdminEditProducerPage({required this.producerId, super.key});
@@ -78,39 +43,7 @@ class _AdminEditProducerView extends StatefulWidget {
 
 class _AdminEditProducerViewState extends State<_AdminEditProducerView> {
   final _formKey = GlobalKey<FormState>();
-
-  // Personal data
-  final _nameController = TextEditingController();
-  final _phoneController = TextEditingController();
-  final _emailController = TextEditingController();
-  final _cpfCnpjController = TextEditingController();
-  final _farmNameController = TextEditingController();
-  final _descriptionController = TextEditingController();
-
-  // Address
-  final _cepController = TextEditingController();
-  final _addressController = TextEditingController();
-  final _numberController = TextEditingController();
-  final _neighborhoodController = TextEditingController();
-  final _cityController = TextEditingController();
-  final _stateController = TextEditingController();
-
-  // PIX (optional on partial update)
-  String? _pixKeyType;
-  final _pixKeyController = TextEditingController();
-
-  // Bank account (optional on partial update)
-  final _bankNameController = TextEditingController();
-  final _bankCodeController = TextEditingController();
-  final _agencyController = TextEditingController();
-  final _accountController = TextEditingController();
-  final _holderController = TextEditingController();
-  final _bankFiscalController = TextEditingController();
-
-  // Business hours
-  final _scheduleStartController = TextEditingController();
-  final _scheduleEndController = TextEditingController();
-  final List<bool> _weekdays = List.filled(7, false);
+  final _c = ProducerFormControllers();
 
   // Snapshot used to detect changes
   late AdminProducer _original;
@@ -119,162 +52,22 @@ class _AdminEditProducerViewState extends State<_AdminEditProducerView> {
   @override
   void initState() {
     super.initState();
-    _cepController.addListener(_onCepChanged);
-  }
-
-  static const _weekdayLabels = [
-    'Seg',
-    'Ter',
-    'Qua',
-    'Qui',
-    'Sex',
-    'Sáb',
-    'Dom',
-  ];
-
-  String _digitsOnly(String v) => v.replaceAll(RegExp(r'\D'), '');
-
-  String _applyMask(String val, TextInputFormatter formatter) {
-    if (val.isEmpty) return val;
-    return formatter
-        .formatEditUpdate(TextEditingValue.empty, TextEditingValue(text: val))
-        .text;
-  }
-
-  void _onCepChanged() {
-    final cep = _digitsOnly(_cepController.text);
-    if (cep.length == 8) {
-      _lookupCep(cep);
-    }
-  }
-
-  Future<void> _lookupCep(String cep) async {
-    final address = await getIt<CepService>().fetchAddress(cep);
-    if (address != null && mounted) {
-      setState(() {
-        _addressController.text = address.street;
-        _neighborhoodController.text = address.neighborhood;
-        _cityController.text = address.city;
-        _stateController.text = address.state;
-      });
-    }
-  }
-
-  List<TextInputFormatter> _pixKeyFormatters() {
-    switch (_pixKeyType) {
-      case 'cpf':
-      case 'cnpj':
-        return [FiscalNumberInputFormatter()];
-      case 'phone':
-        return [PhoneInputFormatter()];
-      default:
-        return [];
-    }
+    CepLookup(
+      controllers: _c,
+      isMounted: () => mounted,
+      applyState: setState,
+    ).attach();
   }
 
   @override
   void dispose() {
-    _nameController.dispose();
-    _phoneController.dispose();
-    _emailController.dispose();
-    _cpfCnpjController.dispose();
-    _farmNameController.dispose();
-    _descriptionController.dispose();
-    _cepController.dispose();
-    _addressController.dispose();
-    _numberController.dispose();
-    _neighborhoodController.dispose();
-    _cityController.dispose();
-    _stateController.dispose();
-    _pixKeyController.dispose();
-    _bankNameController.dispose();
-    _bankCodeController.dispose();
-    _agencyController.dispose();
-    _accountController.dispose();
-    _holderController.dispose();
-    _bankFiscalController.dispose();
-    _scheduleStartController.dispose();
-    _scheduleEndController.dispose();
+    _c.disposeAll();
     super.dispose();
   }
 
   void _fillControllers(AdminProducer producer) {
     _original = producer;
-
-    _nameController.text = producer.name;
-    _phoneController.text = _applyMask(producer.phone, PhoneInputFormatter());
-    _emailController.text = producer.email;
-    _cpfCnpjController.text = _applyMask(
-      producer.fiscalNumber,
-      FiscalNumberInputFormatter(),
-    );
-    _farmNameController.text = producer.farmName;
-    _descriptionController.text = producer.description;
-    _cepController.text = _applyMask(
-      producer.producerAddress?.zipCode ?? '',
-      CepInputFormatter(),
-    );
-    _addressController.text = producer.producerAddress?.street ?? '';
-    _numberController.text = producer.producerAddress?.number ?? '';
-    _neighborhoodController.text = producer.producerAddress?.neighborhood ?? '';
-    _cityController.text = producer.producerAddress?.city ?? '';
-    _stateController.text = producer.producerAddress?.state ?? '';
-
-    // Pre-fill PIX
-    final pix = producer.paymentMethods
-        ?.where((pm) => pm.type == 'pix')
-        .firstOrNull;
-    if (pix != null) {
-      _pixKeyType = pix.pixKeyType;
-      if (_pixKeyType == 'cpf' || _pixKeyType == 'cnpj') {
-        _pixKeyController.text = _applyMask(
-          pix.pixKey ?? '',
-          FiscalNumberInputFormatter(),
-        );
-      } else if (_pixKeyType == 'phone') {
-        _pixKeyController.text = _applyMask(
-          pix.pixKey ?? '',
-          PhoneInputFormatter(),
-        );
-      } else {
-        _pixKeyController.text = pix.pixKey ?? '';
-      }
-    }
-
-    // Pre-fill bank account
-    final bank = producer.paymentMethods
-        ?.where((pm) => pm.type == 'bank_account')
-        .firstOrNull;
-    if (bank != null) {
-      _bankNameController.text = bank.bankName ?? '';
-      _bankCodeController.text = bank.bankCode ?? '';
-      _agencyController.text = bank.agency ?? '';
-      _accountController.text = _applyMask(
-        bank.accountNumber ?? '',
-        BankAccountInputFormatter(),
-      );
-      _holderController.text = bank.holderName ?? '';
-      _bankFiscalController.text = _applyMask(
-        bank.fiscalNumber ?? '',
-        FiscalNumberInputFormatter(),
-      );
-    }
-
-    // Pre-fill business hours
-    _scheduleStartController.text =
-        producer.availability?.firstOrNull?.opensAt ?? '';
-    _scheduleEndController.text =
-        producer.availability?.firstOrNull?.closesAt ?? '';
-    for (var i = 0; i < 7; i++) {
-      _weekdays[i] = false;
-    }
-    if (producer.availability != null) {
-      for (final slot in producer.availability!) {
-        final uiIndex = slot.weekday == 0 ? 6 : slot.weekday - 1;
-        if (uiIndex >= 0 && uiIndex < 7) _weekdays[uiIndex] = true;
-      }
-    }
-
+    _c.hydrateFromAdminProducer(producer);
     _controllersInitialized = true;
   }
 
@@ -286,24 +79,24 @@ class _AdminEditProducerViewState extends State<_AdminEditProducerView> {
     final pix = _original.paymentMethods
         ?.where((pm) => pm.type == 'pix')
         .firstOrNull;
-    return _nameController.text != _original.name ||
-        _phoneController.text != _original.phone ||
-        _emailController.text != _original.email ||
-        _cepController.text != (_original.producerAddress?.zipCode ?? '') ||
-        _addressController.text != (_original.producerAddress?.street ?? '') ||
-        _numberController.text != (_original.producerAddress?.number ?? '') ||
-        _neighborhoodController.text !=
+    return _c.name.text != _original.name ||
+        _c.phone.text != _original.phone ||
+        _c.email.text != _original.email ||
+        _c.cep.text != (_original.producerAddress?.zipCode ?? '') ||
+        _c.address.text != (_original.producerAddress?.street ?? '') ||
+        _c.number.text != (_original.producerAddress?.number ?? '') ||
+        _c.neighborhood.text !=
             (_original.producerAddress?.neighborhood ?? '') ||
-        _cityController.text != (_original.producerAddress?.city ?? '') ||
-        _stateController.text != (_original.producerAddress?.state ?? '') ||
-        _pixKeyType != pix?.pixKeyType ||
-        _pixKeyController.text != (pix?.pixKey ?? '') ||
-        _bankNameController.text != (bank?.bankName ?? '') ||
-        _agencyController.text != (bank?.agency ?? '') ||
-        _accountController.text != (bank?.accountNumber ?? '') ||
-        _holderController.text != (bank?.holderName ?? '') ||
-        _farmNameController.text != _original.farmName ||
-        _descriptionController.text != _original.description;
+        _c.city.text != (_original.producerAddress?.city ?? '') ||
+        _c.state.text != (_original.producerAddress?.state ?? '') ||
+        _c.pixKeyType != pix?.pixKeyType ||
+        _c.pixKey.text != (pix?.pixKey ?? '') ||
+        _c.bankName.text != (bank?.bankName ?? '') ||
+        _c.agency.text != (bank?.agency ?? '') ||
+        _c.account.text != (bank?.accountNumber ?? '') ||
+        _c.holder.text != (bank?.holderName ?? '') ||
+        _c.farmName.text != _original.farmName ||
+        _c.description.text != _original.description;
   }
 
   Future<bool> _confirmDiscard() async {
@@ -364,24 +157,19 @@ class _AdminEditProducerViewState extends State<_AdminEditProducerView> {
     if (!_formKey.currentState!.validate()) return;
 
     // Include PIX only if the admin filled in both type and key
-    final hasPix =
-        _pixKeyType != null && _pixKeyController.text.trim().isNotEmpty;
+    final hasPix = _c.pixKeyType != null && _c.pixKey.text.trim().isNotEmpty;
     String? pixKey;
     if (hasPix) {
-      final raw = _pixKeyController.text.trim();
-      pixKey = (_pixKeyType == 'cpf' || _pixKeyType == 'phone')
-          ? _digitsOnly(raw)
+      final raw = _c.pixKey.text.trim();
+      pixKey = (_c.pixKeyType == 'cpf' || _c.pixKeyType == 'phone')
+          ? digitsOnly(raw)
           : raw;
     }
 
     // Include the bank account only if bank, agency, account and holder are filled
-    final hasBank =
-        _bankNameController.text.trim().isNotEmpty &&
-        _agencyController.text.trim().isNotEmpty &&
-        _accountController.text.trim().isNotEmpty &&
-        _holderController.text.trim().isNotEmpty;
+    final hasBank = _c.hasCompleteBank;
 
-    if (_bankNameController.text.trim().isNotEmpty && !hasBank) {
+    if (_c.bankName.text.trim().isNotEmpty && !hasBank) {
       _showError(
         'Preencha agência, conta e titular para salvar os dados bancários.',
       );
@@ -390,35 +178,35 @@ class _AdminEditProducerViewState extends State<_AdminEditProducerView> {
 
     context.read<AdminEditProducerBloc>().add(
       AdminEditProducerSubmitted(
-        name: _nameController.text.trim(),
-        email: _emailController.text.trim(),
-        phone: _digitsOnly(_phoneController.text),
-        cep: _digitsOnly(_cepController.text),
-        address: _addressController.text.trim(),
-        number: _numberController.text.trim(),
-        neighborhood: _neighborhoodController.text.trim(),
-        city: _cityController.text.trim(),
-        state: _stateController.text.trim(),
-        cpfCnpj: _cpfCnpjController.text.trim(),
-        farmName: _farmNameController.text.trim(),
-        description: _descriptionController.text.trim(),
-        scheduleWeekdays: List.from(_weekdays),
-        scheduleStart: _scheduleStartController.text.trim(),
-        scheduleEnd: _scheduleEndController.text.trim(),
+        name: _c.name.text.trim(),
+        email: _c.email.text.trim(),
+        phone: digitsOnly(_c.phone.text),
+        cep: digitsOnly(_c.cep.text),
+        address: _c.address.text.trim(),
+        number: _c.number.text.trim(),
+        neighborhood: _c.neighborhood.text.trim(),
+        city: _c.city.text.trim(),
+        state: _c.state.text.trim(),
+        cpfCnpj: _c.fiscal.text.trim(),
+        farmName: _c.farmName.text.trim(),
+        description: _c.description.text.trim(),
+        scheduleWeekdays: List.from(_c.weekdays),
+        scheduleStart: _c.scheduleStart.text.trim(),
+        scheduleEnd: _c.scheduleEnd.text.trim(),
         // PIX (optional)
-        pixKeyType: hasPix ? _pixKeyType : null,
+        pixKeyType: hasPix ? _c.pixKeyType : null,
         pixKey: hasPix ? pixKey : null,
         // Bank account (optional)
-        bankName: hasBank ? _bankNameController.text.trim() : null,
-        bankCode: _bankCodeController.text.trim().isNotEmpty
-            ? _bankCodeController.text.trim()
+        bankName: hasBank ? _c.bankName.text.trim() : null,
+        bankCode: _c.bankCode.text.trim().isNotEmpty
+            ? _c.bankCode.text.trim()
             : null,
-        agency: hasBank ? _agencyController.text.trim() : null,
-        accountNumber: hasBank ? _accountController.text.trim() : null,
+        agency: hasBank ? _c.agency.text.trim() : null,
+        accountNumber: hasBank ? _c.account.text.trim() : null,
         accountType: hasBank ? 'checking' : null,
-        accountHolder: hasBank ? _holderController.text.trim() : null,
-        bankFiscalNumber: _bankFiscalController.text.trim().isNotEmpty
-            ? _digitsOnly(_bankFiscalController.text)
+        accountHolder: hasBank ? _c.holder.text.trim() : null,
+        bankFiscalNumber: _c.bankFiscal.text.trim().isNotEmpty
+            ? digitsOnly(_c.bankFiscal.text)
             : null,
       ),
     );
@@ -515,12 +303,12 @@ class _AdminEditProducerViewState extends State<_AdminEditProducerView> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _sectionTitle('Dados Pessoais'),
+            const FormSectionTitle('Dados Pessoais'),
             const SizedBox(height: 12),
-            const _FieldLabel('Nome Completo'),
+            const FieldLabel('Nome Completo'),
             const SizedBox(height: 8),
-            _TextField(
-              controller: _nameController,
+            ProducerTextField(
+              controller: _c.name,
               hint: 'Nome do produtor',
               prefixIcon: Icons.person_outline,
               enabled: !isSaving,
@@ -532,10 +320,10 @@ class _AdminEditProducerViewState extends State<_AdminEditProducerView> {
               },
             ),
             const SizedBox(height: 12),
-            const _FieldLabel('Telefone'),
+            const FieldLabel('Telefone'),
             const SizedBox(height: 8),
-            _TextField(
-              controller: _phoneController,
+            ProducerTextField(
+              controller: _c.phone,
               hint: '(XX) XXXXX-XXXX',
               prefixIcon: Icons.phone_outlined,
               keyboardType: TextInputType.phone,
@@ -543,16 +331,16 @@ class _AdminEditProducerViewState extends State<_AdminEditProducerView> {
               inputFormatters: [PhoneInputFormatter()],
               validator: (value) {
                 if (value == null || value.isEmpty) return null; // partial
-                final digits = _digitsOnly(value);
+                final digits = digitsOnly(value);
                 if (digits.length != 11) return 'DDD + número com 11 dígitos';
                 return null;
               },
             ),
             const SizedBox(height: 12),
-            const _FieldLabel('Email'),
+            const FieldLabel('Email'),
             const SizedBox(height: 8),
-            _TextField(
-              controller: _emailController,
+            ProducerTextField(
+              controller: _c.email,
               hint: 'email@exemplo.com',
               prefixIcon: Icons.email_outlined,
               keyboardType: TextInputType.emailAddress,
@@ -565,20 +353,20 @@ class _AdminEditProducerViewState extends State<_AdminEditProducerView> {
               },
             ),
             const SizedBox(height: 12),
-            const _FieldLabel('CPF / CNPJ'),
+            const FieldLabel('CPF / CNPJ'),
             const SizedBox(height: 8),
-            _TextField(
-              controller: _cpfCnpjController,
+            ProducerTextField(
+              controller: _c.fiscal,
               hint: '000.000.000-00',
               prefixIcon: Icons.badge_outlined,
               keyboardType: TextInputType.number,
               enabled: !isSaving,
             ),
             const SizedBox(height: 12),
-            const _FieldLabel('Nome da Fazenda'),
+            const FieldLabel('Nome da Fazenda'),
             const SizedBox(height: 8),
-            _TextField(
-              controller: _farmNameController,
+            ProducerTextField(
+              controller: _c.farmName,
               hint: 'Ex: Fazenda Santa Luzia',
               prefixIcon: Icons.home_outlined,
               enabled: !isSaving,
@@ -590,10 +378,10 @@ class _AdminEditProducerViewState extends State<_AdminEditProducerView> {
               },
             ),
             const SizedBox(height: 12),
-            const _FieldLabel('Descrição'),
+            const FieldLabel('Descrição'),
             const SizedBox(height: 8),
-            _TextField(
-              controller: _descriptionController,
+            ProducerTextField(
+              controller: _c.description,
               hint: 'Breve descrição sobre o produtor...',
               prefixIcon: Icons.description_outlined,
               enabled: !isSaving,
@@ -603,125 +391,46 @@ class _AdminEditProducerViewState extends State<_AdminEditProducerView> {
             ),
 
             const SizedBox(height: 20),
-            _sectionTitle('Endereço'),
+            const FormSectionTitle('Endereço'),
             const SizedBox(height: 12),
-            const _FieldLabel('CEP'),
-            const SizedBox(height: 8),
-            _TextField(
-              controller: _cepController,
-              hint: '00000-000',
-              prefixIcon: Icons.location_on_outlined,
-              keyboardType: TextInputType.number,
+            AddressFields(
+              controllers: _c,
               enabled: !isSaving,
-              inputFormatters: [CepInputFormatter()],
-              validator: (value) {
+              cepValidator: (value) {
                 if (value == null || value.isEmpty) return null; // partial
-                final digits = _digitsOnly(value);
+                final digits = digitsOnly(value);
                 if (digits.length != 8) return 'CEP deve ter 8 dígitos';
                 return null;
               },
-            ),
-            const SizedBox(height: 12),
-            const _FieldLabel('Endereço'),
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                Expanded(
-                  flex: 3,
-                  child: _TextField(
-                    controller: _addressController,
-                    hint: 'Rua / Avenida',
-                    prefixIcon: Icons.location_on_outlined,
-                    enabled: !isSaving,
-                    validator: (value) {
-                      if ((value ?? '').trim().isEmpty) {
-                        return 'Informe o endereço';
-                      }
-                      return null;
-                    },
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: _TextField(
-                    controller: _numberController,
-                    hint: 'Nº',
-                    keyboardType: TextInputType.number,
-                    enabled: !isSaving,
-                    validator: (value) {
-                      if ((value ?? '').trim().isEmpty) {
-                        return 'Informe o nº';
-                      }
-                      return null;
-                    },
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            const _FieldLabel('Bairro'),
-            const SizedBox(height: 8),
-            _TextField(
-              controller: _neighborhoodController,
-              hint: 'Bairro',
-              prefixIcon: Icons.map_outlined,
-              enabled: !isSaving,
-              validator: (value) {
+              streetValidator: (value) {
+                if ((value ?? '').trim().isEmpty) {
+                  return 'Informe o endereço';
+                }
+                return null;
+              },
+              numberValidator: (value) {
+                if ((value ?? '').trim().isEmpty) {
+                  return 'Informe o nº';
+                }
+                return null;
+              },
+              neighborhoodValidator: (value) {
                 if ((value ?? '').trim().isEmpty) {
                   return 'Informe o bairro';
                 }
                 return null;
               },
-            ),
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                Expanded(
-                  flex: 2,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const _FieldLabel('Cidade'),
-                      const SizedBox(height: 8),
-                      _TextField(
-                        controller: _cityController,
-                        hint: 'Cidade',
-                        prefixIcon: Icons.location_city_outlined,
-                        enabled: !isSaving,
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const _FieldLabel('Estado'),
-                      const SizedBox(height: 8),
-                      _TextField(
-                        controller: _stateController,
-                        hint: 'UF',
-                        inputFormatters: [
-                          LengthLimitingTextInputFormatter(2),
-                          _UppercaseFormatter(),
-                        ],
-                        validator: (v) {
-                          if ((v ?? '').trim().isEmpty) {
-                            return 'UF';
-                          }
-                          return null;
-                        },
-                      ),
-                    ],
-                  ),
-                ),
-              ],
+              stateValidator: (v) {
+                if ((v ?? '').trim().isEmpty) {
+                  return 'UF';
+                }
+                return null;
+              },
             ),
 
             // Payment method (partial — optional)
             const SizedBox(height: 20),
-            _sectionTitle('Forma de Recebimento'),
+            const FormSectionTitle('Forma de Recebimento'),
             const SizedBox(height: 4),
             const Text(
               'Preencha apenas os campos que deseja atualizar.',
@@ -734,308 +443,57 @@ class _AdminEditProducerViewState extends State<_AdminEditProducerView> {
             const SizedBox(height: 12),
 
             // PIX
-            Card(
-              elevation: 0,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-                side: const BorderSide(color: AppColors.inputBorder),
+            PixSectionCard(
+              pixKeyType: _c.pixKeyType,
+              dropdownValue: _c.pixKeyType,
+              pixKeyController: _c.pixKey,
+              keyFormatters: pixMaskListFor(_c.pixKeyType),
+              dropdownHint: 'Selecione (opcional)',
+              itemTextStyle: const TextStyle(
+                fontFamily: 'Manrope',
+                fontSize: 15,
               ),
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'Chave PIX',
-                      style: TextStyle(
-                        fontFamily: 'Figtree',
-                        fontWeight: FontWeight.w700,
-                        fontSize: 15,
-                        color: AppColors.darkGreen,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    const _FieldLabel('Tipo da chave'),
-                    const SizedBox(height: 8),
-                    DropdownButtonFormField<String>(
-                      initialValue: _pixKeyType,
-                      decoration: _dropdownDecoration(),
-                      hint: const Text(
-                        'Selecione (opcional)',
-                        style: TextStyle(
-                          fontFamily: 'Manrope',
-                          fontSize: 15,
-                          color: AppColors.placeholder,
-                        ),
-                      ),
-                      items: _pixKeyTypes
-                          .map(
-                            (t) => DropdownMenuItem(
-                              value: t,
-                              child: Text(
-                                _pixKeyTypeLabels[t] ?? t,
-                                style: const TextStyle(
-                                  fontFamily: 'Manrope',
-                                  fontSize: 15,
-                                ),
-                              ),
-                            ),
-                          )
-                          .toList(),
-                      onChanged: isSaving
-                          ? null
-                          : (v) => setState(() {
-                              _pixKeyType = v;
-                              _pixKeyController.clear();
-                            }),
-                    ),
-                    if (_pixKeyType != null) ...[
-                      const SizedBox(height: 12),
-                      const _FieldLabel('Chave Pix'),
-                      const SizedBox(height: 8),
-                      _TextField(
-                        key: ValueKey(_pixKeyType),
-                        controller: _pixKeyController,
-                        hint: _pixKeyHint(_pixKeyType!),
-                        keyboardType: _pixKeyboardType(_pixKeyType!),
-                        enabled: !isSaving,
-                        inputFormatters: _pixKeyFormatters(),
-                      ),
-                    ],
-                  ],
-                ),
-              ),
+              dropdownEnabled: !isSaving,
+              fieldEnabled: !isSaving,
+              onTypeChanged: (v) => setState(() {
+                _c.pixKeyType = v;
+                _c.pixKey.clear();
+              }),
             ),
 
             const SizedBox(height: 12),
 
             // Bank account
-            Card(
-              elevation: 0,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-                side: const BorderSide(color: AppColors.inputBorder),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'Conta Bancária',
-                      style: TextStyle(
-                        fontFamily: 'Figtree',
-                        fontWeight: FontWeight.w700,
-                        fontSize: 15,
-                        color: AppColors.darkGreen,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    const _FieldLabel('Banco'),
-                    const SizedBox(height: 8),
-                    _TextField(
-                      controller: _bankNameController,
-                      hint: 'Nome do banco',
-                      prefixIcon: Icons.account_balance_outlined,
-                      enabled: !isSaving,
-                    ),
-                    const SizedBox(height: 12),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const _FieldLabel('Código (3 dígitos)'),
-                              const SizedBox(height: 8),
-                              _TextField(
-                                controller: _bankCodeController,
-                                hint: '001',
-                                keyboardType: TextInputType.number,
-                                enabled: !isSaving,
-                                inputFormatters: [
-                                  LengthLimitingTextInputFormatter(3),
-                                  FilteringTextInputFormatter.digitsOnly,
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const _FieldLabel('Agência'),
-                              const SizedBox(height: 8),
-                              _TextField(
-                                controller: _agencyController,
-                                hint: '0000',
-                                keyboardType: TextInputType.number,
-                                enabled: !isSaving,
-                                inputFormatters: [
-                                  LengthLimitingTextInputFormatter(4),
-                                  FilteringTextInputFormatter.digitsOnly,
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                    const _FieldLabel('Conta'),
-                    const SizedBox(height: 8),
-                    _TextField(
-                      controller: _accountController,
-                      hint: '000000-0',
-                      enabled: !isSaving,
-                      keyboardType: TextInputType.number,
-                      inputFormatters: [BankAccountInputFormatter()],
-                    ),
-                    const SizedBox(height: 12),
-                    const _FieldLabel('Titular'),
-                    const SizedBox(height: 8),
-                    _TextField(
-                      controller: _holderController,
-                      hint: 'Nome completo do titular',
-                      prefixIcon: Icons.account_circle_outlined,
-                      enabled: !isSaving,
-                    ),
-                    const SizedBox(height: 12),
-                    const _FieldLabel('CPF / CNPJ do Titular (opcional)'),
-                    const SizedBox(height: 8),
-                    _TextField(
-                      controller: _bankFiscalController,
-                      hint: '000.000.000-00',
-                      prefixIcon: Icons.badge_outlined,
-                      keyboardType: TextInputType.number,
-                      enabled: !isSaving,
-                      inputFormatters: [FiscalNumberInputFormatter()],
-                    ),
-                  ],
-                ),
-              ),
+            BankSectionCard(
+              controllers: _c,
+              enabled: !isSaving,
+              agencyFormatters: [
+                LengthLimitingTextInputFormatter(4),
+                FilteringTextInputFormatter.digitsOnly,
+              ],
             ),
 
             const SizedBox(height: 20),
-            _sectionTitle('Horário de atendimento'),
+            const FormSectionTitle('Horário de atendimento'),
             const SizedBox(height: 12),
-            Wrap(
-              spacing: 8,
-              children: List.generate(7, (i) {
-                final isSelected = _weekdays[i];
-                return GestureDetector(
-                  onTap: isSaving
-                      ? null
-                      : () => setState(() => _weekdays[i] = !_weekdays[i]),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 8,
-                    ),
-                    decoration: BoxDecoration(
-                      color: isSelected
-                          ? AppColors.darkGreen
-                          : AppColors.inputBackground,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Text(
-                      _weekdayLabels[i],
-                      style: TextStyle(
-                        fontFamily: 'Manrope',
-                        fontWeight: FontWeight.w600,
-                        fontSize: 13,
-                        color: isSelected
-                            ? AppColors.white
-                            : AppColors.placeholder,
-                      ),
-                    ),
-                  ),
-                );
-              }),
+            WeekdaySelector(
+              selected: _c.weekdays,
+              onToggle: (i) => setState(() => _c.weekdays[i] = !_c.weekdays[i]),
+              enabled: !isSaving,
             ),
             const SizedBox(height: 12),
-            Row(
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const _FieldLabel('Início'),
-                      const SizedBox(height: 8),
-                      _TextField(
-                        controller: _scheduleStartController,
-                        hint: '08:00',
-                        prefixIcon: Icons.schedule_outlined,
-                        keyboardType: TextInputType.datetime,
-                        enabled: !isSaving,
-                      ),
-                    ],
-                  ),
-                ),
-                const Padding(
-                  padding: EdgeInsets.only(top: 28, left: 12, right: 12),
-                  child: Icon(
-                    Icons.arrow_forward,
-                    color: AppColors.placeholder,
-                    size: 18,
-                  ),
-                ),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const _FieldLabel('Fim'),
-                      const SizedBox(height: 8),
-                      _TextField(
-                        controller: _scheduleEndController,
-                        hint: '18:00',
-                        prefixIcon: Icons.schedule_outlined,
-                        keyboardType: TextInputType.datetime,
-                        enabled: !isSaving,
-                      ),
-                    ],
-                  ),
-                ),
-              ],
+            ScheduleHoursRow(
+              startController: _c.scheduleStart,
+              endController: _c.scheduleEnd,
+              enabled: !isSaving,
             ),
 
             const SizedBox(height: 24),
 
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: isSaving ? null : _submit,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.darkGreen,
-                  foregroundColor: AppColors.white,
-                  disabledBackgroundColor: AppColors.darkGreen.withValues(
-                    alpha: 0.5,
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(24),
-                  ),
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                ),
-                child: isSaving
-                    ? const SizedBox(
-                        height: 20,
-                        width: 20,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: AppColors.white,
-                        ),
-                      )
-                    : const Text(
-                        'Salvar alterações',
-                        style: TextStyle(
-                          fontFamily: 'Manrope',
-                          fontWeight: FontWeight.w700,
-                          fontSize: 16,
-                        ),
-                      ),
-              ),
+            ProducerFormSubmitButton(
+              label: 'Salvar alterações',
+              busy: isSaving,
+              onPressed: _submit,
             ),
 
             const SizedBox(height: 32),
@@ -1044,261 +502,4 @@ class _AdminEditProducerViewState extends State<_AdminEditProducerView> {
       ),
     );
   }
-
-  InputDecoration _dropdownDecoration() {
-    return InputDecoration(
-      filled: true,
-      fillColor: AppColors.inputBackground,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: AppColors.inputBorder),
-      ),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: AppColors.inputBorder),
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: AppColors.darkGreen, width: 1.5),
-      ),
-    );
-  }
-
-  String _pixKeyHint(String type) {
-    return switch (type) {
-      'cpf' => '000.000.000-00',
-      'cnpj' => '00.000.000/0000-00',
-      'email' => 'email@exemplo.com',
-      'phone' => '(XX) XXXXX-XXXX',
-      _ => 'Chave aleatória',
-    };
-  }
-
-  TextInputType _pixKeyboardType(String type) {
-    return switch (type) {
-      'cpf' || 'cnpj' || 'phone' => TextInputType.number,
-      'email' => TextInputType.emailAddress,
-      _ => TextInputType.text,
-    };
-  }
-
-  Widget _sectionTitle(String title) {
-    return Text(
-      title,
-      style: const TextStyle(
-        fontFamily: 'Figtree',
-        fontWeight: FontWeight.w700,
-        fontSize: 17,
-        color: AppColors.darkGreen,
-      ),
-    );
-  }
-}
-
-class _FieldLabel extends StatelessWidget {
-  const _FieldLabel(this.text);
-  final String text;
-
-  @override
-  Widget build(BuildContext context) {
-    return Text(
-      text,
-      style: const TextStyle(
-        fontFamily: 'Manrope',
-        fontWeight: FontWeight.w600,
-        fontSize: 14,
-        color: AppColors.black,
-      ),
-    );
-  }
-}
-
-class _TextField extends StatelessWidget {
-  const _TextField({
-    required this.controller,
-    required this.hint,
-    super.key,
-    this.prefixIcon,
-    this.maxLines = 1,
-    this.minLines,
-    this.maxLength,
-    this.keyboardType = TextInputType.text,
-    this.enabled = true,
-    this.inputFormatters,
-    this.validator,
-  });
-
-  final TextEditingController controller;
-  final String hint;
-  final IconData? prefixIcon;
-  final int? maxLines;
-  final int? minLines;
-  final int? maxLength;
-  final TextInputType keyboardType;
-  final bool enabled;
-  final List<TextInputFormatter>? inputFormatters;
-  final String? Function(String?)? validator;
-
-  @override
-  Widget build(BuildContext context) {
-    return TextFormField(
-      controller: controller,
-      maxLines: maxLines,
-      minLines: minLines,
-      maxLength: maxLength,
-      keyboardType: keyboardType,
-      enabled: enabled,
-      inputFormatters: inputFormatters,
-      validator: validator,
-      decoration: InputDecoration(
-        hintText: hint,
-        hintStyle: const TextStyle(
-          fontFamily: 'Figtree',
-          fontSize: 17,
-          color: AppColors.placeholder,
-        ),
-        prefixIcon: prefixIcon != null
-            ? Icon(prefixIcon, size: 20, color: AppColors.placeholder)
-            : null,
-        filled: true,
-        fillColor: AppColors.inputBackground,
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 16,
-          vertical: 18,
-        ),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(24),
-          borderSide: const BorderSide(color: AppColors.inputBorder),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(24),
-          borderSide: const BorderSide(color: AppColors.inputBorder),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(24),
-          borderSide: const BorderSide(color: AppColors.darkGreen, width: 1.5),
-        ),
-      ),
-      style: const TextStyle(
-        fontFamily: 'Figtree',
-        fontSize: 17,
-        color: AppColors.black,
-      ),
-    );
-  }
-}
-
-// Mantido intencionalmente: widget privado usado condicionalmente em formulários.
-class _UfAutocomplete extends StatelessWidget {
-  const _UfAutocomplete({
-    required this.initialValue,
-    required this.onSelected,
-    this.enabled = true,
-    super.key,
-  });
-
-  final String? initialValue;
-  final ValueChanged<String> onSelected;
-  final bool enabled;
-
-  @override
-  Widget build(BuildContext context) {
-    return Autocomplete<String>(
-      initialValue: TextEditingValue(text: initialValue ?? ''),
-      optionsBuilder: (value) {
-        final query = value.text.toUpperCase();
-        if (query.isEmpty) return _brazilianStates;
-        return _brazilianStates.where((uf) => uf.startsWith(query));
-      },
-      onSelected: onSelected,
-      fieldViewBuilder: (context, controller, focusNode, onFieldSubmitted) {
-        return TextField(
-          controller: controller,
-          focusNode: focusNode,
-          enabled: enabled,
-          textCapitalization: TextCapitalization.characters,
-          inputFormatters: [
-            LengthLimitingTextInputFormatter(2),
-            _UppercaseFormatter(),
-          ],
-          onChanged: (v) {
-            if (_brazilianStates.contains(v.toUpperCase())) {
-              onSelected(v.toUpperCase());
-            }
-          },
-          style: const TextStyle(
-            fontFamily: 'Manrope',
-            fontSize: 15,
-            color: AppColors.black,
-          ),
-          decoration: InputDecoration(
-            hintText: 'UF',
-            hintStyle: const TextStyle(
-              fontFamily: 'Manrope',
-              fontSize: 15,
-              color: AppColors.placeholder,
-            ),
-            filled: true,
-            fillColor: AppColors.inputBackground,
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: 16,
-              vertical: 14,
-            ),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: AppColors.inputBorder),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: AppColors.inputBorder),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(
-                color: AppColors.darkGreen,
-                width: 1.5,
-              ),
-            ),
-          ),
-        );
-      },
-      optionsViewBuilder: (context, onSelected, options) {
-        return Align(
-          alignment: Alignment.topLeft,
-          child: Material(
-            elevation: 4,
-            borderRadius: BorderRadius.circular(8),
-            child: SizedBox(
-              width: 110,
-              child: ListView.builder(
-                padding: EdgeInsets.zero,
-                shrinkWrap: true,
-                itemCount: options.length,
-                itemBuilder: (context, index) {
-                  final uf = options.elementAt(index);
-                  return ListTile(
-                    dense: true,
-                    title: Text(
-                      uf,
-                      style: const TextStyle(fontFamily: 'Manrope'),
-                    ),
-                    onTap: () => onSelected(uf),
-                  );
-                },
-              ),
-            ),
-          ),
-        );
-      },
-    );
-  }
-}
-
-class _UppercaseFormatter extends TextInputFormatter {
-  @override
-  TextEditingValue formatEditUpdate(
-    TextEditingValue oldValue,
-    TextEditingValue newValue,
-  ) => newValue.copyWith(text: newValue.text.toUpperCase());
 }

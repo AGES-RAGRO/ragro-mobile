@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:ragro_mobile/core/di/injection.dart';
+import 'package:ragro_mobile/core/formatters/currency.dart';
 import 'package:ragro_mobile/core/theme/app_colors.dart';
 import 'package:ragro_mobile/features/inventory/presentation/bloc/inventory_bloc.dart';
 import 'package:ragro_mobile/features/inventory/presentation/bloc/inventory_event.dart';
@@ -59,9 +60,6 @@ class _InventoryView extends StatelessWidget {
     ('active', 'Ativos'),
     ('unavailable', 'Indisponíveis'),
   ];
-
-  String _formatPrice(double price) =>
-      'R\$ ${price.toStringAsFixed(2).replaceAll('.', ',')}';
 
   @override
   Widget build(BuildContext context) {
@@ -147,7 +145,7 @@ class _InventoryView extends StatelessWidget {
                         Expanded(
                           child: _SummaryCard(
                             label: 'Valor Total',
-                            value: _formatPrice(state.totalValue),
+                            value: formatCurrency(state.totalValue),
                             icon: Icons.attach_money,
                           ),
                         ),
@@ -287,7 +285,7 @@ class _InventoryView extends StatelessWidget {
                                         'productName': product.name,
                                         'unit': product.unit,
                                         'currentStock': product.stock
-                                            .toDouble(),
+                                            ,
                                       },
                                     )
                                     .then((result) {
