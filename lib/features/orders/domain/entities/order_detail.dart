@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:ragro_mobile/core/domain/order_status.dart';
 
 class OrderDetailActions extends Equatable {
   const OrderDetailActions({
@@ -184,14 +185,7 @@ class OrderDetail extends Equatable {
 
   String get friendlyStatusLabel {
     if (statusLabel != null && statusLabel!.isNotEmpty) return statusLabel!;
-    return switch (_normalizedStatus) {
-      'PENDING' => 'Pendente',
-      'CONFIRMED' => 'Aceito',
-      'IN_DELIVERY' => 'A caminho',
-      'DELIVERED' => 'Entregue',
-      'CANCELLED' => 'Cancelado',
-      _ => status,
-    };
+    return OrderStatus.tryParse(status)?.label ?? status;
   }
 
   String get _normalizedStatus => status.trim().toUpperCase();

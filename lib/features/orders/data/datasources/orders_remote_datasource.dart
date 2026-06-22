@@ -121,5 +121,5 @@ class OrdersRemoteDatasource {
     return const [];
   }
 
-  String _statusQueryValue(OrderStatus status) => status.backendValue;
+  String _statusQueryValue(OrderStatus status) => status.apiValue;
 }
