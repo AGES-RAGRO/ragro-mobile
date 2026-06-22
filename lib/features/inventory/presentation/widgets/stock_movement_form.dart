@@ -103,7 +103,9 @@ class _StockMovementFormState extends State<StockMovementForm> {
     if (maxQuantity != null && qty > maxQuantity) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(widget.maxQuantityMessage ?? ''),
+          content: Text(
+            widget.maxQuantityMessage ?? 'Quantidade acima do limite permitido.',
+          ),
           backgroundColor: AppColors.red,
         ),
       );

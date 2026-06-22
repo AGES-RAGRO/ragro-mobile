@@ -10,7 +10,10 @@ class DeliveryAddressCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final visibleLines = lines.where((line) => line.isNotEmpty).toList();
+    final visibleLines = lines
+        .map((line) => line.trim())
+        .where((line) => line.isNotEmpty)
+        .toList();
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16),

@@ -24,6 +24,10 @@ class CepLookup {
   /// Runs the fill inside the page's `setState`.
   final void Function(VoidCallback fn) applyState;
 
+  /// Monotonic counter to discard stale lookups: only the latest request may
+  /// apply its result.
+  int _lookupSeq = 0;
+
   void attach() => controllers.cep.addListener(_onCepChanged);
 
   void _onCepChanged() {
@@ -34,8 +38,16 @@ class CepLookup {
   }
 
   Future<void> _lookup(String cep) async {
+    final seq = ++_lookupSeq;
     final address = await getIt<CepService>().fetchAddress(cep);
-    if (address != null && isMounted()) {
+    // Bail if this response was superseded by a newer lookup, the widget is
+    // gone, or the CEP changed while we awaited.
+    if (!isMounted() ||
+        seq != _lookupSeq ||
+        digitsOnly(controllers.cep.text) != cep) {
+      return;
+    }
+    if (address != null) {
       applyState(() {
         controllers.address.text = address.street;
         controllers.neighborhood.text = address.neighborhood;

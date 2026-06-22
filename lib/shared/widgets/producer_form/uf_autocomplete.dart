@@ -68,8 +68,11 @@ class UfAutocomplete extends StatelessWidget {
             UppercaseFormatter(),
           ],
           onChanged: (v) {
-            if (brazilianStates.contains(v.toUpperCase())) {
-              onSelected(v.toUpperCase());
+            final normalized = v.toUpperCase();
+            if (brazilianStates.contains(normalized)) {
+              onSelected(normalized);
+            } else {
+              onSelected('');
             }
           },
           style: const TextStyle(

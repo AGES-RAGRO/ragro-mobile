@@ -48,6 +48,21 @@ class _DeliveryTrackingViewState extends State<_DeliveryTrackingView>
   BitmapDescriptor? _destinationIcon;
   bool _iconsRequested = false;
 
+  /// Cache da rota decodificada: build roda a cada frame de animação (~60x/s),
+  /// então só re-decodifica a polyline quando a string codificada muda.
+  String? _cachedPolyline;
+  List<LatLng> _cachedRoutePoints = const <LatLng>[];
+
+  List<LatLng> _routePointsFor(String? encoded) {
+    if (encoded != _cachedPolyline) {
+      _cachedPolyline = encoded;
+      _cachedRoutePoints = encoded == null
+          ? const <LatLng>[]
+          : decodePolyline(encoded).map((p) => LatLng(p.$1, p.$2)).toList();
+    }
+    return _cachedRoutePoints;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -237,11 +252,7 @@ class _DeliveryTrackingViewState extends State<_DeliveryTrackingView>
           final initialTarget =
               producer ?? destination ?? const LatLng(-30.0346, -51.2177);
           // Caminho calculado pelo Google (overviewPolyline) desenhado em verde.
-          final routePoints = state.routePolyline == null
-              ? const <LatLng>[]
-              : decodePolyline(state.routePolyline!)
-                    .map((p) => LatLng(p.$1, p.$2))
-                    .toList();
+          final routePoints = _routePointsFor(state.routePolyline);
 
           final showMap =
               state.phase != DeliveryTrackingPhase.loading &&

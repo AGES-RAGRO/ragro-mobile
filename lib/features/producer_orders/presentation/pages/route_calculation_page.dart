@@ -69,8 +69,8 @@ class _RouteCalculationViewState extends State<_RouteCalculationView> {
       return;
     }
 
-    final lat = state.producerLat ?? -16.6868;
-    final lng = state.producerLng ?? -49.2647;
+    final lat = state.producerLat;
+    final lng = state.producerLng;
     final destination = stops.last;
     final waypoints = stops.length > 1
         ? stops.sublist(0, stops.length - 1)
@@ -78,10 +78,12 @@ class _RouteCalculationViewState extends State<_RouteCalculationView> {
 
     // Navigation deep-link (no API key needed). Stops already come in the
     // backend's optimized order; `dir_action=navigate` opens directly into
-    // turn-by-turn driving navigation.
+    // turn-by-turn driving navigation. Only pin an `origin` when the producer's
+    // real GPS is known; otherwise omit it so Maps starts from the device's
+    // current location instead of a hardcoded fallback (Goiânia).
     final uri = Uri.https('www.google.com', '/maps/dir/', {
       'api': '1',
-      'origin': '$lat,$lng',
+      if (lat != null && lng != null) 'origin': '$lat,$lng',
       'destination': destination,
       if (waypoints.isNotEmpty) 'waypoints': waypoints.join('|'),
       'travelmode': 'driving',

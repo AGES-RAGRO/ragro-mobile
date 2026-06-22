@@ -12,6 +12,7 @@ List<(double, double)> decodePolyline(String encoded) {
     var result = 0;
     int byte;
     do {
+      if (index >= encoded.length) return points;
       byte = encoded.codeUnitAt(index++) - 63;
       result |= (byte & 0x1f) << shift;
       shift += 5;
@@ -21,6 +22,7 @@ List<(double, double)> decodePolyline(String encoded) {
     shift = 0;
     result = 0;
     do {
+      if (index >= encoded.length) return points;
       byte = encoded.codeUnitAt(index++) - 63;
       result |= (byte & 0x1f) << shift;
       shift += 5;

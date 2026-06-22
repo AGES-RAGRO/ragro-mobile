@@ -102,7 +102,10 @@ class _ProducerEditProfileViewState extends State<_ProducerEditProfileView> {
     final hasPix = _c.pixKeyType != null && _c.pixKey.text.trim().isNotEmpty;
     if (hasPix) {
       final raw = _c.pixKey.text.trim();
-      final pKey = (_c.pixKeyType == 'cpf' || _c.pixKeyType == 'phone')
+      final pKey =
+          (_c.pixKeyType == 'cpf' ||
+              _c.pixKeyType == 'phone' ||
+              _c.pixKeyType == 'cnpj')
           ? digitsOnly(raw)
           : raw;
       paymentMethods.add({

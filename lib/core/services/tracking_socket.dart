@@ -26,7 +26,13 @@ class TrackingSocket {
 
   /// Garante uma conexão ativa (idempotente).
   Future<void> ensureConnected() async {
-    if (_client != null) return;
+    if (_client?.connected == true) return;
+    // Um cliente que existe mas não está conectado (pós-disconnect) ficava preso
+    // — descarta-o antes de construir um novo para permitir o self-heal.
+    if (_client != null) {
+      _client?.deactivate();
+      _client = null;
+    }
     final token = await _authLocal.getToken();
     if (token == null || token.isEmpty) return;
 
@@ -41,6 +47,9 @@ class TrackingSocket {
             listener();
           }
         },
+        // Ao desconectar, libera o cliente para que ensureConnected reconstrua a
+        // conexão na próxima chamada em vez de devolver um cliente morto.
+        onDisconnect: (_) => _client = null,
         // Erros de socket são tratados pela reconexão automática; o fallback de
         // polling do cliente cobre a janela sem conexão.
         onWebSocketError: (_) {},

@@ -161,7 +161,10 @@ class _AdminEditProducerViewState extends State<_AdminEditProducerView> {
     String? pixKey;
     if (hasPix) {
       final raw = _c.pixKey.text.trim();
-      pixKey = (_c.pixKeyType == 'cpf' || _c.pixKeyType == 'phone')
+      pixKey =
+          (_c.pixKeyType == 'cpf' ||
+              _c.pixKeyType == 'phone' ||
+              _c.pixKeyType == 'cnpj')
           ? digitsOnly(raw)
           : raw;
     }
