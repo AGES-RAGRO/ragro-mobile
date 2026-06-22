@@ -7,6 +7,7 @@ import 'package:ragro_mobile/core/theme/app_colors.dart';
 import 'package:ragro_mobile/core/utils/polyline_decoder.dart';
 import 'package:ragro_mobile/features/producer_orders/presentation/bloc/route_calculation_cubit.dart';
 import 'package:ragro_mobile/features/producer_orders/presentation/bloc/route_calculation_state.dart';
+import 'package:ragro_mobile/shared/widgets/confirm_delivery_code_dialog.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class RouteCalculationPage extends StatelessWidget {
@@ -646,6 +647,21 @@ class _DeliveryItem extends StatelessWidget {
   final String title;
   final String subtitle;
 
+  /// Abre o diálogo COMPARTILHADO de código (mesmo do detalhe do pedido) e só
+  /// conclui a entrega quando o produtor digita os 4 dígitos do consumidor. O
+  /// backend exige o código — sem ele a confirmação direta era uma falha de
+  /// segurança (qualquer entrega era marcada como concluída sem validação).
+  void _openConfirmDeliveryDialog(BuildContext context) {
+    final cubit = context.read<RouteCalculationCubit>();
+    showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => ConfirmDeliveryCodeDialog(
+        onConfirm: (code) => cubit.confirmDelivery(id, code),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<RouteCalculationCubit, RouteCalculationState>(
@@ -681,9 +697,7 @@ class _DeliveryItem extends StatelessWidget {
             GestureDetector(
               onTap: isConfirmed
                   ? null
-                  : () => context.read<RouteCalculationCubit>().confirmDelivery(
-                      id,
-                    ),
+                  : () => _openConfirmDeliveryDialog(context),
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 300),
                 padding: const EdgeInsets.symmetric(

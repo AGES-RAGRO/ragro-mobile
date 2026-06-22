@@ -143,15 +143,19 @@ class RouteRepository {
   }
 
   /// Atualiza uma parada (ARRIVED/DELIVERED/FAILED) e devolve a rota atualizada.
+  /// O [code] (4 dígitos do consumidor) é OBRIGATÓRIO no backend quando o status
+  /// é DELIVERED — sem ele, a API responde 400 "Código de confirmação
+  /// obrigatório para concluir a entrega".
   Future<DeliveryRoute> updateStop({
     required String routeId,
     required String stopId,
     required String status,
+    String? code,
   }) async {
     try {
       final response = await _apiClient.dio.patch<Map<String, dynamic>>(
         ApiEndpoints.routeStop(routeId, stopId),
-        data: {'status': status},
+        data: {'status': status, if (code != null) 'code': code},
       );
       return DeliveryRoute.fromJson(response.data ?? const {});
     } on DioException catch (e) {

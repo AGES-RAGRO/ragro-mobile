@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:injectable/injectable.dart';
 import 'package:ragro_mobile/core/di/injection.dart';
+import 'package:ragro_mobile/core/network/api_exception.dart';
 import 'package:ragro_mobile/features/producer_management/presentation/bloc/producer_management_bloc.dart';
 import 'package:ragro_mobile/features/producer_management/presentation/bloc/producer_management_event.dart';
 import 'package:ragro_mobile/features/producer_management/presentation/bloc/producer_management_state.dart';
@@ -209,28 +210,47 @@ class RouteCalculationCubit extends Cubit<RouteCalculationState> {
   /// Marca a parada como entregue (PATCH no backend, que conclui o pedido pela
   /// máquina de estados). NENHUMA chamada ao Google acontece aqui — a resposta
   /// já traz a rota atualizada.
-  Future<void> confirmDelivery(String stopId) async {
+  ///
+  /// O [code] (4 dígitos do consumidor) é OBRIGATÓRIO: o backend rejeita com 400
+  /// uma conclusão sem código ou com código errado. Devolve `true` quando a
+  /// entrega é confirmada e `false` no erro (para o diálogo de código manter o
+  /// estado de erro e re-solicitar o código).
+  Future<bool> confirmDelivery(String stopId, String code) async {
     final routeId = state.routeId;
-    if (routeId == null || state.confirmedDeliveries.contains(stopId)) return;
+    if (routeId == null) return false;
+    if (state.confirmedDeliveries.contains(stopId)) return true;
 
     try {
       final route = await _routeRepository.updateStop(
         routeId: routeId,
         stopId: stopId,
         status: 'DELIVERED',
+        code: code,
       );
-      if (isClosed) return;
+      if (isClosed) return false;
 
       _applyRoute(route);
       _refreshProducerDashboard();
+      return true;
+    } on ApiException catch (e) {
+      if (isClosed) return false;
+      // Surface the backend message (e.g. código incorreto / obrigatório).
+      emit(
+        state.copyWith(
+          status: RouteCalculationStatus.error,
+          errorMessage: e.message,
+        ),
+      );
+      return false;
     } on Exception {
-      if (isClosed) return;
+      if (isClosed) return false;
       emit(
         state.copyWith(
           status: RouteCalculationStatus.error,
           errorMessage: 'Erro ao confirmar entrega. Tente novamente.',
         ),
       );
+      return false;
     }
   }
 
