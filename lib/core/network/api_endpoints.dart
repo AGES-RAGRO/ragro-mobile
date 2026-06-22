@@ -117,9 +117,7 @@ abstract final class ApiEndpoints {
   static String get co2Emissions => '$_base/co2/emissions';
 
   // Rotas de entrega persistidas (E5) + rastreamento em tempo real (E6).
-  // routesOptimize (legado /routes/optimize) substituído pela rota persistida; mantido até a
-  // migração do route_repository (MB-5).
-  static String get routesOptimize => '$_base/routes/optimize';
+  // O legado /routes/optimize foi substituído pela rota persistida (route_repository).
   static String get routes => '$_base/routes';
   static String get activeRoute => '$_base/routes/active';
   static String routeStop(String routeId, String stopId) =>

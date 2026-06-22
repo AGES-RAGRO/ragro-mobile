@@ -6,8 +6,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show Clipboard, ClipboardData;
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:ragro_mobile/core/di/injection.dart';
+import 'package:ragro_mobile/core/formatters/currency.dart';
 import 'package:ragro_mobile/core/theme/app_colors.dart';
 import 'package:ragro_mobile/features/orders/domain/entities/order_detail.dart';
 import 'package:ragro_mobile/features/orders/presentation/bloc/order_detail_bloc.dart';
@@ -15,8 +17,15 @@ import 'package:ragro_mobile/features/orders/presentation/bloc/order_detail_even
 import 'package:ragro_mobile/features/orders/presentation/bloc/order_detail_state.dart';
 import 'package:ragro_mobile/shared/utils/unity_type_label.dart';
 import 'package:ragro_mobile/shared/widgets/cancel_order_dialog.dart';
+import 'package:ragro_mobile/shared/widgets/order_detail/cancellation_card.dart';
+import 'package:ragro_mobile/shared/widgets/order_detail/delivery_address_card.dart';
+import 'package:ragro_mobile/shared/widgets/order_detail/order_action_button.dart';
+import 'package:ragro_mobile/shared/widgets/order_detail/order_action_footer.dart';
+import 'package:ragro_mobile/shared/widgets/order_detail/order_item_row.dart';
+import 'package:ragro_mobile/shared/widgets/order_detail/order_items_card.dart';
+import 'package:ragro_mobile/shared/widgets/order_detail/order_section_title.dart';
+import 'package:ragro_mobile/shared/widgets/order_detail/order_status_badge.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 
 class OrderDetailPage extends StatelessWidget {
   const OrderDetailPage({required this.orderId, super.key});
@@ -145,13 +154,17 @@ class _OrderDetailView extends StatelessWidget {
   final OrderDetail order;
   final bool isUpdating;
 
-  static final _currency = NumberFormat.currency(
-    locale: 'pt_BR',
-    symbol: r'R$',
-  );
+  String _itemQuantityLabel(OrderDetailItem item) {
+    final value = item.quantity % 1 == 0
+        ? item.quantity.toInt().toString()
+        : item.quantity.toStringAsFixed(2).replaceAll('.', ',');
+    final unit = localizeUnityType(item.unityType);
+    return unit.isNotEmpty ? '$value $unit' : value;
+  }
 
   @override
   Widget build(BuildContext context) {
+    final address = order.deliveryAddress;
     return Scaffold(
       backgroundColor: AppColors.white,
       body: SafeArea(
@@ -185,7 +198,10 @@ class _OrderDetailView extends StatelessWidget {
                             ),
                           ),
                         ),
-                        _StatusBadge(order: order),
+                        OrderStatusBadge(
+                          status: order.status,
+                          label: order.friendlyStatusLabel,
+                        ),
                       ],
                     ),
                   ),
@@ -202,93 +218,48 @@ class _OrderDetailView extends StatelessWidget {
                     ),
                   ),
                   if (order.producerName.isNotEmpty) _ProducerHeader(order),
-                  const _SectionTitle('ITENS DO PEDIDO'),
-                  Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 16),
-                    decoration: BoxDecoration(
-                      color: AppColors.white,
-                      borderRadius: BorderRadius.circular(24),
-                      border: Border.all(
-                        color: AppColors.lightGreen.withValues(alpha: 0.08),
-                      ),
-                      boxShadow: const [
-                        BoxShadow(
-                          color: Color(0x0D000000),
-                          blurRadius: 2,
-                          offset: Offset(0, 1),
+                  const OrderSectionTitle('ITENS DO PEDIDO'),
+                  OrderItemsCard(
+                    totalLabel: formatCurrency(order.totalAmount),
+                    items: [
+                      for (final item in order.items)
+                        OrderItemRow(
+                          name: item.productName,
+                          photoUrl: item.productPhoto,
+                          quantityLabel: _itemQuantityLabel(item),
+                          unitPriceLabel: formatCurrency(item.unitPrice),
+                          subtotalLabel: formatCurrency(item.subtotal),
                         ),
-                      ],
-                    ),
-                    child: Column(
-                      children: [
-                        ...order.items.asMap().entries.map((entry) {
-                          final isLast = entry.key == order.items.length - 1;
-                          return Column(
-                            children: [
-                              _OrderDetailItemRow(item: entry.value),
-                              if (!isLast)
-                                Divider(
-                                  color: AppColors.lightGreen.withValues(
-                                    alpha: 0.08,
-                                  ),
-                                  height: 1,
-                                ),
-                            ],
-                          );
-                        }),
-                        Container(
-                          padding: const EdgeInsets.all(16),
-                          decoration: BoxDecoration(
-                            color: AppColors.lightGreen.withValues(alpha: 0.05),
-                            borderRadius: const BorderRadius.vertical(
-                              bottom: Radius.circular(24),
-                            ),
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              const Text(
-                                'Total',
-                                style: TextStyle(
-                                  fontFamily: 'Manrope',
-                                  fontWeight: FontWeight.w700,
-                                  fontSize: 18,
-                                  color: AppColors.black,
-                                ),
-                              ),
-                              Text(
-                                _currency.format(order.totalAmount),
-                                style: const TextStyle(
-                                  fontFamily: 'Manrope',
-                                  fontWeight: FontWeight.w700,
-                                  fontSize: 18,
-                                  color: AppColors.darkGreen,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
+                    ],
                   ),
                   const SizedBox(height: 18),
-                  const _SectionTitle('ENTREGA'),
-                  _DeliveryCard(address: order.deliveryAddress),
+                  const OrderSectionTitle('ENTREGA'),
+                  DeliveryAddressCard(
+                    lines: [
+                      address.streetLine,
+                      address.cityLine,
+                      if (address.zipCode.isNotEmpty) 'CEP: ${address.zipCode}',
+                      address.reference,
+                    ],
+                  ),
                   if (order.isInDelivery &&
                       (order.confirmationCode?.isNotEmpty ?? false)) ...[
                     const SizedBox(height: 18),
-                    const _SectionTitle('CÓDIGO DE CONFIRMAÇÃO'),
+                    const OrderSectionTitle('CÓDIGO DE CONFIRMAÇÃO'),
                     _ConfirmationCodeCard(code: order.confirmationCode!),
                   ],
                   if (order.isCancelled &&
                       (order.cancellationReason?.isNotEmpty ?? false)) ...[
                     const SizedBox(height: 18),
-                    const _SectionTitle('MOTIVO DE CANCELAMENTO'),
-                    _CancellationCard(order: order),
+                    const OrderSectionTitle('MOTIVO DE CANCELAMENTO'),
+                    CancellationCard.customer(
+                      reason: order.cancellationReason ?? '',
+                      details: order.cancellationDetails,
+                    ),
                   ],
                   if (order.bankInfo != null && order.bankInfo!.hasAnyInfo) ...[
                     const SizedBox(height: 18),
-                    const _SectionTitle('PAGAMENTO'),
+                    const OrderSectionTitle('PAGAMENTO'),
                     _PaymentCard(bankInfo: order.bankInfo!),
                   ],
                   const SizedBox(height: 8),
@@ -382,348 +353,6 @@ class _ProducerAvatar extends StatelessWidget {
           : const Center(
               child: Icon(Icons.storefront, color: AppColors.lightGreen),
             ),
-    );
-  }
-}
-
-class _SectionTitle extends StatelessWidget {
-  const _SectionTitle(this.text);
-
-  final String text;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-      child: Text(
-        text,
-        style: const TextStyle(
-          fontFamily: 'Manrope',
-          fontWeight: FontWeight.w700,
-          fontSize: 14,
-          color: AppColors.darkGreen,
-          letterSpacing: 1.4,
-        ),
-      ),
-    );
-  }
-}
-
-class _StatusBadge extends StatelessWidget {
-  const _StatusBadge({required this.order});
-
-  final OrderDetail order;
-
-  Color get _color {
-    return switch (order.status) {
-      'PENDING' => AppColors.yellow,
-      'CONFIRMED' => AppColors.lightGreen,
-      'IN_DELIVERY' => AppColors.orange,
-      'DELIVERED' => AppColors.blue,
-      'CANCELLED' => AppColors.red,
-      _ => AppColors.placeholder,
-    };
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final foreground =
-        ThemeData.estimateBrightnessForColor(_color) == Brightness.dark
-        ? AppColors.white
-        : AppColors.black;
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
-      decoration: BoxDecoration(
-        color: _color,
-        borderRadius: BorderRadius.circular(6),
-      ),
-      child: Text(
-        order.friendlyStatusLabel.toUpperCase(),
-        style: TextStyle(
-          fontFamily: 'Manrope',
-          fontWeight: FontWeight.w700,
-          fontSize: 10,
-          color: foreground,
-          letterSpacing: 0.6,
-        ),
-      ),
-    );
-  }
-}
-
-class _OrderDetailItemRow extends StatelessWidget {
-  const _OrderDetailItemRow({required this.item});
-
-  final OrderDetailItem item;
-
-  static final _currency = NumberFormat.currency(
-    locale: 'pt_BR',
-    symbol: r'R$',
-  );
-
-  String get _quantity {
-    final value = item.quantity % 1 == 0
-        ? item.quantity.toInt().toString()
-        : item.quantity.toStringAsFixed(2).replaceAll('.', ',');
-    final unit = localizeUnityType(item.unityType);
-    return unit.isNotEmpty ? '$value $unit' : value;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(16),
-      child: Row(
-        children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(16),
-            child: Container(
-              width: 64,
-              height: 64,
-              color: AppColors.lightGreen.withValues(alpha: 0.05),
-              child: item.productPhoto.isNotEmpty
-                  ? Image.network(
-                      item.productPhoto,
-                      fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) =>
-                          const Icon(Icons.eco, color: AppColors.lightGreen),
-                    )
-                  : const Icon(Icons.eco, color: AppColors.lightGreen),
-            ),
-          ),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  item.productName,
-                  style: const TextStyle(
-                    fontFamily: 'Manrope',
-                    fontWeight: FontWeight.w700,
-                    fontSize: 14,
-                    color: AppColors.black,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  _quantity,
-                  style: const TextStyle(
-                    fontFamily: 'Manrope',
-                    fontSize: 13,
-                    color: AppColors.placeholder,
-                  ),
-                ),
-                Text(
-                  _currency.format(item.unitPrice),
-                  style: const TextStyle(
-                    fontFamily: 'Manrope',
-                    fontSize: 13,
-                    color: AppColors.placeholder,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Text(
-            _currency.format(item.subtotal),
-            style: const TextStyle(
-              fontFamily: 'Manrope',
-              fontWeight: FontWeight.w700,
-              fontSize: 14,
-              color: AppColors.black,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _DeliveryCard extends StatelessWidget {
-  const _DeliveryCard({required this.address});
-
-  final OrderDetailAddress address;
-
-  @override
-  Widget build(BuildContext context) {
-    final lines = [
-      address.streetLine,
-      address.cityLine,
-      if (address.zipCode.isNotEmpty) 'CEP: ${address.zipCode}',
-      address.reference,
-    ].where((line) => line.isNotEmpty).toList();
-
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16),
-      padding: const EdgeInsets.all(17),
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: AppColors.lightGreen.withValues(alpha: 0.08)),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x0D000000),
-            blurRadius: 2,
-            offset: Offset(0, 1),
-          ),
-        ],
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Icon(
-            Icons.location_on_outlined,
-            size: 20,
-            color: AppColors.darkGreen,
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'Endereço',
-                  style: TextStyle(
-                    fontFamily: 'Manrope',
-                    fontWeight: FontWeight.w700,
-                    fontSize: 14,
-                    color: AppColors.black,
-                  ),
-                ),
-                const SizedBox(height: 6),
-                ...lines.map(
-                  (line) => Text(
-                    line,
-                    style: const TextStyle(
-                      fontFamily: 'Manrope',
-                      fontSize: 15,
-                      color: AppColors.black,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _ConfirmationCodeCard extends StatelessWidget {
-  const _ConfirmationCodeCard({required this.code});
-
-  final String code;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16),
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: AppColors.darkGreen),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x1A000000),
-            blurRadius: 18,
-            offset: Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          const Text(
-            'Informe este código ao produtor',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontFamily: 'Manrope',
-              fontWeight: FontWeight.w600,
-              fontSize: 14,
-              color: AppColors.placeholder,
-            ),
-          ),
-          const SizedBox(height: 12),
-          Text(
-            code,
-            style: const TextStyle(
-              fontFamily: 'Manrope',
-              fontWeight: FontWeight.w800,
-              fontSize: 32,
-              letterSpacing: 8,
-              color: AppColors.darkGreen,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _CancellationCard extends StatelessWidget {
-  const _CancellationCard({required this.order});
-
-  final OrderDetail order;
-
-  @override
-  Widget build(BuildContext context) {
-    // Reason is already display-ready text (from the dialog or backend).
-    final reason = order.cancellationReason ?? '';
-
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16),
-      padding: const EdgeInsets.all(17),
-      decoration: BoxDecoration(
-        color: AppColors.red.withValues(alpha: 0.05),
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: AppColors.red.withValues(alpha: 0.2)),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Icon(Icons.cancel_outlined, size: 20, color: AppColors.red),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'Motivo',
-                  style: TextStyle(
-                    fontFamily: 'Manrope',
-                    fontWeight: FontWeight.w700,
-                    fontSize: 14,
-                    color: AppColors.red,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  reason,
-                  style: const TextStyle(
-                    fontFamily: 'Manrope',
-                    fontSize: 14,
-                    color: AppColors.black,
-                  ),
-                ),
-                if (order.cancellationDetails != null &&
-                    order.cancellationDetails!.isNotEmpty) ...[
-                  const SizedBox(height: 6),
-                  Text(
-                    order.cancellationDetails!,
-                    style: const TextStyle(
-                      fontFamily: 'Manrope',
-                      fontSize: 13,
-                      color: AppColors.placeholder,
-                    ),
-                  ),
-                ],
-              ],
-            ),
-          ),
-        ],
-      ),
     );
   }
 }
@@ -913,8 +542,18 @@ class _ActionFooter extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final buttons = <Widget>[
+      // Pedido em rota: acompanhamento em tempo real no mapa (Fase 3).
+      if (order.isInDelivery)
+        OrderActionButton(
+          label: 'Acompanhar Entrega',
+          icon: Icons.location_on_outlined,
+          color: AppColors.lightGreen,
+          onTap: isUpdating
+              ? null
+              : () => context.push('/customer/orders/${order.id}/tracking'),
+        ),
       if (order.canConfirmDelivery)
-        _ActionButton(
+        OrderActionButton(
           label: 'Confirmar Entrega',
           icon: Icons.check_circle_outline,
           color: AppColors.darkGreen,
@@ -925,54 +564,22 @@ class _ActionFooter extends StatelessWidget {
                 ),
         ),
       if (order.canContactProducer)
-        _ActionButton(
+        OrderActionButton(
           label: 'Contatar Produtor',
-          iconAsset: 'assets/images/whatsapp.svg',
+          icon: Icons.chat,
           color: const Color(0xFF25D366),
-          isOutlined: true,
           onTap: isUpdating ? null : () => _contactProducer(context),
         ),
       if (order.canCancel)
-        _ActionButton(
+        OrderActionButton(
           label: 'Cancelar Pedido',
           icon: Icons.cancel_outlined,
           color: AppColors.red,
-          isOutlined: true,
           onTap: isUpdating ? null : () => _confirmCancel(context),
         ),
     ];
 
-    if (buttons.isEmpty) return const SizedBox.shrink();
-
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x1A000000),
-            blurRadius: 18,
-            offset: Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(10),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (isUpdating)
-              const Padding(
-                padding: EdgeInsets.only(bottom: 10),
-                child: LinearProgressIndicator(color: AppColors.darkGreen),
-              ),
-            ...buttons
-                .expand((button) => [button, const SizedBox(height: 8)])
-                .take(buttons.length * 2 - 1),
-          ],
-        ),
-      ),
-    );
+    return OrderActionFooter(isBusy: isUpdating, buttons: buttons);
   }
 
   Future<void> _confirmCancel(BuildContext context) async {
@@ -1008,70 +615,54 @@ class _ActionFooter extends StatelessWidget {
   }
 }
 
-class _ActionButton extends StatelessWidget {
-  const _ActionButton({
-    required this.label,
-    required this.color,
-    required this.onTap,
-    this.icon,
-    this.iconAsset,
-    this.isOutlined = false,
-  });
+/// Card com o código de 4 dígitos que o consumidor informa ao produtor para
+/// confirmar o recebimento (exibido enquanto o pedido está IN_DELIVERY).
+class _ConfirmationCodeCard extends StatelessWidget {
+  const _ConfirmationCodeCard({required this.code});
 
-  final String label;
-  final IconData? icon;
-  final String? iconAsset;
-  final Color color;
-  final VoidCallback? onTap;
-  final bool isOutlined;
+  final String code;
 
   @override
   Widget build(BuildContext context) {
-    final effectiveColor = onTap == null ? color.withValues(alpha: 0.5) : color;
-
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        height: 48,
-        decoration: BoxDecoration(
-          color: isOutlined ? Colors.transparent : effectiveColor,
-          borderRadius: BorderRadius.circular(36),
-          border: isOutlined ? Border.all(color: effectiveColor) : null,
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            if (iconAsset != null)
-              SvgPicture.asset(
-                iconAsset!,
-                colorFilter: ColorFilter.mode(
-                  isOutlined ? effectiveColor : AppColors.white,
-                  BlendMode.srcIn,
-                ),
-                width: 20,
-                height: 20,
-              )
-            else if (icon != null)
-              Icon(
-                icon,
-                color: isOutlined ? effectiveColor : AppColors.white,
-                size: 20,
-              ),
-            const SizedBox(width: 8),
-            Flexible(
-              child: Text(
-                label,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  fontFamily: 'Manrope',
-                  fontWeight: FontWeight.w700,
-                  fontSize: 15,
-                  color: isOutlined ? effectiveColor : AppColors.white,
-                ),
-              ),
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16),
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: AppColors.darkGreen),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x1A000000),
+            blurRadius: 18,
+            offset: Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          const Text(
+            'Informe este código ao produtor',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontFamily: 'Manrope',
+              fontWeight: FontWeight.w600,
+              fontSize: 14,
+              color: AppColors.placeholder,
             ),
-          ],
-        ),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            code,
+            style: const TextStyle(
+              fontFamily: 'Manrope',
+              fontWeight: FontWeight.w800,
+              fontSize: 32,
+              letterSpacing: 8,
+              color: AppColors.darkGreen,
+            ),
+          ),
+        ],
       ),
     );
   }
