@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:ragro_mobile/core/di/injection.dart';
 import 'package:ragro_mobile/core/theme/app_colors.dart';
+import 'package:ragro_mobile/core/utils/maps_directions.dart';
 import 'package:ragro_mobile/core/utils/polyline_decoder.dart';
 import 'package:ragro_mobile/features/producer_orders/presentation/bloc/route_calculation_cubit.dart';
 import 'package:ragro_mobile/features/producer_orders/presentation/bloc/route_calculation_state.dart';
@@ -59,10 +60,22 @@ class _RouteCalculationViewState extends State<_RouteCalculationView> {
 
   Future<void> _openGoogleMaps() async {
     final state = context.read<RouteCalculationCubit>().state;
-    final stops = state.orderedStops;
+    final messenger = ScaffoldMessenger.of(context);
 
-    if (stops.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
+    // Build the deep-link from the pending stops (already in the backend's
+    // optimized order). The builder validates/de-duplicates coordinates, caps
+    // waypoints and drops `dir_action=navigate` when there are waypoints (the
+    // navigate mode errors with multiple stops — the "Waypoint, Waypoint..."
+    // failure). Origin is pinned only when the producer's real GPS is known.
+    final directions = buildMapsDirectionsUri(
+      stops: state.orderedStops,
+      originLat: state.producerLat,
+      originLng: state.producerLng,
+    );
+
+    final uri = directions.uri;
+    if (uri == null) {
+      messenger.showSnackBar(
         const SnackBar(
           content: Text('Nenhuma entrega pendente para abrir no mapa.'),
         ),
@@ -70,30 +83,40 @@ class _RouteCalculationViewState extends State<_RouteCalculationView> {
       return;
     }
 
-    final lat = state.producerLat;
-    final lng = state.producerLng;
-    final destination = stops.last;
-    final waypoints = stops.length > 1
-        ? stops.sublist(0, stops.length - 1)
-        : const <String>[];
+    // TODO(gustavo): remover após validar na próxima demo — confirma a URL
+    // real e a contagem de paradas no momento da falha.
+    debugPrint(
+      '[route][maps] stops=${state.orderedStops.length} '
+      'truncated=${directions.truncated} uri=$uri',
+    );
 
-    // Navigation deep-link (no API key needed); stops already in the backend's
-    // optimized order. Only pin `origin` when the producer's real GPS is known,
-    // else Maps starts from the device location (not the Goiânia fallback).
-    final uri = Uri.https('www.google.com', '/maps/dir/', {
-      'api': '1',
-      if (lat != null && lng != null) 'origin': '$lat,$lng',
-      'destination': destination,
-      if (waypoints.isNotEmpty) 'waypoints': waypoints.join('|'),
-      'travelmode': 'driving',
-      'dir_action': 'navigate',
-    });
+    if (directions.truncated) {
+      messenger.showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Muitas paradas: abrindo apenas as primeiras no mapa.',
+          ),
+        ),
+      );
+    }
 
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri, mode: LaunchMode.externalApplication);
-    } else {
+    // Launch directly (no canLaunchUrl gate): per url_launcher docs canLaunchUrl
+    // can return false even when launchUrl would succeed.
+    try {
+      final launched = await launchUrl(
+        uri,
+        mode: LaunchMode.externalApplication,
+      );
+      if (!launched && mounted) {
+        messenger.showSnackBar(
+          const SnackBar(
+            content: Text('Não foi possível abrir o Google Maps.'),
+          ),
+        );
+      }
+    } on Exception {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        messenger.showSnackBar(
           const SnackBar(
             content: Text('Não foi possível abrir o Google Maps.'),
           ),
@@ -373,49 +396,67 @@ class _RouteCalculationViewState extends State<_RouteCalculationView> {
                         ),
 
                         const SizedBox(height: 24),
-                        const Text(
-                          'Sequência de Entregas',
-                          style: TextStyle(
-                            fontFamily: 'Figtree',
-                            fontWeight: FontWeight.w700,
-                            fontSize: 16,
-                            color: AppColors.black,
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-
+                        // Pending stops feed the active numbered sequence;
+                        // delivered/failed stops move to a separate "Entregues"
+                        // section so the producer doesn't confuse finished
+                        // orders with the live route.
                         BlocBuilder<
                           RouteCalculationCubit,
                           RouteCalculationState
                         >(
                           builder: (context, state) {
-                            if (state.deliveries.isEmpty) {
-                              return const Padding(
-                                padding: EdgeInsets.symmetric(vertical: 12),
-                                child: Text(
-                                  'Nenhuma entrega pendente no momento.',
+                            final pending = state.deliveries
+                                .where(
+                                  (d) =>
+                                      !state.confirmedDeliveries.contains(d.id),
+                                )
+                                .toList();
+                            final done = state.deliveries
+                                .where(
+                                  (d) =>
+                                      state.confirmedDeliveries.contains(d.id),
+                                )
+                                .toList();
+
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text(
+                                  'Sequência de Entregas',
                                   style: TextStyle(
-                                    fontSize: 13,
-                                    color: Colors.grey,
+                                    fontFamily: 'Figtree',
+                                    fontWeight: FontWeight.w700,
+                                    fontSize: 16,
+                                    color: AppColors.black,
                                   ),
                                 ),
-                              );
-                            }
-                            return Column(
-                              children: [
-                                for (
-                                  var i = 0;
-                                  i < state.deliveries.length;
-                                  i++
-                                ) ...[
-                                  _DeliveryItem(
-                                    id: state.deliveries[i].id,
-                                    number: i + 1,
-                                    title: state.deliveries[i].title,
-                                    subtitle: state.deliveries[i].subtitle,
+                                const SizedBox(height: 16),
+                                if (pending.isEmpty)
+                                  const Padding(
+                                    padding: EdgeInsets.symmetric(vertical: 12),
+                                    child: Text(
+                                      'Nenhuma entrega pendente no momento.',
+                                      style: TextStyle(
+                                        fontSize: 13,
+                                        color: Colors.grey,
+                                      ),
+                                    ),
+                                  )
+                                else
+                                  _DeliverySequence(items: pending),
+                                if (done.isNotEmpty) ...[
+                                  const SizedBox(height: 24),
+                                  const Text(
+                                    'Entregues',
+                                    style: TextStyle(
+                                      fontFamily: 'Figtree',
+                                      fontWeight: FontWeight.w700,
+                                      fontSize: 16,
+                                      color: AppColors.black,
+                                    ),
                                   ),
-                                  if (i != state.deliveries.length - 1)
-                                    const SizedBox(height: 16),
+                                  const SizedBox(height: 16),
+                                  _DeliverySequence(items: done),
                                 ],
                               ],
                             );
@@ -627,6 +668,31 @@ class _Co2ResultCard extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+/// Renders a numbered list of [_DeliveryItem]s (1..n) with separators. Reused
+/// for both the pending sequence and the "Entregues" history.
+class _DeliverySequence extends StatelessWidget {
+  const _DeliverySequence({required this.items});
+
+  final List<RouteDelivery> items;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        for (var i = 0; i < items.length; i++) ...[
+          _DeliveryItem(
+            id: items[i].id,
+            number: i + 1,
+            title: items[i].title,
+            subtitle: items[i].subtitle,
+          ),
+          if (i != items.length - 1) const SizedBox(height: 16),
+        ],
+      ],
     );
   }
 }
