@@ -1,19 +1,8 @@
 # RAGRO — Database Documentation
 
-> PostgreSQL 16 · 21 tables · 2 triggers
+> PostgreSQL 16 · ~26 tables · 2 triggers
 
-> **Note — Schema Sync**: This document is the **design reference** for the database. The runtime schema is defined in `data/schema.sql`. If any field documented here is missing from `schema.sql`, it means the migration has not been applied yet. Known pending migrations are listed below.
-
-### Pending Schema Additions
-
-The following fields are documented here but **not yet present** in `data/schema.sql`:
-
-| Table | Column | Type | Status |
-|-------|--------|------|--------|
-| `farmers` | `story` | `text` | Pending — producer narrative for the profile page |
-| `cart_items` | `price_snapshot` | `decimal(10,2)` | Pending — price at the time the item was added |
-
-These must be added to `data/schema.sql` before the corresponding features can be implemented.
+> **Note — Source of truth**: The runtime schema lives in the **ragro-backend** Flyway migrations at `ragro-backend/src/main/resources/db/migration/` (`V1` … `V24`, current head `V24__route_positions`). This document describes that schema — when in doubt, the migrations win. Schema changes are made by adding a new migration, never by editing a hand-maintained file.
 
 ---
 
@@ -27,6 +16,8 @@ These must be added to `data/schema.sql` before the corresponding features can b
   - [Cart and Orders](#cart-and-orders)
   - [Reviews and Favorites](#reviews-and-favorites)
   - [Logistics](#logistics)
+  - [Sustainability / CO2](#sustainability--co2)
+  - [Notifications](#notifications)
   - [Payment](#payment)
 - [Triggers](#triggers)
 ---
@@ -52,13 +43,20 @@ erDiagram
         varchar fiscal_number_type
         varchar farm_name
         text description
-        text story
         text avatar_s3
         text display_photo_s3
         integer total_reviews
         decimal average_rating
         integer total_orders
         decimal total_sales_amount
+        timestamptz created_at
+        timestamptz updated_at
+    }
+    producer_profiles {
+        uuid id PK_FK
+        text story
+        text photo_url
+        date member_since
         timestamptz created_at
         timestamptz updated_at
     }
@@ -79,6 +77,8 @@ erDiagram
         decimal latitude
         decimal longitude
         boolean is_primary
+        varchar geocode_status
+        timestamptz geocoded_at
         timestamptz created_at
     }
     farmer_availability {
@@ -104,6 +104,7 @@ erDiagram
         decimal stock_quantity
         text image_s3
         boolean active
+        bigint version
         timestamptz created_at
         timestamptz updated_at
     }
@@ -140,7 +141,6 @@ erDiagram
         uuid cart_id FK
         uuid product_id FK
         decimal quantity
-        decimal price_snapshot
         boolean active
     }
     orders {
@@ -156,6 +156,11 @@ erDiagram
         timestamptz delivered_at
         text notes
         text cancellation_reason
+        text cancellation_details
+        boolean seen_by_farmer
+        varchar confirmation_code
+        integer confirmation_attempts
+        timestamptz confirmation_locked_until
         timestamptz created_at
         timestamptz updated_at
     }
@@ -193,30 +198,37 @@ erDiagram
         uuid id PK
         uuid farmer_id FK
         varchar status
-        date planned_date
-        timestamptz started_at
-        timestamptz completed_at
+        decimal origin_latitude
+        decimal origin_longitude
+        decimal total_distance_km
+        integer total_duration_seconds
+        decimal baseline_distance_km
+        text overview_polyline
         timestamptz created_at
-        timestamptz updated_at
+        timestamptz completed_at
     }
-    delivery_route_stops {
+    route_stops {
         uuid id PK
         uuid route_id FK
         uuid order_id FK
-        smallint stop_order
+        integer sequence
         varchar status
-        timestamptz delivered_at
-        text notes
+        decimal latitude
+        decimal longitude
+        text address_text
+        decimal leg_distance_km
+        integer leg_duration_seconds
+        timestamptz eta
+        timestamptz completed_at
     }
-    visual_route_information {
+    route_positions {
         uuid id PK
-        uuid delivery_route_id FK
-        text encoded_polyline
-        integer total_distance_meters
-        text total_duration
-        varchar travel_mode
-        decimal origin_latitude
-        decimal origin_longitude
+        uuid route_id FK
+        decimal latitude
+        decimal longitude
+        decimal accuracy_meters
+        decimal speed_kmh
+        timestamptz recorded_at
     }
     payment_methods {
         uuid id PK
@@ -233,10 +245,63 @@ erDiagram
         timestamptz created_at
         timestamptz updated_at
     }
+    notifications {
+        uuid id PK
+        uuid user_id FK
+        varchar title
+        text message
+        varchar type
+        varchar reference_type
+        uuid reference_id
+        jsonb metadata
+        boolean is_read
+        timestamptz created_at
+        timestamptz read_at
+    }
+    fcm_tokens {
+        uuid id PK
+        uuid user_id FK
+        text token
+        timestamptz updated_at
+    }
+    vehicle_preferences {
+        uuid user_id PK_FK
+        varchar vehicle_type
+        varchar fuel_type
+        double average_consumption
+        timestamptz created_at
+        timestamptz updated_at
+    }
+    co2_savings {
+        uuid id PK
+        uuid user_id FK
+        double distance_optimized
+        double distance_non_optimized
+        double co2_saved
+        varchar vehicle_type
+        varchar fuel_type
+        double average_consumption
+        timestamptz created_at
+    }
+    co2_emissions {
+        uuid id PK
+        uuid vehicle_preference_user_id FK
+        double route_distance_km
+        double co2_emission
+        varchar vehicle_type
+        varchar fuel_type
+        double average_consumption
+        timestamptz created_at
+    }
 
     users ||--o{ addresses : "has"
 users ||--|| farmers : "is"
 users ||--|| customers : "is"
+users ||--o{ notifications : "receives"
+users ||--o{ fcm_tokens : "registers"
+users ||--o| vehicle_preferences : "has"
+users ||--o{ co2_savings : "accrues"
+farmers ||--|| producer_profiles : "has"
 farmers ||--o{ farmer_availability : "has"
 farmers ||--o{ products : "sells"
 farmers ||--o{ delivery_routes : "creates"
@@ -257,11 +322,13 @@ carts ||--o{ cart_items : "contains"
 orders ||--o{ order_items : "contains"
 orders ||--o{ order_status_history : "tracks"
 orders ||--|| review : "has"
-orders ||--o| delivery_route_stops : "has"
+orders ||--o| route_stops : "has"
 payment_methods ||--o{ orders : "used in"
 addresses ||--o{ orders : "delivered to"
-delivery_routes ||--o{ delivery_route_stops : "has"
-delivery_routes ||--|| visual_route_information : "has"
+delivery_routes ||--o{ route_stops : "has"
+delivery_routes ||--o{ route_positions : "tracks"
+vehicle_preferences ||--o{ co2_emissions : "produces"
+```
 
 ---
 
@@ -269,11 +336,13 @@ delivery_routes ||--|| visual_route_information : "has"
 
 | Domain | Tables |
 |--------|--------|
-| 👤 Users and Profiles | `users` `farmers` `customers` `addresses` `farmer_availability` |
+| 👤 Users and Profiles | `users` `farmers` `producer_profiles` `customers` `addresses` `farmer_availability` |
 | 📦 Products and Inventory | `products` `product_categories` `product_category_assignments` `product_photos` `stock_movements` |
 | 🛒 Cart and Orders | `carts` `cart_items` `orders` `order_items` `order_status_history` |
 | ⭐ Reviews and Favorites | `review` `favorites` |
-| 🚚 Logistics | `delivery_routes` `delivery_route_stops` `visual_route_information` |
+| 🚚 Logistics | `delivery_routes` `route_stops` `route_positions` |
+| 🌱 Sustainability / CO2 | `vehicle_preferences` `co2_savings` `co2_emissions` |
+| 🔔 Notifications | `notifications` `fcm_tokens` |
 | 💳 Payment | `payment_methods` |
 
 ---
@@ -311,7 +380,6 @@ Extended profile for farmers. The `id` is the same as `users.id` — a 1:1 relat
 | `fiscal_number_type` | varchar(5) | ✅ | Document type: `cpf` \| `cnpj` |
 | `farm_name` | varchar(150) | ✅ | Farm name displayed in the marketplace |
 | `description` | text | ❌ | Short description shown on marketplace cards |
-| `story` | text | ❌ | Full story displayed on the detailed profile |
 | `avatar_s3` | text | ❌ | Profile picture URL stored in S3 |
 | `display_photo_s3` | text | ❌ | Cover photo URL stored in S3 |
 | `total_reviews` | integer | ✅ | Denormalized counter — updated after each review |
@@ -322,6 +390,20 @@ Extended profile for farmers. The `id` is the same as `users.id` — a 1:1 relat
 | `updated_at` | timestamptz | ✅ | Last update timestamp |
 
 > **Note:** The fields `total_reviews`, `average_rating`, `total_orders`, and `total_sales_amount` are intentionally denormalized to avoid expensive `COUNT`/`AVG` queries on every profile load. Maintaining consistency of these values is the responsibility of the application layer when processing orders and reviews.
+
+---
+
+#### `producer_profiles`
+Extra producer-facing profile data (narrative, cover photo, member-since). The `id` is the same as `farmers.id` / `users.id` — a 1:1 relationship.
+
+| Column | Type | Required | Description |
+|--------|------|----------|-------------|
+| `id` | uuid | ✅ | FK → `farmers.id` — same identifier |
+| `story` | text | ❌ | Full story displayed on the detailed profile |
+| `photo_url` | text | ❌ | Cover photo URL |
+| `member_since` | date | ✅ | Date the producer joined — backfilled from `users.created_at` in `V21` |
+| `created_at` | timestamptz | ✅ | Record creation timestamp |
+| `updated_at` | timestamptz | ✅ | Last update timestamp |
 
 ---
 
@@ -354,6 +436,8 @@ User addresses. A user can have multiple; `is_primary` identifies the main one.
 | `latitude` | decimal(10,7) | ❌ | Latitude geocoded at registration via maps API |
 | `longitude` | decimal(10,7) | ❌ | Longitude geocoded at registration via maps API |
 | `is_primary` | boolean | ✅ | `true` = user's primary address |
+| `geocode_status` | varchar(12) | ❌ | Geocoding bookkeeping: `OK` \| `AMBIGUOUS` \| `FAILED` — `null` = never attempted (added in `V23`) |
+| `geocoded_at` | timestamptz | ❌ | When geocoding was last attempted (added in `V23`) |
 | `created_at` | timestamptz | ✅ | Record creation timestamp |
 
 > **Note:** `latitude` and `longitude` are filled only once when the address is created, using the Google Maps API or device GPS. From then on, all proximity queries use the database directly — avoiding additional API costs per query.
@@ -391,6 +475,7 @@ Farmer availability hours by weekday. Displayed on the public profile.
 | `stock_quantity` | decimal(12,3) | ✅ | Current available stock — decremented when order is confirmed |
 | `image_s3` | text | ❌ | Main image URL stored in S3 |
 | `active` | boolean | ✅ | `false` = product hidden from marketplace (soft delete) |
+| `version` | bigint | ✅ | Optimistic-lock version — guards concurrent `stock_quantity` read-modify-write on sale/cancel (added in `V22`) |
 | `created_at` | timestamptz | ✅ | Record creation timestamp |
 | `updated_at` | timestamptz | ✅ | Last update timestamp |
 
@@ -474,7 +559,6 @@ Active cart for the customer. A `UNIQUE` index on `customer_id` ensures one cart
 | `cart_id` | uuid | ✅ | FK → `carts.id` |
 | `product_id` | uuid | ✅ | FK → `products.id` |
 | `quantity` | decimal(12,3) | ✅ | Quantity selected by the customer |
-| `price_snapshot` | decimal(10,2) | ✅ | Price at the moment the item was added to the cart |
 | `active` | boolean | ✅ | `false` = item removed or product deactivated |
 
 **Unique index:** `(cart_id, product_id)` — no duplicate items in the same cart.
@@ -482,7 +566,7 @@ Active cart for the customer. A `UNIQUE` index on `customer_id` ensures one cart
 ---
 
 #### `orders`
-Order generated from the cart. Immutable after creation — status changes are tracked in `order_status_history`.
+Order generated from the cart. Line items and address snapshot are immutable after creation; status transitions are tracked in `order_status_history`.
 
 | Column | Type | Required | Description |
 |--------|------|----------|-------------|
@@ -491,13 +575,18 @@ Order generated from the cart. Immutable after creation — status changes are t
 | `farmer_id` | uuid | ✅ | FK → `farmers.id` |
 | `delivery_address_id` | uuid | ✅ | FK → `addresses.id` — current address |
 | `delivery_address_snapshot` | jsonb | ✅ | Copy of the address at order time — immutable |
-| `status` | varchar(20) | ✅ | `pending` \| `confirmed` \| `delivering` \| `delivered` \| `cancelled` |
+| `status` | varchar(20) | ✅ | `PENDING` \| `CONFIRMED` \| `IN_DELIVERY` \| `DELIVERED` \| `CANCELLED` (see `OrderStatus` enum) |
 | `payment_method_id` | uuid | ✅ | FK → `payment_methods.id` |
 | `payment_status` | varchar(20) | ✅ | `pending` \| `paid` \| `refunded` |
 | `scheduled_for` | timestamptz | ❌ | Scheduled delivery date and time |
 | `delivered_at` | timestamptz | ❌ | Actual delivery date and time |
 | `notes` | text | ❌ | Customer notes |
-| `cancellation_reason` | text | ❌ | Filled only when `status = cancelled` |
+| `cancellation_reason` | text | ❌ | Reason/category for the cancellation (e.g. `CUSTOMER_GIVE_UP`, `REFUSED_BY_FARMER`, free text) — filled when cancelled |
+| `cancellation_details` | text | ❌ | Longer justification optionally provided by whoever cancelled (added in `V12`) |
+| `seen_by_farmer` | boolean | ✅ | `false` until the farmer opens the order — drives new-order badges (added in `V17`) |
+| `confirmation_code` | varchar(4) | ❌ | 4-digit delivery confirmation code, generated when the order moves to `IN_DELIVERY` (added in `V19`) |
+| `confirmation_attempts` | integer | ✅ | Wrong-code attempt counter — brute-force protection (added in `V19`) |
+| `confirmation_locked_until` | timestamptz | ❌ | Lockout timestamp after too many wrong attempts (added in `V19`) |
 | `created_at` | timestamptz | ✅ | Record creation timestamp |
 | `updated_at` | timestamptz | ✅ | Last update timestamp |
 
@@ -567,55 +656,151 @@ Junction table between customers and their favorite farmers. Composite primary k
 
 ### Logistics
 
+> Redesigned in `V23__delivery_routes_v2` (the original V1 logistics tables were never mapped by an entity and were dropped). Real-time GPS tracking (`route_positions`) was added in `V24`.
+
 #### `delivery_routes`
-Represents a delivery trip by the farmer. Can include multiple orders.
+A delivery trip by the producer, built from the optimized order via the Google Routes API. At most one `ACTIVE` route per producer (a new `POST /routes` replaces the previous one).
 
 | Column | Type | Required | Description |
 |--------|------|----------|-------------|
 | `id` | uuid | ✅ | Primary key |
 | `farmer_id` | uuid | ✅ | FK → `farmers.id` |
-| `status` | varchar(20) | ✅ | `planned` \| `in_progress` \| `completed` \| `cancelled` |
-| `planned_date` | date | ✅ | Planned date for the delivery trip |
-| `started_at` | timestamptz | ❌ | When the farmer started the route |
-| `completed_at` | timestamptz | ❌ | When the route was completed |
+| `status` | varchar(20) | ✅ | `ACTIVE` \| `COMPLETED` \| `CANCELLED` |
+| `origin_latitude` | decimal(10,7) | ✅ | Route origin latitude (producer's location) |
+| `origin_longitude` | decimal(10,7) | ✅ | Route origin longitude (producer's location) |
+| `total_distance_km` | decimal(10,2) | ❌ | Total optimized road distance in km |
+| `total_duration_seconds` | integer | ❌ | Total estimated duration in seconds |
+| `baseline_distance_km` | decimal(10,2) | ❌ | Round-trip-per-stop baseline (Route Matrix) used as the CO2-savings baseline |
+| `overview_polyline` | text | ❌ | Encoded polyline used to render the route on the map |
 | `created_at` | timestamptz | ✅ | Record creation timestamp |
-| `updated_at` | timestamptz | ✅ | Last update timestamp |
+| `completed_at` | timestamptz | ❌ | When the route was completed |
+
+**Unique index:** `(farmer_id) WHERE status = 'ACTIVE'` — at most one active route per producer.
 
 ---
 
-#### `delivery_route_stops`
-Each stop in the route. An order can only belong to one route at a time — enforced by `UNIQUE` on `order_id`.
+#### `route_stops`
+Each stop in the route. An order can appear at most once per route — enforced by `UNIQUE` on `(route_id, order_id)`. `ON DELETE CASCADE` from `delivery_routes`.
 
 | Column | Type | Required | Description |
 |--------|------|----------|-------------|
 | `id` | uuid | ✅ | Primary key |
 | `route_id` | uuid | ✅ | FK → `delivery_routes.id` |
-| `order_id` | uuid | ✅ | FK → `orders.id` — UNIQUE, an order can be in at most one route |
-| `stop_order` | smallint | ✅ | Visit sequence in the route — defined by the maps API |
-| `status` | varchar(20) | ✅ | `pending` \| `arrived` \| `delivered` \| `failed` |
-| `delivered_at` | timestamptz | ❌ | Actual delivery timestamp at this stop |
-| `notes` | text | ❌ | Delivery notes |
+| `order_id` | uuid | ✅ | FK → `orders.id` |
+| `sequence` | integer | ✅ | Visit sequence in the route — defined by route optimization |
+| `status` | varchar(20) | ✅ | `PENDING` \| `ARRIVED` \| `DELIVERED` \| `FAILED` |
+| `latitude` | decimal(10,7) | ✅ | Stop latitude |
+| `longitude` | decimal(10,7) | ✅ | Stop longitude |
+| `address_text` | text | ❌ | Human-readable address of the stop |
+| `leg_distance_km` | decimal(10,2) | ❌ | Distance of the leg from the previous point to this stop |
+| `leg_duration_seconds` | integer | ❌ | Duration of the leg from the previous point to this stop |
+| `eta` | timestamptz | ❌ | Absolute ETA at this stop (`created_at` + sum of legs up to here) |
+| `completed_at` | timestamptz | ❌ | When the stop was completed |
 
 **Unique indexes:**
-- `(route_id, stop_order)` — no duplicate stop numbers within the same route  
-- `(order_id)` — the same order cannot appear in multiple routes
+- `(route_id, sequence)` — no duplicate stop numbers within the same route
+- `(route_id, order_id)` — an order appears at most once per route
 
 ---
 
-#### `visual_route_information`
-Stores data returned by the Google Maps Directions API for a route. Avoids recalculating every time the farmer opens the app.
+#### `route_positions`
+Real-time GPS trail recorded while the producer runs the route (used by the live tracking WebSocket). `ON DELETE CASCADE` from `delivery_routes`. Retained 7 days, then purged by a daily job.
 
 | Column | Type | Required | Description |
 |--------|------|----------|-------------|
 | `id` | uuid | ✅ | Primary key |
-| `delivery_route_id` | uuid | ✅ | FK → `delivery_routes.id` |
-| `encoded_polyline` | text | ❌ | Encoded polyline used to render the route on the map |
-| `total_distance_meters` | integer | ❌ | Total route distance in meters |
-| `total_duration` | text | ❌ | Estimated total duration — e.g., `1h 23min` |
-| `optimized_stop_order` | smallint[] | ❌ | Array with optimized stop sequence returned by the API |
-| `travel_mode` | varchar(20) | ❌ | Transport mode: `driving` \| `walking` \| `bicycling` |
-| `origin_latitude` | decimal(10,7) | ❌ | Origin latitude (farmer’s location) |
-| `origin_longitude` | decimal(10,7) | ❌ | Origin longitude (farmer’s location) |
+| `route_id` | uuid | ✅ | FK → `delivery_routes.id` |
+| `latitude` | decimal(10,7) | ✅ | Recorded latitude |
+| `longitude` | decimal(10,7) | ✅ | Recorded longitude |
+| `accuracy_meters` | decimal(8,2) | ❌ | Reported GPS accuracy in meters |
+| `speed_kmh` | decimal(6,2) | ❌ | Reported speed in km/h |
+| `recorded_at` | timestamptz | ✅ | When the position was recorded |
+
+---
+
+### Sustainability / CO2
+
+> Powers the `/co2` impact feature. Added in `V13` (`vehicle_preferences`, `co2_savings`) and `V14` (`co2_emissions`).
+
+#### `vehicle_preferences`
+The producer's vehicle/fuel profile used to compute emissions. Keyed by `user_id` (1:1 with `users`).
+
+| Column | Type | Required | Description |
+|--------|------|----------|-------------|
+| `user_id` | uuid | ✅ | PK / FK → `users.id` |
+| `vehicle_type` | varchar(50) | ✅ | Vehicle type |
+| `fuel_type` | varchar(50) | ✅ | Fuel type |
+| `average_consumption` | double precision | ✅ | Average consumption used in the emission formula |
+| `created_at` | timestamptz | ❌ | Record creation timestamp |
+| `updated_at` | timestamptz | ❌ | Last update timestamp |
+
+---
+
+#### `co2_savings`
+A computed CO2-savings record: optimized vs. non-optimized distance for a delivery run.
+
+| Column | Type | Required | Description |
+|--------|------|----------|-------------|
+| `id` | uuid | ✅ | Primary key |
+| `user_id` | uuid | ✅ | FK → `users.id` |
+| `distance_optimized` | double precision | ✅ | Distance with route optimization |
+| `distance_non_optimized` | double precision | ✅ | Baseline distance without optimization |
+| `co2_saved` | double precision | ✅ | Computed CO2 saved |
+| `vehicle_type` | varchar(50) | ✅ | Vehicle type at computation time |
+| `fuel_type` | varchar(50) | ✅ | Fuel type at computation time |
+| `average_consumption` | double precision | ✅ | Average consumption at computation time |
+| `created_at` | timestamptz | ❌ | Record creation timestamp |
+
+---
+
+#### `co2_emissions`
+A computed emission record for a route distance, tied to a vehicle profile.
+
+| Column | Type | Required | Description |
+|--------|------|----------|-------------|
+| `id` | uuid | ✅ | Primary key |
+| `vehicle_preference_user_id` | uuid | ✅ | FK → `vehicle_preferences.user_id` |
+| `route_distance_km` | double precision | ✅ | Route distance used in the computation |
+| `co2_emission` | double precision | ✅ | Computed CO2 emission |
+| `vehicle_type` | varchar(50) | ✅ | Vehicle type at computation time |
+| `fuel_type` | varchar(50) | ✅ | Fuel type at computation time |
+| `average_consumption` | double precision | ✅ | Average consumption at computation time |
+| `created_at` | timestamptz | ❌ | Record creation timestamp |
+
+---
+
+### Notifications
+
+> Backs the in-app notification feed and FCM push. Added in `V16` (`notifications`) and `V20` (`fcm_tokens`).
+
+#### `notifications`
+In-app notification feed entry for a user.
+
+| Column | Type | Required | Description |
+|--------|------|----------|-------------|
+| `id` | uuid | ✅ | Primary key |
+| `user_id` | uuid | ✅ | FK → `users.id` — recipient |
+| `title` | varchar(120) | ✅ | Notification title |
+| `message` | text | ✅ | Notification body |
+| `type` | varchar(40) | ✅ | Notification category/type |
+| `reference_type` | varchar(40) | ❌ | Type of the referenced entity (e.g. order) for deep-linking |
+| `reference_id` | uuid | ❌ | Id of the referenced entity |
+| `metadata` | jsonb | ❌ | Extra payload for the client |
+| `is_read` | boolean | ✅ | `false` until the user reads it |
+| `created_at` | timestamptz | ✅ | Record creation timestamp |
+| `read_at` | timestamptz | ❌ | When the notification was read |
+
+---
+
+#### `fcm_tokens`
+Firebase Cloud Messaging device tokens per user, for push delivery.
+
+| Column | Type | Required | Description |
+|--------|------|----------|-------------|
+| `id` | uuid | ✅ | Primary key |
+| `user_id` | uuid | ✅ | FK → `users.id` |
+| `token` | text | ✅ | FCM device token — `UNIQUE` |
+| `updated_at` | timestamptz | ✅ | Last time the token was registered/refreshed |
 
 ---
 
@@ -662,6 +847,7 @@ AFTER UPDATE OF active ON products
 FOR EACH ROW
 WHEN (OLD.active = true AND NEW.active = false)
 -- deactivates cart_items and carts left with no active items
+```
 
 ---
 

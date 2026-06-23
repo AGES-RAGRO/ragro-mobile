@@ -41,7 +41,7 @@ class _SearchViewState extends State<_SearchView> {
   @override
   void initState() {
     super.initState();
-    // Ao entrar na tela, carrega as recomendações gerais (/recommendations?limit=6).
+    // Load general recommendations (/recommendations?limit=6).
     context.read<SearchBloc>().add(const SearchCategoryProductsRequested(''));
   }
 
@@ -72,7 +72,6 @@ class _SearchViewState extends State<_SearchView> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Header
               const Padding(
                 padding: EdgeInsets.fromLTRB(16, 16, 16, 0),
                 child: Text(
@@ -86,7 +85,6 @@ class _SearchViewState extends State<_SearchView> {
                 ),
               ),
 
-              // Search bar
               Padding(
                 padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
                 child: Container(
@@ -127,7 +125,6 @@ class _SearchViewState extends State<_SearchView> {
                   ),
                 ),
               ),
-              // Categories
               Padding(
                 padding: const EdgeInsets.fromLTRB(0, 20, 0, 0),
                 child: Column(
@@ -175,7 +172,6 @@ class _SearchViewState extends State<_SearchView> {
                   ],
                 ),
               ),
-              // Recent searches
               BlocBuilder<SearchBloc, SearchState>(
                 buildWhen: (prev, curr) =>
                     curr is SearchIdle && curr.recentSearches.isNotEmpty ||
@@ -222,7 +218,6 @@ class _SearchViewState extends State<_SearchView> {
                   );
                 },
               ),
-              // Category products (below recent searches)
               BlocBuilder<SearchBloc, SearchState>(
                 builder: (context, state) {
                   if (state is SearchCategoryLoading) {

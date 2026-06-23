@@ -6,14 +6,13 @@ import 'package:injectable/injectable.dart';
 import 'package:ragro_mobile/core/services/tracking_socket.dart';
 import 'package:ragro_mobile/features/orders/data/repositories/order_tracking_repository.dart';
 
-/// Estados da entrega visíveis ao cliente (decisão de produto: experiência
-/// tipo iFood — aguardando, em rota, próxima parada, chegando, entregue).
+/// Delivery phases shown to the customer (iFood-style experience).
 enum DeliveryTrackingPhase {
   loading,
-  waiting, // pedido ainda não está em rota ativa
-  awaitingLocation, // em rota, mas o produtor ainda não enviou posição GPS
-  enRoute, // em rota, com paradas antes da sua
-  nextStop, // a sua entrega é a próxima parada
+  waiting, // order not yet in an active route
+  awaitingLocation, // in route, but producer hasn't sent a GPS position yet
+  enRoute, // in route, with stops ahead of yours
+  nextStop, // your delivery is the next stop
   arriving, // ETA < 5 min
   delivered,
   error,
@@ -41,12 +40,12 @@ class DeliveryTrackingState extends Equatable {
   final int? etaSeconds;
   final int stopsBefore;
 
-  /// true = recebendo pelo WebSocket; false = fallback de polling (10s).
+  /// true = receiving via WebSocket; false = polling fallback (10s).
   final bool live;
   final DateTime? updatedAt;
 
-  /// Polyline codificada (Google) da rota — desenhada no mapa. Vem no snapshot
-  /// inicial e não muda durante a entrega.
+  /// Google-encoded route polyline (drawn on map). From the initial snapshot;
+  /// does not change during delivery.
   final String? routePolyline;
 
   DeliveryTrackingState copyWith({
@@ -90,9 +89,9 @@ class DeliveryTrackingState extends Equatable {
   ];
 }
 
-/// Acompanhamento em tempo real da entrega pelo CLIENTE: snapshot inicial via
-/// REST, stream ao vivo via STOMP (`/topic/routes/{routeId}`), e degradação
-/// graciosa para polling de 10s quando o WebSocket não entrega.
+/// Real-time delivery tracking for the customer: initial REST snapshot, live
+/// STOMP stream (`/topic/routes/{routeId}`), graceful 10s-polling fallback when
+/// the WebSocket goes silent.
 @injectable
 class DeliveryTrackingCubit extends Cubit<DeliveryTrackingState> {
   DeliveryTrackingCubit(this._repository, this._socket)
@@ -118,8 +117,8 @@ class DeliveryTrackingCubit extends Cubit<DeliveryTrackingState> {
       _socket.addOnConnect(_resubscribe);
       _resubscribe();
     }
-    // Polling de segurança: se o WS não entregou nada nos últimos 15s, busca o
-    // snapshot REST (última posição conhecida + ETA) a cada 10s.
+    // Safety polling: if the WS has been silent for 15s, fetch the REST
+    // snapshot every 10s.
     _pollTimer = Timer.periodic(const Duration(seconds: 10), (_) {
       final last = state.updatedAt;
       final stale =
@@ -208,7 +207,7 @@ class DeliveryTrackingCubit extends Cubit<DeliveryTrackingState> {
       if (state.phase == DeliveryTrackingPhase.loading) {
         emit(state.copyWith(phase: DeliveryTrackingPhase.error));
       }
-      // Com dados na tela, falha de polling é silenciosa (próxima tentativa em 10s).
+      // With data on screen, a polling failure is silent (retries in 10s).
     }
   }
 
@@ -219,8 +218,7 @@ class DeliveryTrackingCubit extends Cubit<DeliveryTrackingState> {
     required bool hasPosition,
   }) {
     if (stopStatus == 'DELIVERED') return DeliveryTrackingPhase.delivered;
-    // Em rota mas sem nenhum ping do produtor ainda: deixa explícito em vez de um
-    // mapa "vazio" sem o marker do produtor.
+    // In route but no producer ping yet: be explicit instead of an empty map.
     if (!hasPosition) return DeliveryTrackingPhase.awaitingLocation;
     if (etaSeconds != null && etaSeconds <= 300 && stopsBefore == 0) {
       return DeliveryTrackingPhase.arriving;

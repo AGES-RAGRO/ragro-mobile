@@ -2,19 +2,19 @@ include: package:very_good_analysis/analysis_options.yaml
 
 analyzer:
   errors:
-    # Tratar imports não utilizados como erro
+    # Unused imports are errors
     unused_import: error
-    # Tratar variáveis não utilizadas como warning
+    # Unused locals are warnings
     unused_local_variable: warning
   exclude:
-    # Arquivos gerados pelo build_runner
+    # build_runner generated files
     - "**/*.g.dart"
     - "**/*.config.dart"
     - "**/*.freezed.dart"
 
 linter:
   rules:
-    # Desabilitar regras que conflitam com o padrão do projeto
+    # Rules that conflict with the project conventions
     public_member_api_docs: false
     lines_longer_than_80_chars: false
     one_member_abstracts: false

@@ -3,9 +3,8 @@ import 'package:intl/intl.dart';
 import 'package:ragro_mobile/core/theme/app_colors.dart';
 import 'package:ragro_mobile/features/notifications/domain/entities/notification.dart';
 
-/// Tela de detalhe de uma notificação. Mostra título, mensagem completa (sem
-/// truncar como na lista) e a data formatada, com botão de voltar. Responsiva:
-/// o conteúdo é limitado a uma largura máxima em telas grandes.
+/// Notification detail: title, full untruncated message, formatted date.
+/// Content width-capped on large screens.
 class NotificationDetailPage extends StatelessWidget {
   const NotificationDetailPage({required this.notification, super.key});
 

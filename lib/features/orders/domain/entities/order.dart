@@ -74,8 +74,8 @@ class Order extends Equatable {
   final ProducerBankInfo bankInfo;
   final bool avaliado;
 
-  /// Código de confirmação de entrega. O backend só o expõe enquanto o pedido
-  /// está IN_DELIVERY (a caminho); nos demais estados vem nulo.
+  /// Delivery confirmation code. Backend exposes it only while IN_DELIVERY;
+  /// null otherwise.
   final String? confirmationCode;
 
   Order copyWith({

@@ -2,13 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:ragro_mobile/core/theme/app_colors.dart';
 
-/// Full-width pill action button used in the order detail footers
-/// (confirm, cancel, contact, track delivery...). A null [onTap] renders the
-/// button at half opacity and disabled.
-///
-/// Suporta a variante [isOutlined] (fundo transparente + borda colorida, usada
-/// pelos botões "Contatar"/"Cancelar" da develop) e ícone SVG via [iconAsset]
-/// (ex.: WhatsApp), além do [icon] padrão.
+/// Full-width pill action button for the order detail footers. Null [onTap]
+/// disables it at half opacity. Supports an [isOutlined] variant (transparent
+/// + colored border) and an SVG icon via [iconAsset] besides the default [icon].
 class OrderActionButton extends StatelessWidget {
   const OrderActionButton({
     required this.label,

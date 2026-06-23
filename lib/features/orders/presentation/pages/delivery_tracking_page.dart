@@ -8,10 +8,9 @@ import 'package:ragro_mobile/core/theme/app_colors.dart';
 import 'package:ragro_mobile/core/utils/polyline_decoder.dart';
 import 'package:ragro_mobile/features/orders/presentation/bloc/delivery_tracking_cubit.dart';
 
-/// Acompanhamento da entrega em tempo real (cliente): mapa com o produtor se
-/// movendo (interpolação suave entre pings, sem "teleporte"), destino da SUA
-/// entrega, ETA dinâmico e estados tipo iFood. Privacidade: nada das demais
-/// paradas é exibido além da contagem à frente.
+/// Real-time delivery tracking (customer): map with the producer moving
+/// (smooth interpolation between pings), your destination, dynamic ETA. For
+/// privacy, only the count of stops ahead is shown.
 class DeliveryTrackingPage extends StatelessWidget {
   const DeliveryTrackingPage({required this.orderId, super.key});
 
@@ -42,14 +41,14 @@ class _DeliveryTrackingViewState extends State<_DeliveryTrackingView>
   LatLng? _animFrom;
   LatLng? _animTo;
 
-  /// Ícones do mapa (carro verde = produtor; casa = destino), gerados via Canvas
-  /// para não depender de assets PNG. Carregados uma vez em didChangeDependencies.
+  /// Map icons (green car = producer; house = destination), drawn via Canvas to
+  /// avoid PNG assets. Loaded once in didChangeDependencies.
   BitmapDescriptor? _producerIcon;
   BitmapDescriptor? _destinationIcon;
   bool _iconsRequested = false;
 
-  /// Cache da rota decodificada: build roda a cada frame de animação (~60x/s),
-  /// então só re-decodifica a polyline quando a string codificada muda.
+  /// Decoded-route cache: build runs every animation frame (~60/s), so
+  /// re-decode the polyline only when the encoded string changes.
   String? _cachedPolyline;
   List<LatLng> _cachedRoutePoints = const <LatLng>[];
 
@@ -95,7 +94,7 @@ class _DeliveryTrackingViewState extends State<_DeliveryTrackingView>
   }
 
   Future<void> _loadMarkerIcons(double dpr) async {
-    // Carro verde (temática RAGRO) para o produtor; casa para a sua entrega.
+    // Green car for the producer; house for your delivery.
     final producer = await _markerFromIcon(
       Icons.directions_car_filled,
       AppColors.lightGreen,
@@ -113,8 +112,8 @@ class _DeliveryTrackingViewState extends State<_DeliveryTrackingView>
     });
   }
 
-  /// Renderiza um [IconData] num círculo branco com borda colorida e devolve um
-  /// [BitmapDescriptor] — marker nítido em qualquer densidade de tela, sem PNG.
+  /// Renders an [IconData] in a white circle with a colored border into a
+  /// [BitmapDescriptor] — crisp marker at any screen density, no PNG.
   Future<BitmapDescriptor> _markerFromIcon(
     IconData icon,
     Color color,
@@ -168,7 +167,7 @@ class _DeliveryTrackingViewState extends State<_DeliveryTrackingView>
     super.dispose();
   }
 
-  /// Move o marker suavemente da posição exibida para a nova (sem teleporte).
+  /// Smoothly moves the marker from the displayed position to the new one.
   void _animateProducerTo(LatLng target) {
     final current = _displayedProducer;
     if (current == null) {
@@ -251,7 +250,7 @@ class _DeliveryTrackingViewState extends State<_DeliveryTrackingView>
           final producer = _displayedProducer;
           final initialTarget =
               producer ?? destination ?? const LatLng(-30.0346, -51.2177);
-          // Caminho calculado pelo Google (overviewPolyline) desenhado em verde.
+          // Google-computed path (overviewPolyline) drawn in green.
           final routePoints = _routePointsFor(state.routePolyline);
 
           final showMap =

@@ -39,8 +39,8 @@ class Co2SavingRequest extends Equatable {
   });
   final double distanceOptimized;
 
-  /// Baseline já em ida-e-volta (km): vem do servidor (Route Matrix) junto com
-  /// a rota persistida — antes era linha reta calculada no app.
+  /// Round-trip baseline (km) from the server (Route Matrix) alongside the
+  /// persisted route.
   final double distanceNonOptimized;
   final String vehicleType;
   final String fuelType;

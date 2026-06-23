@@ -15,10 +15,9 @@ import 'package:ragro_mobile/features/producer_orders/data/services/route_tracki
 import 'package:ragro_mobile/features/producer_orders/domain/usecases/refuse_producer_order.dart';
 import 'package:ragro_mobile/features/producer_orders/presentation/bloc/route_calculation_state.dart';
 
-/// Rota de entrega PERSISTIDA no backend: criada uma vez (1 chamada Google),
-/// retomada via GET /routes/active ao reabrir o app, e com progresso por parada
-/// (PATCH) sem recálculo no Google — antes, cada confirmação de entrega pagava
-/// uma nova chamada Directions e fechar o app perdia a sequência.
+/// Delivery route PERSISTED on the backend: created once (1 Google call),
+/// resumed via GET /routes/active on reopen, with per-stop progress (PATCH) and
+/// no Google recompute.
 @injectable
 class RouteCalculationCubit extends Cubit<RouteCalculationState> {
 
@@ -35,20 +34,19 @@ class RouteCalculationCubit extends Cubit<RouteCalculationState> {
   final RouteTrackingPublisher _trackingPublisher;
   final RefuseProducerOrder _refuseProducerOrder;
 
-  /// Garante o registro de economia de CO2 só na CRIAÇÃO da rota (retomar uma
-  /// rota ativa não re-registra a mesma economia).
+  /// Records CO2 savings only on route CREATION (resuming doesn't re-record).
   bool _savingsRecorded = false;
 
   @override
   Future<void> close() async {
-    // Fechar a tela NÃO encerra o compartilhamento: a rota continua ativa e o
-    // foreground service segue emitindo até a última entrega ser confirmada.
+    // Closing the screen does NOT stop sharing: the route stays active and the
+    // foreground service keeps emitting until the last delivery is confirmed.
     return super.close();
   }
 
   Future<void> _initRoute() async {
-    // Best-effort: troca a matriz hardcoded de combustíveis pela do backend
-    // sem bloquear o carregamento da rota.
+    // Best-effort: swap the hardcoded fuel matrix for the backend's without
+    // blocking route loading.
     unawaited(_loadCo2Options());
 
     if (state.averageConsumption.trim().isEmpty) {
@@ -79,25 +77,24 @@ class RouteCalculationCubit extends Cubit<RouteCalculationState> {
         );
       }
     } on Exception {
-      // Sem GPS: ainda dá para RETOMAR uma rota ativa; criar uma nova exige
-      // localização e o fluxo abaixo emite o erro adequado.
+      // No GPS: can still RESUME an active route; creating a new one needs
+      // location and the flow below emits the proper error.
     }
 
     if (isClosed) return;
     await loadRoute();
   }
 
-  /// Best-effort: busca a matriz veículo -> combustíveis do backend
-  /// (`GET /co2/options`) e a aplica nos dropdowns. Em caso de falha mantém o
-  /// FALLBACK hardcoded já presente no estado
-  /// ([RouteCalculationState.fallbackAllowedFuelsByVehicle]), para o fluxo
-  /// continuar funcionando offline ou com o endpoint indisponível.
+  /// Best-effort: fetches the vehicle -> fuels matrix (`GET /co2/options`) into
+  /// the dropdowns. On failure keeps the hardcoded fallback
+  /// ([RouteCalculationState.fallbackAllowedFuelsByVehicle]) so the flow still
+  /// works offline or when the endpoint is down.
   Future<void> _loadCo2Options() async {
     try {
       final options = await _co2Repository.getOptions();
       if (isClosed) return;
 
-      // A API envia enums EN (CAR/GASOLINE...); a UI trabalha com labels PT.
+      // API sends EN enums (CAR/GASOLINE...); UI uses PT labels.
       final mapped = <String, List<String>>{};
       for (final entry in options.entries) {
         final vehicle = _vehicleLabelFromApi(entry.key);
@@ -110,14 +107,14 @@ class RouteCalculationCubit extends Cubit<RouteCalculationState> {
       }
       if (mapped.isEmpty) return;
 
-      // Ordem estável dos veículos (o mapa do backend não tem ordem definida).
+      // Stable vehicle order (backend map is unordered).
       final ordered = <String, List<String>>{
         for (final vehicle
             in RouteCalculationState.fallbackAllowedFuelsByVehicle.keys)
           if (mapped.containsKey(vehicle)) vehicle: mapped[vehicle]!,
       };
 
-      // Garante que a seleção atual continua válida nos novos dropdowns.
+      // Keep the current selection valid in the new dropdowns.
       var selectedVehicle = state.selectedVehicle;
       if (!ordered.containsKey(selectedVehicle)) {
         selectedVehicle = ordered.keys.first;
@@ -134,8 +131,7 @@ class RouteCalculationCubit extends Cubit<RouteCalculationState> {
         ),
       );
     } on Exception {
-      // FALLBACK: estado já nasce com a matriz hardcoded (espelho local do
-      // backend); nada a fazer.
+      // State already starts with the hardcoded fallback matrix; nothing to do.
     }
   }
 
@@ -210,14 +206,12 @@ class RouteCalculationCubit extends Cubit<RouteCalculationState> {
     }
   }
 
-  /// Marca a parada como entregue (PATCH no backend, que conclui o pedido pela
-  /// máquina de estados). NENHUMA chamada ao Google acontece aqui — a resposta
-  /// já traz a rota atualizada.
+  /// Marks the stop delivered (backend PATCH completes the order via its state
+  /// machine). No Google call here — the response carries the updated route.
   ///
-  /// O [code] (4 dígitos do consumidor) é OBRIGATÓRIO: o backend rejeita com 400
-  /// uma conclusão sem código ou com código errado. Devolve `true` quando a
-  /// entrega é confirmada e `false` no erro (para o diálogo de código manter o
-  /// estado de erro e re-solicitar o código).
+  /// [code] (customer's 4 digits) is REQUIRED: the backend rejects a missing or
+  /// wrong code with 400. Returns `true` on success, `false` on error (so the
+  /// code dialog keeps its error state and re-prompts).
   Future<bool> confirmDelivery(String stopId, String code) async {
     final routeId = state.routeId;
     if (routeId == null) return false;
@@ -257,18 +251,16 @@ class RouteCalculationCubit extends Cubit<RouteCalculationState> {
     }
   }
 
-  /// Cancela (recusa) o PEDIDO associado a uma parada da rota e atualiza a tela.
+  /// Refuses the ORDER behind a route stop and refreshes the screen.
   ///
-  /// A parada referencia um pedido; o backend recusa o pedido (transição para
-  /// CANCELLED) e o `RouteStopSyncListener` sincroniza a parada para um estado
-  /// terminal (FAILED). Como NÃO há um PATCH de "cancelar parada" no app, o
-  /// refresh re-busca a rota ativa (`GET /routes/active`) e a reaplica: a parada
-  /// recusada deixa de aparecer como pendente. Se era a ÚLTIMA parada, a rota
-  /// completa no backend e `getActiveRoute()` devolve `null` — o estado é
-  /// esvaziado de forma graciosa (sem entregas pendentes), sem crash.
+  /// The backend refuses the order (-> CANCELLED) and `RouteStopSyncListener`
+  /// moves the stop to terminal (FAILED). There's no "cancel stop" PATCH, so we
+  /// re-fetch the active route (`GET /routes/active`) and reapply it. If it was
+  /// the LAST stop, the route completes and `getActiveRoute()` returns `null`;
+  /// state is cleared gracefully (no crash).
   ///
-  /// Devolve `true` no sucesso e `false` no erro (emitindo estado de erro, como
-  /// em [confirmDelivery]).
+  /// Returns `true` on success, `false` on error (emits error state, like
+  /// [confirmDelivery]).
   Future<bool> cancelOrder(
     String stopId, {
     required String reason,
@@ -277,8 +269,8 @@ class RouteCalculationCubit extends Cubit<RouteCalculationState> {
     final routeId = state.routeId;
     if (routeId == null) return false;
 
-    // Resolve o id do pedido a partir da parada (a recusa age sobre o PEDIDO,
-    // não sobre a parada).
+    // Resolve the order id from the stop (refusal acts on the ORDER, not the
+    // stop).
     final orderId = state.deliveries
         .where((d) => d.id == stopId)
         .map((d) => d.orderId)
@@ -289,14 +281,14 @@ class RouteCalculationCubit extends Cubit<RouteCalculationState> {
       await _refuseProducerOrder(orderId, reason: reason, details: details);
       if (isClosed) return false;
 
-      // O backend já sincronizou a parada (terminal); re-busca a rota ativa para
-      // refletir a remoção da parada cancelada.
+      // Backend already synced the stop (terminal); re-fetch the active route
+      // to reflect the cancelled stop's removal.
       final route = await _routeRepository.getActiveRoute();
       if (isClosed) return false;
 
       if (route == null) {
-        // Era a única/última parada: a rota completou no backend. Esvazia o
-        // estado de forma graciosa (tela mostra "nenhuma entrega pendente").
+        // Was the only/last stop: route completed. Clear state gracefully
+        // (screen shows "no pending deliveries").
         unawaited(_trackingPublisher.stop());
         emit(
           state.copyWith(
@@ -334,7 +326,7 @@ class RouteCalculationCubit extends Cubit<RouteCalculationState> {
     }
   }
 
-  /// Retoma a rota ativa ou cria uma nova a partir dos pedidos do produtor.
+  /// Resumes the active route or creates a new one from the producer's orders.
   Future<void> loadRoute() async {
     try {
       var route = await _routeRepository.getActiveRoute();
@@ -359,9 +351,8 @@ class RouteCalculationCubit extends Cubit<RouteCalculationState> {
         );
         if (isClosed) return;
 
-        // Economia de CO2 com números do servidor: rota otimizada (rodoviária)
-        // vs. baseline de idas-e-voltas individuais (Route Matrix) — antes o
-        // baseline era linha reta calculada no app.
+        // CO2 savings from server numbers: optimized route vs individual
+        // round-trips baseline (Route Matrix).
         if (!_savingsRecorded) {
           _savingsRecorded = true;
           _recordCo2Savings(route);
@@ -386,8 +377,8 @@ class RouteCalculationCubit extends Cubit<RouteCalculationState> {
     }
   }
 
-  /// Projeta a rota persistida na interface que a tela consome: paradas
-  /// pendentes em ordem otimizada + entregues no fim, totais e polyline.
+  /// Projects the persisted route into the shape the screen consumes: pending
+  /// stops in optimized order + delivered last, totals and polyline.
   void _applyRoute(DeliveryRoute route) {
     final pending = route.stops.where((s) => !s.isTerminal).toList();
     final done = route.stops.where((s) => s.isTerminal).toList();
@@ -401,8 +392,8 @@ class RouteCalculationCubit extends Cubit<RouteCalculationState> {
       eta: stop.eta,
     );
 
-    // Rota ativa: liga o compartilhamento de posição (tempo real p/ os clientes);
-    // rota concluída: para de emitir e a posição deixa de ser compartilhada.
+    // Active route: turn on position sharing (real-time for customers);
+    // completed route: stop emitting.
     if (route.status == 'ACTIVE') {
       unawaited(_trackingPublisher.start(route.id));
     } else {
@@ -434,8 +425,8 @@ class RouteCalculationCubit extends Cubit<RouteCalculationState> {
     }
   }
 
-  /// Best-effort: registra a economia de CO2 da rota recém-criada com as
-  /// distâncias rodoviárias do servidor (otimizada vs. baseline individual).
+  /// Best-effort: records the new route's CO2 savings using server road
+  /// distances (optimized vs individual baseline).
   void _recordCo2Savings(DeliveryRoute route) {
     final fuel = _mapFuelType(state.selectedFuel);
     if (fuel == 'ELECTRIC') return; // CO2 savings = 0
@@ -464,7 +455,7 @@ class RouteCalculationCubit extends Cubit<RouteCalculationState> {
     );
   }
 
-  /// Inverso de [_mapVehicleType]: enum EN do backend -> label PT da UI.
+  /// Inverse of [_mapVehicleType]: backend EN enum -> UI PT label.
   String? _vehicleLabelFromApi(String apiVehicle) {
     return switch (apiVehicle.toUpperCase()) {
       'MOTORCYCLE' => 'Moto',
@@ -475,7 +466,7 @@ class RouteCalculationCubit extends Cubit<RouteCalculationState> {
     };
   }
 
-  /// Inverso de [_mapFuelType]: enum EN do backend -> label PT da UI.
+  /// Inverse of [_mapFuelType]: backend EN enum -> UI PT label.
   String? _fuelLabelFromApi(String apiFuel) {
     return switch (apiFuel.toUpperCase()) {
       'GASOLINE' => 'Gasolina',

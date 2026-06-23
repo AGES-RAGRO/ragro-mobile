@@ -11,8 +11,8 @@ class ConfirmDeliveryCodeDialog extends StatefulWidget {
 
   final Future<bool> Function(String code) onConfirm;
 
-  /// Quando informado, exibe uma ação secundária "Cancelar pedido" abaixo dos
-  /// botões. Ao tocar, o modal fecha e este callback é chamado.
+  /// When set, shows a secondary "Cancelar pedido" action; tapping it closes
+  /// the modal and invokes this callback.
   final VoidCallback? onCancelOrder;
 
   @override

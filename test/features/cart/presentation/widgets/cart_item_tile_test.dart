@@ -72,7 +72,7 @@ void main() {
     ) async {
       await tester.pumpWidget(buildSubject(item: buildItem()));
 
-      // formatCurrency usa o locale pt_BR (espaço não-separável após R$).
+      // formatCurrency uses pt_BR locale (non-breaking space after R$).
       expect(find.text('${formatCurrency(15.50)} / kg'), findsOneWidget);
     });
 

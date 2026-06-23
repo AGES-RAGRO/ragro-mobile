@@ -13,10 +13,10 @@ class RouteDelivery extends Equatable {
     this.eta,
   });
 
-  /// Route stop id (a parada referencia o pedido no backend).
+  /// Route stop id.
   final String id;
 
-  /// Id do pedido associado à parada (usado para cancelar/recusar o pedido).
+  /// Order id behind the stop (used to cancel/refuse the order).
   final String orderId;
 
   /// Customer name.
@@ -28,7 +28,7 @@ class RouteDelivery extends Equatable {
   /// Routing point: "lat,lng" when coordinates exist, otherwise the address.
   final String stop;
 
-  /// ETA absoluto estimado na criação da rota (com trânsito do momento).
+  /// Absolute ETA estimated at route creation (with traffic at that time).
   final DateTime? eta;
 
   @override
@@ -56,10 +56,9 @@ class RouteCalculationState extends Equatable {
     this.orderedStops = const [],
     this.allowedFuelsByVehicle = fallbackAllowedFuelsByVehicle,
   });
-  /// FALLBACK local da matriz veículo -> combustíveis do backend (Co2Service /
-  /// `GET /co2/options`): usado como valor inicial e mantido quando a chamada
-  /// falha, para os dropdowns continuarem dependentes e o app não enviar uma
-  /// combinação que o backend rejeita com HTTP 400.
+  /// Local fallback for the backend vehicle -> fuels matrix (`GET /co2/options`):
+  /// initial value and kept on failure so dropdowns stay dependent and the app
+  /// never sends a combination the backend rejects with HTTP 400.
   static const Map<String, List<String>> fallbackAllowedFuelsByVehicle = {
     'Carro': ['Gasolina', 'Etanol', 'Diesel', 'Elétrico'],
     'Moto': ['Gasolina', 'Etanol', 'Elétrico'],
@@ -79,13 +78,13 @@ class RouteCalculationState extends Equatable {
   final double? producerLat;
   final double? producerLng;
 
-  /// Id da rota persistida no backend (null enquanto não criada/carregada).
+  /// Persisted route id (null until created/loaded).
   final String? routeId;
 
-  /// Baseline de CO2 do servidor (idas-e-voltas individuais, km).
+  /// Server CO2 baseline (individual round-trips, km).
   final double? baselineDistanceKm;
 
-  /// Polyline codificada da rota completa, desenhada no mini-mapa.
+  /// Encoded polyline of the full route, drawn on the mini-map.
   final String? overviewPolyline;
 
   /// Displayed deliveries, already in optimized order (unconfirmed first).
@@ -94,9 +93,8 @@ class RouteCalculationState extends Equatable {
   /// Unconfirmed stops in optimized order, used to build the Google Maps deep-link.
   final List<String> orderedStops;
 
-  /// Fuels allowed per vehicle (PT labels for the dropdowns). Starts with
-  /// [fallbackAllowedFuelsByVehicle] and is replaced by the backend matrix
-  /// when `GET /co2/options` succeeds.
+  /// Fuels allowed per vehicle (PT labels). Starts as [fallbackAllowedFuelsByVehicle];
+  /// replaced by the backend matrix when `GET /co2/options` succeeds.
   final Map<String, List<String>> allowedFuelsByVehicle;
 
   /// Whether there are pending (unconfirmed) deliveries to route.

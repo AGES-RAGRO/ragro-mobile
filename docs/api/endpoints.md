@@ -1,10 +1,12 @@
 # RAGRO API — Endpoint Reference
 
-Base URL: `https://7ruopxdlm7.execute-api.us-east-2.amazonaws.com`
+Base URL (prod): `https://9zjh97ezih.execute-api.us-east-2.amazonaws.com`
 
-Set `API_BASE_URL` in the Flutter app to switch to a local backend such as `http://localhost:8080` or `http://10.0.2.2:8080` on the Android emulator.
+Local default: `http://localhost:8080`. The app resolves the base from `API_BASE_URL` (passed via `--dart-define-from-file=env/prod.json` or a process env var) and falls back to `http://localhost:8080`. On Android emulators it automatically rewrites `localhost`/`127.0.0.1` hosts to `10.0.2.2`, so no manual `10.0.2.2` value is needed (`lib/core/network/api_endpoints.dart`).
 
-All authenticated endpoints require the header: `Authorization: Bearer <token>`
+All authenticated endpoints require the header: `Authorization: Bearer <token>`. The backend is an OAuth2 resource server (Keycloak); the public chain only covers `/auth/config`, `/auth/register/customer`, `/auth/password/reset`, and `/auth/password/forgot`.
+
+> Source of truth: `lib/core/network/api_endpoints.dart` (mobile) cross-checked against the backend controllers under `br.com.ragro.controller`.
 
 ---
 
@@ -78,7 +80,7 @@ The `type` field can be: `"customer"`, `"farmer"`, or `"admin"`. The app maps th
 
 ### POST /auth/register/customer
 
-Registers a new customer.
+Registers a new customer. No authentication required.
 
 **Request Body:**
 ```json
@@ -115,13 +117,25 @@ Registers a new customer.
 
 ---
 
-## Consumers
+### POST /auth/password/forgot
 
-### GET /consumers/:id
+Starts the password-reset flow for the given email. No authentication required.
 
-Returns the complete consumer profile. Requires authentication.
+---
 
-**Path Parameters:** `id` — consumer ID
+### POST /auth/password/reset
+
+Completes a password reset. No authentication required.
+
+---
+
+## Customers
+
+The profile API is scoped by JWT; there is no `:id` path parameter (the caller is identified by the token).
+
+### GET /customers/me
+
+Returns the authenticated customer's profile. Requires authentication.
 
 **Response (200 OK):**
 ```json
@@ -144,11 +158,9 @@ Returns the complete consumer profile. Requires authentication.
 
 ---
 
-### PUT /consumers/:id
+### PUT /customers/me
 
-Updates consumer data. Requires authentication. Only the consumer themselves can update.
-
-**Path Parameters:** `id` — consumer ID
+Updates the authenticated customer's data. Requires authentication.
 
 **Request Body:**
 ```json
@@ -167,7 +179,35 @@ Updates consumer data. Requires authentication. Only the consumer themselves can
 }
 ```
 
-**Response (200 OK):** updated consumer object (same shape as GET)
+**Response (200 OK):** updated customer object (same shape as GET)
+
+---
+
+### Favorite producers
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `GET` | `/customers/me/favorites` | Lists the customer's favorite producers |
+| `POST` | `/customers/me/favorites/{producerId}` | Adds a producer to favorites |
+| `DELETE` | `/customers/me/favorites/{producerId}` | Removes a producer from favorites |
+
+All require customer authentication.
+
+---
+
+## Cart
+
+The cart is scoped to the authenticated customer; `POST /orders` resolves the cart server-side.
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `GET` | `/customers/carts` | Returns the current cart |
+| `POST` | `/customers/carts/items` | Adds an item to the cart |
+| `PATCH` | `/customers/carts/items/{id}` | Updates a cart item (e.g. quantity) |
+| `DELETE` | `/customers/carts/items/{id}` | Removes a cart item |
+| `DELETE` | `/customers/carts` | Clears the cart |
+
+All require customer authentication.
 
 ---
 
@@ -175,14 +215,7 @@ Updates consumer data. Requires authentication. Only the consumer themselves can
 
 ### GET /producers
 
-Lists active producers with pagination and filter support.
-
-**Query Parameters:**
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `page` | `int` | Page number (default: 1) |
-| `limit` | `int` | Items per page (default: 20) |
-| `active` | `bool` | Filter by active/inactive status |
+Lists producers with pagination and sorting (default `sortBy=rating`).
 
 **Response (200 OK):**
 ```json
@@ -203,11 +236,15 @@ Lists active producers with pagination and filter support.
 
 ---
 
-### GET /producers/:id
+### GET /producers/locations
+
+Returns producer locations for the map feature.
+
+---
+
+### GET /producers/{id}
 
 Returns the complete producer profile, including a list of available products.
-
-**Path Parameters:** `id` — producer ID
 
 **Response (200 OK):**
 ```json
@@ -231,17 +268,16 @@ Returns the complete producer profile, including a list of available products.
 
 ---
 
-### GET /recommendations
+### Other producer endpoints
 
-Returns recommended products and producers for the consumer home feed. Requires consumer authentication.
-
-**Response (200 OK):**
-```json
-{
-  "featuredProducers": [ ... ],
-  "recommendedProducts": [ ... ]
-}
-```
+| Method | Path | Description |
+|--------|------|-------------|
+| `GET` | `/producers/{id}/profile` | Public producer profile |
+| `GET` | `/producers/{id}/products` | Products of a producer |
+| `GET` | `/producers/{producerId}/products/{productId}` | Single product of a producer |
+| `GET` | `/producers/{id}/reviews` | Reviews for a producer |
+| `POST` | `/producers/{id}/avatar` | Uploads the producer avatar (`multipart/form-data`) |
+| `POST` | `/producers/{id}/cover` | Uploads the producer cover image (`multipart/form-data`) |
 
 ---
 
@@ -261,13 +297,19 @@ Returns metrics for the authenticated producer's dashboard. Requires producer au
 
 ---
 
-## Products / Inventory
+### GET /producers/me/dashboard/week
 
-### GET /products?producer_id=
+Returns daily sales data for the last 7 days (including today) for the authenticated producer's dashboard.
 
-Lists products for a producer. Requires producer authentication.
+---
 
-**Query Parameters:** `producer_id` — producer ID
+## Producer inventory
+
+Producer inventory CRUD is scoped to the authenticated FARMER (no `producer_id` query parameter).
+
+### GET /producers/products
+
+Lists the authenticated producer's products. Requires producer authentication.
 
 **Response (200 OK):**
 ```json
@@ -289,9 +331,15 @@ Lists products for a producer. Requires producer authentication.
 
 ---
 
-### POST /products
+### GET /producers/products/categories
 
-Creates a new product in the producer's inventory. Requires producer authentication.
+Lists the product categories available to the producer.
+
+---
+
+### POST /producers/products
+
+Creates a new product in the producer's inventory. Requires producer authentication. The product photo is uploaded separately (see below) — there is no `imageUrl` field in this JSON body.
 
 **Request Body:**
 ```json
@@ -301,8 +349,7 @@ Creates a new product in the producer's inventory. Requires producer authenticat
   "price": 3.50,
   "unit": "unidade",
   "stock": 50,
-  "category": "hortaliças",
-  "imageUrl": "https://..."
+  "category": "hortaliças"
 }
 ```
 
@@ -310,11 +357,9 @@ Creates a new product in the producer's inventory. Requires producer authenticat
 
 ---
 
-### PUT /products/:id
+### PUT /producers/products/{id}
 
 Updates an existing product. Requires producer authentication.
-
-**Path Parameters:** `id` — product ID
 
 **Request Body:** same shape as POST
 
@@ -322,49 +367,91 @@ Updates an existing product. Requires producer authentication.
 
 ---
 
-### DELETE /products/:id
+### DELETE /producers/products/{id}
 
 Removes a product from the inventory. Requires producer authentication.
-
-**Path Parameters:** `id` — product ID
 
 **Response (204 No Content)**
 
 ---
 
-## Orders — Consumer
+### POST /producers/products/{id}/photo
 
-### GET /orders?status=
+Uploads/replaces the product photo. Requires producer authentication.
 
-Lists orders for the authenticated consumer.
+**Content-Type:** `multipart/form-data`
 
-**Query Parameters:**
-| Parameter | Type | Values | Description |
-|-----------|------|--------|-------------|
-| `status` | `string` | `pending`, `confirmed`, `delivered`, `cancelled` | Filter by status |
+---
 
-**Response (200 OK):**
+## Stock movements
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `POST` | `/producers/stock/entry` | Records a stock entry |
+| `POST` | `/producers/stock/exit` | Records a stock exit |
+| `GET` | `/producers/stock/movements` | Lists all stock movements |
+| `GET` | `/producers/stock/{productId}/movements` | Lists movements for one product |
+
+All require producer authentication.
+
+---
+
+## Products
+
+The bare product endpoints back generic product lookups in the app.
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `GET` | `/products` | Lists products |
+| `GET` | `/products/{id}` | Returns a single product |
+
+> Producer-owned inventory CRUD lives under `/producers/products` (see **Producer inventory**), not here.
+
+---
+
+## Search
+
+### GET /search
+
+Powers the search feature. Requires authentication.
+
+---
+
+## Recommendations
+
+### GET /recommendations
+
+Returns recommended products and producers for the consumer home feed. Requires consumer authentication. (Backed by Spring AI → NVIDIA.)
+
+**Response (200 OK):** illustrative shape
 ```json
-[
-  {
-    "id": "order_001",
-    "producerName": "Sítio Boa Vista",
-    "producerPhoto": "https://...",
-    "status": "confirmed",
-    "total": 45.50,
-    "createdAt": "2024-01-15T10:30:00Z",
-    "items": [ ... ]
-  }
-]
+{
+  "featuredProducers": [ ... ],
+  "recommendedProducts": [ ... ]
+}
 ```
 
 ---
 
-### GET /orders/:id
+## Orders
 
-Returns the complete detail of a consumer order.
+Order status values follow the `OrderStatus` enum: `PENDING` → `CONFIRMED` → `IN_DELIVERY` → `DELIVERED`, plus `CANCELLED`. Refusal is a separate transition (see `/orders/{id}/refuse`).
 
-**Response (200 OK):**
+### Consumer
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `GET` | `/orders/consumer` | Lists the authenticated consumer's orders |
+| `GET` | `/orders/customer/{id}` | Returns the detail of one consumer order |
+| `POST` | `/orders` | Creates an order from the active cart |
+| `PATCH` | `/orders/customer/{id}/cancel` | Consumer cancels their order |
+| `PATCH` | `/orders/customer/{id}/confirm-delivery` | Consumer confirms delivery |
+| `PATCH` | `/orders/{id}/seen` | Marks the order as seen |
+| `POST` | `/orders/{id}/repeat` | Repeats a previous order |
+
+`POST /orders` takes no request body — the cart is resolved server-side from the authenticated customer's cart (`/customers/carts`), and the primary delivery address / default payment method are selected automatically.
+
+**`GET /orders/customer/{id}` response (200 OK):**
 ```json
 {
   "id": "order_001",
@@ -372,7 +459,7 @@ Returns the complete detail of a consumer order.
   "producerName": "Sítio Boa Vista",
   "producerPhoto": "https://...",
   "ownerName": "João Silva",
-  "status": "confirmed",
+  "status": "CONFIRMED",
   "total": 45.50,
   "createdAt": "2024-01-15T10:30:00Z",
   "estimatedDelivery": "2024-01-20T00:00:00Z",
@@ -388,114 +475,118 @@ Returns the complete detail of a consumer order.
 }
 ```
 
+### Producer
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `GET` | `/orders/producer` | Lists orders received by the authenticated producer |
+| `PATCH` | `/orders/{id}/confirm` | Confirms a pending order |
+| `PATCH` | `/orders/{id}/cancel` | Cancels an order |
+| `PATCH` | `/orders/{id}/refuse` | Refuses an order |
+| `PATCH` | `/orders/{id}/status` | Advances the order to the next status |
+| `PATCH` | `/orders/{id}/confirm-delivery-with-code` | Producer confirms delivery using the consumer's 4-digit code |
+
+> Today's/weekly producer metrics come from `GET /producers/me/dashboard` and `GET /producers/me/dashboard/week` — there is no `/orders/today` endpoint.
+
+### GET /orders/{id}/tracking
+
+Returns the tracking state for an order (delivery position, route stop, etc.). See **Routes & real-time tracking**.
+
 ---
 
-### POST /orders
+## Reviews
 
-Creates a new order from the current cart. Requires consumer authentication.
+### POST /reviews
+
+Creates a review for a delivered order. Requires consumer authentication.
 
 **Request Body:**
 ```json
 {
-  "cart_id": "cart_abc123"
+  "orderId": "550e8400-e29b-41d4-a716-446655440000",
+  "rating": 5,
+  "comment": "Entrega rápida e produtos frescos"
 }
 ```
 
-**Response (201 Created):** created order object
+`rating` must be between 1 and 5; `comment` is optional.
+
+> Producer reviews are read via `GET /producers/{id}/reviews`.
 
 ---
 
-### POST /orders/:id/rating
+## Routes & real-time tracking
 
-Rates the producer after order delivery.
+Persisted delivery routes (E5) and real-time GPS tracking (E6). The legacy `/routes/optimize` was replaced by the persisted route.
 
-**Path Parameters:** `id` — order ID
+| Method | Path | Description |
+|--------|------|-------------|
+| `POST` | `/routes` | Creates/optimizes a delivery route (Google Routes API) |
+| `GET` | `/routes/active` | Returns the producer's active route |
+| `PATCH` | `/routes/{routeId}/stops/{stopId}` | Updates a route stop |
 
-**Request Body:**
-```json
-{
-  "rating": 5
-}
-```
-
-**Response (200 OK):** rating confirmation
+**WebSocket (STOMP):** connect to `/ws`. The driver publishes position updates to `@MessageMapping("/routes/{routeId}/position")`; consumers subscribe for live tracking (powers the map feature).
 
 ---
 
-## Orders — Producer
+## CO2 impact
 
-### GET /orders/producer?status=
+Drives the impact feature module.
 
-Lists orders received by the authenticated producer.
-
-**Query Parameters:** `status` — same values as the consumer listing
-
-**Response (200 OK):** array of orders (same shape)
-
----
-
-### GET /orders/today
-
-Lists today's orders for the authenticated producer. Used for the daily summary on the dashboard.
-
-**Response (200 OK):** array of today's orders
+| Method | Path | Description |
+|--------|------|-------------|
+| `POST` | `/co2/calculate` | Calculates CO2 savings for a scenario |
+| `GET` | `/co2/preference` | Returns the user's CO2 preference |
+| `GET` | `/co2/emissions` | Returns emissions data |
+| `POST` | `/co2/record-savings` | Records realized CO2 savings |
+| `GET` | `/co2/options` | Lists CO2 options |
+| `GET` | `/co2/total-saved` | Returns total CO2 saved |
 
 ---
 
-### POST /orders/:id/confirm
+## Notifications
 
-Confirms a pending order.
+Notifications are role-scoped: identical operations live under `/customers/me/notifications` (CUSTOMER) and `/producers/me/notifications` (FARMER); the mobile data source picks by logged-in role.
 
-**Path Parameters:** `id` — order ID
+| Method | Path (per role prefix) | Description |
+|--------|------------------------|-------------|
+| `GET` | `/{role}/me/notifications` | Lists notifications |
+| `GET` | `/{role}/me/notifications/unread-count` | Returns the unread count |
+| `PATCH` | `/{role}/me/notifications/{id}/read` | Marks one notification as read |
+| `PATCH` | `/{role}/me/notifications/read-all` | Marks all as read |
 
-**Response (200 OK):** order with status `"confirmed"`
+`{role}` is `customers` or `producers`.
+
+### POST /notifications/token
+
+Registers an FCM device token (role-agnostic; any authenticated user).
 
 ---
 
-### POST /orders/:id/cancel
+## Media
 
-Cancels an order.
+### GET /media/**
 
-**Path Parameters:** `id` — order ID
-
-**Response (200 OK):** order with status `"cancelled"`
-
----
-
-### PATCH /orders/:id/status
-
-Updates an order's status to the next step in the flow.
-
-**Path Parameters:** `id` — order ID
-
-**Request Body:**
-```json
-{
-  "status": "delivered"
-}
-```
-
-**Valid status values:** `pending` → `confirmed` → `out_for_delivery` → `delivered`
-
-**Response (200 OK):** updated order
+Serves all media through the backend (not presigned MinIO URLs). The app rewrites dev-host media URLs to the API base host via `resolveMediaUrl` so images stay reachable on emulators.
 
 ---
 
 ## Admin
 
-### GET /admin/producers
+All require admin authentication.
 
-Lists all producers (active and inactive). Requires admin authentication.
+| Method | Path | Description |
+|--------|------|-------------|
+| `GET` | `/admin/dashboard` | Admin dashboard metrics |
+| `GET` | `/admin/producers` | Lists all producers (active and inactive) |
+| `POST` | `/admin/producers` | Registers a new producer |
+| `GET` | `/admin/producers/{id}` | Producer detail |
+| `PUT` | `/admin/producers/{id}` | Updates a producer |
+| `PATCH` | `/admin/producers/{id}/activate` | Reactivates a producer |
+| `PATCH` | `/admin/producers/{id}/deactivate` | Deactivates a producer |
+| `GET` | `/admin/customers/{id}` | Customer detail |
 
-**Response (200 OK):** array of producers with the `active` field
-
----
-
-### POST /admin/producers
-
-Registers a new producer on the platform. Requires admin authentication.
-
-**Request Body:**
+**`POST /admin/producers` request body:**
 ```json
 {
   "name": "Sítio Novo",
@@ -510,23 +601,3 @@ Registers a new producer on the platform. Requires admin authentication.
 ```
 
 **Response (201 Created):** created producer object
-
----
-
-### PATCH /admin/producers/:id/deactivate
-
-Deactivates a producer (blocks access to the platform). Requires admin authentication.
-
-**Path Parameters:** `id` — producer ID
-
-**Response (200 OK):** producer with `active: false`
-
----
-
-### PATCH /admin/producers/:id/activate
-
-Reactivates a previously deactivated producer. Requires admin authentication.
-
-**Path Parameters:** `id` — producer ID
-
-**Response (200 OK):** producer with `active: true`

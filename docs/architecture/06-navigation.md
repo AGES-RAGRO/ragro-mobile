@@ -42,10 +42,10 @@ redirect: (context, state) {
     return '/login';
   }
 
-  // Authenticated trying to access login/register → go to their role's home
+  // Authenticated trying to access login/register → go to their role's landing
   if (authState is AuthAuthenticated && isAuthRoute) {
     return switch (authState.user.type) {
-      UserType.consumer => '/consumer/home',
+      UserType.customer => '/customer/impact',
       UserType.producer => '/producer/home',
       UserType.admin    => '/admin/producers',
     };
@@ -86,24 +86,38 @@ Every time `AuthBloc` emits a new state (e.g., `AuthAuthenticated`), `notifyList
 
 RAGRO uses `StatefulShellRoute.indexedStack` to implement tab navigation with a bottom navigation bar. Each tab (branch) maintains its own navigation stack, preserving scroll position and state when switching tabs.
 
-### Consumer Shell (4 tabs)
+### Customer Shell (5 tabs)
 
 ```
-ConsumerShell
-├── Tab 0: /consumer/home          → ConsumerHomePage
-│   ├── /consumer/home/producer/:producerId  → ProducerPublicProfilePage
-│   └── /consumer/home/product/:productId   → ProductDetailPage
-├── Tab 1: /consumer/orders        → ConsumerOrdersPage
-│   └── /consumer/orders/:orderId           → OrderDetailPage
-│       └── /consumer/orders/:orderId/rate  → RateProducerPage
-├── Tab 2: /consumer/profile       → ConsumerProfilePage (BlocProvider here)
-│   └── /consumer/profile/edit             → ConsumerEditProfilePage
-└── Tab 3: /consumer/search        → SearchPage
+CustomerShell
+├── Tab 0: /customer/home          → CustomerHomePage
+│   ├── /customer/home/producer/:producerId          → ProducerPublicProfilePage
+│   │   └── /customer/home/producer/:producerId/reviews → ReviewsPage
+│   └── /customer/home/product/:productId            → ProductDetailPage
+├── Tab 1: /customer/orders        → CustomerOrdersPage (observers: ordersRouteObserver)
+│   └── /customer/orders/:orderId                    → OrderDetailPage
+│       ├── /customer/orders/:orderId/tracking       → DeliveryTrackingPage
+│       └── /customer/orders/:orderId/rate           → RateProducerPage
+├── Tab 2: /customer/map           → MapPage
+├── Tab 3: /customer/profile       → CustomerProfilePage (ShellRoute provides BlocProvider)
+│   ├── /customer/profile/edit                       → CustomerEditProfilePage
+│   └── /customer/profile/faq                        → FaqPage
+└── Tab 4: /customer/search        → SearchPage
+    └── /customer/search/results                     → SearchResultsPage
 ```
+
+The orders branch attaches a custom `NavigatorObserver` (`observers: [ordersRouteObserver]`, see `lib/core/navigation/orders_route_observer.dart`).
 
 Routes outside the shell (no bottom nav):
-- `/consumer/cart` → CartPage
-- `/consumer/checkout` → OrderConfirmationPage
+- `/customer/impact` → ImpactPage (post-login landing for customers)
+- `/customer/impact/detail` → ImpactDetailPage
+- `/customer/notifications` → NotificationsPage
+- `/customer/notifications/detail` → NotificationDetailPage
+- `/customer/producer/:producerId` → ProducerPublicProfilePage (fullscreen, used from the map)
+- `/customer/producer/:producerId/reviews` → ReviewsPage
+- `/customer/cart` → CartPage
+- `/customer/checkout` → OrderConfirmationPage
+- `/customer/edit-address` → CustomerEditAddressPage
 
 ### Producer Shell (3 tabs)
 
@@ -113,12 +127,21 @@ ProducerShell
 │   ├── /producer/home/orders/:orderId → ProducerOrderDetailPage
 │   └── /producer/home/route           → RouteCalculationPage
 ├── Tab 1: /producer/stock         → InventoryPage
-│   ├── /producer/stock/new            → ProductFormPage
-│   └── /producer/stock/:productId/edit → ProductFormPage(productId)
+│   ├── /producer/stock/new                → ProductFormPage
+│   ├── /producer/stock/:productId/edit    → ProductFormPage(productId)
+│   ├── /producer/stock/:productId/entry   → StockEntryPage
+│   ├── /producer/stock/:productId/exit    → StockExitPage
+│   └── /producer/stock/:productId/history → StockMovementsPage
 └── Tab 2: /producer/profile       → ProducerProfilePage
     ├── /producer/profile/edit         → ProducerEditProfilePage
-    └── /producer/profile/settings     → ProducerSettingsPage
+    ├── /producer/profile/settings     → ProducerSettingsPage
+    ├── /producer/profile/faq          → FaqPage
+    └── /producer/profile/reviews      → ReviewsPage
 ```
+
+Routes outside the shell (no bottom nav):
+- `/producer/notifications` → NotificationsPage
+- `/producer/notifications/detail` → NotificationDetailPage
 
 ---
 
@@ -129,23 +152,35 @@ ProducerShell
 | Route | Page | Description |
 |-------|------|-------------|
 | `/login` | `LoginPage` | Unified login screen |
-| `/register` | `ConsumerRegisterPage` | New consumer registration |
+| `/register` | `CustomerRegisterPage` | New customer registration |
 
-### Consumer
+### Customer
 
 | Route | Page | Description |
 |-------|------|-------------|
-| `/consumer/home` | `ConsumerHomePage` | Producer feed and recommendations |
-| `/consumer/home/producer/:producerId` | `ProducerPublicProfilePage` | Public profile of a producer |
-| `/consumer/home/product/:productId` | `ProductDetailPage` | Product detail |
-| `/consumer/orders` | `ConsumerOrdersPage` | Consumer order list |
-| `/consumer/orders/:orderId` | `OrderDetailPage` | Order detail |
-| `/consumer/orders/:orderId/rate` | `RateProducerPage` | Post-order producer rating |
-| `/consumer/profile` | `ConsumerProfilePage` | Consumer profile |
-| `/consumer/profile/edit` | `ConsumerEditProfilePage` | Edit consumer data |
-| `/consumer/search` | `SearchPage` | Search for producers and products |
-| `/consumer/cart` | `CartPage` | Shopping cart |
-| `/consumer/checkout` | `OrderConfirmationPage` | Order confirmation |
+| `/customer/impact` | `ImpactPage` | CO2 impact — post-login landing for customers |
+| `/customer/impact/detail` | `ImpactDetailPage` | CO2 impact detail |
+| `/customer/home` | `CustomerHomePage` | Producer feed and recommendations |
+| `/customer/home/producer/:producerId` | `ProducerPublicProfilePage` | Public profile of a producer |
+| `/customer/home/producer/:producerId/reviews` | `ReviewsPage` | Producer reviews |
+| `/customer/home/product/:productId` | `ProductDetailPage` | Product detail |
+| `/customer/orders` | `CustomerOrdersPage` | Customer order list |
+| `/customer/orders/:orderId` | `OrderDetailPage` | Order detail |
+| `/customer/orders/:orderId/tracking` | `DeliveryTrackingPage` | Real-time delivery GPS tracking |
+| `/customer/orders/:orderId/rate` | `RateProducerPage` | Post-order producer rating |
+| `/customer/map` | `MapPage` | Producers map |
+| `/customer/profile` | `CustomerProfilePage` | Customer profile |
+| `/customer/profile/edit` | `CustomerEditProfilePage` | Edit customer data |
+| `/customer/profile/faq` | `FaqPage` | FAQ |
+| `/customer/search` | `SearchPage` | Search for producers and products |
+| `/customer/search/results` | `SearchResultsPage` | Search results |
+| `/customer/notifications` | `NotificationsPage` | Notification list |
+| `/customer/notifications/detail` | `NotificationDetailPage` | Notification detail (falls back to list without `extra`) |
+| `/customer/producer/:producerId` | `ProducerPublicProfilePage` | Fullscreen producer profile (e.g. from the map) |
+| `/customer/producer/:producerId/reviews` | `ReviewsPage` | Producer reviews |
+| `/customer/cart` | `CartPage` | Shopping cart |
+| `/customer/checkout` | `OrderConfirmationPage` | Order confirmation |
+| `/customer/edit-address` | `CustomerEditAddressPage` | Edit delivery address |
 
 ### Producer
 
@@ -157,9 +192,16 @@ ProducerShell
 | `/producer/stock` | `InventoryPage` | Product inventory |
 | `/producer/stock/new` | `ProductFormPage` | Create new product |
 | `/producer/stock/:productId/edit` | `ProductFormPage(productId)` | Edit existing product |
+| `/producer/stock/:productId/entry` | `StockEntryPage` | Register stock entry |
+| `/producer/stock/:productId/exit` | `StockExitPage` | Register stock exit |
+| `/producer/stock/:productId/history` | `StockMovementsPage` | Stock movement history |
 | `/producer/profile` | `ProducerProfilePage` | Producer profile and dashboard |
 | `/producer/profile/edit` | `ProducerEditProfilePage` | Edit producer data |
 | `/producer/profile/settings` | `ProducerSettingsPage` | Account settings |
+| `/producer/profile/faq` | `FaqPage` | FAQ |
+| `/producer/profile/reviews` | `ReviewsPage` | Producer reviews |
+| `/producer/notifications` | `NotificationsPage` | Notification list |
+| `/producer/notifications/detail` | `NotificationDetailPage` | Notification detail (falls back to list without `extra`) |
 
 ### Admin
 
@@ -167,6 +209,7 @@ ProducerShell
 |-------|------|-------------|
 | `/admin/producers` | `AdminProducersPage` | List of all producers |
 | `/admin/producers/new` | `AdminCreateProducerPage` | Register a new producer |
+| `/admin/producers/:id/edit` | `AdminEditProducerPage` | Edit an existing producer |
 
 ---
 
@@ -174,20 +217,20 @@ ProducerShell
 
 ```dart
 // Replaces the entire stack — use for tabs and after login/logout
-context.go('/consumer/home');
+context.go('/customer/home');
 
 // Pushes on top of the current screen — use for details and modals
-context.push('/consumer/orders/order-123');
+context.push('/customer/orders/order-123');
 
 // Goes back to the previous screen
 context.pop();
 
 // Navigates with query parameters
-context.push('/consumer/orders/order-123/rate?farmName=Sitio&ownerName=Joao');
-// Read with: state.uri.queryParameters['farmName']
+context.push('/customer/orders/order-123/rate?farmName=Sitio&ownerName=Joao&isRated=true');
+// Read with: state.uri.queryParameters['farmName'] (also 'ownerName', 'isRated')
 
 // Navigates with path parameters
-context.go('/consumer/home/producer/$producerId');
+context.go('/customer/home/producer/$producerId');
 // Read with: state.pathParameters['producerId']
 ```
 
@@ -195,8 +238,8 @@ context.go('/consumer/home/producer/$producerId');
 
 ## Important: BlocProvider at the Route Level
 
-For BLoCs that need to survive sub-routes (such as `ConsumerProfileBloc`, which serves both `/consumer/profile` and `/consumer/profile/edit`), the `BlocProvider` must be placed in the parent route's `builder`, **not** inside the page widget.
+For BLoCs that need to survive sub-routes (such as `CustomerProfileBloc`, which serves `/customer/profile`, `/customer/profile/edit` and `/customer/profile/faq`), the `BlocProvider` is placed above the routes, **not** inside the page widget.
 
-See `lib/core/router/app_router.dart` — the `/consumer/profile` route creates a `BlocProvider` in its builder. The child route `/consumer/profile/edit` creates a separate BlocProvider with its own instance.
+See `lib/core/router/app_router.dart` — the `/customer/profile` GoRoute and its `edit`/`faq` children are wrapped in a `ShellRoute` whose `builder` provides a single shared `CustomerProfileBloc` (created with `getIt<CustomerProfileBloc>()..add(const CustomerProfileStarted())`). The child routes do **not** create their own instances — they reuse the one from the wrapping `ShellRoute`.
 
 This avoids the `ProviderNotFoundException` error that would occur if the parent page were destroyed when navigating to the child route.

@@ -2,13 +2,11 @@
 
 ## Base URL
 
-```
-https://7ruopxdlm7.execute-api.us-east-2.amazonaws.com
-```
+The base URL is not hardcoded in the app — it is read from the `API_BASE_URL` key of the selected environment file under `env/` (e.g. the current prod build points to `https://9zjh97ezih.execute-api.us-east-2.amazonaws.com/`). The default, when no environment is provided, is the local backend `http://localhost:8080`.
 
 All requests are made over HTTPS. There is no API version in the URL — versioning is managed via headers when necessary.
 
-Use `API_BASE_URL` in the Flutter app to switch between this AWS environment and a local backend such as `http://localhost:8080`.
+To switch backends, pass `--dart-define-from-file=env/<file>.json` (e.g. `env/local.json`, `env/prod.json`); each file sets `API_BASE_URL`. An optional `--dart-define=API_BASE_URL=https://...` override is also honored.
 
 ---
 
@@ -71,11 +69,14 @@ Common HTTP errors:
 | Code | Meaning | App Handling |
 |------|---------|--------------|
 | `400` | Bad Request — invalid data in the body | `UnknownApiException` |
-| `401` | Unauthorized — token missing or expired | `UnauthorizedException` |
-| `403` | Forbidden — no permission for the resource | Redirect to login |
+| `401` | Unauthorized — token missing or expired | `UnauthorizedException`, or `DeactivatedAccountException` when the `error` body indicates a deactivated account (`inativo`/`desativad`) |
+| `403` | Forbidden — no permission for the resource | `ForbiddenException` |
 | `404` | Not Found — resource does not exist | `NotFoundException` |
 | `409` | Conflict — duplicate resource | `ConflictException` |
+| `429` | Too Many Requests — rate limited | `RateLimitedException` |
 | `500` | Internal Server Error — backend error | `ServerException` |
+
+Connection-level failures (no HTTP status) are also mapped: connection/receive/send timeouts become `ApiTimeoutException`, and connection errors become `NetworkException`.
 
 ---
 
@@ -89,7 +90,7 @@ Three users are pre-configured in both Keycloak and the database when the backen
 | Farmer | `farmer@ragro.com.br` | `Test@123` |
 | Admin | `admin@ragro.com.br` | `Admin@123` |
 
-These credentials authenticate against the local Keycloak instance at `http://localhost:8180` or the AWS equivalent at `https://kwn6g5amn5.execute-api.us-east-2.amazonaws.com`, depending on the backend selected through `API_BASE_URL`.
+These credentials authenticate against the local Keycloak instance at `http://localhost:8180` (or its AWS equivalent), depending on the backend selected through `API_BASE_URL`. The Keycloak token URL is not hardcoded in the app — it is discovered at runtime from `GET /auth/config`.
 
 ---
 
@@ -114,16 +115,18 @@ When `DEMO_MODE=true`, `getCurrentUser()` returns a mocked user without checking
 
 ## Pagination
 
-List endpoints support pagination parameters via query string:
+List endpoints follow the Spring Pageable convention. They support pagination parameters via query string:
 
 ```
-GET /producers?page=1&limit=20
+GET /producers?page=0&size=20
 ```
 
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
-| `page` | `int` | `1` | Current page (1-indexed) |
-| `limit` | `int` | `20` | Items per page |
+| `page` | `int` | `0` | Current page (0-indexed) |
+| `size` | `int` | `20` | Items per page |
+
+Paginated responses are decoded by `PaginatedResponse`, which exposes `content`, `page`, `size`, `totalElements`, and `totalPages`.
 
 ---
 
@@ -132,13 +135,13 @@ GET /producers?page=1&limit=20
 `ApiClient` is the Dio wrapper used in all remote datasources. It:
 
 1. Configures timeouts (10s for connection, receive, and send)
-2. Automatically adds the `Authorization: Bearer <token>` header
+2. Automatically adds the `Authorization: Bearer <token>` header, except on public endpoints (`ApiEndpoints.isPublic` — `/auth/register/customer`, `/auth/password/forgot`, `/auth/config`), which are sent without it
 3. Throws typed `ApiException` instances on HTTP errors
 
 ```dart
 // Usage in datasources:
 final response = await _apiClient.dio.get<Map<String, dynamic>>(
   ApiEndpoints.producers,
-  queryParameters: {'page': 1, 'limit': 20},
+  queryParameters: {'page': 0, 'size': 20},
 );
 ```

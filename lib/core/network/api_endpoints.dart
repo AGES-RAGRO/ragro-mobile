@@ -16,9 +16,8 @@ abstract final class ApiEndpoints {
       return _normalizeForRuntime(normalized);
     }
 
-    // Fallback: read from process environment (set via Xcode scheme LaunchAction
-    // or `flutter run --dart-define` equivalent via shell env). This lets a
-    // physical iOS device pick up the Mac's LAN IP without a recompile.
+    // Fallback to process env (Xcode scheme LaunchAction or shell env) so a
+    // physical iOS device can pick up the Mac's LAN IP without a recompile.
     if (!kIsWeb) {
       final runtimeBase = Platform.environment['API_BASE_URL'] ?? '';
       if (runtimeBase.trim().isNotEmpty) {
@@ -30,8 +29,7 @@ abstract final class ApiEndpoints {
     return _normalizeForRuntime(_localBase);
   }
 
-  /// Fixes URLs that come from the backend (like Keycloak token URLs)
-  /// to be reachable from the emulator.
+  /// Rewrites backend URLs (e.g. Keycloak token URLs) reachable from the emulator.
   static String fixUrl(String url) {
     return _normalizeForRuntime(url);
   }
@@ -74,10 +72,9 @@ abstract final class ApiEndpoints {
   static String customerFavorite(String producerId) =>
       '$_base/customers/me/favorites/$producerId';
 
-  // Notifications — role-scoped. The backend serves identical operations under
-  // /customers/me/notifications (CustomerNotificationController, role CUSTOMER)
-  // and /producers/me/notifications (ProducerNotificationController, role FARMER).
-  // NotificationsRemoteDataSource picks the right set from the logged-in role.
+  // Notifications — role-scoped. Identical ops under /customers/me/notifications
+  // (CUSTOMER) and /producers/me/notifications (FARMER); NotificationsRemoteDataSource
+  // picks by logged-in role.
   static String get customerNotifications => '$_base/customers/me/notifications';
   static String get customerNotificationsUnreadCount =>
       '$_base/customers/me/notifications/unread-count';
@@ -116,14 +113,14 @@ abstract final class ApiEndpoints {
   static String get co2Options => '$_base/co2/options';
   static String get co2Emissions => '$_base/co2/emissions';
 
-  // Rotas de entrega persistidas (E5) + rastreamento em tempo real (E6).
-  // O legado /routes/optimize foi substituído pela rota persistida (route_repository).
+  // Persisted delivery routes (E5) + real-time tracking (E6). Legacy
+  // /routes/optimize replaced by the persisted route (route_repository).
   static String get routes => '$_base/routes';
   static String get activeRoute => '$_base/routes/active';
   static String routeStop(String routeId, String stopId) =>
       '$_base/routes/$routeId/stops/$stopId';
 
-  /// Endpoint WebSocket (STOMP) do rastreamento em tempo real.
+  /// WebSocket (STOMP) endpoint for real-time tracking.
   static String get wsUrl => '${_base.replaceFirst('http', 'ws')}/ws';
 
   // Orders
@@ -184,9 +181,8 @@ abstract final class ApiEndpoints {
   static String get adminProducers => '$_base/admin/producers';
   static String adminProducer(String id) => '$_base/admin/producers/$id';
 
-  /// Rewrites a media URL that came from the backend (e.g. MinIO public URL).
-  /// This keeps local backend URLs reachable on emulators by matching the
-  /// host used by the configured API base URL.
+  /// Rewrites a backend media URL (e.g. MinIO public URL) to the API base host,
+  /// keeping local backend URLs reachable on emulators.
   static String resolveMediaUrl(String url) {
     if (url.isEmpty) return url;
     final mediaUri = Uri.tryParse(url);

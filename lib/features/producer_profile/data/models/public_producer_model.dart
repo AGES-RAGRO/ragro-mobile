@@ -62,9 +62,8 @@ class PublicProducerModel extends PublicProducer {
       totalReviews: json['totalReviews'] as int? ?? 0,
       phone: json['phone'] as String? ?? '',
       availability: _parseAvailability(json['availability']),
-      // Mantém o parser nullable da develop (com fallback farm_name) exigido pelo
-      // membershipLabel (#425); sem o fallback DateTime(2016) da etapa1, que mostraria
-      // uma data bogus em vez de "--" para produtores sem data de cadastro.
+      // Nullable parse (no DateTime(2016) fallback) so membershipLabel (#425)
+      // shows "--" instead of a bogus date for producers without a join date.
       memberSince: _parseMemberSince(memberSinceRaw),
       photoUrl: () {
         final raw = json['photoUrl'] as String?;
