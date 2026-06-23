@@ -4,7 +4,7 @@ Guia passo a passo para gerar os artefatos de produção do app. O app aponta pa
 backend de produção (API Gateway AWS) via `env/prod.json`.
 
 > **Resumo rápido**
-> - **Android**: dá pra fazer em Linux/Mac/Windows (precisa Android SDK + JDK 21).
+> - **Android**: dá pra fazer em Linux/Mac/Windows (precisa Android SDK + JDK 17+).
 > - **iOS**: **só em macOS com Xcode** + conta Apple Developer. Não dá pra gerar em Linux/Windows.
 
 ---
@@ -12,9 +12,10 @@ backend de produção (API Gateway AWS) via `env/prod.json`.
 ## 0. Pré-requisitos (uma vez por máquina)
 
 - **Flutter** stable 3.44+ (`flutter --version`) e Dart 3.11+.
-- **Android**: Android SDK (via Android Studio) + **JDK 21**.
-  - Se o `java` padrão da máquina não for o 21, exporte antes de buildar:
-    `export JAVA_HOME=/caminho/para/jdk-21`.
+- **Android**: Android SDK (via Android Studio) + **JDK 17+** (o módulo Gradle compila com
+  `JavaVersion.VERSION_17`).
+  - Se o `java` padrão da máquina for incompatível, exporte um JDK 17 antes de buildar:
+    `export JAVA_HOME=/caminho/para/jdk-17`.
 - **iOS** (macOS): Xcode + Command Line Tools + CocoaPods (`sudo gem install cocoapods`).
 - Clonar o repo e entrar em `ragro-mobile/`.
 
@@ -39,6 +40,19 @@ A chave **não** está no git (é secreta). Crie os arquivos locais (gitignored)
 > Peça a chave para o Gustavo. Em produção a chave deve ser **restrita** no Google Cloud
 > Console: Android = package `com.ragro.ragro_mobile` + SHA-1 do keystore de release;
 > iOS = bundle id `com.ragro.ragroMobile`.
+
+### Firebase / FCM (obrigatório — o build depende dele)
+
+O app usa Firebase para push (`firebase_core`, `firebase_messaging` no `pubspec.yaml`). Os
+arquivos de config do Firebase são **necessários para buildar**:
+
+- **Android** → `android/app/google-services.json`. O plugin `com.google.gms.google-services`
+  (em `android/app/build.gradle.kts`) lê esse arquivo e o build do Gradle **falha** se ele
+  faltar. Está **commitado** no repo (não é gitignored). O `package_name` dentro dele precisa
+  bater com `com.ragro.ragro_mobile`.
+- **iOS** → `ios/Runner/GoogleService-Info.plist`. O `AppDelegate.swift` chama
+  `FirebaseApp.configure()`, que precisa desse arquivo (bundle `com.ragro.ragroMobile`). Está
+  **commitado** no repo.
 
 ---
 
@@ -118,6 +132,10 @@ Garanta que `ios/Flutter/Env.xcconfig` tem o `GOOGLE_MAPS_API_KEY` (passo 0).
 3. Marque **Automatically manage signing** e escolha o **Team** da conta Apple Developer.
 4. Confirme o **Bundle Identifier**: `com.ragro.ragroMobile` (precisa estar registrado no
    portal da Apple e a chave do Maps liberada para ele).
+5. Em **Signing & Capabilities**, adicione a capability **Push Notifications** (o FCM exige
+   isso). Em `ios/Runner/Runner.entitlements` o `aps-environment` está como `development` —
+   para um release de TestFlight/App Store **troque para `production`**, senão o push falha
+   silenciosamente em produção.
 
 ### 2.3 Gerar o build
 
@@ -140,9 +158,11 @@ Xcode **Organizer** ou o app **Transporter**.
 
 ## 3. Checklist final antes de distribuir
 
-- [ ] `env/prod.json` aponta para a API de produção (hoje: `https://7ruopxdlm7.execute-api.us-east-2.amazonaws.com`).
+- [ ] `env/prod.json` aponta para a API de produção (hoje: `https://9zjh97ezih.execute-api.us-east-2.amazonaws.com/`).
 - [ ] Android assinado com keystore de release (`apksigner verify`), não debug.
 - [ ] Chave do Maps presente (Android `local.properties`, iOS `Env.xcconfig`) e **restrita** no Google Cloud (package/bundle + SHA-1).
+- [ ] Firebase: `android/app/google-services.json` presente (`package_name` = `com.ragro.ragro_mobile`) e iOS `ios/Runner/GoogleService-Info.plist` presente.
+- [ ] iOS com capability **Push Notifications** habilitada e `aps-environment` = `production` no `Runner.entitlements` (release).
 - [ ] Mapa renderiza (não fica cinza/branco) no app instalado.
 - [ ] Login funciona e persiste (token vai para armazenamento seguro).
 - [ ] Fotos de produto carregam (backend precisa do `MEDIA_PUBLIC_URL` certo em prod — não `localhost`).

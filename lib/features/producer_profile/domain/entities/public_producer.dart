@@ -136,8 +136,8 @@ class PublicProducer extends Equatable {
   final List<HomeProduct>? products;
   final List<Review>? reviews;
 
-  /// Tempo no RAGRO formatado: anos quando >= 1 ano, senão meses (mínimo
-  /// "1 mês" para quem acabou de entrar). Null quando não há data de adesão.
+  /// Membership duration: years when >= 1 year, else months (min "1 mês").
+  /// Null when there is no join date.
   String? get membershipLabel {
     final memberSince = this.memberSince;
     if (memberSince == null) return null;

@@ -22,9 +22,8 @@ class App extends StatefulWidget {
 }
 
 class _AppState extends State<App> with WidgetsBindingObserver {
-  // The notifications bloc lives at the app root (above MaterialApp.router) so
-  // every screen's bell badge AND the pushed notifications page share a single
-  // source of truth, regardless of which shell/route renders them.
+  // Notifications bloc lives at app root so every bell badge and the pushed
+  // notifications page share one source of truth across all shells/routes.
   final AuthBloc _authBloc = getIt<AuthBloc>()..add(const AuthStarted());
   final NotificationsBloc _notificationsBloc = getIt<NotificationsBloc>();
   final NotificationService _notificationService = getIt<NotificationService>();
@@ -56,8 +55,8 @@ class _AppState extends State<App> with WidgetsBindingObserver {
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state != AppLifecycleState.resumed) return;
 
-    // The backend unread count may change while the app is backgrounded or
-    // when a notification is delivered outside the foreground FCM stream.
+    // Unread count may change while backgrounded or via pushes outside the
+    // foreground FCM stream.
     _notificationsBloc.add(const NotificationsUnreadCountRequested());
   }
 
@@ -68,9 +67,8 @@ class _AppState extends State<App> with WidgetsBindingObserver {
         _fcmInitialized = true;
         unawaited(_notificationService.initialize());
       } else {
-        // FCM já iniciado: re-vincula o token ao usuário que acabou de entrar
-        // (troca de conta no mesmo device). O backend faz upsert pela coluna
-        // `token` (unique), então o re-POST move o device para o novo usuário.
+        // Account switch on same device: re-bind token to the new user.
+        // Backend upserts by unique `token`, so re-POST moves the device.
         unawaited(_notificationService.registerCurrentToken());
       }
     } else {

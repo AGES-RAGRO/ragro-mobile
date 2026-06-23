@@ -6,14 +6,12 @@ import 'package:geolocator/geolocator.dart';
 import 'package:injectable/injectable.dart';
 import 'package:ragro_mobile/core/services/tracking_socket.dart';
 
-/// Publica a posição do produtor durante a rota ativa.
+/// Publishes the producer's position during an active route.
 ///
-/// Frequência adaptativa (decisão de produto): envia a cada ~5s quando em
-/// movimento (≥15m desde o último envio) e a cada ~30s parado — equilíbrio
-/// precisão × bateria × ingestão. No Android, o stream roda num foreground
-/// service (notificação persistente) para continuar emitindo com o app atrás
-/// do Google Maps de navegação; no iOS, background updates de localização.
-/// Offline: guarda a última posição e a reenvia na reconexão do socket.
+/// Adaptive rate: every ~5s when moving (≥15m since last send), every ~30s when
+/// stationary — accuracy vs battery vs ingestion. Android uses a foreground
+/// service to keep emitting behind Google Maps navigation; iOS uses background
+/// location updates. Offline: keeps the last position and resends on reconnect.
 @lazySingleton
 class RouteTrackingPublisher {
   RouteTrackingPublisher(this._socket);
@@ -33,7 +31,7 @@ class RouteTrackingPublisher {
 
   bool get isActive => _routeId != null;
 
-  /// Começa a publicar para a rota. Idempotente por rota.
+  /// Starts publishing for the route. Idempotent per route.
   Future<void> start(String routeId) async {
     if (_routeId == routeId) return;
     await stop();
@@ -72,7 +70,7 @@ class RouteTrackingPublisher {
         .listen(_onPosition, onError: (_) {});
   }
 
-  /// Para de publicar (fim/cancelamento da rota ou tela fechada).
+  /// Stops publishing (route ended/cancelled or screen closed).
   Future<void> stop() async {
     await _subscription?.cancel();
     _subscription = null;
@@ -118,8 +116,8 @@ class RouteTrackingPublisher {
       _socket.sendPosition(routeId, payload);
       _pendingPayload = null;
     } else {
-      // Offline: guarda só a ÚLTIMA posição; o histórico intermediário não tem
-      // valor para o cliente e o backend descartaria saltos atrasados.
+      // Offline: keep only the LAST position; intermediate history is useless to
+      // the customer and the backend would drop stale jumps.
       _pendingPayload = payload;
     }
     _lastSentAt = now;

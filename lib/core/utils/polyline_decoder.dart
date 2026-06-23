@@ -1,6 +1,5 @@
-/// Decodifica uma "encoded polyline" do Google (algoritmo padrão de 5 casas
-/// decimais) em pares (latitude, longitude). Usada para desenhar a rota
-/// persistida no mapa sem dependência nova.
+/// Decodes a Google encoded polyline (standard 5-decimal algorithm) into
+/// (latitude, longitude) pairs to draw the persisted route on the map.
 List<(double, double)> decodePolyline(String encoded) {
   final points = <(double, double)>[];
   var index = 0;

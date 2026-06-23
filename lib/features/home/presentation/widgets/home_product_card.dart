@@ -20,9 +20,8 @@ class HomeProductCard extends StatelessWidget {
   final VoidCallback onAddToCart;
   final bool isRecommended;
 
-  /// `true` when the AI reranker actually reordered this item
-  /// (reason == LLM_RERANKED). Distinguishes AI from heuristic recommendations
-  /// so the "AI recommends" badge isn't shown misleadingly for all items.
+  /// `true` only when the AI reranker reordered this item (reason == LLM_RERANKED),
+  /// so the "AI recommends" badge isn't shown for heuristic recommendations.
   final bool aiRanked;
 
   /// Relevance score (0-100) assigned by the AI, when available.

@@ -4,9 +4,9 @@ import 'package:go_router/go_router.dart';
 import 'package:ragro_mobile/core/theme/app_colors.dart';
 import 'package:ragro_mobile/features/orders/presentation/bloc/active_delivery_cubit.dart';
 
-/// Banner no topo da home do consumidor (estilo iFood/Uber Eats): aparece
-/// quando há um pedido a caminho, mostrando o código de confirmação que o
-/// cliente deve informar ao produtor. Toque abre o detalhe do pedido.
+/// Banner atop the customer home (iFood/Uber Eats style): appears when an order
+/// is on the way, showing the confirmation code the customer gives the
+/// producer. Tap opens the order detail.
 class ActiveDeliveryBanner extends StatelessWidget {
   const ActiveDeliveryBanner({super.key});
 

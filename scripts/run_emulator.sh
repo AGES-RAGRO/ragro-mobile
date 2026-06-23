@@ -1,9 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Arquivo de environment a usar (padrão: env/local.json — localhost, sem segredos).
-# Para prod: ENV_FILE=env/prod.json ./scripts/run_emulator.sh
-# Para outro env: ENV_FILE=env/staging.json ./scripts/run_emulator.sh
+# Env file to use (default: env/local.json — localhost, no secrets).
+# Override: ENV_FILE=env/prod.json ./scripts/run_emulator.sh
 ENV_FILE="${ENV_FILE:-env/local.json}"
 
 DEVICE="${DEVICE:-emulator-5554}"
@@ -12,11 +11,9 @@ ADB="${ADB:-$HOME/Android/Sdk/platform-tools/adb}"
 
 cd "$(dirname "$0")/.."
 
-# A chave do Google Maps fica APENAS no git-ignored android/local.properties
-# (mesma fonte que o build Android lê), nunca no env JSON commitado. Encaminhamos
-# para o Dart via --dart-define para a chamada da Directions API funcionar sem a
-# chave viver em arquivo versionado. Sobrescreva exportando MAPS_API_KEY antes de
-# rodar.
+# Google Maps key lives only in git-ignored android/local.properties (same source
+# the Android build reads), never in committed env JSON. Forwarded to Dart via
+# --dart-define so the Directions API works. Override by exporting MAPS_API_KEY.
 MAPS_API_KEY="${MAPS_API_KEY:-$(grep -E '^MAPS_API_KEY=' android/local.properties 2>/dev/null | cut -d '=' -f2- | tr -d '[:space:]')}"
 
 if [ -x "$ADB" ]; then

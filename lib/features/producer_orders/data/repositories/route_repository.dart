@@ -5,7 +5,7 @@ import 'package:ragro_mobile/core/network/api_endpoints.dart';
 import 'package:ragro_mobile/core/network/api_exception.dart';
 import 'package:ragro_mobile/core/utils/api_date_time.dart';
 
-/// Parada da rota persistida (`RouteStopResponse` do backend).
+/// Persisted route stop (backend `RouteStopResponse`).
 class DeliveryRouteStop {
   const DeliveryRouteStop({
     required this.id,
@@ -54,7 +54,7 @@ class DeliveryRouteStop {
   bool get isTerminal => status == 'DELIVERED' || status == 'FAILED';
 }
 
-/// Rota de entrega persistida do produtor (`RouteResponse` do backend).
+/// Producer's persisted delivery route (backend `RouteResponse`).
 class DeliveryRoute {
   const DeliveryRoute({
     required this.id,
@@ -94,22 +94,22 @@ class DeliveryRoute {
   final double totalDistanceKm;
   final int totalDurationSeconds;
 
-  /// Baseline do CO2 (ida-e-volta individual a cada parada), calculado no servidor.
+  /// CO2 baseline (individual round-trip per stop), computed server-side.
   final double? baselineDistanceKm;
   final String? overviewPolyline;
   final List<DeliveryRouteStop> stops;
 }
 
-/// Rotas de entrega persistidas no backend (Google Routes API roda no servidor;
-/// a key nunca fica no app). A rota é calculada UMA vez na criação; o progresso
-/// é por parada, sem novas chamadas ao Google.
+/// Delivery routes persisted on the backend (Google Routes API runs
+/// server-side; the key never reaches the app). Route is computed once on
+/// creation; progress is per-stop, with no further Google calls.
 @lazySingleton
 class RouteRepository {
   const RouteRepository(this._apiClient);
 
   final ApiClient _apiClient;
 
-  /// Cria (ou substitui) a rota ativa a partir dos pedidos CONFIRMED/IN_DELIVERY.
+  /// Creates (or replaces) the active route from CONFIRMED/IN_DELIVERY orders.
   Future<DeliveryRoute> createRoute({
     required double originLatitude,
     required double originLongitude,
@@ -128,7 +128,7 @@ class RouteRepository {
     }
   }
 
-  /// Rota ativa do produtor; `null` quando não há (404).
+  /// Producer's active route; `null` when none (404).
   Future<DeliveryRoute?> getActiveRoute() async {
     try {
       final response = await _apiClient.dio.get<Map<String, dynamic>>(
@@ -142,10 +142,9 @@ class RouteRepository {
     }
   }
 
-  /// Atualiza uma parada (ARRIVED/DELIVERED/FAILED) e devolve a rota atualizada.
-  /// O [code] (4 dígitos do consumidor) é OBRIGATÓRIO no backend quando o status
-  /// é DELIVERED — sem ele, a API responde 400 "Código de confirmação
-  /// obrigatório para concluir a entrega".
+  /// Updates a stop (ARRIVED/DELIVERED/FAILED) and returns the updated route.
+  /// [code] (customer's 4 digits) is REQUIRED when status is DELIVERED;
+  /// otherwise the API returns 400.
   Future<DeliveryRoute> updateStop({
     required String routeId,
     required String stopId,

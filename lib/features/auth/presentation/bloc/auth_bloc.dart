@@ -39,11 +39,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     try {
       await _logout();
     } on Exception catch (_) {
-      // Logout failure (e.g. local storage error) — still clear local session
-      // and unauthenticate the user in-memory.
+      // Logout failure (e.g. local storage error) — still clear the session.
     }
-    // Descarta blocs de sessão para o próximo login começar do zero (sem expor
-    // dados do usuário anterior). Ver [resetSessionScopedBlocs].
+    // Reset session blocs so the next login starts clean. See [resetSessionScopedBlocs].
     resetSessionScopedBlocs();
     emit(const AuthUnauthenticated());
   }

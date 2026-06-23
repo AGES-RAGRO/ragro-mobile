@@ -77,8 +77,8 @@ class ProducerOrderDetailPage extends StatelessWidget {
                 );
                 if (context.mounted) context.pop('in_delivery');
               }
-              // O caso 'delivered' é tratado no fluxo do botão "Entregue" (diálogo
-              // de código de confirmação), evitando empilhar dois diálogos.
+              // 'delivered' is handled by the "Entregue" button flow (code
+              // dialog), avoiding two stacked dialogs.
             }
           }
         },
@@ -116,9 +116,8 @@ class ProducerOrderDetailPage extends StatelessWidget {
             canPop: false,
             onPopInvokedWithResult: (didPop, result) {
               if (didPop) return;
-              // Mirrors the header back button: signal 'cancelled' so the list
-              // moves the order to the Cancelled tab after a refuse, 'seen' if
-              // the order was new, otherwise nothing.
+              // Mirrors the header back button: 'cancelled' moves the order to
+              // the Cancelled tab after a refuse, 'seen' if it was new, else nothing.
               if (order.status == ProducerOrderStatus.cancelled) {
                 context.pop('cancelled');
               } else if (order.isNew) {
@@ -513,8 +512,8 @@ class _ActionFooter extends StatelessWidget {
     return OrderActionFooter(isBusy: isProcessing, buttons: buttons);
   }
 
-  /// Aguarda o bloc resolver a confirmação por código (sucesso ou erro de ação),
-  /// devolvendo true ao diálogo de código quando a entrega é confirmada.
+  /// Waits for the bloc to resolve the code confirmation (success or action
+  /// error); returns true to the code dialog when delivery is confirmed.
   Future<bool> _waitForBlocConfirmation(ProducerOrderDetailBloc bloc) async {
     try {
       final state = await bloc.stream.firstWhere(

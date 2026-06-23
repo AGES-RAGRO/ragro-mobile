@@ -1,6 +1,5 @@
-// Dependency injection setup. injectable reads the annotations (@injectable,
-// @lazySingleton, etc.) and generates the get_it registrations in
-// injection.config.dart, making annotated classes available via getIt<T>().
+// DI setup. injectable generates get_it registrations from annotations into
+// injection.config.dart, exposing annotated classes via getIt<T>().
 
 import 'package:get_it/get_it.dart';
 import 'package:injectable/injectable.dart';
@@ -16,22 +15,14 @@ final getIt = GetIt.instance;
 @InjectableInit()
 Future<void> configureDependencies() => getIt.init();
 
-/// Reseta os singletons que guardam dados da sessão do usuário, para que um
-/// próximo login não exiba (nem por um frame) dados do usuário anterior.
-///
-/// Cobre os blocs/cubits `@lazySingleton` providos por shell/página (re-lidos do
-/// get_it no próximo login). NÃO inclui:
-/// - factories (Orders/CustomerProfile/Recommendations): instância nova a cada uso;
-/// - NotificationsBloc: é segurado na raiz (app.dart) por toda a vida do app e
-///   já é limpo via evento `NotificationsReset` no logout — um reset no get_it
-///   deixaria a referência da raiz dessincronizada.
-///
-/// Reset SEM fechar de propósito: as instâncias antigas ainda podem estar
-/// montadas no IndexedStack do shell no momento do logout; o get_it passa a
-/// criar instâncias novas (estado inicial) no próximo acesso.
+/// Resets session-scoped `@lazySingleton` blocs/cubits so the next login never
+/// shows the previous user's data (even for one frame). Excludes factories (new
+/// instance per use) and NotificationsBloc (held in app.dart and cleared via
+/// NotificationsReset; a get_it reset would desync the root reference).
+/// Reset without close on purpose: old instances may still be mounted in the
+/// shell's IndexedStack; get_it then builds fresh instances on next access.
 void resetSessionScopedBlocs() {
-  // Guardado por isRegistered para não quebrar em testes que não rodam o
-  // configureDependencies completo.
+  // isRegistered-guarded so tests without full configureDependencies don't break.
   _resetIfRegistered<HomeBloc>();
   _resetIfRegistered<CartBloc>();
   _resetIfRegistered<ProducerManagementBloc>();

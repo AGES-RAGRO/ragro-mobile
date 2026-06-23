@@ -100,9 +100,9 @@ void main() {
     return getIt.reset();
   });
 
-  // Mirrors the per-stop wiring in route_calculation_page.dart: the
-  // "Confirmar Entrega" action opens the SHARED ConfirmDeliveryCodeDialog whose
-  // onConfirm(code) calls cubit.confirmDelivery(id, code).
+  // Mirrors route_calculation_page.dart per-stop wiring: "Confirmar Entrega"
+  // opens the shared ConfirmDeliveryCodeDialog; onConfirm(code) calls
+  // cubit.confirmDelivery(id, code).
   Widget harness(RouteCalculationCubit cubit) {
     return MaterialApp(
       home: Scaffold(
@@ -117,8 +117,8 @@ void main() {
                   builder: (_) => ConfirmDeliveryCodeDialog(
                     onConfirm: (code) =>
                         cubit.confirmDelivery('stop-1', code),
-                    // Mirrors the page: the secondary action opens the reason
-                    // dialog; the refuse only fires after confirming there.
+                    // Secondary action opens the reason dialog; refuse fires
+                    // only after confirming there.
                     onCancelOrder: () async {
                       final result =
                           await CancelOrderDialog.showForProducer(context);
@@ -182,8 +182,7 @@ void main() {
         ),
       );
 
-      // The dialog's "Confirmar" button is disabled until 4 digits are entered:
-      // tapping it now must not call the repository.
+      // "Confirmar" is disabled until 4 digits; tapping now must not call repo.
       await tester.tap(find.widgetWithText(ElevatedButton, 'Confirmar'));
       await tester.pump();
       verifyNever(

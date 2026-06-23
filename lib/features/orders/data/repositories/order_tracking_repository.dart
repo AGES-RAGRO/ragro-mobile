@@ -5,7 +5,7 @@ import 'package:ragro_mobile/core/network/api_endpoints.dart';
 import 'package:ragro_mobile/core/network/api_exception.dart';
 import 'package:ragro_mobile/core/utils/api_date_time.dart';
 
-/// Snapshot de rastreamento do pedido (`GET /orders/{id}/tracking`).
+/// Order tracking snapshot (`GET /orders/{id}/tracking`).
 class OrderTracking {
   const OrderTracking({
     required this.available,
@@ -50,12 +50,12 @@ class OrderTracking {
   /// PENDING | ARRIVED | DELIVERED | FAILED.
   final String? stopStatus;
 
-  /// Polyline codificada (Google) da rota completa — desenha o caminho no mapa.
+  /// Google-encoded polyline of the full route (drawn on the map).
   final String? overviewPolyline;
 }
 
-/// Estado inicial e fallback de polling do acompanhamento de entrega — o stream
-/// ao vivo vem do tópico STOMP `/topic/routes/{routeId}`.
+/// Initial snapshot + polling fallback for delivery tracking; live stream comes
+/// from STOMP topic `/topic/routes/{routeId}`.
 @lazySingleton
 class OrderTrackingRepository {
   const OrderTrackingRepository(this._apiClient);

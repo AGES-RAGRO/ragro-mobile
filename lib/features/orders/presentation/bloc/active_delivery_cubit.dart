@@ -11,12 +11,12 @@ sealed class ActiveDeliveryState extends Equatable {
   List<Object?> get props => [];
 }
 
-/// Nenhum pedido a caminho (ou ainda não carregado) — o banner fica escondido.
+/// No order in delivery (or not yet loaded); banner hidden.
 class ActiveDeliveryNone extends ActiveDeliveryState {
   const ActiveDeliveryNone();
 }
 
-/// Há um pedido a caminho com código de confirmação para exibir no banner.
+/// An order is in delivery with a confirmation code to show in the banner.
 class ActiveDeliveryAvailable extends ActiveDeliveryState {
   const ActiveDeliveryAvailable(this.order);
   final Order order;
@@ -24,9 +24,9 @@ class ActiveDeliveryAvailable extends ActiveDeliveryState {
   List<Object?> get props => [order];
 }
 
-/// Cubit do banner "seu pedido está a caminho" na home do consumidor.
-/// Reusa [GetOrders] filtrando por IN_DELIVERY; o backend já devolve o
-/// `confirmationCode` apenas nesse estado. Falhas são silenciosas (banner some).
+/// Drives the "order on the way" banner on the customer home. Reuses
+/// [GetOrders] filtered by IN_DELIVERY (the only state with a
+/// `confirmationCode`). Failures are silent (banner hides).
 @lazySingleton
 class ActiveDeliveryCubit extends Cubit<ActiveDeliveryState> {
   ActiveDeliveryCubit(this._getOrders) : super(const ActiveDeliveryNone());

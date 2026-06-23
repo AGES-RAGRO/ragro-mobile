@@ -52,8 +52,8 @@ class _CustomerHomeViewState extends State<_CustomerHomeView> {
   void initState() {
     super.initState();
     _scrollController.addListener(_onScroll);
-    // Carrega o pedido a caminho (banner do topo). Recarregado no pull-to-refresh
-    // e ao reabrir a aba Início (CustomerShell).
+    // Load the in-transit order (top banner); reloaded on pull-to-refresh and
+    // when reopening the Home tab.
     context.read<ActiveDeliveryCubit>().load();
   }
 

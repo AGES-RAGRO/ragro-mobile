@@ -144,8 +144,7 @@ class _CustomerShellState extends State<CustomerShell> {
       index,
       initialLocation: index == widget.navigationShell.currentIndex,
     );
-    // Início (0): recarrega o banner "pedido a caminho" ao reabrir a aba, para
-    // refletir um pedido que saiu para entrega sem precisar reabrir o app.
+    // Home (0): reload the "order on the way" banner when reopening the tab.
     if (index == 0) {
       getIt<ActiveDeliveryCubit>().load();
     }

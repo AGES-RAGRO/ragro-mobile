@@ -33,9 +33,8 @@ class _RouteCalculationView extends StatefulWidget {
 class _RouteCalculationViewState extends State<_RouteCalculationView> {
   GoogleMapController? _miniMapController;
 
-  /// Enquadra o mini-mapa no traçado real da rota (a câmera seguia o GPS do
-  /// produtor — ou o fallback de Goiânia quando o GPS é nulo — deixando a rota
-  /// fora de tela). Roda pós-frame porque newLatLngBounds exige o mapa já medido.
+  /// Fits the mini-map to the route bounds. Runs post-frame because
+  /// newLatLngBounds requires the map to be already laid out.
   void _fitMiniMap(List<LatLng> points) {
     final controller = _miniMapController;
     if (controller == null || points.length < 2) return;
@@ -78,11 +77,9 @@ class _RouteCalculationViewState extends State<_RouteCalculationView> {
         ? stops.sublist(0, stops.length - 1)
         : const <String>[];
 
-    // Navigation deep-link (no API key needed). Stops already come in the
-    // backend's optimized order; `dir_action=navigate` opens directly into
-    // turn-by-turn driving navigation. Only pin an `origin` when the producer's
-    // real GPS is known; otherwise omit it so Maps starts from the device's
-    // current location instead of a hardcoded fallback (Goiânia).
+    // Navigation deep-link (no API key needed); stops already in the backend's
+    // optimized order. Only pin `origin` when the producer's real GPS is known,
+    // else Maps starts from the device location (not the Goiânia fallback).
     final uri = Uri.https('www.google.com', '/maps/dir/', {
       'api': '1',
       if (lat != null && lng != null) 'origin': '$lat,$lng',
@@ -259,8 +256,7 @@ class _RouteCalculationViewState extends State<_RouteCalculationView> {
                             final lat = state.producerLat ?? -16.6868;
                             final lng = state.producerLng ?? -49.2647;
                             final loc = LatLng(lat, lng);
-                            // Rota persistida: desenha a polyline real (antes o
-                            // backend retornava a polyline e ela era descartada).
+                            // Draw the persisted route polyline.
                             final encoded = state.overviewPolyline;
                             final routePoints = encoded == null
                                 ? const <LatLng>[]
@@ -298,8 +294,8 @@ class _RouteCalculationViewState extends State<_RouteCalculationView> {
                                       tiltGesturesEnabled: false,
                                       mapToolbarEnabled: false,
                                       markers: {
-                                        // Só marca o produtor quando há GPS real
-                                        // (sem isto, caía no fallback de Goiânia).
+                                        // Mark the producer only when real GPS
+                                        // exists (else falls back to Goiânia).
                                         if (state.producerLat != null)
                                           Marker(
                                             markerId: const MarkerId('producer'),
@@ -648,10 +644,8 @@ class _DeliveryItem extends StatelessWidget {
   final String title;
   final String subtitle;
 
-  /// Abre o diálogo COMPARTILHADO de código (mesmo do detalhe do pedido) e só
-  /// conclui a entrega quando o produtor digita os 4 dígitos do consumidor. O
-  /// backend exige o código — sem ele a confirmação direta era uma falha de
-  /// segurança (qualquer entrega era marcada como concluída sem validação).
+  /// Opens the shared code dialog (same as the order detail). Backend requires
+  /// the consumer's 4-digit code; without it any delivery could be marked done.
   void _openConfirmDeliveryDialog(BuildContext context) {
     final cubit = context.read<RouteCalculationCubit>();
     showDialog<bool>(
@@ -659,16 +653,15 @@ class _DeliveryItem extends StatelessWidget {
       barrierDismissible: false,
       builder: (_) => ConfirmDeliveryCodeDialog(
         onConfirm: (code) => cubit.confirmDelivery(id, code),
-        // Espelha o fluxo do detalhe do pedido: a ação secundária só abre o
-        // diálogo de motivo (CancelOrderDialog); a recusa só acontece quando o
-        // produtor confirma lá dentro.
+        // Secondary action only opens the reason dialog (CancelOrderDialog);
+        // refusal happens only when the producer confirms there.
         onCancelOrder: () => _confirmCancelOrder(context, cubit),
       ),
     );
   }
 
-  /// Coleta o motivo (CancelOrderDialog) e, se confirmado, recusa o pedido da
-  /// parada e atualiza a rota. Espelha `_confirmRefuse` do detalhe do pedido.
+  /// Collects the reason (CancelOrderDialog); if confirmed, refuses the stop's
+  /// order and updates the route.
   Future<void> _confirmCancelOrder(
     BuildContext context,
     RouteCalculationCubit cubit,
@@ -909,7 +902,7 @@ class _Co2BottomSheetContentState extends State<_Co2BottomSheetContent> {
                           ? null
                           : () {
                               // Backend requires consumption (> 0) for
-                              // non-electric vehicles; validate before sending.
+                              // non-electric vehicles.
                               final needsConsumption =
                                   state.selectedFuel != 'Elétrico';
                               final consumption = double.tryParse(

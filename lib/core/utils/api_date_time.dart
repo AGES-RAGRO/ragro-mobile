@@ -1,9 +1,7 @@
-/// Converte timestamps da API (ISO-8601 com offset/Z) para o fuso local do aparelho.
+/// Parses API timestamps (ISO-8601 with offset/Z) to the device's local zone.
 ///
-/// O backend serializa `OffsetDateTime` em UTC; exibir o resultado de
-/// `DateTime.parse` sem `toLocal()` mostra horário 3h adiantado no fuso de
-/// Brasília (auditoria Fase 0 — o detalhe do pedido divergia da lista).
-/// Use SEMPRE este helper ao parsear datas vindas da API.
+/// Backend serializes `OffsetDateTime` in UTC; without `toLocal()` times show
+/// 3h ahead in Brasilia. Always use this helper when parsing API dates.
 DateTime? parseApiDateTime(Object? value) {
   if (value is! String || value.isEmpty) return null;
   return DateTime.tryParse(value)?.toLocal();

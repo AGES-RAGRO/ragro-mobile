@@ -241,16 +241,16 @@ class AppRouter {
           ],
         ),
 
-        // Notifications — pushed routes (not shell tabs) so the back button
-        // pops to the screen that opened them, from any origin.
+        // Notifications — pushed routes (not shell tabs) so back pops to the
+        // opening screen, from any origin.
         GoRoute(
           path: '/customer/notifications',
           builder: (_, __) => const NotificationsPage(),
           routes: [
             GoRoute(
               path: 'detail',
-              // Sem a notificação no `extra` (ex.: deep link / refresh da URL no
-              // web) não há o que exibir — volta para a lista em vez de quebrar.
+              // Without the notification in `extra` (e.g. deep link / web refresh)
+              // there's nothing to show — fall back to the list instead of crashing.
               redirect: (_, state) => state.extra is AppNotificationEntity
                   ? null
                   : '/customer/notifications',
@@ -272,9 +272,8 @@ class AppRouter {
           builder: (_, __) => const CustomerEditAddressPage(),
         ),
 
-        // Top-level producer profile (fullscreen) — used by map and other contexts
-        // outside the shell; reviews sub-route lives here so navigation from both
-        // the home branch and the map never crosses shell boundaries.
+        // Top-level producer profile (fullscreen), used outside the shell (e.g.
+        // map); reviews sub-route lives here so navigation never crosses shells.
         GoRoute(
           path: '/customer/producer/:producerId',
           builder: (context, state) => ProducerPublicProfilePage(
@@ -430,8 +429,8 @@ class AppRouter {
           routes: [
             GoRoute(
               path: 'detail',
-              // Sem a notificação no `extra` (ex.: deep link / refresh da URL no
-              // web) não há o que exibir — volta para a lista em vez de quebrar.
+              // Without the notification in `extra` (e.g. deep link / web refresh)
+              // there's nothing to show — fall back to the list instead of crashing.
               redirect: (_, state) => state.extra is AppNotificationEntity
                   ? null
                   : '/producer/notifications',

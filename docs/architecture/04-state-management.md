@@ -108,33 +108,34 @@ class LoginPage extends StatelessWidget {
 
 ### B) Route level in the router (for BLoCs that survive sub-routes)
 
-This is the critical RAGRO pattern for BLoCs that need to be available in child routes. **Do not place the `BlocProvider` inside the child widget**, because when navigating to `/consumer/profile/edit` the parent widget `/consumer/profile` would be destroyed, killing the BLoC and causing a `ProviderNotFoundException`.
+This is the critical RAGRO pattern for BLoCs that need to be available in child routes. **Do not place the `BlocProvider` inside the child widget**, because when navigating to `/customer/profile/edit` the parent widget `/customer/profile` would be destroyed, killing the BLoC and causing a `ProviderNotFoundException`.
+
+The customer profile uses a `ShellRoute` whose builder wraps **all** sub-routes (profile, edit, faq) in a single shared `CustomerProfileBloc`. The child `GoRoute`s have no `BlocProvider` of their own, so they reuse the one instance created at the shell.
 
 ```dart
 // lib/core/router/app_router.dart
-GoRoute(
-  path: '/consumer/profile',
-  builder: (context, __) {
-    final authState = context.read<AuthBloc>().state;
-    final userId = authState is AuthAuthenticated ? authState.user.id : '';
-    return BlocProvider(               // <-- provider HERE, in the route builder
-      create: (_) => getIt<ConsumerProfileBloc>()
-        ..add(ConsumerProfileStarted(userId)),
-      child: const ConsumerProfilePage(),
+ShellRoute(
+  builder: (_, __, child) {
+    return BlocProvider(               // <-- one shared provider for the whole branch
+      create: (_) => getIt<CustomerProfileBloc>()
+        ..add(const CustomerProfileStarted()),
+      child: child,
     );
   },
   routes: [
     GoRoute(
-      path: 'edit',
-      builder: (context, __) {
-        final authState = context.read<AuthBloc>().state;
-        final userId = authState is AuthAuthenticated ? authState.user.id : '';
-        return BlocProvider(           // <-- separate instance for the edit route
-          create: (_) => getIt<ConsumerProfileBloc>()
-            ..add(ConsumerProfileStarted(userId)),
-          child: const ConsumerEditProfilePage(),
-        );
-      },
+      path: '/customer/profile',
+      builder: (_, __) => const CustomerProfilePage(),
+      routes: [
+        GoRoute(
+          path: 'edit',                // <-- reuses the shell's CustomerProfileBloc
+          builder: (_, __) => const CustomerEditProfilePage(),
+        ),
+        GoRoute(
+          path: 'faq',
+          builder: (_, __) => const FaqPage(),
+        ),
+      ],
     ),
   ],
 ),
@@ -190,9 +191,9 @@ Use when the same state change needs to both update the UI and trigger a side ef
 
 ```dart
 BlocConsumer<InventoryBloc, InventoryState>(
-  listenWhen: (_, current) => current is InventoryError,
+  listenWhen: (_, current) => current is InventoryFailure,
   listener: (context, state) {
-    if (state is InventoryError) {
+    if (state is InventoryFailure) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(state.message)),
       );
@@ -202,8 +203,7 @@ BlocConsumer<InventoryBloc, InventoryState>(
     return switch (state) {
       InventoryLoading() => const InventoryShimmer(),
       InventoryLoaded(:final products) => ProductListView(products: products),
-      InventoryEmpty() => const EmptyInventoryState(),
-      InventoryError() => const RetryButton(),
+      InventoryFailure() => const RetryButton(),
       InventoryInitial() => const SizedBox.shrink(),
     };
   },
@@ -214,15 +214,17 @@ BlocConsumer<InventoryBloc, InventoryState>(
 
 ## AuthBloc — The Global BLoC
 
-`AuthBloc` is the only BLoC registered as a **lazySingleton**. It manages the authentication state for the entire application and is provided at the top of the widget tree in `main.dart`:
+`AuthBloc` is registered as a **lazySingleton**. It manages the authentication state for the entire application. It is one of two BLoCs provided at the top of the widget tree, alongside `NotificationsBloc` (the global bell-badge / notifications source of truth). `main.dart` only calls `runApp(const App())`; the global providers live in `lib/app.dart`, which builds both singletons as fields and exposes them with `BlocProvider.value`:
 
 ```dart
-// lib/main.dart (or app.dart)
+// lib/app.dart
+final AuthBloc _authBloc = getIt<AuthBloc>()..add(const AuthStarted());
+final NotificationsBloc _notificationsBloc = getIt<NotificationsBloc>();
+// ...
 MultiBlocProvider(
   providers: [
-    BlocProvider(
-      create: (_) => getIt<AuthBloc>()..add(const AuthStarted()),
-    ),
+    BlocProvider.value(value: _authBloc),
+    BlocProvider.value(value: _notificationsBloc),
   ],
   child: MaterialApp.router(
     routerConfig: getIt<AppRouter>().router,
@@ -230,7 +232,7 @@ MultiBlocProvider(
 )
 ```
 
-All other BLoCs are registered as `@injectable` (factory), creating a new instance every time `getIt<XBloc>()` is called.
+Several other BLoCs are also `@lazySingleton` (e.g. `CartBloc`, `HomeBloc`, `ProducerManagementBloc`, `InventoryBloc`, and `ActiveDeliveryCubit`), so `getIt<XBloc>()` returns the same instance across the app. The remaining BLoCs are registered as `@injectable` (factory), creating a new instance every time `getIt<XBloc>()` is called.
 
 ### AuthBloc Events and States
 

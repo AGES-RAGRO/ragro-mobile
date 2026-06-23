@@ -6,12 +6,11 @@ import 'package:ragro_mobile/core/network/api_endpoints.dart';
 import 'package:ragro_mobile/features/auth/data/datasources/auth_local_datasource.dart';
 import 'package:stomp_dart_client/stomp_dart_client.dart';
 
-/// Conexão STOMP do rastreamento em tempo real (canal `/ws` do backend).
+/// STOMP connection for real-time tracking (backend `/ws` channel).
 ///
-/// O handshake envia o JWT no header Authorization (o backend valida na security
-/// chain e o interceptor STOMP autoriza tópico/envio por usuário). Reconexão
-/// automática a cada 5s; quem usa registra callbacks de conexão para reassinar
-/// tópicos e reenviar a última posição pendente.
+/// Handshake sends the JWT in the Authorization header; backend authorizes
+/// topic/send per user. Auto-reconnects every 5s; callers register connect
+/// callbacks to re-subscribe topics and resend the last pending position.
 @lazySingleton
 class TrackingSocket {
   TrackingSocket(this._authLocal);
@@ -24,11 +23,10 @@ class TrackingSocket {
 
   bool get isConnected => _client?.connected ?? false;
 
-  /// Garante uma conexão ativa (idempotente).
+  /// Ensures an active connection (idempotent).
   Future<void> ensureConnected() async {
     if (_client?.connected == true) return;
-    // Um cliente que existe mas não está conectado (pós-disconnect) ficava preso
-    // — descarta-o antes de construir um novo para permitir o self-heal.
+    // Discard a stale (post-disconnect) client before rebuilding to self-heal.
     if (_client != null) {
       _client?.deactivate();
       _client = null;
@@ -47,11 +45,9 @@ class TrackingSocket {
             listener();
           }
         },
-        // Ao desconectar, libera o cliente para que ensureConnected reconstrua a
-        // conexão na próxima chamada em vez de devolver um cliente morto.
+        // Release the client on disconnect so ensureConnected rebuilds it.
         onDisconnect: (_) => _client = null,
-        // Erros de socket são tratados pela reconexão automática; o fallback de
-        // polling do cliente cobre a janela sem conexão.
+        // Socket errors handled by auto-reconnect; client polling covers the gap.
         onWebSocketError: (_) {},
       ),
     );
@@ -59,7 +55,7 @@ class TrackingSocket {
     client.activate();
   }
 
-  /// Callback disparado a cada (re)conexão — usado para reassinar e reenviar.
+  /// Callback fired on each (re)connect — used to re-subscribe and resend.
   void addOnConnect(void Function() listener) {
     _connectListeners.add(listener);
     if (isConnected) listener();
@@ -69,7 +65,7 @@ class TrackingSocket {
     _connectListeners.remove(listener);
   }
 
-  /// Assina o tópico da rota; o callback recebe o JSON decodificado.
+  /// Subscribes to the route topic; callback receives the decoded JSON.
   void subscribeRoute(String routeId, void Function(Map<String, dynamic>) onMessage) {
     final destination = '/topic/routes/$routeId';
     _subscriptions.remove(destination)?.call();
@@ -89,7 +85,7 @@ class TrackingSocket {
     _subscriptions.remove('/topic/routes/$routeId')?.call();
   }
 
-  /// Envia um ping de posição do produtor.
+  /// Sends a producer position ping.
   void sendPosition(String routeId, Map<String, dynamic> payload) {
     if (!isConnected) return;
     _client?.send(
@@ -98,7 +94,7 @@ class TrackingSocket {
     );
   }
 
-  /// Encerra a conexão (logout/fim de uso). Idempotente.
+  /// Closes the connection (logout/teardown). Idempotent.
   void shutdown() {
     for (final unsubscribe in _subscriptions.values) {
       unsubscribe();

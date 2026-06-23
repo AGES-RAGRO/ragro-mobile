@@ -1,7 +1,4 @@
-// Screen: Order Details
-// User Story: US-12 - View Order Details
-// Epic: EPIC 3 - Shopping & Orders
-// Routes: GET /orders/customer/:id
+// Order detail screen. Route: GET /orders/customer/:id
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show Clipboard, ClipboardData;
@@ -542,7 +539,7 @@ class _ActionFooter extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final buttons = <Widget>[
-      // Pedido em rota: acompanhamento em tempo real no mapa (Fase 3).
+      // Order in route: real-time map tracking.
       if (order.isInDelivery)
         OrderActionButton(
           label: 'Acompanhar Entrega',
@@ -615,8 +612,8 @@ class _ActionFooter extends StatelessWidget {
   }
 }
 
-/// Card com o código de 4 dígitos que o consumidor informa ao produtor para
-/// confirmar o recebimento (exibido enquanto o pedido está IN_DELIVERY).
+/// Card with the 4-digit code the customer gives the producer to confirm
+/// receipt (shown while the order is IN_DELIVERY).
 class _ConfirmationCodeCard extends StatelessWidget {
   const _ConfirmationCodeCard({required this.code});
 
