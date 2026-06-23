@@ -328,6 +328,7 @@ class RouteCalculationCubit extends Cubit<RouteCalculationState> {
 
   /// Resumes the active route or creates a new one from the producer's orders.
   Future<void> loadRoute() async {
+    emit(state.copyWith(status: RouteCalculationStatus.loading));
     try {
       var route = await _routeRepository.getActiveRoute();
       if (isClosed) return;
@@ -360,6 +361,20 @@ class RouteCalculationCubit extends Cubit<RouteCalculationState> {
       }
 
       _applyRoute(route);
+    } on ApiException catch (e) {
+      if (isClosed) return;
+      // Surface the backend's specific reason (e.g. "Nenhum pedido confirmado…"
+      // or the per-order geocode failure) instead of a generic message.
+      emit(
+        state.copyWith(
+          deliveries: const [],
+          orderedStops: const [],
+          totalDistanceKm: 0,
+          totalDurationMins: 0,
+          status: RouteCalculationStatus.error,
+          errorMessage: e.message,
+        ),
+      );
     } on Exception {
       if (isClosed) return;
       emit(
@@ -372,6 +387,85 @@ class RouteCalculationCubit extends Cubit<RouteCalculationState> {
           errorMessage:
               'Não foi possível montar a rota. Verifique se há pedidos '
               'confirmados e tente novamente.',
+        ),
+      );
+    }
+  }
+
+  /// Pull-to-refresh: pulls newly accepted orders into the active route
+  /// (backend re-optimizes only the pending portion, keeping delivered stops).
+  /// Falls back to [loadRoute] when there is no route yet. Idempotent on the
+  /// backend, so it is safe to call on every pull.
+  Future<void> refreshRoute() async {
+    final routeId = state.routeId;
+    if (routeId == null) {
+      await loadRoute();
+      return;
+    }
+    emit(state.copyWith(status: RouteCalculationStatus.loading));
+
+    // Best-effort fresh GPS so add-stops re-anchors/re-optimizes the remaining
+    // route from where the producer is NOW (they move during a delivery). Falls
+    // back to the last-known position; the backend keeps the origin if none sent.
+    var lat = state.producerLat;
+    var lng = state.producerLng;
+    try {
+      final permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.whileInUse ||
+          permission == LocationPermission.always) {
+        final position = await Geolocator.getCurrentPosition();
+        if (isClosed) return;
+        lat = position.latitude;
+        lng = position.longitude;
+      }
+    } on Exception {
+      // Keep last-known position.
+    }
+    if (isClosed) return;
+
+    try {
+      final route = await _routeRepository.addStops(
+        routeId,
+        originLatitude: lat,
+        originLongitude: lng,
+      );
+      if (isClosed) return;
+
+      if (route == null) {
+        // Route completed while away: clear gracefully.
+        unawaited(_trackingPublisher.stop());
+        emit(
+          state.copyWith(
+            status: RouteCalculationStatus.initial,
+            deliveries: const [],
+            orderedStops: const [],
+            confirmedDeliveries: const {},
+            totalDistanceKm: 0,
+            totalDurationMins: 0,
+          ),
+        );
+      } else {
+        // Reflect the fresh GPS so the mini-map and Maps deep-link use it too.
+        if (lat != null && lng != null) {
+          emit(state.copyWith(producerLat: lat, producerLng: lng));
+        }
+        _applyRoute(route);
+      }
+      _refreshProducerDashboard();
+    } on ApiException catch (e) {
+      if (isClosed) return;
+      emit(
+        state.copyWith(
+          status: RouteCalculationStatus.error,
+          errorMessage: e.message,
+        ),
+      );
+    } on Exception {
+      if (isClosed) return;
+      emit(
+        state.copyWith(
+          status: RouteCalculationStatus.error,
+          errorMessage: 'Não foi possível atualizar a rota. Tente novamente.',
         ),
       );
     }
@@ -400,8 +494,17 @@ class RouteCalculationCubit extends Cubit<RouteCalculationState> {
       unawaited(_trackingPublisher.stop());
     }
 
+    // Route data arrived: clear a transient loading/error status, but preserve a
+    // CO2 'calculated' status so the result card stays after a delivery refresh.
+    final nextStatus =
+        state.status == RouteCalculationStatus.loading ||
+            state.status == RouteCalculationStatus.error
+        ? RouteCalculationStatus.initial
+        : state.status;
+
     emit(
       state.copyWith(
+        status: nextStatus,
         routeId: route.id,
         deliveries: [...pending.map(toDelivery), ...done.map(toDelivery)],
         orderedStops: pending.map((s) => '${s.latitude},${s.longitude}').toList(),

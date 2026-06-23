@@ -245,7 +245,13 @@ class _InventoryView extends StatelessWidget {
                               ],
                             ),
                           )
-                        : ListView.separated(
+                        : RefreshIndicator(
+                            color: AppColors.darkGreen,
+                            onRefresh: () async => context
+                                .read<InventoryBloc>()
+                                .add(const InventoryRefreshed()),
+                            child: ListView.separated(
+                            physics: const AlwaysScrollableScrollPhysics(),
                             padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
                             itemCount: state.products.length,
                             separatorBuilder: (_, __) =>
@@ -306,6 +312,7 @@ class _InventoryView extends StatelessWidget {
                                 ),
                               );
                             },
+                          ),
                           ),
                   ),
                 ] else if (state is InventoryLoading) ...[

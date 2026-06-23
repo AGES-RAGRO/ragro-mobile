@@ -142,6 +142,36 @@ class RouteRepository {
     }
   }
 
+  /// Pulls newly accepted orders into the ACTIVE route (re-optimizes only the
+  /// pending portion, keeps delivered stops). When [originLatitude]/
+  /// [originLongitude] (the producer's current GPS) are provided, the remaining
+  /// route is re-anchored/re-optimized from there. Idempotent: with no new order
+  /// the backend returns the route unchanged (no re-anchor). `null` when the
+  /// route already completed (404) — same contract as [getActiveRoute].
+  Future<DeliveryRoute?> addStops(
+    String routeId, {
+    double? originLatitude,
+    double? originLongitude,
+  }) async {
+    try {
+      final hasOrigin = originLatitude != null && originLongitude != null;
+      final response = await _apiClient.dio.patch<Map<String, dynamic>>(
+        ApiEndpoints.routeAddStops(routeId),
+        data: hasOrigin
+            ? {
+                'originLatitude': originLatitude,
+                'originLongitude': originLongitude,
+              }
+            : null,
+      );
+      return DeliveryRoute.fromJson(response.data ?? const {});
+    } on DioException catch (e) {
+      final error = e.error;
+      if (error is NotFoundException) return null;
+      throw error as ApiException? ?? const UnknownApiException();
+    }
+  }
+
   /// Updates a stop (ARRIVED/DELIVERED/FAILED) and returns the updated route.
   /// [code] (customer's 4 digits) is REQUIRED when status is DELIVERED;
   /// otherwise the API returns 400.
