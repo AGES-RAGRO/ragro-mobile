@@ -403,8 +403,32 @@ class RouteCalculationCubit extends Cubit<RouteCalculationState> {
       return;
     }
     emit(state.copyWith(status: RouteCalculationStatus.loading));
+
+    // Best-effort fresh GPS so add-stops re-anchors/re-optimizes the remaining
+    // route from where the producer is NOW (they move during a delivery). Falls
+    // back to the last-known position; the backend keeps the origin if none sent.
+    var lat = state.producerLat;
+    var lng = state.producerLng;
     try {
-      final route = await _routeRepository.addStops(routeId);
+      final permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.whileInUse ||
+          permission == LocationPermission.always) {
+        final position = await Geolocator.getCurrentPosition();
+        if (isClosed) return;
+        lat = position.latitude;
+        lng = position.longitude;
+      }
+    } on Exception {
+      // Keep last-known position.
+    }
+    if (isClosed) return;
+
+    try {
+      final route = await _routeRepository.addStops(
+        routeId,
+        originLatitude: lat,
+        originLongitude: lng,
+      );
       if (isClosed) return;
 
       if (route == null) {
@@ -421,6 +445,10 @@ class RouteCalculationCubit extends Cubit<RouteCalculationState> {
           ),
         );
       } else {
+        // Reflect the fresh GPS so the mini-map and Maps deep-link use it too.
+        if (lat != null && lng != null) {
+          emit(state.copyWith(producerLat: lat, producerLng: lng));
+        }
         _applyRoute(route);
       }
       _refreshProducerDashboard();

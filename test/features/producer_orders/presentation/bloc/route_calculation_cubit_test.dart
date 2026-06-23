@@ -334,13 +334,23 @@ void main() {
   group('refreshRoute', () {
     test('calls addStops and applies the returned route', () async {
       final cubit = await buildLoadedCubit();
-      when(() => routeRepository.addStops(any())).thenAnswer(
+      when(() => routeRepository.addStops(
+        any(),
+        originLatitude: any(named: 'originLatitude'),
+        originLongitude: any(named: 'originLongitude'),
+      )).thenAnswer(
         (_) async => _route(stops: [_stop(id: 'stop-1'), _stop(id: 'stop-2')]),
       );
 
       await cubit.refreshRoute();
 
-      verify(() => routeRepository.addStops('route-1')).called(1);
+      verify(
+        () => routeRepository.addStops(
+          'route-1',
+          originLatitude: any(named: 'originLatitude'),
+          originLongitude: any(named: 'originLongitude'),
+        ),
+      ).called(1);
       expect(cubit.state.deliveries.length, 2);
       expect(cubit.state.status, isNot(RouteCalculationStatus.loading));
       await cubit.close();
@@ -348,7 +358,11 @@ void main() {
 
     test('clears state when the route completed (addStops -> null)', () async {
       final cubit = await buildLoadedCubit();
-      when(() => routeRepository.addStops(any())).thenAnswer((_) async => null);
+      when(() => routeRepository.addStops(
+        any(),
+        originLatitude: any(named: 'originLatitude'),
+        originLongitude: any(named: 'originLongitude'),
+      )).thenAnswer((_) async => null);
 
       await cubit.refreshRoute();
 
@@ -369,14 +383,22 @@ void main() {
 
       await cubit.refreshRoute();
 
-      verifyNever(() => routeRepository.addStops(any()));
+      verifyNever(() => routeRepository.addStops(
+        any(),
+        originLatitude: any(named: 'originLatitude'),
+        originLongitude: any(named: 'originLongitude'),
+      ));
       await cubit.close();
     });
 
     test('emits the backend message on ApiException', () async {
       final cubit = await buildLoadedCubit();
       when(
-        () => routeRepository.addStops(any()),
+        () => routeRepository.addStops(
+        any(),
+        originLatitude: any(named: 'originLatitude'),
+        originLongitude: any(named: 'originLongitude'),
+      ),
       ).thenThrow(const UnknownApiException('Falha ao otimizar a rota'));
 
       await cubit.refreshRoute();
