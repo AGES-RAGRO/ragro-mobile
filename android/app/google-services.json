@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "284472607680",
+    "project_id": "ragro-19d6a",
+    "storage_bucket": "ragro-19d6a.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:284472607680:android:2750da6644344df0147e25",
+        "android_client_info": {
+          "package_name": "com.ragro.ragro_mobile"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBn-Y--b0ofs6aeQn4D_3RRF5wXq3LNFe8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

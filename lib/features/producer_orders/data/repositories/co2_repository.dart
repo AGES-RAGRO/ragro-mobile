@@ -29,6 +29,36 @@ class Co2Repository {
     }
   }
 
+  /// Fetches the vehicle/fuel matrix from `GET /co2/options` as
+  /// `{vehicleType: [fuelTypes]}` with the backend enum names (CAR/GASOLINE...).
+  ///
+  /// Backend shape (Co2OptionsResponse):
+  /// `{"vehicles": [{"type": "CAR", "description": "...",
+  ///   "allowedFuels": [{"type": "GASOLINE", "description": "..."}]}]}`
+  Future<Map<String, List<String>>> getOptions() async {
+    try {
+      final response = await _apiClient.dio.get<Map<String, dynamic>>(
+        ApiEndpoints.co2Options,
+      );
+
+      final vehicles =
+          response.data?['vehicles'] as List<dynamic>? ?? const <dynamic>[];
+      return {
+        for (final vehicle in vehicles.whereType<Map<String, dynamic>>())
+          if (vehicle['type'] is String)
+            vehicle['type'] as String: [
+              for (final fuel
+                  in (vehicle['allowedFuels'] as List<dynamic>? ??
+                          const <dynamic>[])
+                      .whereType<Map<String, dynamic>>())
+                if (fuel['type'] is String) fuel['type'] as String,
+            ],
+      };
+    } on DioException catch (e) {
+      throw e.error as ApiException? ?? const UnknownApiException();
+    }
+  }
+
   /// Records an optimized route's CO2 savings. Best-effort: must not block the
   /// route flow on failure.
   Future<void> recordSavings(Co2SavingRequest request) async {

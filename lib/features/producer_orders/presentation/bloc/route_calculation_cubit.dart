@@ -1,43 +1,54 @@
 import 'dart:async';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:injectable/injectable.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:injectable/injectable.dart';
 import 'package:ragro_mobile/core/di/injection.dart';
+import 'package:ragro_mobile/core/network/api_exception.dart';
 import 'package:ragro_mobile/features/producer_management/presentation/bloc/producer_management_bloc.dart';
 import 'package:ragro_mobile/features/producer_management/presentation/bloc/producer_management_event.dart';
 import 'package:ragro_mobile/features/producer_management/presentation/bloc/producer_management_state.dart';
 import 'package:ragro_mobile/features/producer_orders/data/models/co2_request_model.dart';
 import 'package:ragro_mobile/features/producer_orders/data/repositories/co2_repository.dart';
 import 'package:ragro_mobile/features/producer_orders/data/repositories/route_repository.dart';
-import 'package:ragro_mobile/features/producer_orders/domain/entities/producer_order.dart';
-import 'package:ragro_mobile/features/producer_orders/domain/entities/producer_order_status.dart';
-import 'package:ragro_mobile/features/producer_orders/domain/repositories/producer_orders_repository.dart';
-import 'route_calculation_state.dart';
+import 'package:ragro_mobile/features/producer_orders/data/services/route_tracking_publisher.dart';
+import 'package:ragro_mobile/features/producer_orders/domain/usecases/refuse_producer_order.dart';
+import 'package:ragro_mobile/features/producer_orders/presentation/bloc/route_calculation_state.dart';
 
+/// Delivery route PERSISTED on the backend: created once (1 Google call),
+/// resumed via GET /routes/active on reopen, with per-stop progress (PATCH) and
+/// no Google recompute.
 @injectable
 class RouteCalculationCubit extends Cubit<RouteCalculationState> {
-  final Co2Repository _co2Repository;
-  final ProducerOrdersRepository _ordersRepository;
-  final RouteRepository _routeRepository;
-
-  /// Source of truth for all routable deliveries; the displayed list is derived
-  /// from this plus already-confirmed deliveries.
-  List<RouteDelivery> _allDeliveries = const [];
-
-  /// Ensures CO2 savings are recorded only once per route session.
-  bool _savingsRecorded = false;
 
   RouteCalculationCubit(
     this._co2Repository,
-    this._ordersRepository,
     this._routeRepository,
+    this._trackingPublisher,
+    this._refuseProducerOrder,
   ) : super(const RouteCalculationState()) {
     _initRoute();
   }
+  final Co2Repository _co2Repository;
+  final RouteRepository _routeRepository;
+  final RouteTrackingPublisher _trackingPublisher;
+  final RefuseProducerOrder _refuseProducerOrder;
+
+  /// Records CO2 savings only on route CREATION (resuming doesn't re-record).
+  bool _savingsRecorded = false;
+
+  @override
+  Future<void> close() async {
+    // Closing the screen does NOT stop sharing: the route stays active and the
+    // foreground service keeps emitting until the last delivery is confirmed.
+    return super.close();
+  }
 
   Future<void> _initRoute() async {
-    // Pre-fill an editable default consumption for the CO2 calculation.
+    // Best-effort: swap the hardcoded fuel matrix for the backend's without
+    // blocking route loading.
+    unawaited(_loadCo2Options());
+
     if (state.averageConsumption.trim().isEmpty) {
       emit(
         state.copyWith(
@@ -65,25 +76,64 @@ class RouteCalculationCubit extends Cubit<RouteCalculationState> {
           ),
         );
       }
-      // GPS denied/unavailable: origin is anchored to the first delivery in
-      // loadDeliveries, avoiding a hardcoded city.
-    } catch (e) {
-      // Proceed without GPS; loadDeliveries resolves the origin from deliveries.
+    } on Exception {
+      // No GPS: can still RESUME an active route; creating a new one needs
+      // location and the flow below emits the proper error.
     }
 
     if (isClosed) return;
-    await loadDeliveries();
+    await loadRoute();
   }
 
-  /// Fuels allowed per vehicle, mirroring the backend matrix (Co2Service /
-  /// `GET /co2/options`). Keeps the dropdowns dependent so the app never sends
-  /// a combination the backend rejects with HTTP 400.
-  static const Map<String, List<String>> allowedFuelsByVehicle = {
-    'Carro': ['Gasolina', 'Etanol', 'Diesel', 'Elétrico'],
-    'Moto': ['Gasolina', 'Etanol', 'Elétrico'],
-    'Van': ['Gasolina', 'Diesel', 'Elétrico'],
-    'Caminhão': ['Diesel', 'Elétrico'],
-  };
+  /// Best-effort: fetches the vehicle -> fuels matrix (`GET /co2/options`) into
+  /// the dropdowns. On failure keeps the hardcoded fallback
+  /// ([RouteCalculationState.fallbackAllowedFuelsByVehicle]) so the flow still
+  /// works offline or when the endpoint is down.
+  Future<void> _loadCo2Options() async {
+    try {
+      final options = await _co2Repository.getOptions();
+      if (isClosed) return;
+
+      // API sends EN enums (CAR/GASOLINE...); UI uses PT labels.
+      final mapped = <String, List<String>>{};
+      for (final entry in options.entries) {
+        final vehicle = _vehicleLabelFromApi(entry.key);
+        if (vehicle == null) continue;
+        final fuels = entry.value
+            .map(_fuelLabelFromApi)
+            .whereType<String>()
+            .toList();
+        if (fuels.isNotEmpty) mapped[vehicle] = fuels;
+      }
+      if (mapped.isEmpty) return;
+
+      // Stable vehicle order (backend map is unordered).
+      final ordered = <String, List<String>>{
+        for (final vehicle
+            in RouteCalculationState.fallbackAllowedFuelsByVehicle.keys)
+          if (mapped.containsKey(vehicle)) vehicle: mapped[vehicle]!,
+      };
+
+      // Keep the current selection valid in the new dropdowns.
+      var selectedVehicle = state.selectedVehicle;
+      if (!ordered.containsKey(selectedVehicle)) {
+        selectedVehicle = ordered.keys.first;
+      }
+      var selectedFuel = state.selectedFuel;
+      final allowed = ordered[selectedVehicle]!;
+      if (!allowed.contains(selectedFuel)) selectedFuel = allowed.first;
+
+      emit(
+        state.copyWith(
+          allowedFuelsByVehicle: ordered,
+          selectedVehicle: selectedVehicle,
+          selectedFuel: selectedFuel,
+        ),
+      );
+    } on Exception {
+      // State already starts with the hardcoded fallback matrix; nothing to do.
+    }
+  }
 
   /// Default consumption (km/L) per vehicle, used when the producer leaves it
   /// blank to avoid the backend's "consumption required" error and still
@@ -99,14 +149,12 @@ class RouteCalculationCubit extends Cubit<RouteCalculationState> {
     final nextVehicle = vehicle ?? state.selectedVehicle;
     var nextFuel = fuel ?? state.selectedFuel;
 
-    // If the vehicle changed and the current fuel is no longer allowed, fall
-    // back to the first valid fuel to avoid an invalid combination.
-    final allowed = allowedFuelsByVehicle[nextVehicle] ?? const ['Gasolina'];
+    final allowed =
+        state.allowedFuelsByVehicle[nextVehicle] ?? const ['Gasolina'];
     if (!allowed.contains(nextFuel)) {
       nextFuel = allowed.first;
     }
 
-    // When switching vehicle with no consumption set, use the new vehicle's default.
     final nextConsumption =
         consumption ??
         (vehicle != null && state.averageConsumption.trim().isEmpty
@@ -147,7 +195,7 @@ class RouteCalculationCubit extends Cubit<RouteCalculationState> {
           calculatedCo2: response.co2Emission,
         ),
       );
-    } catch (e) {
+    } on Exception {
       if (isClosed) return;
       emit(
         state.copyWith(
@@ -158,99 +206,317 @@ class RouteCalculationCubit extends Cubit<RouteCalculationState> {
     }
   }
 
-  Future<void> confirmDelivery(String deliveryId) async {
-    if (state.confirmedDeliveries.contains(deliveryId)) return;
+  /// Marks the stop delivered (backend PATCH completes the order via its state
+  /// machine). No Google call here — the response carries the updated route.
+  ///
+  /// [code] (customer's 4 digits) is REQUIRED: the backend rejects a missing or
+  /// wrong code with 400. Returns `true` on success, `false` on error (so the
+  /// code dialog keeps its error state and re-prompts).
+  Future<bool> confirmDelivery(String stopId, String code) async {
+    final routeId = state.routeId;
+    if (routeId == null) return false;
+    if (state.confirmedDeliveries.contains(stopId)) return true;
 
     try {
-      // Persist to backend: move the order to DELIVERED (PATCH /orders/{id}/status).
-      await _ordersRepository.updateStatus(
-        deliveryId,
-        ProducerOrderStatus.delivered,
+      final route = await _routeRepository.updateStop(
+        routeId: routeId,
+        stopId: stopId,
+        status: 'DELIVERED',
+        code: code,
       );
-      if (isClosed) return;
+      if (isClosed) return false;
 
-      final updatedDeliveries = Set<String>.from(state.confirmedDeliveries)
-        ..add(deliveryId);
-      emit(state.copyWith(confirmedDeliveries: updatedDeliveries));
-
-      // Delivery completed: the dashboard (delivered only) must reload.
+      _applyRoute(route);
       _refreshProducerDashboard();
-
-      // Recalculate the route without the confirmed deliveries.
-      await _recalculateRoute();
-    } catch (e) {
-      if (isClosed) return;
+      return true;
+    } on ApiException catch (e) {
+      if (isClosed) return false;
+      // Surface the backend message (e.g. código incorreto / obrigatório).
+      emit(
+        state.copyWith(
+          status: RouteCalculationStatus.error,
+          errorMessage: e.message,
+        ),
+      );
+      return false;
+    } on Exception {
+      if (isClosed) return false;
       emit(
         state.copyWith(
           status: RouteCalculationStatus.error,
           errorMessage: 'Erro ao confirmar entrega. Tente novamente.',
         ),
       );
+      return false;
     }
   }
 
-  /// Fetches the producer's accepted (CONFIRMED) and in-delivery (IN_DELIVERY)
-  /// orders, builds the stops, and computes the best route.
-  Future<void> loadDeliveries() async {
+  /// Refuses the ORDER behind a route stop and refreshes the screen.
+  ///
+  /// The backend refuses the order (-> CANCELLED) and `RouteStopSyncListener`
+  /// moves the stop to terminal (FAILED). There's no "cancel stop" PATCH, so we
+  /// re-fetch the active route (`GET /routes/active`) and reapply it. If it was
+  /// the LAST stop, the route completes and `getActiveRoute()` returns `null`;
+  /// state is cleared gracefully (no crash).
+  ///
+  /// Returns `true` on success, `false` on error (emits error state, like
+  /// [confirmDelivery]).
+  Future<bool> cancelOrder(
+    String stopId, {
+    required String reason,
+    String? details,
+  }) async {
+    final routeId = state.routeId;
+    if (routeId == null) return false;
+
+    // Resolve the order id from the stop (refusal acts on the ORDER, not the
+    // stop).
+    final orderId = state.deliveries
+        .where((d) => d.id == stopId)
+        .map((d) => d.orderId)
+        .firstWhere((id) => id.isNotEmpty, orElse: () => '');
+    if (orderId.isEmpty) return false;
+
     try {
-      final orders = await _ordersRepository.getOrders();
+      await _refuseProducerOrder(orderId, reason: reason, details: details);
+      if (isClosed) return false;
+
+      // Backend already synced the stop (terminal); re-fetch the active route
+      // to reflect the cancelled stop's removal.
+      final route = await _routeRepository.getActiveRoute();
+      if (isClosed) return false;
+
+      if (route == null) {
+        // Was the only/last stop: route completed. Clear state gracefully
+        // (screen shows "no pending deliveries").
+        unawaited(_trackingPublisher.stop());
+        emit(
+          state.copyWith(
+            deliveries: const [],
+            orderedStops: const [],
+            confirmedDeliveries: const {},
+            totalDistanceKm: 0,
+            totalDurationMins: 0,
+          ),
+        );
+      } else {
+        _applyRoute(route);
+      }
+
+      _refreshProducerDashboard();
+      return true;
+    } on ApiException catch (e) {
+      if (isClosed) return false;
+      emit(
+        state.copyWith(
+          status: RouteCalculationStatus.error,
+          errorMessage: e.message,
+        ),
+      );
+      return false;
+    } on Exception {
+      if (isClosed) return false;
+      emit(
+        state.copyWith(
+          status: RouteCalculationStatus.error,
+          errorMessage: 'Erro ao cancelar o pedido. Tente novamente.',
+        ),
+      );
+      return false;
+    }
+  }
+
+  /// Resumes the active route or creates a new one from the producer's orders.
+  Future<void> loadRoute() async {
+    emit(state.copyWith(status: RouteCalculationStatus.loading));
+    try {
+      var route = await _routeRepository.getActiveRoute();
       if (isClosed) return;
 
-      _allDeliveries = orders
-          .where(
-            (o) =>
-                o.status == ProducerOrderStatus.accepted ||
-                o.status == ProducerOrderStatus.inDelivery,
-          )
-          .map(_toDelivery)
-          .where((d) => d.stop.isNotEmpty)
-          .toList();
+      if (route == null) {
+        final lat = state.producerLat;
+        final lng = state.producerLng;
+        if (lat == null || lng == null) {
+          emit(
+            state.copyWith(
+              status: RouteCalculationStatus.error,
+              errorMessage:
+                  'Ative a localização para montar a rota de entregas.',
+            ),
+          );
+          return;
+        }
+        route = await _routeRepository.createRoute(
+          originLatitude: lat,
+          originLongitude: lng,
+        );
+        if (isClosed) return;
 
-      // No GPS: anchor origin/preview to the first delivery with coordinates
-      // instead of a hardcoded city. Runs only when GPS did not set a position.
-      if (state.producerLat == null || state.producerLng == null) {
-        for (final d in _allDeliveries) {
-          final coords = _parseLatLng(d.stop);
-          if (coords != null) {
-            emit(state.copyWith(producerLat: coords.$1, producerLng: coords.$2));
-            break;
-          }
+        // CO2 savings from server numbers: optimized route vs individual
+        // round-trips baseline (Route Matrix).
+        if (!_savingsRecorded) {
+          _savingsRecorded = true;
+          _recordCo2Savings(route);
         }
       }
 
-      await _recalculateRoute();
-    } catch (e) {
+      _applyRoute(route);
+    } on ApiException catch (e) {
       if (isClosed) return;
-      // No routable deliveries: reset stats and keep the list empty.
-      _allDeliveries = const [];
+      // Surface the backend's specific reason (e.g. "Nenhum pedido confirmado…"
+      // or the per-order geocode failure) instead of a generic message.
       emit(
         state.copyWith(
           deliveries: const [],
           orderedStops: const [],
-          totalDistanceKm: 0.0,
+          totalDistanceKm: 0,
           totalDurationMins: 0,
+          status: RouteCalculationStatus.error,
+          errorMessage: e.message,
+        ),
+      );
+    } on Exception {
+      if (isClosed) return;
+      emit(
+        state.copyWith(
+          deliveries: const [],
+          orderedStops: const [],
+          totalDistanceKm: 0,
+          totalDurationMins: 0,
+          status: RouteCalculationStatus.error,
+          errorMessage:
+              'Não foi possível montar a rota. Verifique se há pedidos '
+              'confirmados e tente novamente.',
         ),
       );
     }
   }
 
-  RouteDelivery _toDelivery(ProducerOrder order) {
-    return RouteDelivery(
-      id: order.id,
-      title: order.consumerName.isNotEmpty ? order.consumerName : 'Cliente',
-      subtitle: order.fullDeliveryAddress,
-      stop: order.routeStop,
-    );
+  /// Pull-to-refresh: pulls newly accepted orders into the active route
+  /// (backend re-optimizes only the pending portion, keeping delivered stops).
+  /// Falls back to [loadRoute] when there is no route yet. Idempotent on the
+  /// backend, so it is safe to call on every pull.
+  Future<void> refreshRoute() async {
+    final routeId = state.routeId;
+    if (routeId == null) {
+      await loadRoute();
+      return;
+    }
+    emit(state.copyWith(status: RouteCalculationStatus.loading));
+
+    // Best-effort fresh GPS so add-stops re-anchors/re-optimizes the remaining
+    // route from where the producer is NOW (they move during a delivery). Falls
+    // back to the last-known position; the backend keeps the origin if none sent.
+    var lat = state.producerLat;
+    var lng = state.producerLng;
+    try {
+      final permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.whileInUse ||
+          permission == LocationPermission.always) {
+        final position = await Geolocator.getCurrentPosition();
+        if (isClosed) return;
+        lat = position.latitude;
+        lng = position.longitude;
+      }
+    } on Exception {
+      // Keep last-known position.
+    }
+    if (isClosed) return;
+
+    try {
+      final route = await _routeRepository.addStops(
+        routeId,
+        originLatitude: lat,
+        originLongitude: lng,
+      );
+      if (isClosed) return;
+
+      if (route == null) {
+        // Route completed while away: clear gracefully.
+        unawaited(_trackingPublisher.stop());
+        emit(
+          state.copyWith(
+            status: RouteCalculationStatus.initial,
+            deliveries: const [],
+            orderedStops: const [],
+            confirmedDeliveries: const {},
+            totalDistanceKm: 0,
+            totalDurationMins: 0,
+          ),
+        );
+      } else {
+        // Reflect the fresh GPS so the mini-map and Maps deep-link use it too.
+        if (lat != null && lng != null) {
+          emit(state.copyWith(producerLat: lat, producerLng: lng));
+        }
+        _applyRoute(route);
+      }
+      _refreshProducerDashboard();
+    } on ApiException catch (e) {
+      if (isClosed) return;
+      emit(
+        state.copyWith(
+          status: RouteCalculationStatus.error,
+          errorMessage: e.message,
+        ),
+      );
+    } on Exception {
+      if (isClosed) return;
+      emit(
+        state.copyWith(
+          status: RouteCalculationStatus.error,
+          errorMessage: 'Não foi possível atualizar a rota. Tente novamente.',
+        ),
+      );
+    }
   }
 
-  /// Parses "lat,lng" into a double pair; null if not a numeric coordinate.
-  (double, double)? _parseLatLng(String stop) {
-    final parts = stop.split(',');
-    if (parts.length != 2) return null;
-    final lat = double.tryParse(parts[0].trim());
-    final lng = double.tryParse(parts[1].trim());
-    if (lat == null || lng == null) return null;
-    return (lat, lng);
+  /// Projects the persisted route into the shape the screen consumes: pending
+  /// stops in optimized order + delivered last, totals and polyline.
+  void _applyRoute(DeliveryRoute route) {
+    final pending = route.stops.where((s) => !s.isTerminal).toList();
+    final done = route.stops.where((s) => s.isTerminal).toList();
+
+    RouteDelivery toDelivery(DeliveryRouteStop stop) => RouteDelivery(
+      id: stop.id,
+      orderId: stop.orderId,
+      title: stop.customerName.isNotEmpty ? stop.customerName : 'Cliente',
+      subtitle: stop.addressText,
+      stop: '${stop.latitude},${stop.longitude}',
+      eta: stop.eta,
+    );
+
+    // Active route: turn on position sharing (real-time for customers);
+    // completed route: stop emitting.
+    if (route.status == 'ACTIVE') {
+      unawaited(_trackingPublisher.start(route.id));
+    } else {
+      unawaited(_trackingPublisher.stop());
+    }
+
+    // Route data arrived: clear a transient loading/error status, but preserve a
+    // CO2 'calculated' status so the result card stays after a delivery refresh.
+    final nextStatus =
+        state.status == RouteCalculationStatus.loading ||
+            state.status == RouteCalculationStatus.error
+        ? RouteCalculationStatus.initial
+        : state.status;
+
+    emit(
+      state.copyWith(
+        status: nextStatus,
+        routeId: route.id,
+        deliveries: [...pending.map(toDelivery), ...done.map(toDelivery)],
+        orderedStops: pending.map((s) => '${s.latitude},${s.longitude}').toList(),
+        confirmedDeliveries: done.map((s) => s.id).toSet(),
+        totalDistanceKm: route.totalDistanceKm,
+        totalDurationMins: route.totalDurationSeconds ~/ 60,
+        baselineDistanceKm: route.baselineDistanceKm,
+        overviewPolyline: route.overviewPolyline,
+        producerLat: state.producerLat ?? route.originLatitude,
+        producerLng: state.producerLng ?? route.originLongitude,
+      ),
+    );
   }
 
   /// Reloads the producer dashboard (singleton bloc) after a delivery so the
@@ -262,31 +528,16 @@ class RouteCalculationCubit extends Cubit<RouteCalculationState> {
     }
   }
 
-  /// Records the route's CO2 savings: baseline = sum of origin→each-stop
-  /// distances (round-trip, computed by the backend) vs. the optimized route.
-  /// Best-effort: does not block the route flow.
-  void _recordCo2Savings(List<RouteDelivery> deliveries, double optimizedKm) {
+  /// Best-effort: records the new route's CO2 savings using server road
+  /// distances (optimized vs individual baseline).
+  void _recordCo2Savings(DeliveryRoute route) {
     final fuel = _mapFuelType(state.selectedFuel);
     if (fuel == 'ELECTRIC') return; // CO2 savings = 0
 
-    final originLat = state.producerLat;
-    final originLng = state.producerLng;
-    if (originLat == null || originLng == null) return;
-
-    final distances = <double>[];
-    for (final d in deliveries) {
-      final coords = _parseLatLng(d.stop);
-      if (coords == null) continue;
-      final meters = Geolocator.distanceBetween(
-        originLat,
-        originLng,
-        coords.$1,
-        coords.$2,
-      );
-      final km = meters / 1000.0;
-      if (km > 0) distances.add(km); // backend requires distance > 0
+    final baseline = route.baselineDistanceKm;
+    if (route.totalDistanceKm <= 0 || baseline == null || baseline <= 0) {
+      return;
     }
-    if (distances.isEmpty) return;
 
     final consumption = double.tryParse(
       state.averageConsumption.replaceAll(',', '.'),
@@ -296,8 +547,8 @@ class RouteCalculationCubit extends Cubit<RouteCalculationState> {
       _co2Repository
           .recordSavings(
             Co2SavingRequest(
-              distanceOptimized: optimizedKm,
-              separateDeliveryDistances: distances,
+              distanceOptimized: route.totalDistanceKm,
+              distanceNonOptimized: baseline,
               vehicleType: _mapVehicleType(state.selectedVehicle),
               fuelType: fuel,
               averageConsumption: consumption,
@@ -307,96 +558,26 @@ class RouteCalculationCubit extends Cubit<RouteCalculationState> {
     );
   }
 
-  Future<void> _recalculateRoute() async {
-    final pending = _allDeliveries
-        .where((d) => !state.confirmedDeliveries.contains(d.id))
-        .toList();
-    final confirmed = _allDeliveries
-        .where((d) => state.confirmedDeliveries.contains(d.id))
-        .toList();
+  /// Inverse of [_mapVehicleType]: backend EN enum -> UI PT label.
+  String? _vehicleLabelFromApi(String apiVehicle) {
+    return switch (apiVehicle.toUpperCase()) {
+      'MOTORCYCLE' => 'Moto',
+      'CAR' => 'Carro',
+      'VAN' => 'Van',
+      'LIGHT_TRUCK' => 'Caminhão',
+      _ => null,
+    };
+  }
 
-    if (pending.isEmpty) {
-      emit(
-        state.copyWith(
-          deliveries: confirmed,
-          orderedStops: const [],
-          totalDistanceKm: 0.0,
-          totalDurationMins: 0,
-        ),
-      );
-      return;
-    }
-
-    final lat = state.producerLat;
-    final lng = state.producerLng;
-    // Origin: GPS/first delivery when coordinates exist; otherwise the first
-    // stop (the backend accepts a textual address).
-    final origin = (lat != null && lng != null) ? '$lat,$lng' : pending.first.stop;
-
-    final destination = pending.last;
-    final waypointDeliveries = pending.length > 1
-        ? pending.sublist(0, pending.length - 1)
-        : <RouteDelivery>[];
-
-    try {
-      final route = await _routeRepository.optimize(
-        origin: origin,
-        destination: destination.stop,
-        waypoints: waypointDeliveries.map((d) => d.stop).toList(),
-      );
-      if (isClosed) return;
-
-      // Reorder the waypoints according to the backend's optimized order.
-      final orderedWaypoints = <RouteDelivery>[];
-      if (route.waypointOrder.length == waypointDeliveries.length) {
-        for (final idx in route.waypointOrder) {
-          if (idx >= 0 && idx < waypointDeliveries.length) {
-            orderedWaypoints.add(waypointDeliveries[idx]);
-          }
-        }
-      }
-      if (orderedWaypoints.length != waypointDeliveries.length) {
-        orderedWaypoints
-          ..clear()
-          ..addAll(waypointDeliveries);
-      }
-
-      final orderedActive = [...orderedWaypoints, destination];
-
-      emit(
-        state.copyWith(
-          deliveries: [...orderedActive, ...confirmed],
-          orderedStops: orderedActive.map((d) => d.stop).toList(),
-          totalDistanceKm: route.distanceKm,
-          totalDurationMins: route.durationMins,
-        ),
-      );
-
-      // Record the optimized route's CO2 savings (once per session).
-      if (!_savingsRecorded && route.distanceKm > 0) {
-        _savingsRecorded = true;
-        _recordCo2Savings(pending, route.distanceKm);
-      }
-
-      // If CO2 was already calculated, recompute it with the new distance.
-      if (state.status == RouteCalculationStatus.calculated) {
-        await calculateCo2(route.distanceKm);
-      }
-    } catch (e) {
-      if (isClosed) return;
-      // Calculation failed: keep the deliveries (original order), reset metrics,
-      // and surface the error visibly instead of silently showing 0/0.
-      emit(
-        state.copyWith(
-          deliveries: [...pending, ...confirmed],
-          orderedStops: pending.map((d) => d.stop).toList(),
-          totalDistanceKm: 0.0,
-          totalDurationMins: 0,
-          status: RouteCalculationStatus.error,
-          errorMessage: 'Não foi possível calcular a rota. Tente novamente.',
-        ),
-      );
-    }
+  /// Inverse of [_mapFuelType]: backend EN enum -> UI PT label.
+  String? _fuelLabelFromApi(String apiFuel) {
+    return switch (apiFuel.toUpperCase()) {
+      'GASOLINE' => 'Gasolina',
+      'ETHANOL' => 'Etanol',
+      'DIESEL' => 'Diesel',
+      'ELECTRIC' => 'Elétrico',
+      _ => null,
+    };
   }
 
   String _mapVehicleType(String uiVehicle) {

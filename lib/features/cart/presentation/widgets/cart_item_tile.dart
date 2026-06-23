@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:ragro_mobile/core/formatters/currency.dart';
 import 'package:ragro_mobile/core/theme/app_colors.dart';
 import 'package:ragro_mobile/features/cart/domain/entities/cart_item.dart';
 import 'package:ragro_mobile/features/cart/presentation/bloc/cart_bloc.dart';
@@ -13,9 +14,6 @@ class CartItemTile extends StatelessWidget {
 
   final CartItem item;
   final String producerId;
-
-  String _formatPrice(double price) =>
-      'R\$ ${price.toStringAsFixed(2).replaceAll('.', ',')}';
 
   String _formatQuantity(double qty) {
     final fixed = qty.toStringAsFixed(3);
@@ -115,7 +113,7 @@ class CartItemTile extends StatelessWidget {
                         ),
                       ),
                       Text(
-                        _formatPrice(item.totalPrice),
+                        formatCurrency(item.totalPrice),
                         style: const TextStyle(
                           fontFamily: 'Manrope',
                           fontWeight: FontWeight.w700,
@@ -128,8 +126,8 @@ class CartItemTile extends StatelessWidget {
                   const SizedBox(height: 4),
                   Text(
                     item.unityType.isEmpty
-                        ? _formatPrice(item.unitPrice)
-                        : '${_formatPrice(item.unitPrice)} / '
+                        ? formatCurrency(item.unitPrice)
+                        : '${formatCurrency(item.unitPrice)} / '
                               '${localizeUnityType(item.unityType)}',
                     style: const TextStyle(
                       fontFamily: 'Manrope',
@@ -141,21 +139,22 @@ class CartItemTile extends StatelessWidget {
                   Row(
                     children: [
                       Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 4,
-                        ),
                         decoration: BoxDecoration(
                           color: const Color(0xFFF1F5F9),
                           borderRadius: BorderRadius.circular(9999),
                         ),
                         child: Row(
+                          mainAxisSize: MainAxisSize.min,
                           children: [
                             GestureDetector(
+                              behavior: HitTestBehavior.opaque,
                               onTap: () => _decrement(context),
-                              child: const Icon(Icons.remove, size: 14),
+                              child: const SizedBox(
+                                width: 44,
+                                height: 44,
+                                child: Icon(Icons.remove, size: 16),
+                              ),
                             ),
-                            const SizedBox(width: 12),
                             Text(
                               _formatQuantity(item.quantity),
                               style: const TextStyle(
@@ -164,10 +163,14 @@ class CartItemTile extends StatelessWidget {
                                 fontSize: 14,
                               ),
                             ),
-                            const SizedBox(width: 12),
                             GestureDetector(
+                              behavior: HitTestBehavior.opaque,
                               onTap: () => _increment(context),
-                              child: const Icon(Icons.add, size: 14),
+                              child: const SizedBox(
+                                width: 44,
+                                height: 44,
+                                child: Icon(Icons.add, size: 16),
+                              ),
                             ),
                           ],
                         ),

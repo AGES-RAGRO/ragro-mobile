@@ -1,6 +1,6 @@
 # RAGRO — Mobile
 
-Flutter app for RAGRO, a platform connecting small family farmers with urban consumers.
+Flutter app for RAGRO, a platform connecting small family farmers with urban consumers. Beyond browsing and ordering, it covers real-time GPS delivery tracking (STOMP over `/ws`), push notifications (Firebase Cloud Messaging), CO2 impact savings, LLM-based recommendations, and delivery-route optimization for producers.
 
 Built with **Clean Architecture + BLoC**.
 
@@ -19,7 +19,16 @@ Built with **Clean Architecture + BLoC**.
 | `dio` | HTTP client |
 | `go_router` | Navigation and routing |
 | `equatable` | Value-based object comparison |
-| `shared_preferences` | Local storage (token, settings) |
+| `shared_preferences` | Local storage (settings) |
+| `flutter_secure_storage` | Secure token storage |
+| `google_maps_flutter` | Maps and delivery-route display |
+| `geolocator` + `geocoding` | Device location and address lookup |
+| `stomp_dart_client` | Real-time GPS tracking (STOMP over `/ws`) |
+| `firebase_core` + `firebase_messaging` | Push notifications (FCM) |
+| `flutter_local_notifications` + `app_badge_plus` | Local notification display and app badge |
+| `flutter_markdown` | Markdown rendering |
+| `image_picker` | Photo selection / upload |
+| `intl` + `url_launcher` | Formatting/i18n and launching URLs |
 | `bloc_test` + `mocktail` | BLoC unit tests and mocks |
 
 ---
@@ -41,6 +50,7 @@ Built with **Clean Architecture + BLoC**.
 | [`docs/backlog_ragro.md`](docs/backlog_ragro.md) | User stories and acceptance criteria |
 | [`docs/database.md`](docs/database.md) | PostgreSQL schema and ER diagram |
 | [`docs/figma_screens.md`](docs/figma_screens.md) | Figma node IDs and screen-to-story mapping |
+| [`docs/BUILD_RELEASE.md`](docs/BUILD_RELEASE.md) | Generating production release builds (Android APK/AAB + iOS) |
 
 ---
 
@@ -74,10 +84,11 @@ The app authenticates via Keycloak. The **default API base URL is `http://localh
 |------|---------|----------|
 | `env/local.json` | Dev local (`localhost:8080`) | Yes — committed |
 | `env/prod.example.json` | Prod template — copy to `env/prod.json` and fill in the URL | Yes — committed |
+| `env/local-device.json` | Physical device on LAN (target the dev machine's LAN IP) | **No — gitignored** |
 | `env/prod.json` | Real prod build config | **No — gitignored** |
+| `env/prodages.json` | Alternate prod build config | **No — gitignored** |
 
-> **Production API (AWS API Gateway):** `https://7ruopxdlm7.execute-api.us-east-2.amazonaws.com`
-> The committed `env/prod.example.json` is only a template with a placeholder — real prod builds read `env/prod.json` (gitignored), so the endpoint is never baked into a committed JSON file.
+> **Production API (AWS API Gateway):** the real endpoint lives only in `env/prod.json` (gitignored) — copy `env/prod.example.json`, which ships with a placeholder, and set `API_BASE_URL` there. The endpoint is never baked into a committed JSON file.
 
 **1. Start the backend** (from `ragro-backend/`):
 
@@ -135,7 +146,7 @@ flutter run -d chrome --dart-define-from-file=env/local.json
 
 # Prod (AWS): create env/prod.json from the template, set the URL, then build.
 #    cp env/prod.example.json env/prod.json
-#    # edit env/prod.json → API_BASE_URL = https://7ruopxdlm7.execute-api.us-east-2.amazonaws.com
+#    # edit env/prod.json → set API_BASE_URL to the production API Gateway URL
 flutter build apk --dart-define-from-file=env/prod.json
 # (or `flutter run --dart-define-from-file=env/prod.json` to run against prod)
 
@@ -169,6 +180,15 @@ This file is included by both `Debug.xcconfig` and `Release.xcconfig` and expose
 </script>
 ```
 
+### Firebase / Push Notifications (FCM)
+
+Push notifications use Firebase Cloud Messaging (`firebase_core` + `firebase_messaging`). Building the app requires the Firebase config files for each platform:
+
+- **Android** — `android/app/google-services.json` (the `com.google.gms.google-services` Gradle plugin reads it at build time).
+- **iOS** — `ios/Runner/GoogleService-Info.plist`.
+
+If these files are missing or do not match the app's package/bundle id, the build fails (Android) or push registration silently breaks. Make sure they come from the correct Firebase project for the build you are creating.
+
 ### Run on Android
 
 ```bash
@@ -190,6 +210,8 @@ flutter test
 ```
 
 ### Visual regression tests (Playwright)
+
+> **Note:** the `playwright/` directory is gitignored (`.gitignore`) and is **not** part of a fresh clone — the harness is kept local only. The commands below assume you already have a populated `playwright/` folder; they will not work otherwise.
 
 Requires the Flutter app running locally in Chrome. The API can point to local backend or AWS via `API_BASE_URL`.
 

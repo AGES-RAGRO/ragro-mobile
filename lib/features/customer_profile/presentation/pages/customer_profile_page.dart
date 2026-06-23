@@ -178,6 +178,12 @@ class _CustomerProfileView extends StatelessWidget {
                     ),
                     const SizedBox(height: 16),
                     ProfileMenuItem(
+                      icon: Icons.quiz_outlined,
+                      label: 'FAQ',
+                      onTap: () => context.push('/customer/profile/faq'),
+                    ),
+                    const SizedBox(height: 16),
+                    ProfileMenuItem(
                       icon: Icons.logout,
                       label: 'Sair',
                       onTap: () => _onLogout(context),

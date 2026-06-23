@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:ragro_mobile/core/formatters/currency.dart';
 import 'package:ragro_mobile/core/theme/app_colors.dart';
 import 'package:ragro_mobile/features/home/domain/entities/home_product.dart';
+import 'package:ragro_mobile/shared/utils/unity_type_label.dart';
 
 class HomeProductCard extends StatelessWidget {
   const HomeProductCard({
@@ -18,9 +20,8 @@ class HomeProductCard extends StatelessWidget {
   final VoidCallback onAddToCart;
   final bool isRecommended;
 
-  /// `true` when the AI reranker actually reordered this item
-  /// (reason == LLM_RERANKED). Distinguishes AI from heuristic recommendations
-  /// so the "AI recommends" badge isn't shown misleadingly for all items.
+  /// `true` only when the AI reranker reordered this item (reason == LLM_RERANKED),
+  /// so the "AI recommends" badge isn't shown for heuristic recommendations.
   final bool aiRanked;
 
   /// Relevance score (0-100) assigned by the AI, when available.
@@ -113,16 +114,30 @@ class HomeProductCard extends StatelessWidget {
                   Row(
                     children: [
                       Expanded(
-                        child: Text(
-                          'R\$ ${product.price.toStringAsFixed(2).replaceAll('.', ',')}',
-                          style: const TextStyle(
-                            fontFamily: 'Figtree',
-                            fontWeight: FontWeight.w700,
-                            fontSize: 16,
-                            color: AppColors.black,
-                          ),
+                        child: RichText(
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
+                          text: TextSpan(
+                            text: formatCurrency(product.price),
+                            style: const TextStyle(
+                              fontFamily: 'Figtree',
+                              fontWeight: FontWeight.w700,
+                              fontSize: 16,
+                              color: AppColors.black,
+                            ),
+                            children: [
+                              if (product.unityType.isNotEmpty)
+                                TextSpan(
+                                  text:
+                                      ' /${localizeUnityType(product.unityType)}',
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.w400,
+                                    fontSize: 12,
+                                    color: AppColors.placeholder,
+                                  ),
+                                ),
+                            ],
+                          ),
                         ),
                       ),
                       GestureDetector(
@@ -165,7 +180,9 @@ class _RecommendationBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final label = aiRanked
-        ? (score != null && score! > 0 ? 'IA recomenda · $score%' : 'IA recomenda')
+        ? (score != null && score! > 0
+              ? 'IA recomenda · $score%'
+              : 'IA recomenda')
         : 'Para você';
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),

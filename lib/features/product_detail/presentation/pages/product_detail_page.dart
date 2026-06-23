@@ -5,12 +5,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:ragro_mobile/core/di/injection.dart';
+import 'package:ragro_mobile/core/formatters/currency.dart';
 import 'package:ragro_mobile/core/theme/app_colors.dart';
 import 'package:ragro_mobile/features/cart/presentation/bloc/cart_bloc.dart';
 import 'package:ragro_mobile/features/cart/presentation/bloc/cart_event.dart';
 import 'package:ragro_mobile/features/product_detail/presentation/bloc/product_detail_bloc.dart';
 import 'package:ragro_mobile/features/product_detail/presentation/bloc/product_detail_event.dart';
 import 'package:ragro_mobile/features/product_detail/presentation/bloc/product_detail_state.dart';
+import 'package:ragro_mobile/shared/utils/unity_type_label.dart';
 
 class ProductDetailPage extends StatelessWidget {
   const ProductDetailPage({
@@ -148,30 +150,95 @@ class _ProductDetailView extends StatelessWidget {
                                       style: const TextStyle(
                                         fontFamily: 'Figtree',
                                         fontWeight: FontWeight.w700,
-                                        fontSize: 32,
+                                        fontSize: 24,
                                         color: AppColors.black,
                                       ),
                                     ),
                                   ),
-                                  Text(
-                                    'R\$ ${product.price.toStringAsFixed(2).replaceAll('.', ',')}',
-                                    style: const TextStyle(
-                                      fontFamily: 'Figtree',
-                                      fontWeight: FontWeight.w600,
-                                      fontSize: 24,
-                                      color: AppColors.black,
+                                  RichText(
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    textAlign: TextAlign.end,
+                                    text: TextSpan(
+                                      text: formatCurrency(product.price),
+                                      style: const TextStyle(
+                                        fontFamily: 'Figtree',
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 24,
+                                        color: AppColors.black,
+                                      ),
+                                      children: [
+                                        if (product.unityType.isNotEmpty)
+                                          TextSpan(
+                                            text:
+                                                ' /${localizeUnityType(product.unityType)}',
+                                            style: const TextStyle(
+                                              fontWeight: FontWeight.w400,
+                                              fontSize: 14,
+                                              color: AppColors.placeholder,
+                                            ),
+                                          ),
+                                      ],
                                     ),
                                   ),
                                 ],
                               ),
                               const SizedBox(height: 16),
                               if (product.producerName.isNotEmpty)
-                                Text(
-                                  'Produtor: ${product.producerName}',
-                                  style: const TextStyle(
-                                    fontFamily: 'Figtree',
-                                    fontSize: 14,
-                                    color: AppColors.black,
+                                GestureDetector(
+                                  behavior: HitTestBehavior.opaque,
+                                  onTap: product.producerId.isEmpty
+                                      ? null
+                                      : () => context.push(
+                                          '/customer/producer/'
+                                          '${product.producerId}',
+                                        ),
+                                  child: Row(
+                                    children: [
+                                      Flexible(
+                                        child: RichText(
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          text: TextSpan(
+                                            text: 'Produtor: ',
+                                            style: const TextStyle(
+                                              fontFamily: 'Figtree',
+                                              fontSize: 14,
+                                              color: AppColors.black,
+                                            ),
+                                            children: [
+                                              TextSpan(
+                                                text: product.producerName,
+                                                style: TextStyle(
+                                                  fontFamily: 'Figtree',
+                                                  fontWeight: FontWeight.w600,
+                                                  fontSize: 14,
+                                                  color: product
+                                                          .producerId.isEmpty
+                                                      ? AppColors.black
+                                                      : AppColors.darkGreen,
+                                                  decoration: product
+                                                          .producerId.isEmpty
+                                                      ? null
+                                                      : TextDecoration
+                                                          .underline,
+                                                  decorationColor:
+                                                      AppColors.darkGreen,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                      if (product.producerId.isNotEmpty) ...[
+                                        const SizedBox(width: 4),
+                                        const Icon(
+                                          Icons.chevron_right,
+                                          size: 16,
+                                          color: AppColors.darkGreen,
+                                        ),
+                                      ],
+                                    ],
                                   ),
                                 ),
                               if (product.producerName.isNotEmpty)
@@ -263,20 +330,24 @@ class _ProductDetailView extends StatelessWidget {
                     children: [
                       Container(
                         height: 53,
-                        width: 113,
                         decoration: BoxDecoration(
                           color: const Color(0xFFF1F5F9),
                           borderRadius: BorderRadius.circular(9999),
                         ),
                         child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          mainAxisSize: MainAxisSize.min,
                           children: [
                             GestureDetector(
+                              behavior: HitTestBehavior.opaque,
                               onTap: () =>
                                   context.read<ProductDetailBloc>().add(
                                     const ProductDetailQuantityDecremented(),
                                   ),
-                              child: const Icon(Icons.remove, size: 16),
+                              child: const SizedBox(
+                                width: 48,
+                                height: 53,
+                                child: Icon(Icons.remove, size: 16),
+                              ),
                             ),
                             Text(
                               quantity.toString(),
@@ -287,11 +358,16 @@ class _ProductDetailView extends StatelessWidget {
                               ),
                             ),
                             GestureDetector(
+                              behavior: HitTestBehavior.opaque,
                               onTap: () =>
                                   context.read<ProductDetailBloc>().add(
                                     const ProductDetailQuantityIncremented(),
                                   ),
-                              child: const Icon(Icons.add, size: 14),
+                              child: const SizedBox(
+                                width: 48,
+                                height: 53,
+                                child: Icon(Icons.add, size: 16),
+                              ),
                             ),
                           ],
                         ),
@@ -306,7 +382,6 @@ class _ProductDetailView extends StatelessWidget {
                                 quantity: quantity.toDouble(),
                               ),
                             );
-                            context.push('/customer/cart');
                           },
                           child: Container(
                             height: 53,

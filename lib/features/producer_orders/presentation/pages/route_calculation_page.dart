@@ -4,8 +4,12 @@ import 'package:go_router/go_router.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:ragro_mobile/core/di/injection.dart';
 import 'package:ragro_mobile/core/theme/app_colors.dart';
+import 'package:ragro_mobile/core/utils/maps_directions.dart';
+import 'package:ragro_mobile/core/utils/polyline_decoder.dart';
 import 'package:ragro_mobile/features/producer_orders/presentation/bloc/route_calculation_cubit.dart';
 import 'package:ragro_mobile/features/producer_orders/presentation/bloc/route_calculation_state.dart';
+import 'package:ragro_mobile/shared/widgets/cancel_order_dialog.dart';
+import 'package:ragro_mobile/shared/widgets/confirm_delivery_code_dialog.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class RouteCalculationPage extends StatelessWidget {
@@ -28,12 +32,50 @@ class _RouteCalculationView extends StatefulWidget {
 }
 
 class _RouteCalculationViewState extends State<_RouteCalculationView> {
+  GoogleMapController? _miniMapController;
+
+  /// Fits the mini-map to the route bounds. Runs post-frame because
+  /// newLatLngBounds requires the map to be already laid out.
+  void _fitMiniMap(List<LatLng> points) {
+    final controller = _miniMapController;
+    if (controller == null || points.length < 2) return;
+    var minLat = points.first.latitude;
+    var maxLat = points.first.latitude;
+    var minLng = points.first.longitude;
+    var maxLng = points.first.longitude;
+    for (final p in points) {
+      minLat = p.latitude < minLat ? p.latitude : minLat;
+      maxLat = p.latitude > maxLat ? p.latitude : maxLat;
+      minLng = p.longitude < minLng ? p.longitude : minLng;
+      maxLng = p.longitude > maxLng ? p.longitude : maxLng;
+    }
+    final bounds = LatLngBounds(
+      southwest: LatLng(minLat, minLng),
+      northeast: LatLng(maxLat, maxLng),
+    );
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      controller.animateCamera(CameraUpdate.newLatLngBounds(bounds, 32));
+    });
+  }
+
   Future<void> _openGoogleMaps() async {
     final state = context.read<RouteCalculationCubit>().state;
-    final stops = state.orderedStops;
+    final messenger = ScaffoldMessenger.of(context);
 
-    if (stops.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
+    // Build the deep-link from the pending stops (already in the backend's
+    // optimized order). The builder validates/de-duplicates coordinates, caps
+    // waypoints and drops `dir_action=navigate` when there are waypoints (the
+    // navigate mode errors with multiple stops — the "Waypoint, Waypoint..."
+    // failure). Origin is pinned only when the producer's real GPS is known.
+    final directions = buildMapsDirectionsUri(
+      stops: state.orderedStops,
+      originLat: state.producerLat,
+      originLng: state.producerLng,
+    );
+
+    final uri = directions.uri;
+    if (uri == null) {
+      messenger.showSnackBar(
         const SnackBar(
           content: Text('Nenhuma entrega pendente para abrir no mapa.'),
         ),
@@ -41,30 +83,34 @@ class _RouteCalculationViewState extends State<_RouteCalculationView> {
       return;
     }
 
-    final lat = state.producerLat ?? -16.6868;
-    final lng = state.producerLng ?? -49.2647;
-    final destination = stops.last;
-    final waypoints = stops.length > 1
-        ? stops.sublist(0, stops.length - 1)
-        : const <String>[];
+    if (directions.truncated) {
+      messenger.showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Muitas paradas: abrindo as primeiras ${kMaxMapsWaypoints + 1} '
+            'no mapa.',
+          ),
+        ),
+      );
+    }
 
-    // Navigation deep-link (no API key needed). Stops already come in the
-    // backend's optimized order; `dir_action=navigate` opens directly into
-    // turn-by-turn driving navigation.
-    final uri = Uri.https('www.google.com', '/maps/dir/', {
-      'api': '1',
-      'origin': '$lat,$lng',
-      'destination': destination,
-      if (waypoints.isNotEmpty) 'waypoints': waypoints.join('|'),
-      'travelmode': 'driving',
-      'dir_action': 'navigate',
-    });
-
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri, mode: LaunchMode.externalApplication);
-    } else {
+    // Launch directly (no canLaunchUrl gate): per url_launcher docs canLaunchUrl
+    // can return false even when launchUrl would succeed.
+    try {
+      final launched = await launchUrl(
+        uri,
+        mode: LaunchMode.externalApplication,
+      );
+      if (!launched && mounted) {
+        messenger.showSnackBar(
+          const SnackBar(
+            content: Text('Não foi possível abrir o Google Maps.'),
+          ),
+        );
+      }
+    } on Exception {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        messenger.showSnackBar(
           const SnackBar(
             content: Text('Não foi possível abrir o Google Maps.'),
           ),
@@ -109,8 +155,13 @@ class _RouteCalculationViewState extends State<_RouteCalculationView> {
         backgroundColor: AppColors.white,
         body: Stack(
           children: [
-            CustomScrollView(
-              slivers: [
+            RefreshIndicator(
+              color: AppColors.darkGreen,
+              onRefresh: () =>
+                  context.read<RouteCalculationCubit>().refreshRoute(),
+              child: CustomScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                slivers: [
                 SliverAppBar(
                   backgroundColor: AppColors.white,
                   leading: GestureDetector(
@@ -197,25 +248,48 @@ class _RouteCalculationViewState extends State<_RouteCalculationView> {
                         ),
 
                         const SizedBox(height: 20),
-                        const Text(
-                          'A rota abaixo foi otimizada para\neconomizar tempo, combustível e emissões de CO2.',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontFamily: 'Manrope',
-                            fontSize: 12,
-                            color: AppColors.black,
+                        // Full width so textAlign.center actually centers on screen
+                        // (the parent Column is crossAxisAlignment.start).
+                        const SizedBox(
+                          width: double.infinity,
+                          child: Text(
+                            'A rota abaixo foi otimizada para\neconomizar tempo, combustível e emissões de CO2.',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontFamily: 'Manrope',
+                              fontSize: 12,
+                              color: AppColors.black,
+                            ),
                           ),
                         ),
                         const SizedBox(height: 16),
 
-                        BlocBuilder<
+                        BlocConsumer<
                           RouteCalculationCubit,
                           RouteCalculationState
                         >(
+                          listenWhen: (p, c) =>
+                              p.overviewPolyline != c.overviewPolyline,
+                          listener: (context, state) {
+                            final encoded = state.overviewPolyline;
+                            if (encoded == null) return;
+                            _fitMiniMap(
+                              decodePolyline(encoded)
+                                  .map((p) => LatLng(p.$1, p.$2))
+                                  .toList(),
+                            );
+                          },
                           builder: (context, state) {
                             final lat = state.producerLat ?? -16.6868;
                             final lng = state.producerLng ?? -49.2647;
                             final loc = LatLng(lat, lng);
+                            // Draw the persisted route polyline.
+                            final encoded = state.overviewPolyline;
+                            final routePoints = encoded == null
+                                ? const <LatLng>[]
+                                : decodePolyline(encoded)
+                                      .map((p) => LatLng(p.$1, p.$2))
+                                      .toList();
 
                             return ClipRRect(
                               borderRadius: BorderRadius.circular(16),
@@ -232,24 +306,45 @@ class _RouteCalculationViewState extends State<_RouteCalculationView> {
                                   children: [
                                     GoogleMap(
                                       initialCameraPosition: CameraPosition(
-                                        target: loc,
+                                        target: routePoints.isNotEmpty
+                                            ? routePoints.first
+                                            : loc,
                                         zoom: 13,
                                       ),
+                                      onMapCreated: (controller) {
+                                        _miniMapController = controller;
+                                        _fitMiniMap(routePoints);
+                                      },
                                       zoomControlsEnabled: false,
                                       scrollGesturesEnabled: false,
                                       rotateGesturesEnabled: false,
                                       tiltGesturesEnabled: false,
                                       mapToolbarEnabled: false,
                                       markers: {
-                                        Marker(
-                                          markerId: const MarkerId('producer'),
-                                          position: loc,
-                                          icon:
-                                              BitmapDescriptor.defaultMarkerWithHue(
-                                                BitmapDescriptor.hueGreen,
-                                              ),
-                                        ),
+                                        // Mark the producer only when real GPS
+                                        // exists (else falls back to Goiânia).
+                                        if (state.producerLat != null)
+                                          Marker(
+                                            markerId: const MarkerId('producer'),
+                                            position: loc,
+                                            icon:
+                                                BitmapDescriptor.defaultMarkerWithHue(
+                                                  BitmapDescriptor.hueGreen,
+                                                ),
+                                          ),
                                       },
+                                      polylines: routePoints.isEmpty
+                                          ? const <Polyline>{}
+                                          : {
+                                              Polyline(
+                                                polylineId: const PolylineId(
+                                                  'route',
+                                                ),
+                                                points: routePoints,
+                                                color: AppColors.lightGreen,
+                                                width: 4,
+                                              ),
+                                            },
                                     ),
                                     Positioned(
                                       bottom: 12,
@@ -305,49 +400,67 @@ class _RouteCalculationViewState extends State<_RouteCalculationView> {
                         ),
 
                         const SizedBox(height: 24),
-                        const Text(
-                          'Sequência de Entregas',
-                          style: TextStyle(
-                            fontFamily: 'Figtree',
-                            fontWeight: FontWeight.w700,
-                            fontSize: 16,
-                            color: AppColors.black,
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-
+                        // Pending stops feed the active numbered sequence;
+                        // delivered/failed stops move to a separate "Entregues"
+                        // section so the producer doesn't confuse finished
+                        // orders with the live route.
                         BlocBuilder<
                           RouteCalculationCubit,
                           RouteCalculationState
                         >(
                           builder: (context, state) {
-                            if (state.deliveries.isEmpty) {
-                              return const Padding(
-                                padding: EdgeInsets.symmetric(vertical: 12),
-                                child: Text(
-                                  'Nenhuma entrega pendente no momento.',
+                            final pending = state.deliveries
+                                .where(
+                                  (d) =>
+                                      !state.confirmedDeliveries.contains(d.id),
+                                )
+                                .toList();
+                            final done = state.deliveries
+                                .where(
+                                  (d) =>
+                                      state.confirmedDeliveries.contains(d.id),
+                                )
+                                .toList();
+
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text(
+                                  'Sequência de Entregas',
                                   style: TextStyle(
-                                    fontSize: 13,
-                                    color: Colors.grey,
+                                    fontFamily: 'Figtree',
+                                    fontWeight: FontWeight.w700,
+                                    fontSize: 16,
+                                    color: AppColors.black,
                                   ),
                                 ),
-                              );
-                            }
-                            return Column(
-                              children: [
-                                for (
-                                  var i = 0;
-                                  i < state.deliveries.length;
-                                  i++
-                                ) ...[
-                                  _DeliveryItem(
-                                    id: state.deliveries[i].id,
-                                    number: i + 1,
-                                    title: state.deliveries[i].title,
-                                    subtitle: state.deliveries[i].subtitle,
+                                const SizedBox(height: 16),
+                                if (pending.isEmpty)
+                                  const Padding(
+                                    padding: EdgeInsets.symmetric(vertical: 12),
+                                    child: Text(
+                                      'Nenhuma entrega pendente no momento.',
+                                      style: TextStyle(
+                                        fontSize: 13,
+                                        color: Colors.grey,
+                                      ),
+                                    ),
+                                  )
+                                else
+                                  _DeliverySequence(items: pending),
+                                if (done.isNotEmpty) ...[
+                                  const SizedBox(height: 24),
+                                  const Text(
+                                    'Entregues',
+                                    style: TextStyle(
+                                      fontFamily: 'Figtree',
+                                      fontWeight: FontWeight.w700,
+                                      fontSize: 16,
+                                      color: AppColors.black,
+                                    ),
                                   ),
-                                  if (i != state.deliveries.length - 1)
-                                    const SizedBox(height: 16),
+                                  const SizedBox(height: 16),
+                                  _DeliverySequence(items: done),
                                 ],
                               ],
                             );
@@ -358,6 +471,22 @@ class _RouteCalculationViewState extends State<_RouteCalculationView> {
                   ),
                 ),
               ],
+              ),
+            ),
+            // Themed loading overlay on the FIRST load (route not yet fetched).
+            // On pull-to-refresh of an existing route the RefreshIndicator spinner
+            // is enough, so this only shows when there is no route yet.
+            BlocBuilder<RouteCalculationCubit, RouteCalculationState>(
+              buildWhen: (p, c) =>
+                  p.status != c.status || p.routeId != c.routeId,
+              builder: (context, state) {
+                final initialLoading =
+                    state.status == RouteCalculationStatus.loading &&
+                    state.routeId == null;
+                return initialLoading
+                    ? const Positioned.fill(child: _RouteLoadingView())
+                    : const SizedBox.shrink();
+              },
             ),
             Positioned(
               left: 0,
@@ -563,6 +692,101 @@ class _Co2ResultCard extends StatelessWidget {
   }
 }
 
+/// Themed full-screen loader shown while the route is first being built/fetched,
+/// so the producer never sees the misleading "0 min / 0 km / no deliveries"
+/// empty state. Green progress ring around a dark-green route badge.
+class _RouteLoadingView extends StatelessWidget {
+  const _RouteLoadingView();
+
+  @override
+  Widget build(BuildContext context) {
+    return ColoredBox(
+      color: AppColors.white,
+      child: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SizedBox(
+              width: 96,
+              height: 96,
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  const SizedBox(
+                    width: 96,
+                    height: 96,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 3,
+                      color: AppColors.lightGreen,
+                    ),
+                  ),
+                  Container(
+                    width: 64,
+                    height: 64,
+                    decoration: const BoxDecoration(
+                      color: AppColors.darkGreen,
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.alt_route_rounded,
+                      color: Colors.white,
+                      size: 32,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 20),
+            const Text(
+              'Montando sua rota...',
+              style: TextStyle(
+                fontFamily: 'Figtree',
+                fontWeight: FontWeight.w700,
+                fontSize: 16,
+                color: AppColors.darkGreen,
+              ),
+            ),
+            const SizedBox(height: 6),
+            const Text(
+              'Otimizando suas entregas de hoje',
+              style: TextStyle(
+                fontFamily: 'Manrope',
+                fontSize: 12,
+                color: AppColors.black,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Renders a numbered list of [_DeliveryItem]s (1..n) with separators. Reused
+/// for both the pending sequence and the "Entregues" history.
+class _DeliverySequence extends StatelessWidget {
+  const _DeliverySequence({required this.items});
+
+  final List<RouteDelivery> items;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        for (var i = 0; i < items.length; i++) ...[
+          _DeliveryItem(
+            id: items[i].id,
+            number: i + 1,
+            title: items[i].title,
+            subtitle: items[i].subtitle,
+          ),
+          if (i != items.length - 1) const SizedBox(height: 16),
+        ],
+      ],
+    );
+  }
+}
+
 class _DeliveryItem extends StatelessWidget {
   const _DeliveryItem({
     required this.id,
@@ -576,13 +800,43 @@ class _DeliveryItem extends StatelessWidget {
   final String title;
   final String subtitle;
 
+  /// Opens the shared code dialog (same as the order detail). Backend requires
+  /// the consumer's 4-digit code; without it any delivery could be marked done.
+  void _openConfirmDeliveryDialog(BuildContext context) {
+    final cubit = context.read<RouteCalculationCubit>();
+    showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => ConfirmDeliveryCodeDialog(
+        onConfirm: (code) => cubit.confirmDelivery(id, code),
+        // Secondary action only opens the reason dialog (CancelOrderDialog);
+        // refusal happens only when the producer confirms there.
+        onCancelOrder: () => _confirmCancelOrder(context, cubit),
+      ),
+    );
+  }
+
+  /// Collects the reason (CancelOrderDialog); if confirmed, refuses the stop's
+  /// order and updates the route.
+  Future<void> _confirmCancelOrder(
+    BuildContext context,
+    RouteCalculationCubit cubit,
+  ) async {
+    final cancelResult = await CancelOrderDialog.showForProducer(context);
+    if (cancelResult == null) return;
+    await cubit.cancelOrder(
+      id,
+      reason: cancelResult.reason,
+      details: cancelResult.details,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<RouteCalculationCubit, RouteCalculationState>(
       builder: (context, state) {
         final isConfirmed = state.confirmedDeliveries.contains(id);
         return Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Text(
               number.toString(),
@@ -612,9 +866,7 @@ class _DeliveryItem extends StatelessWidget {
             GestureDetector(
               onTap: isConfirmed
                   ? null
-                  : () => context.read<RouteCalculationCubit>().confirmDelivery(
-                      id,
-                    ),
+                  : () => _openConfirmDeliveryDialog(context),
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 300),
                 padding: const EdgeInsets.symmetric(
@@ -695,7 +947,7 @@ class _Co2BottomSheetContentState extends State<_Co2BottomSheetContent> {
               ),
               const SizedBox(height: 8),
               DropdownButtonFormField<String>(
-                value: state.selectedVehicle,
+                initialValue: state.selectedVehicle,
                 decoration: InputDecoration(
                   contentPadding: const EdgeInsets.symmetric(
                     horizontal: 16,
@@ -705,9 +957,7 @@ class _Co2BottomSheetContentState extends State<_Co2BottomSheetContent> {
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                items: RouteCalculationCubit.allowedFuelsByVehicle.keys.map((
-                  e,
-                ) {
+                items: state.allowedFuelsByVehicle.keys.map((e) {
                   return DropdownMenuItem(value: e, child: Text(e));
                 }).toList(),
                 onChanged: (val) {
@@ -731,7 +981,7 @@ class _Co2BottomSheetContentState extends State<_Co2BottomSheetContent> {
               ),
               const SizedBox(height: 8),
               DropdownButtonFormField<String>(
-                value: state.selectedFuel,
+                initialValue: state.selectedFuel,
                 decoration: InputDecoration(
                   contentPadding: const EdgeInsets.symmetric(
                     horizontal: 16,
@@ -742,8 +992,7 @@ class _Co2BottomSheetContentState extends State<_Co2BottomSheetContent> {
                   ),
                 ),
                 items:
-                    (RouteCalculationCubit.allowedFuelsByVehicle[state
-                                .selectedVehicle] ??
+                    (state.allowedFuelsByVehicle[state.selectedVehicle] ??
                             const ['Gasolina'])
                         .map((e) {
                           return DropdownMenuItem(value: e, child: Text(e));
@@ -809,7 +1058,7 @@ class _Co2BottomSheetContentState extends State<_Co2BottomSheetContent> {
                           ? null
                           : () {
                               // Backend requires consumption (> 0) for
-                              // non-electric vehicles; validate before sending.
+                              // non-electric vehicles.
                               final needsConsumption =
                                   state.selectedFuel != 'Elétrico';
                               final consumption = double.tryParse(

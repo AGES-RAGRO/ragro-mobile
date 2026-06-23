@@ -1,20 +1,5 @@
-enum OrderStatus { pending, accepted, inDelivery, delivered, cancelled }
+/// Re-export of the canonical `OrderStatus` from core, kept so existing
+/// imports keep working after the consumer/producer enums were unified.
+library;
 
-extension OrderStatusLabel on OrderStatus {
-  String get label => switch (this) {
-    OrderStatus.pending => 'PENDENTE',
-    OrderStatus.accepted => 'ACEITO',
-    OrderStatus.inDelivery => 'A CAMINHO',
-    OrderStatus.delivered => 'ENTREGUE',
-    OrderStatus.cancelled => 'CANCELADO',
-  };
-
-  /// Value exchanged with the backend (Java OrderStatus enum, UPPERCASE).
-  String get backendValue => switch (this) {
-    OrderStatus.pending => 'PENDING',
-    OrderStatus.accepted => 'CONFIRMED',
-    OrderStatus.inDelivery => 'IN_DELIVERY',
-    OrderStatus.delivered => 'DELIVERED',
-    OrderStatus.cancelled => 'CANCELLED',
-  };
-}
+export 'package:ragro_mobile/core/domain/order_status.dart';

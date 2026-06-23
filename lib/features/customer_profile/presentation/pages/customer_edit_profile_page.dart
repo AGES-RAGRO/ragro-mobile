@@ -209,8 +209,7 @@ class _CustomerEditProfilePageState extends State<CustomerEditProfilePage> {
                           label: 'Complemento',
                           controller: _complementController,
                           icon: Icons.apartment_outlined,
-                          hint: 'Apto 42',
-                          validator: _requiredValidator,
+                          hint: 'Apto 42 (opcional)',
                         ),
                         const SizedBox(height: 24),
                         _buildField(
@@ -283,12 +282,12 @@ class _CustomerEditProfilePageState extends State<CustomerEditProfilePage> {
                                           const Icon(
                                             Icons.save_outlined,
                                             color: AppColors.white,
-                                            size: 18,
+                                            size: 22,
                                           ),
                                           const SizedBox(width: 8),
                                         ],
                                         const Text(
-                                          'Salvar Alteracoes',
+                                          'Salvar Alterações',
                                           style: TextStyle(
                                             fontFamily: 'Figtree',
                                             fontWeight: FontWeight.w700,

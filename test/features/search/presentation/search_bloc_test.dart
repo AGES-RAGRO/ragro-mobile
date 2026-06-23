@@ -30,6 +30,15 @@ void main() {
     rating: 0,
   );
 
+  const tProduct = SearchResult(
+    id: 'b0000000-0000-0000-0000-000000000001',
+    type: SearchResultType.product,
+    name: 'Tomate',
+    subtitle: 'Sítio Boa Vista',
+    imageUrl: '',
+    price: 5,
+  );
+
   setUp(() async {
     SharedPreferences.setMockInitialValues({});
     final prefs = await SharedPreferences.getInstance();
@@ -120,7 +129,7 @@ void main() {
     blocTest<SearchBloc, SearchState>(
       'não emite estados ao trocar categoria',
       build: () => bloc,
-      act: (b) => b.add(const SearchCategoryChanged('Horta')),
+      act: (b) => b.add(const SearchCategoryChanged('FRUTAS')),
       expect: () => <SearchState>[],
     );
 
@@ -128,12 +137,12 @@ void main() {
       'busca com categoria quando categoria não é Tudo',
       build: () {
         when(
-          () => mockRepository.search(query: 'tomate', category: 'Horta'),
+          () => mockRepository.search(query: 'tomate', category: 'FRUTAS'),
         ).thenAnswer((_) async => [tProducer]);
         return bloc;
       },
       act: (b) async {
-        b.add(const SearchCategoryChanged('Horta'));
+        b.add(const SearchCategoryChanged('FRUTAS'));
         await Future<void>.delayed(Duration.zero);
         b.add(const SearchQueryChanged('tomate'));
       },
@@ -143,7 +152,7 @@ void main() {
       ],
       verify: (_) {
         verify(
-          () => mockRepository.search(query: 'tomate', category: 'Horta'),
+          () => mockRepository.search(query: 'tomate', category: 'FRUTAS'),
         ).called(1);
       },
     );
@@ -157,7 +166,7 @@ void main() {
         return bloc;
       },
       act: (b) async {
-        b.add(const SearchCategoryChanged('Tudo'));
+        b.add(const SearchCategoryChanged(null));
         await Future<void>.delayed(Duration.zero);
         b.add(const SearchQueryChanged('tomate'));
       },
@@ -168,6 +177,63 @@ void main() {
       verify: (_) {
         verify(() => mockRepository.search(query: 'tomate')).called(1);
       },
+    );
+  });
+
+  group('SearchCategoryProductsRequested', () {
+    blocTest<SearchBloc, SearchState>(
+      'emite [SearchCategoryLoading, SearchCategoryLoaded] quando retorna produtos',
+      build: () {
+        when(
+          () => mockRepository.getProductsByCategory(category: 'FRUTAS'),
+        ).thenAnswer((_) async => [tProduct]);
+        return bloc;
+      },
+      act: (b) => b.add(const SearchCategoryProductsRequested('FRUTAS')),
+      expect: () => [
+        const SearchCategoryLoading(),
+        const SearchCategoryLoaded(products: [tProduct]),
+      ],
+      verify: (_) {
+        verify(
+          () => mockRepository.getProductsByCategory(category: 'FRUTAS'),
+        ).called(1);
+      },
+    );
+
+    blocTest<SearchBloc, SearchState>(
+      'envia categoria nula quando categoria é Tudo',
+      build: () {
+        when(
+          () => mockRepository.getProductsByCategory(category: null),
+        ).thenAnswer((_) async => []);
+        return bloc;
+      },
+      act: (b) => b.add(const SearchCategoryProductsRequested('')),
+      expect: () => [
+        const SearchCategoryLoading(),
+        const SearchCategoryLoaded(products: []),
+      ],
+      verify: (_) {
+        verify(
+          () => mockRepository.getProductsByCategory(category: null),
+        ).called(1);
+      },
+    );
+
+    blocTest<SearchBloc, SearchState>(
+      'emite [SearchCategoryLoading, SearchCategoryFailure] quando ocorre ApiException',
+      build: () {
+        when(
+          () => mockRepository.getProductsByCategory(category: 'FRUTAS'),
+        ).thenThrow(const UnknownApiException());
+        return bloc;
+      },
+      act: (b) => b.add(const SearchCategoryProductsRequested('FRUTAS')),
+      expect: () => [
+        const SearchCategoryLoading(),
+        isA<SearchCategoryFailure>(),
+      ],
     );
   });
 

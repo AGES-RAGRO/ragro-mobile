@@ -32,7 +32,7 @@ class LoginPage extends StatelessWidget {
       child: BlocListener<LoginBloc, LoginState>(
         listener: (context, state) {
           if (state is LoginSuccess) {
-            context.read<AuthBloc>().add(AuthLoggedIn(state.user));
+            getIt<AuthBloc>().add(AuthLoggedIn(state.user));
           }
           if (state is LoginFailure) {
             ScaffoldMessenger.of(context).showSnackBar(
@@ -55,11 +55,14 @@ The BLoC receives events (user or system actions), processes them via UseCases, 
 // lib/features/auth/presentation/bloc/login_bloc.dart
 @injectable
 class LoginBloc extends Bloc<LoginEvent, LoginState> {
-  LoginBloc(this._loginUser) : super(const LoginInitial()) {
+  LoginBloc(this._loginUser, this._forgotPassword)
+    : super(const LoginInitial()) {
     on<LoginSubmitted>(_onSubmitted);
+    on<LoginForgotPasswordRequested>(_onForgotPasswordRequested);
   }
 
   final LoginUser _loginUser;
+  final ForgotPassword _forgotPassword;
 
   Future<void> _onSubmitted(
     LoginSubmitted event,
@@ -74,8 +77,12 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
       emit(LoginSuccess(result.user));
     } on ApiException catch (e) {
       emit(LoginFailure(e.message));
+    } on Object catch (_) {
+      emit(const LoginFailure('Unexpected error. Please try again.'));
     }
   }
+
+  // _onForgotPasswordRequested(...) delegates to ForgotPassword
 }
 ```
 
@@ -85,22 +92,32 @@ Widgets are reusable visual components. They receive data via constructors and d
 
 ```dart
 // lib/features/auth/presentation/widgets/auth_text_field.dart
-class AuthTextField extends StatelessWidget {
+class AuthTextField extends StatefulWidget {
   const AuthTextField({
-    super.key,
     required this.label,
-    required this.controller,
-    this.obscureText = false,
+    required this.icon,
+    super.key,
+    this.controller,
     this.keyboardType,
+    this.isPassword = false,
+    this.onChanged,
+    this.validator,
+    this.inputFormatters,
+    this.textCapitalization = TextCapitalization.none,
   });
 
   final String label;
-  final TextEditingController controller;
-  final bool obscureText;
+  final IconData icon;
+  final TextEditingController? controller;
   final TextInputType? keyboardType;
+  final bool isPassword;
+  final ValueChanged<String>? onChanged;
+  final FormFieldValidator<String>? validator;
+  final List<TextInputFormatter>? inputFormatters;
+  final TextCapitalization textCapitalization;
 
   @override
-  Widget build(BuildContext context) { ... }
+  State<AuthTextField> createState() => _AuthTextFieldState();
 }
 ```
 
@@ -153,10 +170,11 @@ abstract class AuthRepository {
     required String password,
   });
 
-  Future<User> registerConsumer({
+  Future<User> registerCustomer({
     required String name,
     required String phone,
     required String email,
+    required String fiscalNumber,
     required String password,
     required String zipCode,
     required String street,
@@ -164,9 +182,14 @@ abstract class AuthRepository {
     required String city,
     required String state,
     String? complement,
+    String? neighborhood,
   });
 
   Future<void> logout();
+
+  Future<void> requestPasswordReset();
+
+  Future<void> forgotPassword(String email);
 
   Future<User?> getCurrentUser();
 }
@@ -230,6 +253,8 @@ class UserModel extends User {
 
 Performs HTTP calls using `ApiClient` (a Dio wrapper). Returns Models, throws `ApiException`.
 
+There is no single `/auth/login` endpoint; login is a three-step Keycloak flow (see the walkthrough below). `loginUser` orchestrates the three calls and maps errors via `_mapKeycloakLoginError` (e.g. `invalid_grant`, timeouts).
+
 ```dart
 // lib/features/auth/data/datasources/auth_remote_datasource.dart
 @lazySingleton
@@ -241,46 +266,67 @@ class AuthRemoteDataSource {
     required String email,
     required String password,
   }) async {
-    try {
-      final response = await _apiClient.dio.post<Map<String, dynamic>>(
-        ApiEndpoints.login,
-        data: {'email': email, 'password': password},
-      );
-      return LoginResponseModel.fromJson(response.data!);
-    } on DioException catch (e) {
-      if (e.response?.statusCode == 401) {
-        throw const InvalidCredentialsApiException();
-      }
-      throw e.error as ApiException? ?? const UnknownApiException();
-    }
+    // Step 1: GET /auth/config — fetch Keycloak token URL and client ID
+    final config = AuthConfigModel.fromJson(
+      (await _apiClient.dio.get(ApiEndpoints.authConfig)).data!,
+    );
+
+    // Step 2: POST {tokenUrl} (form-urlencoded) — authenticate with Keycloak
+    final keycloakToken = KeycloakTokenModel.fromJson(/* ... */);
+
+    // Step 3: GET /auth/session — fetch user data from our backend
+    _apiClient.setAuthToken(keycloakToken.accessToken);
+    final user = UserModel.fromJson(
+      (await _apiClient.dio.get(ApiEndpoints.authSession)).data!,
+    );
+
+    return LoginResponseModel(
+      accessToken: keycloakToken.accessToken,
+      refreshToken: keycloakToken.refreshToken,
+      tokenUrl: config.tokenUrl,
+      clientId: config.clientId,
+      user: user,
+    );
   }
 }
 ```
 
 ### 3.3 LocalDataSource
 
-Persists and retrieves local data (SharedPreferences, Hive, etc.).
+Persists and retrieves local data. Sensitive material (access/refresh tokens, token URL, clientId) lives in `FlutterSecureStorage`; non-sensitive profile fields stay in `SharedPreferences`.
 
 ```dart
 // lib/features/auth/data/datasources/auth_local_datasource.dart
 @lazySingleton
 class AuthLocalDataSource {
-  const AuthLocalDataSource(this._prefs);
+  const AuthLocalDataSource(this._prefs, this._secure);
   final SharedPreferences _prefs;
+  final FlutterSecureStorage _secure;
 
   Future<void> saveSession({
     required String token,
+    required String refreshToken,
+    required String tokenUrl,
+    required String clientId,
     required String userType,
     required String userId,
     // ...
   }) async {
-    await _prefs.setString('auth_token', token);
-    await _prefs.setString('user_type', userType);
+    await _secure.write(key: _tokenKey, value: token);
+    await _secure.write(key: _refreshTokenKey, value: refreshToken);
+    await _prefs.setString(_userTypeKey, userType);
     // ...
   }
 
-  String? getToken() => _prefs.getString('auth_token');
-  Future<void> clearSession() => _prefs.clear();
+  Future<String?> getToken() => _secure.read(key: _tokenKey);
+
+  Future<void> clearSession() async {
+    await Future.wait([
+      _secure.delete(key: _tokenKey),
+      _secure.delete(key: _refreshTokenKey),
+      // ...secure tokenUrl/clientId + _prefs.remove(...) profile keys
+    ]);
+  }
 }
 ```
 
@@ -304,17 +350,24 @@ class AuthRepositoryImpl implements AuthRepository {
     required String password,
   }) async {
     final response = await _remote.loginUser(email: email, password: password);
-    await _local.saveSession(
-      token: response.token,
-      userType: response.user.type.name,
-      userId: response.user.id,
-      userName: response.user.name,
-      userEmail: response.user.email,
-      active: response.user.active,
-      phone: response.user.phone,
-    );
-    _apiClient.setAuthToken(response.token);
-    return (user: response.user, token: response.token);
+    try {
+      await _local.saveSession(
+        token: response.accessToken,
+        refreshToken: response.refreshToken,
+        tokenUrl: response.tokenUrl,
+        clientId: response.clientId,
+        userType: response.user.type.name,
+        userId: response.user.id,
+        userName: response.user.name,
+        userEmail: response.user.email,
+        active: response.user.active,
+        phone: response.user.phone,
+      );
+    } on Exception catch (_) {
+      // Network auth succeeded but local persistence failed.
+    }
+    _apiClient.setAuthToken(response.accessToken);
+    return (user: response.user, token: response.accessToken);
   }
   // ...
 }
@@ -364,7 +417,7 @@ The pattern adopted in RAGRO is **extends**: `UserModel extends User`. This mean
    └─ Assembled into LoginResponseModel(accessToken, refreshToken, tokenUrl, clientId, user)
 
 7. Data travels back up: LoginResponseModel → AuthRepositoryImpl
-   └─ AuthRepositoryImpl saves token in SharedPreferences
+   └─ AuthRepositoryImpl saves the session (tokens in FlutterSecureStorage, profile in SharedPreferences)
    └─ AuthRepositoryImpl sets the token on Dio (AuthHeader)
    └─ Returns (user: userModel, token: "...")
 
@@ -372,12 +425,12 @@ The pattern adopted in RAGRO is **extends**: `UserModel extends User`. This mean
    └─ LoginBloc emits LoginSuccess(user)
 
 9. BlocListener on LoginPage reacts to LoginSuccess
-   └─ context.read<AuthBloc>().add(AuthLoggedIn(user))
+   └─ getIt<AuthBloc>().add(AuthLoggedIn(user))
 
 10. AuthBloc emits AuthAuthenticated(user)
     └─ GoRouter detects the change via _GoRouterRefreshStream
     └─ redirect() evaluates the new state
-    └─ Navigates to /consumer/home (or /producer/home, /admin/producers)
+    └─ Navigates to /customer/home (or /producer/home, /admin/producers)
 
 11. The destination screen is rendered with the authenticated user
 ```

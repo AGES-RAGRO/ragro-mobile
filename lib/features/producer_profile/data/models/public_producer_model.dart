@@ -42,12 +42,13 @@ class PublicProducerModel extends PublicProducer {
       );
     }
 
-    final memberSinceRaw = json['memberSince'] as String?;
+    final memberSinceRaw = json['memberSince']?.toString().trim();
 
     return PublicProducerModel(
       id: json['id'] as String? ?? '',
       name: json['name'] as String? ?? '',
-      farmName: json['farmName'] as String? ?? '',
+      farmName:
+          json['farmName'] as String? ?? json['farm_name'] as String? ?? '',
       location: location,
       description: json['description'] as String? ?? '',
       story: json['story'] as String? ?? '',
@@ -61,9 +62,9 @@ class PublicProducerModel extends PublicProducer {
       totalReviews: json['totalReviews'] as int? ?? 0,
       phone: json['phone'] as String? ?? '',
       availability: _parseAvailability(json['availability']),
-      memberSince: memberSinceRaw != null
-          ? DateTime.parse(memberSinceRaw)
-          : DateTime(2016),
+      // Nullable parse (no DateTime(2016) fallback) so membershipLabel (#425)
+      // shows "--" instead of a bogus date for producers without a join date.
+      memberSince: _parseMemberSince(memberSinceRaw),
       photoUrl: () {
         final raw = json['photoUrl'] as String?;
         if (raw == null || raw.isEmpty) return null;
@@ -73,6 +74,14 @@ class PublicProducerModel extends PublicProducer {
       paymentMethods: _parsePaymentMethods(json['paymentMethods']),
       products: const [],
     );
+  }
+
+  static DateTime? _parseMemberSince(String? value) {
+    if (value == null || value.isEmpty) {
+      return null;
+    }
+
+    return DateTime.tryParse(value);
   }
 
   static String _deriveLocation(

@@ -6,7 +6,7 @@ import 'package:ragro_mobile/features/inventory/domain/usecases/get_inventory_pr
 import 'package:ragro_mobile/features/inventory/presentation/bloc/inventory_event.dart';
 import 'package:ragro_mobile/features/inventory/presentation/bloc/inventory_state.dart';
 
-@injectable
+@lazySingleton
 class InventoryBloc extends Bloc<InventoryEvent, InventoryState> {
   InventoryBloc(this._getProducts, this._deleteProduct)
     : super(const InventoryInitial()) {

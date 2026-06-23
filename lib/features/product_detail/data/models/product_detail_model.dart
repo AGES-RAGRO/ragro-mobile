@@ -39,7 +39,11 @@ class ProductDetailModel extends ProductDetail {
       name: json['name'] as String,
       description: json['description'] as String? ?? '',
       price: (json['price'] as num).toDouble(),
-      unityType: json['unityType'] as String? ?? 'kg',
+      unityType:
+          json['unityType'] as String? ??
+          json['unity_type'] as String? ??
+          json['unit'] as String? ??
+          'kg',
       category: firstCategory,
       imageUrl: imageUrl,
       farmName: farmName,

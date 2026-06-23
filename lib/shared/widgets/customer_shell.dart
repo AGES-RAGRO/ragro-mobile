@@ -11,6 +11,7 @@ import 'package:ragro_mobile/features/cart/presentation/widgets/cart_summary_bar
 import 'package:ragro_mobile/features/home/presentation/bloc/home_bloc.dart';
 import 'package:ragro_mobile/features/home/presentation/bloc/home_event.dart';
 import 'package:ragro_mobile/features/home/presentation/bloc/home_state.dart';
+import 'package:ragro_mobile/features/orders/presentation/bloc/active_delivery_cubit.dart';
 import 'package:ragro_mobile/shared/widgets/app_notification.dart';
 
 class CustomerShell extends StatefulWidget {
@@ -30,6 +31,7 @@ class _CustomerShellState extends State<CustomerShell> {
     if (cartBloc.state is CartInitial) {
       cartBloc.add(const CartStarted());
     }
+
     final homeBloc = getIt<HomeBloc>();
     if (homeBloc.state is HomeInitial) {
       homeBloc.add(const HomeStarted());
@@ -142,6 +144,10 @@ class _CustomerShellState extends State<CustomerShell> {
       index,
       initialLocation: index == widget.navigationShell.currentIndex,
     );
+    // Home (0): reload the "order on the way" banner when reopening the tab.
+    if (index == 0) {
+      getIt<ActiveDeliveryCubit>().load();
+    }
   }
 }
 
@@ -177,10 +183,12 @@ class _NavItem extends StatelessWidget {
             const SizedBox(height: 4),
             Text(
               label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
               style: TextStyle(
                 fontFamily: 'Figtree',
                 fontWeight: FontWeight.w500,
-                fontSize: 12,
+                fontSize: 11,
                 color: isActive ? AppColors.darkGreen : AppColors.placeholder,
               ),
             ),

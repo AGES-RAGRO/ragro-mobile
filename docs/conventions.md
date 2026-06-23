@@ -118,7 +118,7 @@ Every BLoC must have **at least** four states, reflecting the lifecycle of an as
 | Situation | Annotation | When to use |
 |-----------|-----------|-------------|
 | BLoC (per page) | `@injectable` | Each page receives a new instance |
-| Global BLoC | `@lazySingleton` | Only `AuthBloc` and `CartBloc` |
+| Global BLoC | `@lazySingleton` | BLoCs that must outlive a single page (e.g., `AuthBloc`, `CartBloc`, `HomeBloc`, `InventoryBloc`, `ProducerManagementBloc`) |
 | Service, DataSource, UseCase | `@lazySingleton` | Shared, no mutable state |
 | Repository impl (by interface) | `@LazySingleton(as: Interface)` | Contract implementations |
 | External dependency without annotation | `@module` + annotated method | `Dio`, `SharedPreferences` |
@@ -135,9 +135,14 @@ Every BLoC must have **at least** four states, reflecting the lifecycle of an as
 | **Dependency Injection** | `get_it` + `injectable` | Service locator and code generation |
 | **Navigation** | `go_router` | Declarative routing with deep linking |
 | **HTTP Client** | `dio` | HTTP requests and interceptors |
-| **Local Storage** | `shared_preferences` | Simple key-value persistence |
+| **Local Storage** | `shared_preferences` + `flutter_secure_storage` | Key-value persistence; secure storage for auth tokens |
+| **Maps & Location** | `google_maps_flutter` + `geolocator` + `geocoding` | Map/route screens, GPS position, address geocoding |
+| **Push Notifications** | `firebase_core` + `firebase_messaging` + `flutter_local_notifications` | FCM push and local notification display |
+| **Real-time Tracking** | `stomp_dart_client` | STOMP client for live GPS tracking over the `/ws` channel |
 | **Equality** | `equatable` | Object comparison in entities and states |
 | **Code Generation** | `build_runner` | Generates `injection.config.dart` |
+| **Linting** | `very_good_analysis` | Active lint ruleset (`analysis_options.yaml`); unused imports are errors |
+| **Testing** | `bloc_test` + `mocktail` | BLoC testing and mocking |
 
 ---
 

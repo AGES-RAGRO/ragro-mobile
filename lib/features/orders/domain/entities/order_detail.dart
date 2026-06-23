@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:ragro_mobile/core/domain/order_status.dart';
 
 class OrderDetailActions extends Equatable {
   const OrderDetailActions({
@@ -141,6 +142,7 @@ class OrderDetail extends Equatable {
     this.reviewed = false,
     this.cancellationReason,
     this.cancellationDetails,
+    this.confirmationCode,
   });
 
   final String id;
@@ -159,6 +161,7 @@ class OrderDetail extends Equatable {
   final bool reviewed;
   final String? cancellationReason;
   final String? cancellationDetails;
+  final String? confirmationCode;
 
   String get displayNumber {
     final shortId = id.length > 4 ? id.substring(0, 4) : id;
@@ -182,14 +185,7 @@ class OrderDetail extends Equatable {
 
   String get friendlyStatusLabel {
     if (statusLabel != null && statusLabel!.isNotEmpty) return statusLabel!;
-    return switch (_normalizedStatus) {
-      'PENDING' => 'Pendente',
-      'CONFIRMED' => 'Aceito',
-      'IN_DELIVERY' => 'A caminho',
-      'DELIVERED' => 'Entregue',
-      'CANCELLED' => 'Cancelado',
-      _ => status,
-    };
+    return OrderStatus.tryParse(status)?.label ?? status;
   }
 
   String get _normalizedStatus => status.trim().toUpperCase();
@@ -201,6 +197,7 @@ class OrderDetail extends Equatable {
     bool? reviewed,
     String? cancellationReason,
     String? cancellationDetails,
+    String? confirmationCode,
   }) {
     return OrderDetail(
       id: id,
@@ -219,6 +216,7 @@ class OrderDetail extends Equatable {
       reviewed: reviewed ?? this.reviewed,
       cancellationReason: cancellationReason ?? this.cancellationReason,
       cancellationDetails: cancellationDetails ?? this.cancellationDetails,
+      confirmationCode: confirmationCode ?? this.confirmationCode,
     );
   }
 
@@ -240,5 +238,6 @@ class OrderDetail extends Equatable {
     reviewed,
     cancellationReason,
     cancellationDetails,
+    confirmationCode,
   ];
 }

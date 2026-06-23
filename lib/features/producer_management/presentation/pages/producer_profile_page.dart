@@ -3,8 +3,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
 import 'package:ragro_mobile/core/di/injection.dart';
+import 'package:ragro_mobile/core/formatters/currency.dart';
 import 'package:ragro_mobile/core/theme/app_colors.dart';
 import 'package:ragro_mobile/features/producer_management/domain/entities/producer_dashboard.dart';
 
@@ -57,10 +57,6 @@ class _ProducerProfileView extends StatelessWidget {
     context.read<ProducerManagementBloc>().add(
       const ProducerManagementRefreshed(),
     );
-  }
-
-  String _formatPrice(double price) {
-    return NumberFormat.currency(locale: 'pt_BR', symbol: r'R$').format(price);
   }
 
   String _formatPercent(double value) {
@@ -200,8 +196,8 @@ class _ProducerProfileView extends StatelessWidget {
             return RefreshIndicator(
               color: AppColors.darkGreen,
               onRefresh: () async {
-                final bloc = context.read<ProducerManagementBloc>();
-                bloc.add(const ProducerManagementRefreshed());
+                final bloc = context.read<ProducerManagementBloc>()
+                  ..add(const ProducerManagementRefreshed());
                 await bloc.stream.firstWhere(
                   (s) =>
                       s is ProducerManagementLoaded ||
@@ -302,18 +298,21 @@ class _ProducerProfileView extends StatelessWidget {
                           ),
                         ),
                         Positioned(
-                          bottom: 4,
-                          right: 4,
-                          child: Container(
-                            padding: const EdgeInsets.all(6),
-                            decoration: const BoxDecoration(
-                              color: AppColors.darkGreen,
-                              shape: BoxShape.circle,
-                            ),
-                            child: const Icon(
-                              Icons.camera_alt,
-                              size: 14,
-                              color: AppColors.white,
+                          bottom: 0,
+                          right: 0,
+                          child: GestureDetector(
+                            onTap: () => _openEditProfile(context),
+                            child: Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: const BoxDecoration(
+                                color: AppColors.darkGreen,
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(
+                                Icons.camera_alt,
+                                size: 18,
+                                color: AppColors.white,
+                              ),
                             ),
                           ),
                         ),
@@ -388,25 +387,29 @@ class _ProducerProfileView extends StatelessWidget {
                       ],
                     ),
                   ),
-                  const SizedBox(height: 12),
-                  OutlinedButton.icon(
-                    onPressed: () => _openEditProfile(context),
-                    icon: const Icon(Icons.edit_outlined, size: 16),
-                    label: const Text('Editar Perfil'),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: AppColors.darkGreen,
-                      side: const BorderSide(color: AppColors.darkGreen),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(24),
-                      ),
-                      textStyle: const TextStyle(
-                        fontFamily: 'Manrope',
-                        fontWeight: FontWeight.w600,
-                        fontSize: 14,
-                      ),
-                    ),
-                  ),
                 ],
+              ),
+            ),
+          ),
+
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
+            child: FilledButton.icon(
+              onPressed: () => _openEditProfile(context),
+              icon: const Icon(Icons.edit_outlined, size: 16),
+              label: const Text('Editar Perfil'),
+              style: FilledButton.styleFrom(
+                backgroundColor: AppColors.darkGreen,
+                foregroundColor: AppColors.white,
+                minimumSize: const Size(double.infinity, 48),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(24),
+                ),
+                textStyle: const TextStyle(
+                  fontFamily: 'Manrope',
+                  fontWeight: FontWeight.w600,
+                  fontSize: 14,
+                ),
               ),
             ),
           ),
@@ -480,7 +483,7 @@ class _ProducerProfileView extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: _SalesCard(
-              value: _formatPrice(dashboard.totalSales),
+              value: formatCurrency(dashboard.totalSales),
               percentText: _formatSignedPercent(dashboard.salesGrowthPercent),
               previousMonth: _previousMonthName(state.selectedMonth),
               positive: dashboard.salesGrowthPercent >= 0,
@@ -521,7 +524,6 @@ class _ProducerProfileView extends StatelessWidget {
           ),
 
           const SizedBox(height: 24),
-          const SizedBox(height: 20),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: _WeeklyChart(data: dashboard.weeklyChartData),
@@ -786,20 +788,20 @@ class _StatCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-            width: 24,
-            height: 24,
+            width: 40,
+            height: 40,
             decoration: BoxDecoration(
               color: iconColor.withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
-            child: Icon(icon, size: 14, color: iconColor),
+            child: Icon(icon, size: 20, color: iconColor),
           ),
-          const SizedBox(height: 26),
+          const SizedBox(height: 16),
           Text(
             label,
             style: const TextStyle(
               fontFamily: 'Manrope',
-              fontSize: 11,
+              fontSize: 14,
               color: AppColors.placeholder,
             ),
           ),
@@ -809,7 +811,7 @@ class _StatCard extends StatelessWidget {
             style: const TextStyle(
               fontFamily: 'Figtree',
               fontWeight: FontWeight.w800,
-              fontSize: 22,
+              fontSize: 28,
               color: AppColors.black,
             ),
           ),
@@ -819,7 +821,7 @@ class _StatCard extends StatelessWidget {
             style: TextStyle(
               fontFamily: 'Manrope',
               fontWeight: FontWeight.w700,
-              fontSize: 10,
+              fontSize: 12,
               color: positive ? AppColors.lightGreen : AppColors.red,
             ),
           ),

@@ -2,6 +2,8 @@
 
 This guide uses **"Producer Reviews"** as a practical example. Follow each step in the indicated order.
 
+> **Note:** Producer reviews already exist in the app (the UI lives under `lib/features/producer_profile/` with the `reviews` route already wired in `app_router.dart`, and review submission under `lib/features/orders/`). This guide reuses that domain only as a teaching example — do not re-create it; apply the same pattern to your own new feature.
+
 ---
 
 ## Checklist
@@ -170,17 +172,17 @@ class ProducerReviewModel extends ProducerReview {
   factory ProducerReviewModel.fromJson(Map<String, dynamic> json) {
     return ProducerReviewModel(
       id: json['id'] as String,
-      producerId: json['producer_id'] as String,
-      consumerId: json['consumer_id'] as String,
-      consumerName: json['consumer_name'] as String,
+      producerId: json['producerId'] as String,
+      consumerId: json['consumerId'] as String,
+      consumerName: json['consumerName'] as String,
       rating: json['rating'] as int,
       comment: json['comment'] as String,
-      createdAt: DateTime.parse(json['created_at'] as String),
+      createdAt: DateTime.parse(json['createdAt'] as String),
     );
   }
 
   Map<String, dynamic> toJson() => {
-    'producer_id': producerId,
+    'producerId': producerId,
     'rating': rating,
     'comment': comment,
   };
@@ -488,7 +490,7 @@ GoRoute(
 ),
 ```
 
-The resulting route would be: `/consumer/home/producer/:producerId/reviews`
+The resulting route would be: `/customer/home/producer/:producerId/reviews`
 
 ---
 

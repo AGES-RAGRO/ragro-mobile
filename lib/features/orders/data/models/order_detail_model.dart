@@ -1,4 +1,6 @@
+import 'package:ragro_mobile/core/domain/order_status.dart';
 import 'package:ragro_mobile/core/network/api_endpoints.dart';
+import 'package:ragro_mobile/core/utils/api_date_time.dart';
 import 'package:ragro_mobile/features/orders/domain/entities/order_detail.dart';
 
 class OrderDetailActionsModel extends OrderDetailActions {
@@ -137,6 +139,7 @@ class OrderDetailModel extends OrderDetail {
     super.reviewed,
     super.cancellationReason,
     super.cancellationDetails,
+    super.confirmationCode,
   });
 
   factory OrderDetailModel.fromJson(Map<String, dynamic> json) {
@@ -157,7 +160,7 @@ class OrderDetailModel extends OrderDetail {
       id: json['id'] as String? ?? '',
       status: _normalizeStatus(json['status'] as String?),
       statusLabel: json['statusLabel'] as String?,
-      createdAt: DateTime.tryParse(json['createdAt'] as String? ?? ''),
+      createdAt: parseApiDateTime(json['createdAt']),
       producerId:
           json['producerId'] as String? ?? producerJson?['id'] as String? ?? '',
       producerName:
@@ -204,6 +207,7 @@ class OrderDetailModel extends OrderDetail {
           json['cancellationDetails'] as String? ??
           json['cancelDetails'] as String? ??
           json['details'] as String?,
+      confirmationCode: json['confirmationCode'] as String?,
     );
   }
 
@@ -240,13 +244,8 @@ class OrderDetailModel extends OrderDetail {
     return false;
   }
 
-  static String _normalizeStatus(String? status) {
-    return switch (status?.trim().toUpperCase()) {
-      'ACCEPTED' || 'CONFIRMED' => 'CONFIRMED',
-      'INDELIVERY' || 'IN_DELIVERY' || 'OUT_FOR_DELIVERY' => 'IN_DELIVERY',
-      'DELIVERED' => 'DELIVERED',
-      'CANCELED' || 'CANCELLED' => 'CANCELLED',
-      _ => 'PENDING',
-    };
-  }
+  // OrderDetail keeps the status as a normalized backend string; the parsing
+  // itself is centralized in the canonical OrderStatus enum.
+  static String _normalizeStatus(String? status) =>
+      (OrderStatus.tryParse(status) ?? OrderStatus.pending).apiValue;
 }

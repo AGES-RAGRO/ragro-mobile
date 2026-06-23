@@ -12,7 +12,7 @@ jobs:
     name: Mirror to GitLab
     runs-on: ubuntu-22.04
 
-    # Só executa em push na main (não roda em PR)
+    # Only on push to main (not on PRs)
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
 
     steps:

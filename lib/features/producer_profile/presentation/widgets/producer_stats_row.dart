@@ -5,13 +5,13 @@ class ProducerStatsRow extends StatelessWidget {
   const ProducerStatsRow({
     required this.productCount,
     required this.rating,
-    required this.yearsOnPlatform,
+    required this.membershipLabel,
     super.key,
   });
 
   final int productCount;
   final double rating;
-  final int yearsOnPlatform;
+  final String? membershipLabel;
 
   @override
   Widget build(BuildContext context) {
@@ -22,7 +22,7 @@ class ProducerStatsRow extends StatelessWidget {
         _StatCard(value: rating.toStringAsFixed(1), label: 'AVALIAÇÃO'),
         const SizedBox(width: 16),
         _StatCard(
-          value: '${yearsOnPlatform > 0 ? yearsOnPlatform : 1} anos',
+          value: membershipLabel ?? '--',
           label: 'DE RAGRO',
         ),
       ],

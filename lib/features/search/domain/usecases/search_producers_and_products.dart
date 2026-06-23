@@ -10,4 +10,6 @@ class SearchProducersAndProducts {
 
   Future<List<SearchResult>> call({required String query, String? category}) =>
       _repository.search(query: query, category: category);
+  Future<List<SearchResult>> getProductsByCategory({String? category}) =>
+      _repository.getProductsByCategory(category: category);
 }

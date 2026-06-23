@@ -36,7 +36,7 @@ RAGRO uses the `get_it` package as a global service locator. A single access poi
 final getIt = GetIt.instance;
 
 @InjectableInit()
-Future<void> configureDependencies() async => getIt.init();
+Future<void> configureDependencies() => getIt.init();
 ```
 
 The `configureDependencies()` function is called in `main.dart` before `runApp()`.
@@ -74,12 +74,34 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> { ... }
 
 @injectable
 class RegisterBloc extends Bloc<RegisterEvent, RegisterState> { ... }
-
-@injectable
-class HomeBloc extends Bloc<HomeEvent, HomeState> { ... }
 ```
 
-> **Rule**: `AuthBloc` is `@lazySingleton` (global state). All other BLoCs are `@injectable` (per-page state).
+> **Rule**: `AuthBloc` is `@lazySingleton` (global auth state). Most page BLoCs are `@injectable` (per-page state), but a handful of **session-scoped** BLoCs/cubits are also `@lazySingleton` — see below.
+
+### Session-scoped `@lazySingleton` BLoCs
+
+Besides `AuthBloc`, the following are registered as `@lazySingleton` because their state must survive across navigation within a session (e.g. they live in the shell's `IndexedStack`):
+
+- `HomeBloc`, `CartBloc`, `InventoryBloc`, `ProducerManagementBloc`, `ActiveDeliveryCubit`
+
+Because these are singletons, they must be cleared on logout so the next login never shows the previous user's data. `lib/core/di/injection.dart` handles this:
+
+```dart
+// lib/core/di/injection.dart
+void resetSessionScopedBlocs() {
+  _resetIfRegistered<HomeBloc>();
+  _resetIfRegistered<CartBloc>();
+  _resetIfRegistered<ProducerManagementBloc>();
+  _resetIfRegistered<InventoryBloc>();
+  _resetIfRegistered<ActiveDeliveryCubit>();
+}
+
+void _resetIfRegistered<T extends Object>() {
+  if (getIt.isRegistered<T>()) {
+    getIt.resetLazySingleton<T>(); // get_it rebuilds a fresh instance on next access
+  }
+}
+```
 
 ### `@LazySingleton(as: Interface)`
 
@@ -89,8 +111,8 @@ Registers the concrete implementation mapped to its interface. This is how depen
 @LazySingleton(as: AuthRepository)
 class AuthRepositoryImpl implements AuthRepository { ... }
 
-@LazySingleton(as: ConsumerProfileRepository)
-class ConsumerProfileRepositoryImpl implements ConsumerProfileRepository { ... }
+@LazySingleton(as: CustomerProfileRepository)
+class CustomerProfileRepositoryImpl implements CustomerProfileRepository { ... }
 ```
 
 ---
@@ -108,7 +130,8 @@ getIt<LoginBloc>()
                             │       └── ApiClient (lazySingleton)
                             │               └── Dio (lazySingleton)
                             ├── AuthLocalDataSource (lazySingleton)
-                            │       └── SharedPreferences (factoryAsync — resolved at boot)
+                            │       ├── SharedPreferences (@preResolve — resolved at boot)
+                            │       └── FlutterSecureStorage (lazySingleton)
                             └── ApiClient (same singleton already created)
 ```
 
@@ -163,10 +186,8 @@ Dependencies that cannot be annotated directly (because they are from external p
 @module
 abstract class NetworkModule {
   @lazySingleton
-  Dio get dio => Dio(BaseOptions(
-    connectTimeout: const Duration(seconds: 15),
-    receiveTimeout: const Duration(seconds: 30),
-  ));
+  Dio get dio => Dio();
+  // Timeouts (10s connect/receive/send) are configured in ApiClient, not here.
 }
 
 // lib/core/di/shared_preferences_module.dart
@@ -174,5 +195,11 @@ abstract class NetworkModule {
 abstract class SharedPreferencesModule {
   @preResolve  // resolves before init() completes (await)
   Future<SharedPreferences> get prefs => SharedPreferences.getInstance();
+
+  // Keystore-backed storage for sensitive auth material (tokens, clientId).
+  @lazySingleton
+  FlutterSecureStorage get secureStorage => const FlutterSecureStorage();
 }
 ```
+
+`AuthLocalDataSource` receives both: sensitive session material (access/refresh tokens, token URL, clientId) is written to `FlutterSecureStorage`, while non-sensitive profile fields (user type, id, name, email, etc.) live in `SharedPreferences`.

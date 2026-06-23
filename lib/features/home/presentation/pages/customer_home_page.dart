@@ -11,10 +11,13 @@ import 'package:ragro_mobile/features/home/presentation/bloc/home_event.dart';
 import 'package:ragro_mobile/features/home/presentation/bloc/home_state.dart';
 import 'package:ragro_mobile/features/home/presentation/widgets/producers_section.dart';
 import 'package:ragro_mobile/features/home/presentation/widgets/products_grid.dart';
+import 'package:ragro_mobile/features/orders/presentation/bloc/active_delivery_cubit.dart';
+import 'package:ragro_mobile/features/orders/presentation/widgets/active_delivery_banner.dart';
 import 'package:ragro_mobile/features/recommendations/domain/entities/recommendation.dart';
 import 'package:ragro_mobile/features/recommendations/presentation/bloc/recommendations_bloc.dart';
 import 'package:ragro_mobile/features/recommendations/presentation/bloc/recommendations_event.dart';
 import 'package:ragro_mobile/features/recommendations/presentation/bloc/recommendations_state.dart';
+import 'package:ragro_mobile/shared/widgets/notification_bell.dart';
 
 class CustomerHomePage extends StatelessWidget {
   const CustomerHomePage({super.key});
@@ -28,6 +31,7 @@ class CustomerHomePage extends StatelessWidget {
           create: (_) =>
               getIt<RecommendationsBloc>()..add(const RecommendationsStarted()),
         ),
+        BlocProvider.value(value: getIt<ActiveDeliveryCubit>()),
       ],
       child: const _CustomerHomeView(),
     );
@@ -48,6 +52,9 @@ class _CustomerHomeViewState extends State<_CustomerHomeView> {
   void initState() {
     super.initState();
     _scrollController.addListener(_onScroll);
+    // Load the in-transit order (top banner); reloaded on pull-to-refresh and
+    // when reopening the Home tab.
+    context.read<ActiveDeliveryCubit>().load();
   }
 
   @override
@@ -93,24 +100,33 @@ class _CustomerHomeViewState extends State<_CustomerHomeView> {
                         context.read<RecommendationsBloc>().add(
                           const RecommendationsRefreshRequested(),
                         );
+                        await context.read<ActiveDeliveryCubit>().load();
                       },
                       child: CustomScrollView(
                         controller: _scrollController,
                         slivers: [
                           const SliverToBoxAdapter(
                             child: Padding(
-                              padding: EdgeInsets.fromLTRB(16, 16, 16, 0),
-                              child: Text(
-                                'Início',
-                                style: TextStyle(
-                                  fontFamily: 'Figtree',
-                                  fontWeight: FontWeight.w700,
-                                  fontSize: 34,
-                                  color: AppColors.darkGreen,
-                                ),
+                              padding: EdgeInsets.fromLTRB(16, 12, 6, 0),
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    'Início',
+                                    style: TextStyle(
+                                      fontFamily: 'Figtree',
+                                      fontWeight: FontWeight.w700,
+                                      fontSize: 34,
+                                      color: AppColors.darkGreen,
+                                    ),
+                                  ),
+                                  NotificationBell(),
+                                ],
                               ),
                             ),
                           ),
+                          const SliverToBoxAdapter(child: ActiveDeliveryBanner()),
                           const SliverToBoxAdapter(child: SizedBox(height: 24)),
                           SliverToBoxAdapter(
                             child: ProducersSection(
@@ -138,7 +154,6 @@ class _CustomerHomeViewState extends State<_CustomerHomeView> {
                                     quantity: 1,
                                   ),
                                 );
-                                context.push('/customer/cart');
                               },
                             ),
                           ),

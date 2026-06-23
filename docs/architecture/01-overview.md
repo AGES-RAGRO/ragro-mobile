@@ -71,7 +71,7 @@ The waiter (BLoC) moves between the dining room and the kitchen, but the custome
          │
          │ emit(LoginSuccess(user))
          ▼
-      Screen reacts → navigates to /consumer/home
+      Screen reacts → navigates to /customer/impact
 ```
 
 **Data travels back up the exact reverse path**: `DataSource → Model → Entity → Repository → UseCase → BLoC → Screen`.

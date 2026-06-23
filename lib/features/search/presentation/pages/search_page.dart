@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:ragro_mobile/core/constants/product_category.dart';
 import 'package:ragro_mobile/core/di/injection.dart';
 import 'package:ragro_mobile/core/theme/app_colors.dart';
+import 'package:ragro_mobile/features/cart/presentation/bloc/cart_bloc.dart';
+import 'package:ragro_mobile/features/cart/presentation/bloc/cart_event.dart';
+import 'package:ragro_mobile/features/home/domain/entities/home_product.dart';
+import 'package:ragro_mobile/features/home/presentation/widgets/products_grid.dart';
 import 'package:ragro_mobile/features/search/presentation/bloc/search_bloc.dart';
 import 'package:ragro_mobile/features/search/presentation/bloc/search_event.dart';
 import 'package:ragro_mobile/features/search/presentation/bloc/search_state.dart';
@@ -30,20 +35,15 @@ class _SearchView extends StatefulWidget {
 
 class _SearchViewState extends State<_SearchView> {
   final _controller = TextEditingController();
-  String _selectedCategory = 'Tudo';
-  final _categories = const [
-    'Tudo',
-    'Frutas',
-    'Verduras',
-    'Legumes',
-    'Laticínios',
-    'Ovos',
-    'Grãos e Cereais',
-    'Carnes',
-    'Mel e Derivados',
-    'Processados Artesanais',
-    'Plantas e Mudas',
-  ];
+  ProductCategory? _selectedCategory;
+  final _categories = ProductCategory.values;
+
+  @override
+  void initState() {
+    super.initState();
+    // Load general recommendations (/recommendations?limit=6).
+    context.read<SearchBloc>().add(const SearchCategoryProductsRequested(''));
+  }
 
   @override
   void dispose() {
@@ -58,7 +58,7 @@ class _SearchViewState extends State<_SearchView> {
       '/customer/search/results',
       extra: SearchRouteParams(
         query: query.trim(),
-        category: _selectedCategory == 'Tudo' ? null : _selectedCategory,
+        category: _selectedCategory?.wireValue,
       ),
     );
   }
@@ -72,7 +72,6 @@ class _SearchViewState extends State<_SearchView> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Header
               const Padding(
                 padding: EdgeInsets.fromLTRB(16, 16, 16, 0),
                 child: Text(
@@ -85,7 +84,7 @@ class _SearchViewState extends State<_SearchView> {
                   ),
                 ),
               ),
-              // Search bar
+
               Padding(
                 padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
                 child: Container(
@@ -126,7 +125,6 @@ class _SearchViewState extends State<_SearchView> {
                   ),
                 ),
               ),
-              // Categories
               Padding(
                 padding: const EdgeInsets.fromLTRB(0, 20, 0, 0),
                 child: Column(
@@ -151,19 +149,29 @@ class _SearchViewState extends State<_SearchView> {
                         padding: const EdgeInsets.symmetric(horizontal: 16),
                         itemCount: _categories.length,
                         separatorBuilder: (_, __) => const SizedBox(width: 8),
-                        itemBuilder: (_, i) => CategoryChip(
-                          label: _categories[i],
-                          isSelected: _selectedCategory == _categories[i],
-                          onTap: () {
-                            setState(() => _selectedCategory = _categories[i]);
-                          },
-                        ),
+                        itemBuilder: (_, i) {
+                          final c = _categories[i];
+                          return CategoryChip(
+                            label: c.label,
+                            isSelected: _selectedCategory == c,
+                            onTap: () {
+                              final isDeselecting = _selectedCategory == c;
+                              setState(() => _selectedCategory = isDeselecting ? null : c);
+                              context.read<SearchBloc>().add(
+                                SearchCategoryChanged(isDeselecting ? null : c.wireValue),
+                              );
+                              context.read<SearchBloc>().add(
+                                SearchCategoryProductsRequested(isDeselecting ? '' : c.wireValue),
+                              );
+                            },
+                          );
+                        },
                       ),
                     ),
+                    const SizedBox(height: 12),
                   ],
                 ),
               ),
-              // Recent searches
               BlocBuilder<SearchBloc, SearchState>(
                 buildWhen: (prev, curr) =>
                     curr is SearchIdle && curr.recentSearches.isNotEmpty ||
@@ -208,6 +216,69 @@ class _SearchViewState extends State<_SearchView> {
                       ],
                     ),
                   );
+                },
+              ),
+              BlocBuilder<SearchBloc, SearchState>(
+                builder: (context, state) {
+                  if (state is SearchCategoryLoading) {
+                    return const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 12),
+                      child: Center(child: CircularProgressIndicator()),
+                    );
+                  }
+                  if (state is SearchCategoryLoaded) {
+                    final results = state.products;
+                    if (results.isEmpty) {
+                      return const Padding(
+                        padding: EdgeInsets.fromLTRB(16, 24, 16, 24),
+                        child: Text(
+                          'Nenhum produto encontrado para essa categoria.',
+                          style: TextStyle(
+                            fontFamily: 'Figtree',
+                            fontSize: 14,
+                            color: AppColors.placeholder,
+                          ),
+                        ),
+                      );
+                    }
+                    final homeProducts = results
+                        .map(
+                          (r) => HomeProduct(
+                            id: r.id,
+                            name: r.name,
+                            category: r.category ?? '',
+                            price: r.price ?? 0.0,
+                            unityType: r.unit ?? '',
+                            imageUrl: r.imageUrl,
+                            farmName: r.subtitle,
+                            producerId: r.producerId ?? '',
+                          ),
+                        )
+                        .toList();
+                    return Padding(
+                      padding: const EdgeInsets.fromLTRB(0, 16, 0, 24),
+                      child: ProductsGrid(
+                        products: homeProducts,
+                        onProductTap: (p) => context.push(
+                          '/customer/home/product/${p.id}',
+                          extra: p.producerId,
+                        ),
+                        onAddToCart: (p) {
+                          getIt<CartBloc>().add(
+                            CartItemAdded(productId: p.id, quantity: 1),
+                          );
+                          context.push('/customer/cart');
+                        },
+                      ),
+                    );
+                  }
+                  if (state is SearchCategoryFailure) {
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      child: Center(child: Text(state.message)),
+                    );
+                  }
+                  return const SizedBox.shrink();
                 },
               ),
             ],

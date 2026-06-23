@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:ragro_mobile/core/formatters/currency.dart';
 import 'package:ragro_mobile/features/cart/domain/entities/cart_item.dart';
 import 'package:ragro_mobile/features/cart/presentation/bloc/cart_bloc.dart';
 import 'package:ragro_mobile/features/cart/presentation/bloc/cart_event.dart';
@@ -71,7 +72,8 @@ void main() {
     ) async {
       await tester.pumpWidget(buildSubject(item: buildItem()));
 
-      expect(find.text(r'R$ 15,50 / kg'), findsOneWidget);
+      // formatCurrency uses pt_BR locale (non-breaking space after R$).
+      expect(find.text('${formatCurrency(15.50)} / kg'), findsOneWidget);
     });
 
     testWidgets('mostra apenas o preço quando unityType vier vazio', (
@@ -79,7 +81,7 @@ void main() {
     ) async {
       await tester.pumpWidget(buildSubject(item: buildItem(unityType: '')));
 
-      expect(find.text(r'R$ 15,50'), findsOneWidget);
+      expect(find.text(formatCurrency(15.50)), findsOneWidget);
       expect(find.textContaining(' / '), findsNothing);
     });
 

@@ -16,11 +16,20 @@ abstract final class ApiEndpoints {
       return _normalizeForRuntime(normalized);
     }
 
+    // Fallback to process env (Xcode scheme LaunchAction or shell env) so a
+    // physical iOS device can pick up the Mac's LAN IP without a recompile.
+    if (!kIsWeb) {
+      final runtimeBase = Platform.environment['API_BASE_URL'] ?? '';
+      if (runtimeBase.trim().isNotEmpty) {
+        final normalized = runtimeBase.trim().replaceFirst(RegExp(r'\/+$'), '');
+        return _normalizeForRuntime(normalized);
+      }
+    }
+
     return _normalizeForRuntime(_localBase);
   }
 
-  /// Fixes URLs that come from the backend (like Keycloak token URLs)
-  /// to be reachable from the emulator.
+  /// Rewrites backend URLs (e.g. Keycloak token URLs) reachable from the emulator.
   static String fixUrl(String url) {
     return _normalizeForRuntime(url);
   }
@@ -63,6 +72,28 @@ abstract final class ApiEndpoints {
   static String customerFavorite(String producerId) =>
       '$_base/customers/me/favorites/$producerId';
 
+  // Notifications — role-scoped. Identical ops under /customers/me/notifications
+  // (CUSTOMER) and /producers/me/notifications (FARMER); NotificationsRemoteDataSource
+  // picks by logged-in role.
+  static String get customerNotifications => '$_base/customers/me/notifications';
+  static String get customerNotificationsUnreadCount =>
+      '$_base/customers/me/notifications/unread-count';
+  static String customerNotificationRead(String id) =>
+      '$_base/customers/me/notifications/$id/read';
+  static String get customerNotificationsReadAll =>
+      '$_base/customers/me/notifications/read-all';
+
+  // FCM device-token registration (role-agnostic; any authenticated user).
+  static String get notificationToken => '$_base/notifications/token';
+
+  static String get producerNotifications => '$_base/producers/me/notifications';
+  static String get producerNotificationsUnreadCount =>
+      '$_base/producers/me/notifications/unread-count';
+  static String producerNotificationRead(String id) =>
+      '$_base/producers/me/notifications/$id/read';
+  static String get producerNotificationsReadAll =>
+      '$_base/producers/me/notifications/read-all';
+
   // Producers / Farmers
   static String get producers => '$_base/producers';
   static String get search => '$_base/search';
@@ -80,9 +111,19 @@ abstract final class ApiEndpoints {
   static String get co2Calculate => '$_base/co2/calculate';
   static String get co2RecordSavings => '$_base/co2/record-savings';
   static String get co2Options => '$_base/co2/options';
+  static String get co2Emissions => '$_base/co2/emissions';
 
-  // Routes (optimized via backend; the Google key stays on the server)
-  static String get routesOptimize => '$_base/routes/optimize';
+  // Persisted delivery routes (E5) + real-time tracking (E6). Legacy
+  // /routes/optimize replaced by the persisted route (route_repository).
+  static String get routes => '$_base/routes';
+  static String get activeRoute => '$_base/routes/active';
+  static String routeAddStops(String routeId) =>
+      '$_base/routes/$routeId/add-stops';
+  static String routeStop(String routeId, String stopId) =>
+      '$_base/routes/$routeId/stops/$stopId';
+
+  /// WebSocket (STOMP) endpoint for real-time tracking.
+  static String get wsUrl => '${_base.replaceFirst('http', 'ws')}/ws';
 
   // Orders
   static String get orders => '$_base/orders';
@@ -97,6 +138,7 @@ abstract final class ApiEndpoints {
   static String orderStatus(String id) => '$_base/orders/$id/status';
   static String orderConfirm(String id) => '$_base/orders/$id/confirm';
   static String orderSeen(String id) => '$_base/orders/$id/seen';
+  static String orderTracking(String id) => '$_base/orders/$id/tracking';
   static String get reviews => '$_base/reviews';
 
   // Customer cart
@@ -132,6 +174,8 @@ abstract final class ApiEndpoints {
   // Producer orders
   static String get producerOrders => '$_base/orders/producer';
   static String producerOrderConfirm(String id) => orderConfirm(id);
+  static String producerOrderConfirmDeliveryWithCode(String id) =>
+      '$_base/orders/$id/confirm-delivery-with-code';
   static String producerOrderStatus(String id) => orderStatus(id);
   static String producerOrderCancel(String id) => orderCancel(id);
 
@@ -139,9 +183,8 @@ abstract final class ApiEndpoints {
   static String get adminProducers => '$_base/admin/producers';
   static String adminProducer(String id) => '$_base/admin/producers/$id';
 
-  /// Rewrites a media URL that came from the backend (e.g. MinIO public URL).
-  /// This keeps local backend URLs reachable on emulators by matching the
-  /// host used by the configured API base URL.
+  /// Rewrites a backend media URL (e.g. MinIO public URL) to the API base host,
+  /// keeping local backend URLs reachable on emulators.
   static String resolveMediaUrl(String url) {
     if (url.isEmpty) return url;
     final mediaUri = Uri.tryParse(url);

@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:ragro_mobile/core/di/injection.dart';
+import 'package:ragro_mobile/core/formatters/currency.dart';
 import 'package:ragro_mobile/core/theme/app_colors.dart';
 import 'package:ragro_mobile/features/inventory/presentation/bloc/inventory_bloc.dart';
 import 'package:ragro_mobile/features/inventory/presentation/bloc/inventory_event.dart';
@@ -16,11 +17,39 @@ class InventoryPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (_) => getIt<InventoryBloc>()..add(const InventoryStarted()),
-      child: const _InventoryView(),
+    // Bloc is a singleton (see InventoryBloc): the shell triggers a refresh when
+    // the Estoque tab is reopened. Here we only provide the value; the loader
+    // handles the initial load.
+    return BlocProvider.value(
+      value: getIt<InventoryBloc>(),
+      child: const _InventoryLoader(),
     );
   }
+}
+
+class _InventoryLoader extends StatefulWidget {
+  const _InventoryLoader();
+
+  @override
+  State<_InventoryLoader> createState() => _InventoryLoaderState();
+}
+
+class _InventoryLoaderState extends State<_InventoryLoader> {
+  @override
+  void initState() {
+    super.initState();
+    final bloc = context.read<InventoryBloc>();
+    // First ever mount → load. Re-mount on a fresh session (singleton survived a
+    // previous login) → refresh, so stale data from another user never shows.
+    if (bloc.state is InventoryInitial) {
+      bloc.add(const InventoryStarted());
+    } else {
+      bloc.add(const InventoryRefreshed());
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) => const _InventoryView();
 }
 
 class _InventoryView extends StatelessWidget {
@@ -31,9 +60,6 @@ class _InventoryView extends StatelessWidget {
     ('active', 'Ativos'),
     ('unavailable', 'Indisponíveis'),
   ];
-
-  String _formatPrice(double price) =>
-      'R\$ ${price.toStringAsFixed(2).replaceAll('.', ',')}';
 
   @override
   Widget build(BuildContext context) {
@@ -119,7 +145,7 @@ class _InventoryView extends StatelessWidget {
                         Expanded(
                           child: _SummaryCard(
                             label: 'Valor Total',
-                            value: _formatPrice(state.totalValue),
+                            value: formatCurrency(state.totalValue),
                             icon: Icons.attach_money,
                           ),
                         ),
@@ -219,7 +245,13 @@ class _InventoryView extends StatelessWidget {
                               ],
                             ),
                           )
-                        : ListView.separated(
+                        : RefreshIndicator(
+                            color: AppColors.darkGreen,
+                            onRefresh: () async => context
+                                .read<InventoryBloc>()
+                                .add(const InventoryRefreshed()),
+                            child: ListView.separated(
+                            physics: const AlwaysScrollableScrollPhysics(),
                             padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
                             itemCount: state.products.length,
                             separatorBuilder: (_, __) =>
@@ -259,7 +291,7 @@ class _InventoryView extends StatelessWidget {
                                         'productName': product.name,
                                         'unit': product.unit,
                                         'currentStock': product.stock
-                                            .toDouble(),
+                                            ,
                                       },
                                     )
                                     .then((result) {
@@ -280,6 +312,7 @@ class _InventoryView extends StatelessWidget {
                                 ),
                               );
                             },
+                          ),
                           ),
                   ),
                 ] else if (state is InventoryLoading) ...[
@@ -394,27 +427,31 @@ class _SummaryCard extends StatelessWidget {
             child: Icon(icon, size: 20, color: AppColors.darkGreen),
           ),
           const SizedBox(width: 12),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                label,
-                style: const TextStyle(
-                  fontFamily: 'Manrope',
-                  fontSize: 12,
-                  color: AppColors.placeholder,
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: const TextStyle(
+                    fontFamily: 'Manrope',
+                    fontSize: 12,
+                    color: AppColors.placeholder,
+                  ),
+                  overflow: TextOverflow.ellipsis,
                 ),
-              ),
-              Text(
-                value,
-                style: const TextStyle(
-                  fontFamily: 'Figtree',
-                  fontWeight: FontWeight.w700,
-                  fontSize: 16,
-                  color: AppColors.black,
+                Text(
+                  value,
+                  style: const TextStyle(
+                    fontFamily: 'Figtree',
+                    fontWeight: FontWeight.w700,
+                    fontSize: 16,
+                    color: AppColors.black,
+                  ),
+                  overflow: TextOverflow.ellipsis,
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ],
       ),

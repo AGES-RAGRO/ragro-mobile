@@ -1,5 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
+import 'package:ragro_mobile/core/di/injection.dart';
 import 'package:ragro_mobile/core/network/api_exception.dart';
 import 'package:ragro_mobile/features/auth/domain/usecases/get_current_user.dart';
 import 'package:ragro_mobile/features/auth/domain/usecases/logout.dart';
@@ -38,9 +39,10 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     try {
       await _logout();
     } on Exception catch (_) {
-      // Logout failure (e.g. local storage error) — still clear local session
-      // and unauthenticate the user in-memory.
+      // Logout failure (e.g. local storage error) — still clear the session.
     }
+    // Reset session blocs so the next login starts clean. See [resetSessionScopedBlocs].
+    resetSessionScopedBlocs();
     emit(const AuthUnauthenticated());
   }
 

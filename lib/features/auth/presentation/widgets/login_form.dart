@@ -8,6 +8,7 @@ import 'package:ragro_mobile/features/auth/presentation/bloc/login_event.dart';
 import 'package:ragro_mobile/features/auth/presentation/bloc/login_state.dart';
 import 'package:ragro_mobile/features/auth/presentation/widgets/auth_submit_button.dart';
 import 'package:ragro_mobile/features/auth/presentation/widgets/auth_text_field.dart';
+import 'package:ragro_mobile/shared/widgets/terms_of_use_dialog.dart';
 
 /// Login form: email/password fields, submit button, and recovery/registration
 /// links. Requires a [LoginBloc] ancestor in the widget tree.
@@ -137,6 +138,19 @@ class _LoginFormState extends State<LoginForm> {
               ),
             ),
           ],
+          const SizedBox(height: 16),
+          Center(
+            child: GestureDetector(
+              onTap: () => showTermsOfUseDialog(context),
+              child: Text(
+                'Termos de Uso',
+                style: AppTextStyles.caption.copyWith(
+                  color: AppColors.darkGreen,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+          ),
         ],
       ),
     );

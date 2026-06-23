@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:injectable/injectable.dart';
 import 'package:ragro_mobile/core/di/injection.dart';
+import 'package:ragro_mobile/core/navigation/orders_route_observer.dart';
 import 'package:ragro_mobile/features/admin/presentation/pages/admin_create_producer_page.dart';
 import 'package:ragro_mobile/features/admin/presentation/pages/admin_edit_producer_page.dart';
 import 'package:ragro_mobile/features/admin/presentation/pages/admin_producers_page.dart';
@@ -19,6 +20,7 @@ import 'package:ragro_mobile/features/customer_profile/presentation/bloc/custome
 import 'package:ragro_mobile/features/customer_profile/presentation/pages/customer_edit_address_page.dart';
 import 'package:ragro_mobile/features/customer_profile/presentation/pages/customer_edit_profile_page.dart';
 import 'package:ragro_mobile/features/customer_profile/presentation/pages/customer_profile_page.dart';
+import 'package:ragro_mobile/features/customer_profile/presentation/pages/faq_page.dart';
 import 'package:ragro_mobile/features/home/presentation/pages/customer_home_page.dart';
 import 'package:ragro_mobile/features/impact/presentation/pages/impact_detail_page.dart';
 import 'package:ragro_mobile/features/impact/presentation/pages/impact_page.dart';
@@ -28,7 +30,11 @@ import 'package:ragro_mobile/features/inventory/presentation/pages/stock_entry_p
 import 'package:ragro_mobile/features/inventory/presentation/pages/stock_exit_page.dart';
 import 'package:ragro_mobile/features/inventory/presentation/pages/stock_movements_page.dart';
 import 'package:ragro_mobile/features/map/presentation/pages/map_page.dart';
+import 'package:ragro_mobile/features/notifications/domain/entities/notification.dart';
+import 'package:ragro_mobile/features/notifications/presentation/pages/notification_detail_page.dart';
+import 'package:ragro_mobile/features/notifications/presentation/pages/notifications_page.dart';
 import 'package:ragro_mobile/features/orders/presentation/pages/customer_orders_page.dart';
+import 'package:ragro_mobile/features/orders/presentation/pages/delivery_tracking_page.dart';
 import 'package:ragro_mobile/features/orders/presentation/pages/order_confirmation_page.dart';
 import 'package:ragro_mobile/features/orders/presentation/pages/order_detail_page.dart';
 import 'package:ragro_mobile/features/orders/presentation/pages/rate_producer_page.dart';
@@ -64,8 +70,7 @@ class AppRouter {
         }
         if (authState is AuthAuthenticated && isAuthRoute) {
           return switch (authState.user.type) {
-            UserType.customer =>
-              '/customer/impact',
+            UserType.customer => '/customer/impact',
             UserType.producer => '/producer/home',
             UserType.admin => '/admin/producers',
           };
@@ -139,6 +144,7 @@ class AppRouter {
               ],
             ),
             StatefulShellBranch(
+              observers: [ordersRouteObserver],
               routes: [
                 GoRoute(
                   path: '/customer/orders',
@@ -150,6 +156,12 @@ class AppRouter {
                         orderId: state.pathParameters['orderId']!,
                       ),
                       routes: [
+                        GoRoute(
+                          path: 'tracking',
+                          builder: (context, state) => DeliveryTrackingPage(
+                            orderId: state.pathParameters['orderId']!,
+                          ),
+                        ),
                         GoRoute(
                           path: 'rate',
                           builder: (context, state) => RateProducerPage(
@@ -196,6 +208,10 @@ class AppRouter {
                           path: 'edit',
                           builder: (_, __) => const CustomerEditProfilePage(),
                         ),
+                        GoRoute(
+                          path: 'faq',
+                          builder: (_, __) => const FaqPage(),
+                        ),
                       ],
                     ),
                   ],
@@ -225,6 +241,26 @@ class AppRouter {
           ],
         ),
 
+        // Notifications — pushed routes (not shell tabs) so back pops to the
+        // opening screen, from any origin.
+        GoRoute(
+          path: '/customer/notifications',
+          builder: (_, __) => const NotificationsPage(),
+          routes: [
+            GoRoute(
+              path: 'detail',
+              // Without the notification in `extra` (e.g. deep link / web refresh)
+              // there's nothing to show — fall back to the list instead of crashing.
+              redirect: (_, state) => state.extra is AppNotificationEntity
+                  ? null
+                  : '/customer/notifications',
+              builder: (_, state) => NotificationDetailPage(
+                notification: state.extra! as AppNotificationEntity,
+              ),
+            ),
+          ],
+        ),
+
         // Cart & Checkout routes
         GoRoute(path: '/customer/cart', builder: (_, __) => const CartPage()),
         GoRoute(
@@ -236,12 +272,29 @@ class AppRouter {
           builder: (_, __) => const CustomerEditAddressPage(),
         ),
 
-        // Top-level producer profile (fullscreen)
+        // Top-level producer profile (fullscreen), used outside the shell (e.g.
+        // map); reviews sub-route lives here so navigation never crosses shells.
         GoRoute(
           path: '/customer/producer/:producerId',
           builder: (context, state) => ProducerPublicProfilePage(
             producerId: state.pathParameters['producerId']!,
           ),
+          routes: [
+            GoRoute(
+              path: 'reviews',
+              builder: (context, state) {
+                final extra = state.extra as Map<String, dynamic>? ?? {};
+                return ReviewsPage(
+                  producerId: state.pathParameters['producerId']!,
+                  producerName: extra['producerName'] as String? ?? '',
+                  producerLocation: extra['producerLocation'] as String? ?? '',
+                  averageRating:
+                      (extra['averageRating'] as num?)?.toDouble() ?? 0.0,
+                  totalReviews: extra['totalReviews'] as int? ?? 0,
+                );
+              },
+            ),
+          ],
         ),
 
         // Producer shell with 3 tabs
@@ -249,6 +302,7 @@ class AppRouter {
           builder: (_, __, shell) => ProducerShell(navigationShell: shell),
           branches: [
             StatefulShellBranch(
+              observers: [producerRouteObserver],
               routes: [
                 GoRoute(
                   path: '/producer/home',
@@ -342,6 +396,10 @@ class AppRouter {
                       builder: (_, __) => const ProducerSettingsPage(),
                     ),
                     GoRoute(
+                      path: 'faq',
+                      builder: (_, __) => const FaqPage(),
+                    ),
+                    GoRoute(
                       path: 'reviews',
                       builder: (context, state) {
                         final extra =
@@ -361,6 +419,25 @@ class AppRouter {
                   ],
                 ),
               ],
+            ),
+          ],
+        ),
+
+        // Producer notifications — pushed route (mirrors the customer one).
+        GoRoute(
+          path: '/producer/notifications',
+          builder: (_, __) => const NotificationsPage(),
+          routes: [
+            GoRoute(
+              path: 'detail',
+              // Without the notification in `extra` (e.g. deep link / web refresh)
+              // there's nothing to show — fall back to the list instead of crashing.
+              redirect: (_, state) => state.extra is AppNotificationEntity
+                  ? null
+                  : '/producer/notifications',
+              builder: (_, state) => NotificationDetailPage(
+                notification: state.extra! as AppNotificationEntity,
+              ),
             ),
           ],
         ),
