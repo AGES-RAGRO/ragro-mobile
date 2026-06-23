@@ -233,25 +233,38 @@ class _OrdersContent extends StatelessWidget {
         );
 
         if (filteredOrders.isEmpty) {
-          return Center(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Icon(
-                  Icons.shopping_bag_outlined,
-                  size: 64,
-                  color: AppColors.placeholder,
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  'Nenhum pedido ${state.activeTab.label.toLowerCase()}',
-                  style: const TextStyle(
-                    fontFamily: 'Manrope',
-                    fontSize: 16,
-                    color: AppColors.placeholder,
+          return RefreshIndicator(
+            color: AppColors.darkGreen,
+            onRefresh: () async =>
+                context.read<OrdersBloc>().add(const OrdersRefreshed()),
+            child: LayoutBuilder(
+              builder: (context, constraints) => SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                  child: Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(
+                          Icons.shopping_bag_outlined,
+                          size: 64,
+                          color: AppColors.placeholder,
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          'Nenhum pedido ${state.activeTab.label.toLowerCase()}',
+                          style: const TextStyle(
+                            fontFamily: 'Manrope',
+                            fontSize: 16,
+                            color: AppColors.placeholder,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-              ],
+              ),
             ),
           );
         }
@@ -273,11 +286,17 @@ class _OrdersList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListView.separated(
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
-      itemCount: orders.length,
-      separatorBuilder: (_, __) => const SizedBox(height: 13),
-      itemBuilder: (context, index) => OrderCard(order: orders[index]),
+    return RefreshIndicator(
+      color: AppColors.darkGreen,
+      onRefresh: () async =>
+          context.read<OrdersBloc>().add(const OrdersRefreshed()),
+      child: ListView.separated(
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+        itemCount: orders.length,
+        separatorBuilder: (_, __) => const SizedBox(height: 13),
+        itemBuilder: (context, index) => OrderCard(order: orders[index]),
+      ),
     );
   }
 }

@@ -1,10 +1,14 @@
 // Producer Orders screen (US-20). Route: GET /orders/producer.
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:ragro_mobile/core/di/injection.dart';
+import 'package:ragro_mobile/core/navigation/orders_route_observer.dart';
 import 'package:ragro_mobile/core/theme/app_colors.dart';
+import 'package:ragro_mobile/features/notifications/data/services/notification_service.dart';
 import 'package:ragro_mobile/features/producer_orders/domain/entities/producer_order.dart';
 import 'package:ragro_mobile/features/producer_orders/domain/entities/producer_order_status.dart';
 import 'package:ragro_mobile/features/producer_orders/presentation/bloc/producer_orders_bloc.dart';
@@ -34,9 +38,68 @@ class _ProducerOrdersView extends StatefulWidget {
   State<_ProducerOrdersView> createState() => _ProducerOrdersViewState();
 }
 
-class _ProducerOrdersViewState extends State<_ProducerOrdersView> {
+class _ProducerOrdersViewState extends State<_ProducerOrdersView>
+    with WidgetsBindingObserver
+    implements RouteAware {
   bool _selectionMode = false;
   final Set<String> _selectedIds = {};
+  StreamSubscription<void>? _foregroundSub;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    // Live auto-refresh: any foreground push (e.g. a new order) re-fetches.
+    _foregroundSub = getIt<NotificationService>().onForegroundMessage.listen((
+      _,
+    ) {
+      if (mounted) {
+        context.read<ProducerOrdersBloc>().add(const ProducerOrdersRefreshed());
+      }
+    });
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final route = ModalRoute.of(context);
+    if (route != null) {
+      producerRouteObserver.subscribe(this, route);
+    }
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // Reopened/foregrounded: pick up orders that arrived while away.
+    if (state == AppLifecycleState.resumed && mounted) {
+      context.read<ProducerOrdersBloc>().add(const ProducerOrdersRefreshed());
+    }
+  }
+
+  @override
+  void dispose() {
+    producerRouteObserver.unsubscribe(this);
+    WidgetsBinding.instance.removeObserver(this);
+    _foregroundSub?.cancel();
+    super.dispose();
+  }
+
+  // Returning to this page (e.g. from the route screen) refreshes the list.
+  @override
+  void didPopNext() {
+    if (mounted) {
+      context.read<ProducerOrdersBloc>().add(const ProducerOrdersRefreshed());
+    }
+  }
+
+  @override
+  void didPush() {}
+
+  @override
+  void didPop() {}
+
+  @override
+  void didPushNext() {}
 
   void _enterSelectionMode() => setState(() {
     _selectionMode = true;
@@ -228,25 +291,45 @@ class _ProducerOrdersViewState extends State<_ProducerOrdersView> {
                         .toList();
 
                     if (orders.isEmpty) {
-                      return Center(
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Icon(
-                              Icons.shopping_bag_outlined,
-                              size: 64,
-                              color: AppColors.placeholder,
-                            ),
-                            const SizedBox(height: 16),
-                            Text(
-                              'Nenhum pedido ${activeTab.label.toLowerCase()}',
-                              style: const TextStyle(
-                                fontFamily: 'Manrope',
-                                fontSize: 16,
-                                color: AppColors.placeholder,
+                      // Scrollable so pull-to-refresh works on an empty tab too
+                      // (e.g. "Pendentes" empty → new order arrives → pull).
+                      return RefreshIndicator(
+                        color: AppColors.darkGreen,
+                        onRefresh: () async => context
+                            .read<ProducerOrdersBloc>()
+                            .add(const ProducerOrdersRefreshed()),
+                        child: LayoutBuilder(
+                          builder: (context, constraints) =>
+                              SingleChildScrollView(
+                                physics: const AlwaysScrollableScrollPhysics(),
+                                child: ConstrainedBox(
+                                  constraints: BoxConstraints(
+                                    minHeight: constraints.maxHeight,
+                                  ),
+                                  child: Center(
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        const Icon(
+                                          Icons.shopping_bag_outlined,
+                                          size: 64,
+                                          color: AppColors.placeholder,
+                                        ),
+                                        const SizedBox(height: 16),
+                                        Text(
+                                          'Nenhum pedido '
+                                          '${activeTab.label.toLowerCase()}',
+                                          style: const TextStyle(
+                                            fontFamily: 'Manrope',
+                                            fontSize: 16,
+                                            color: AppColors.placeholder,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
                               ),
-                            ),
-                          ],
                         ),
                       );
                     }
@@ -268,8 +351,14 @@ class _ProducerOrdersViewState extends State<_ProducerOrdersView> {
                             ),
                           ),
                         Expanded(
-                          child: ListView.separated(
-                            padding: EdgeInsets.fromLTRB(
+                          child: RefreshIndicator(
+                            color: AppColors.darkGreen,
+                            onRefresh: () async => context
+                                .read<ProducerOrdersBloc>()
+                                .add(const ProducerOrdersRefreshed()),
+                            child: ListView.separated(
+                              physics: const AlwaysScrollableScrollPhysics(),
+                              padding: EdgeInsets.fromLTRB(
                               16,
                               12,
                               16,
@@ -336,6 +425,7 @@ class _ProducerOrdersViewState extends State<_ProducerOrdersView> {
                                     : null,
                               );
                             },
+                          ),
                           ),
                         ),
                         if (activeTab == ProducerOrderStatus.inDelivery)

@@ -83,18 +83,12 @@ class _RouteCalculationViewState extends State<_RouteCalculationView> {
       return;
     }
 
-    // TODO(gustavo): remover após validar na próxima demo — confirma a URL
-    // real e a contagem de paradas no momento da falha.
-    debugPrint(
-      '[route][maps] stops=${state.orderedStops.length} '
-      'truncated=${directions.truncated} uri=$uri',
-    );
-
     if (directions.truncated) {
       messenger.showSnackBar(
         const SnackBar(
           content: Text(
-            'Muitas paradas: abrindo apenas as primeiras no mapa.',
+            'Muitas paradas: abrindo as primeiras ${kMaxMapsWaypoints + 1} '
+            'no mapa.',
           ),
         ),
       );
@@ -161,8 +155,13 @@ class _RouteCalculationViewState extends State<_RouteCalculationView> {
         backgroundColor: AppColors.white,
         body: Stack(
           children: [
-            CustomScrollView(
-              slivers: [
+            RefreshIndicator(
+              color: AppColors.darkGreen,
+              onRefresh: () =>
+                  context.read<RouteCalculationCubit>().refreshRoute(),
+              child: CustomScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                slivers: [
                 SliverAppBar(
                   backgroundColor: AppColors.white,
                   leading: GestureDetector(
@@ -249,13 +248,18 @@ class _RouteCalculationViewState extends State<_RouteCalculationView> {
                         ),
 
                         const SizedBox(height: 20),
-                        const Text(
-                          'A rota abaixo foi otimizada para\neconomizar tempo, combustível e emissões de CO2.',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontFamily: 'Manrope',
-                            fontSize: 12,
-                            color: AppColors.black,
+                        // Full width so textAlign.center actually centers on screen
+                        // (the parent Column is crossAxisAlignment.start).
+                        const SizedBox(
+                          width: double.infinity,
+                          child: Text(
+                            'A rota abaixo foi otimizada para\neconomizar tempo, combustível e emissões de CO2.',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontFamily: 'Manrope',
+                              fontSize: 12,
+                              color: AppColors.black,
+                            ),
                           ),
                         ),
                         const SizedBox(height: 16),
@@ -467,6 +471,22 @@ class _RouteCalculationViewState extends State<_RouteCalculationView> {
                   ),
                 ),
               ],
+              ),
+            ),
+            // Themed loading overlay on the FIRST load (route not yet fetched).
+            // On pull-to-refresh of an existing route the RefreshIndicator spinner
+            // is enough, so this only shows when there is no route yet.
+            BlocBuilder<RouteCalculationCubit, RouteCalculationState>(
+              buildWhen: (p, c) =>
+                  p.status != c.status || p.routeId != c.routeId,
+              builder: (context, state) {
+                final initialLoading =
+                    state.status == RouteCalculationStatus.loading &&
+                    state.routeId == null;
+                return initialLoading
+                    ? const Positioned.fill(child: _RouteLoadingView())
+                    : const SizedBox.shrink();
+              },
             ),
             Positioned(
               left: 0,
@@ -667,6 +687,76 @@ class _Co2ResultCard extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// Themed full-screen loader shown while the route is first being built/fetched,
+/// so the producer never sees the misleading "0 min / 0 km / no deliveries"
+/// empty state. Green progress ring around a dark-green route badge.
+class _RouteLoadingView extends StatelessWidget {
+  const _RouteLoadingView();
+
+  @override
+  Widget build(BuildContext context) {
+    return ColoredBox(
+      color: AppColors.white,
+      child: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SizedBox(
+              width: 96,
+              height: 96,
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  const SizedBox(
+                    width: 96,
+                    height: 96,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 3,
+                      color: AppColors.lightGreen,
+                    ),
+                  ),
+                  Container(
+                    width: 64,
+                    height: 64,
+                    decoration: const BoxDecoration(
+                      color: AppColors.darkGreen,
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.alt_route_rounded,
+                      color: Colors.white,
+                      size: 32,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 20),
+            const Text(
+              'Montando sua rota...',
+              style: TextStyle(
+                fontFamily: 'Figtree',
+                fontWeight: FontWeight.w700,
+                fontSize: 16,
+                color: AppColors.darkGreen,
+              ),
+            ),
+            const SizedBox(height: 6),
+            const Text(
+              'Otimizando suas entregas de hoje',
+              style: TextStyle(
+                fontFamily: 'Manrope',
+                fontSize: 12,
+                color: AppColors.black,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

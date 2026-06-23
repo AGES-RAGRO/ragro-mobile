@@ -302,6 +302,7 @@ class AppRouter {
           builder: (_, __, shell) => ProducerShell(navigationShell: shell),
           branches: [
             StatefulShellBranch(
+              observers: [producerRouteObserver],
               routes: [
                 GoRoute(
                   path: '/producer/home',

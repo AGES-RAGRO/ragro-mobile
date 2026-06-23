@@ -142,6 +142,23 @@ class RouteRepository {
     }
   }
 
+  /// Pulls newly accepted orders into the ACTIVE route (re-optimizes only the
+  /// pending portion, keeps delivered stops). Idempotent: with no new order the
+  /// backend returns the route unchanged. `null` when the route already
+  /// completed (404) — same contract as [getActiveRoute].
+  Future<DeliveryRoute?> addStops(String routeId) async {
+    try {
+      final response = await _apiClient.dio.patch<Map<String, dynamic>>(
+        ApiEndpoints.routeAddStops(routeId),
+      );
+      return DeliveryRoute.fromJson(response.data ?? const {});
+    } on DioException catch (e) {
+      final error = e.error;
+      if (error is NotFoundException) return null;
+      throw error as ApiException? ?? const UnknownApiException();
+    }
+  }
+
   /// Updates a stop (ARRIVED/DELIVERED/FAILED) and returns the updated route.
   /// [code] (customer's 4 digits) is REQUIRED when status is DELIVERED;
   /// otherwise the API returns 400.

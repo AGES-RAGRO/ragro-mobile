@@ -117,6 +117,8 @@ abstract final class ApiEndpoints {
   // /routes/optimize replaced by the persisted route (route_repository).
   static String get routes => '$_base/routes';
   static String get activeRoute => '$_base/routes/active';
+  static String routeAddStops(String routeId) =>
+      '$_base/routes/$routeId/add-stops';
   static String routeStop(String routeId, String stopId) =>
       '$_base/routes/$routeId/stops/$stopId';
 

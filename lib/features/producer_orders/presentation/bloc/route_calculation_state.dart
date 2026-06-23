@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
 
-enum RouteCalculationStatus { initial, calculating, calculated, error }
+enum RouteCalculationStatus { initial, loading, calculating, calculated, error }
 
 /// A route delivery stop, derived from an accepted/in-delivery order.
 class RouteDelivery extends Equatable {

@@ -330,4 +330,85 @@ void main() {
       await cubit.close();
     });
   });
+
+  group('refreshRoute', () {
+    test('calls addStops and applies the returned route', () async {
+      final cubit = await buildLoadedCubit();
+      when(() => routeRepository.addStops(any())).thenAnswer(
+        (_) async => _route(stops: [_stop(id: 'stop-1'), _stop(id: 'stop-2')]),
+      );
+
+      await cubit.refreshRoute();
+
+      verify(() => routeRepository.addStops('route-1')).called(1);
+      expect(cubit.state.deliveries.length, 2);
+      expect(cubit.state.status, isNot(RouteCalculationStatus.loading));
+      await cubit.close();
+    });
+
+    test('clears state when the route completed (addStops -> null)', () async {
+      final cubit = await buildLoadedCubit();
+      when(() => routeRepository.addStops(any())).thenAnswer((_) async => null);
+
+      await cubit.refreshRoute();
+
+      expect(cubit.state.deliveries, isEmpty);
+      expect(cubit.state.orderedStops, isEmpty);
+      await cubit.close();
+    });
+
+    test('falls back to loadRoute (no addStops) when there is no route yet', () async {
+      when(() => routeRepository.getActiveRoute()).thenAnswer((_) async => null);
+      final cubit = RouteCalculationCubit(
+        co2Repository,
+        routeRepository,
+        trackingPublisher,
+        refuseProducerOrder,
+      );
+      await Future<void>.delayed(Duration.zero);
+
+      await cubit.refreshRoute();
+
+      verifyNever(() => routeRepository.addStops(any()));
+      await cubit.close();
+    });
+
+    test('emits the backend message on ApiException', () async {
+      final cubit = await buildLoadedCubit();
+      when(
+        () => routeRepository.addStops(any()),
+      ).thenThrow(const UnknownApiException('Falha ao otimizar a rota'));
+
+      await cubit.refreshRoute();
+
+      expect(cubit.state.status, RouteCalculationStatus.error);
+      expect(cubit.state.errorMessage, 'Falha ao otimizar a rota');
+      await cubit.close();
+    });
+  });
+
+  group('loadRoute', () {
+    test('surfaces the backend ApiException message (not a generic one)', () async {
+      when(() => routeRepository.getActiveRoute()).thenThrow(
+        const UnknownApiException(
+          'Não foi possível localizar o endereço de entrega do pedido',
+        ),
+      );
+      final cubit = RouteCalculationCubit(
+        co2Repository,
+        routeRepository,
+        trackingPublisher,
+        refuseProducerOrder,
+      );
+      await cubit.stream
+          .firstWhere((s) => s.status == RouteCalculationStatus.error)
+          .timeout(const Duration(seconds: 2), onTimeout: () => cubit.state);
+
+      expect(
+        cubit.state.errorMessage,
+        'Não foi possível localizar o endereço de entrega do pedido',
+      );
+      await cubit.close();
+    });
+  });
 }
